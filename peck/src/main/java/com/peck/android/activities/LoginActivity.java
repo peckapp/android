@@ -1,9 +1,12 @@
-package com.lever.peck;
+package com.peck.android.activities;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.peck.android.R;
+import com.peck.android.fragments.LoginFragment;
 
 
 public class LoginActivity extends ActionBarActivity {
@@ -11,7 +14,13 @@ public class LoginActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        if (savedInstanceState == null) {
+            LoginFragment fragment = new LoginFragment();
+            fragment.setArguments(getIntent().getExtras());
+            getFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
+
+        }
+        //setContentView(R.layout.activity_login);
     }
 
 
