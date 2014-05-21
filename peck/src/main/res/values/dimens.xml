@@ -5,4 +5,6 @@
     <dimen name="login_et_vert_pad">12dp</dimen>
     <dimen name="login_et_vert_margin">16dp</dimen>
     <dimen name="login_bt_width">120dp</dimen>
+    <dimen name="login_bt_margin">24dp</dimen>
+    <dimen name="acct_bt_spacing">24dp</dimen>
 </resources>

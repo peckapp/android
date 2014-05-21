@@ -10,5 +10,6 @@
     <string name="bt_login">@string/login</string>
     <string name="bt_cancel">Cancel</string>
     <string name="bt_create_acct">Create</string>
+    <string name="bt_acct_suggest">Need an account?</string>
 
 </resources>

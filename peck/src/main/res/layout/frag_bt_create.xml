@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal">
+
+    <Button
+        android:layout_width="@dimen/login_bt_width"
+        android:layout_height="wrap_content"
+        android:text="@string/bt_create_acct"
+        android:id="@+id/bt_create_acct"
+        android:layout_toLeftOf="@+id/space" />
+
+
+    <Button
+        android:layout_width="@dimen/login_bt_width"
+        android:layout_height="wrap_content"
+        android:text="@string/bt_cancel"
+        android:id="@+id/bt_cancel"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="false"
+        android:layout_toRightOf="@+id/space" />
+
+    <Space
+        android:layout_width="@dimen/acct_bt_spacing"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/space" />
+
+</RelativeLayout>

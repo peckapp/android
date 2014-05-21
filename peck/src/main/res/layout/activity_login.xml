@@ -14,16 +14,33 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/login_et_vert_pad"
         android:id="@+id/et_username"
-        android:text="@string/username"
-        style="@style/et_login" />
+        android:hint="@string/username" />
 
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/et_password"
-        android:text="@string/password"
         android:layout_marginTop="@dimen/login_et_vert_margin"
-        style="@style/et_login"
-        />
+        android:password="true"
+        android:hint="@string/password" />
 
-    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/login_bt_margin"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/ll_bt_login">
+
+        </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+
+
+
+    </RelativeLayout>
+
+</LinearLayout>

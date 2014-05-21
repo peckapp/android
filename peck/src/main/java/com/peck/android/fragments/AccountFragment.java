@@ -11,7 +11,7 @@ import com.peck.android.R;
 /**
  * Created by mammothbane on 5/21/2014.
  */
-public class LoginFragment extends Fragment {
+public class AccountFragment extends Fragment {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,8 +19,9 @@ public class LoginFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_bt_login, container, false);
+        return inflater.inflate(R.layout.frag_bt_create, container, false);
     }
+
 
     public void onStop() {
         super.onStop();

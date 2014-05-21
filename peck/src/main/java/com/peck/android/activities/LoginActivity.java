@@ -1,28 +1,41 @@
 package com.peck.android.activities;
 
+import android.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.peck.android.R;
+import com.peck.android.fragments.AccountFragment;
 import com.peck.android.fragments.LoginFragment;
+import com.peck.android.listeners.AccountListener;
+import com.peck.android.listeners.ButtonManager;
+import com.peck.android.listeners.LoginListener;
 
 
 public class LoginActivity extends ActionBarActivity {
 
+    public static final String tag = "LoginActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            LoginFragment fragment = new LoginFragment();
-            fragment.setArguments(getIntent().getExtras());
-            getFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
+        setContentView(R.layout.activity_login);
 
-        }
-        //setContentView(R.layout.activity_login);
+        FragmentTransaction transact = getFragmentManager().beginTransaction();
+        transact.add(R.id.ll_bt_login, new LoginFragment());
+        transact.commit();
+
+        ButtonManager.start(this);
+
+        //new AccountListener(this);
+        //new LoginListener(this);
+
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
