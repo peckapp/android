@@ -1,13 +1,9 @@
 package com.peck.android.managers;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
-import com.peck.android.R;
-import com.peck.android.fragments.AccountFragment;
 
 import java.util.ArrayList;
 
@@ -16,9 +12,8 @@ import java.util.ArrayList;
  */
 public class ButtonManager {
     private static String tag = "ButtonManager";
-    private static long retry = 10L; //the default retry time of 10ms
+    private static long retry = 10L; //default retry time of 10ms
     private Activity activity;
-    private boolean state;
 
     public ButtonManager(Activity activity) {
         this.activity = activity;
