@@ -1,13 +1,9 @@
 package com.peck.android.managers;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
-import com.peck.android.R;
-import com.peck.android.fragments.AccountFragment;
 
 import java.util.ArrayList;
 
