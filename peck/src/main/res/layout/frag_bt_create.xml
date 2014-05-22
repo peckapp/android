@@ -23,11 +23,22 @@
         android:layout_alignParentStart="false"
         android:layout_toRightOf="@+id/space" />
 
-    <Space
+    <Button
         android:layout_width="@dimen/acct_bt_spacing"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/space" />
+        android:id="@+id/space"
+        android:visibility="invisible" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sp_acct"
+        android:layout_below="@+id/space"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/login_sp_margin"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -1,4 +1,4 @@
-package com.peck.android.listeners;
+package com.peck.android.managers;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class ButtonManager {
     private static String tag = "ButtonManager";
-    private static long retry = 10L;
+    private static long retry = 10L; //the default retry time of 10ms
     private Activity activity;
     private boolean state;
 
@@ -25,7 +25,10 @@ public class ButtonManager {
 
     }
 
-    public void listenAsync(final int id, final View.OnClickListener listener, final long interval, final Activity activity){
+    public static void listenAsync(final int id, final View.OnClickListener listener, final long interval, final Activity activity){
+        //fork a new thread to check whether the button in question has been created by the OS,
+        //and hand it a click listener once it has
+
         new Thread() {
             public void run() {
                 Button bt;
@@ -38,11 +41,13 @@ public class ButtonManager {
         }.start();
     }
 
-    public void listenAsync(final int id, final View.OnClickListener listener, final Activity activity) {
-        listenAsync(id, listener, retry, activity);
+    public static void listenAsync(final int id, final View.OnClickListener listener, final Activity activity) {
+        listenAsync(id, listener, retry, activity); //default to the retry time specified above
     }
 
     public boolean setListeners(int[] ids, ArrayList<View.OnClickListener> listeners) throws Exception {
+        //call listenAsync on every id/listener pair in the parameter arrays
+
         if (activity == null) throw new Exception("you must give this object an activity on which to act");
         if (ids.length != listeners.size()) throw new Exception("number of buttons must be equal to number of listeners");
         for (int i = 0; i < ids.length; i++) {
@@ -52,24 +57,3 @@ public class ButtonManager {
     }
 
 }
-
-
-
-/*ButtonManager.listenAsync(R.id.bt_create_acct, new View.OnClickListener() {
-@Override
-public void onClick(View view) {
-        //TODO: implement account creation
-        Log.d(tag, "account created!");
-        }
-        }, activity);
-
-        ButtonManager.listenAsync(R.id.bt_cancel, new View.OnClickListener() {
-@Override
-public void onClick(View view) {
-        activity.getFragmentManager().popBackStack();
-        new PromptListener(activity);
-        new LoginListener();
-        //ButtonManager.listenAsync(R.id.bt_acct_prompt, new AccountListener(activity), activity);
-        //ButtonManager.listenAsync(R.id.bt_login, new AccountListener(activity), activity);
-        }
-        }, activity);*/

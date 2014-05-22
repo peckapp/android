@@ -1,54 +1,34 @@
 package com.peck.android.activities;
 
-import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.peck.android.R;
 import com.peck.android.fragments.AccountFragment;
 import com.peck.android.fragments.LoginFragment;
-import com.peck.android.intefaces.ToggleableActivity;
-import com.peck.android.listeners.ButtonManager;
-
-import java.util.ArrayList;
+import com.peck.android.managers.LoginManager;
 
 
-public class LoginActivity extends ActionBarActivity implements ToggleableActivity {
+public class LoginActivity extends ActionBarActivity {
 
-    public static final String tag = "LoginActivity";
-    private boolean inDefaultState;
-    private ButtonManager buttonManager;
+    private static final String tag = "LoginActivity";
+    private boolean inDefaultState = false;
 
-    private final int[] initIds = {R.id.bt_login, R.id.bt_acct_prompt};
-    private ArrayList<View.OnClickListener> initListeners;
-
-    private final int[] otherIds = {R.id.bt_create_acct, R.id.bt_cancel};
-    private ArrayList<View.OnClickListener> otherListeners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        FragmentTransaction transact = getFragmentManager().beginTransaction();
+        FragmentTransaction transact = getFragmentManager().beginTransaction(); //put the login button fragment
         transact.add(R.id.ll_bt_login, new LoginFragment());
         transact.commit();
+        inDefaultState = true;
 
-        initListeners = new ArrayList<View.OnClickListener>();
-        initListeners.add(new LoginListener());
-        initListeners.add(new ToggleListener(this));
-
-        otherListeners = new ArrayList<View.OnClickListener>();
-        otherListeners.add(new AccountListener());
-        otherListeners.add(new ToggleListener(this));
-
-        buttonManager = new ButtonManager(this);
-        try {inDefaultState = buttonManager.setListeners(initIds, initListeners);} catch (Exception e) {e.printStackTrace();}
+        LoginManager.getLoginManager().initialize(this);
 
     }
 
@@ -71,63 +51,22 @@ public class LoginActivity extends ActionBarActivity implements ToggleableActivi
         return super.onOptionsItemSelected(item);
     }
 
-    public void toggle() {
-        if (inDefaultState) {
-            FragmentTransaction trans = getFragmentManager().beginTransaction();
-            trans.replace(R.id.ll_bt_login, new AccountFragment());
-            trans.addToBackStack(null);
-            trans.commit();
-
-            try {buttonManager.setListeners(otherIds, otherListeners);} catch (Exception e) {e.printStackTrace();}
-
-            inDefaultState = false;
-        } else {
-            getFragmentManager().popBackStack();
-
-            try { buttonManager.setListeners(initIds, initListeners); } catch (Exception e) {e.printStackTrace();}
-
-            inDefaultState = true;
-        }
-
+    public void setLoginState() { //set the login state
+        getFragmentManager().popBackStack();
+        inDefaultState = true;
     }
-}
 
-class LoginListener implements View.OnClickListener {
+    public void setCreateState() { //set the account creation state
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        trans.replace(R.id.ll_bt_login, new AccountFragment());
+        trans.addToBackStack(null);
+        trans.commit();
 
-    private static final String tag = "LoginListener";
-
-    @Override
-    public void onClick(View view) {
-        //TODO: manage login
-        Log.d(tag, "this is where you log in");
-
+        inDefaultState = false;
     }
+
+    public boolean isInDefaultState() { return inDefaultState; }
 
 }
 
-class AccountListener implements View.OnClickListener {
-
-    private static final String tag = "AccountListener";
-
-    public void onClick(View view) {
-        //TODO: manage account creation
-        Log.d(tag, "account creation happens here");
-    }
-}
-
-class ToggleListener implements View.OnClickListener {
-    private final static String tag = "ToggleListener";
-    ToggleableActivity activity = null;
-
-
-    public ToggleListener(ToggleableActivity activity) {
-        this.activity = activity;
-    }
-
-    @Override
-    public void onClick(View view) {
-        activity.toggle();
-    }
-
-}
 
