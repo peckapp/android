@@ -1,4 +1,4 @@
-package com.peck.android.intefaces;
+package com.peck.android.interfaces;
 
 /**
  * Created by mammothbane on 5/22/2014.
