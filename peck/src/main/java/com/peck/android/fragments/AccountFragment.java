@@ -11,7 +11,7 @@ import com.peck.android.R;
 /**
  * Created by mammothbane on 5/21/2014.
  */
-public class AccountFragment extends Fragment {
+public class AccountFragment extends android.support.v4.app.Fragment {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
