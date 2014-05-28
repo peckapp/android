@@ -1,15 +1,22 @@
 package com.peck.android.models;
 
+import android.database.Cursor;
+
+import com.peck.android.database.EventOpenHelper;
+import com.peck.android.interfaces.CursorCreatable;
+
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event {
+public class Event implements CursorCreatable {
     private int localId;
     private int serverId;
     private int color;
     private Date created;
+    private Date updated;
+    private String title;
 
     public int getLocalId() {
         return localId;
@@ -59,10 +66,12 @@ public class Event {
         this.title = title;
     }
 
-    private Date updated;
-    private String title;
-
-
-
+    public Event createFromCursor(Cursor cursor) {
+        setLocalId(cursor.getInt(cursor.getColumnIndex(EventOpenHelper.COLUMN_LOC_ID)));
+        setServerId(cursor.getInt(cursor.getColumnIndex(EventOpenHelper.COLUMN_SERVER_ID)));
+        setColor(cursor.getInt(cursor.getColumnIndex(EventOpenHelper.COLUMN_COLOR)));
+        setTitle(cursor.getString(cursor.getColumnIndex(EventOpenHelper.COLUMN_TITLE)));
+        return this;
+    }
 
 }

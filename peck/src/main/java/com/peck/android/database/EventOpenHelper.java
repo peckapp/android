@@ -1,15 +1,19 @@
 package com.peck.android.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.peck.android.abstracts.DataSourceHelper;
+import com.peck.android.models.Event;
+
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class EventOpenHelper extends SQLiteOpenHelper {
+public class EventOpenHelper extends DataSourceHelper<Event> {
 
 
     public static final String TABLE_EVENTS = "events";
@@ -58,4 +62,24 @@ public class EventOpenHelper extends SQLiteOpenHelper {
 
 
 
+
+    = { EventOpenHelper.COLUMN_LOC_ID,
+            EventOpenHelper.COLUMN_SERVER_ID,
+            EventOpenHelper.COLUMN_COLOR,
+            EventOpenHelper.COLUMN_CREATED,
+            EventOpenHelper.COLUMN_UPDATED,
+            EventOpenHelper.COLUMN_HIDDEN,
+            EventOpenHelper.COLUMN_TITLE};
+
+
 }
+
+String title, int color, int serverId, Date created, Date updated
+
+        ContentValues values = new ContentValues();
+        values.put(EventOpenHelper.COLUMN_SERVER_ID, serverId);
+        values.put(EventOpenHelper.COLUMN_COLOR, color);
+        values.put(EventOpenHelper.COLUMN_TITLE, title);
+        values.put(EventOpenHelper.COLUMN_CREATED, created.getTime());
+        values.put(EventOpenHelper.COLUMN_UPDATED, updated.getTime());
+        values.put(EventOpenHelper.COLUMN_HIDDEN, 0);
