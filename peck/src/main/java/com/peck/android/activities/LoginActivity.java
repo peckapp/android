@@ -18,7 +18,6 @@ public class LoginActivity extends FragmentActivity {
     private static final String TAG = "LoginActivity";
     private boolean inDefaultState = false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
