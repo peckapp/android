@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="PeckTheme" parent="Theme.AppCompat.Light.DarkActionBar">
 
     </style>
 </resources>
