@@ -1,6 +1,7 @@
 package com.peck.android.activities;
 
 import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,9 +13,9 @@ import com.peck.android.fragments.LoginFragment;
 import com.peck.android.managers.LoginManager;
 
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends FragmentActivity {
 
-    private static final String tag = "LoginActivity";
+    private static final String TAG = "LoginActivity";
     private boolean inDefaultState = false;
 
 
@@ -22,8 +23,8 @@ public class LoginActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        android.support.v4.app.FragmentTransaction transact = getSupportFragmentManager().beginTransaction(); //put the login button fragment
 
-        FragmentTransaction transact = getFragmentManager().beginTransaction(); //put the login button fragment
         transact.add(R.id.ll_bt_login, new LoginFragment());
         transact.commit();
         inDefaultState = true;
@@ -52,12 +53,12 @@ public class LoginActivity extends ActionBarActivity {
     }
 
     public void setLoginState() { //set the login state
-        getFragmentManager().popBackStack();
+        getSupportFragmentManager().popBackStack();
         inDefaultState = true;
     }
 
     public void setCreateState() { //set the account creation state
-        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        android.support.v4.app.FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
         trans.replace(R.id.ll_bt_login, new AccountFragment());
         trans.addToBackStack(null);
         trans.commit();
