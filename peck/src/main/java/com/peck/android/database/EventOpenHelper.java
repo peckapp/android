@@ -48,6 +48,11 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    //TODO: remove after testing
+    public EventOpenHelper(Context context, String test_name) {
+        super(context, test_name, null, DATABASE_VERSION);
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(EventOpenHelper.class.getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
@@ -85,6 +90,8 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         e.setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)));
         e.setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)));
         e.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
+        e.setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))));
+        e.setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))));
         return e;
     }
 
