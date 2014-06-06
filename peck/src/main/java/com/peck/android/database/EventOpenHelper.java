@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.peck.android.abstracts.DataSourceHelper;
 import com.peck.android.models.Event;
 
 import java.util.Date;
@@ -15,6 +14,8 @@ import java.util.Date;
  * Created by mammothbane on 5/28/2014.
  */
 public class EventOpenHelper extends DataSourceHelper<Event> {
+
+    private static final String TAG = "eventopenhelper";
 
     public final String TABLE_NAME = "events";
     public final String COLUMN_LOC_ID = "loc_id";
@@ -60,10 +61,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         onCreate(db);
     }
 
-    public String[] getColumns() {
-        return ALL_COLUMNS;
-    }
-
     public void update(Event e) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_SERVER_ID, e.getLocalId());
@@ -86,7 +83,9 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     public Event createFromCursor(Cursor cursor) {
         Event e = new Event();
-        e.setLocalId(cursor.getInt(cursor.getColumnIndex(COLUMN_LOC_ID)));
+        cursor.moveToFirst();
+        Log.d(TAG, Integer.toString(cursor.getColumnIndex(getColLocId())));
+        e.setLocalId(cursor.getInt(cursor.getColumnIndex(getColLocId())));
         e.setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)));
         e.setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)));
         e.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
@@ -95,6 +94,21 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         return e;
     }
 
+    public String getTableName() {
+        return TABLE_NAME;
+    }
+
+    public String getDatabaseCreate() {
+        return DATABASE_CREATE;
+    }
+
+    public String getColLocId() {
+        return COLUMN_LOC_ID;
+    }
+
+    public String[] getColumns() {
+        return ALL_COLUMNS;
+    }
 
 
 }

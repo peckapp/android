@@ -1,8 +1,10 @@
 package com.peck.android.tests;
 
+import android.test.AndroidTestCase;
+
 import junit.framework.TestCase;
 
-public class EventTest extends TestCase {
+public class EventTest extends AndroidTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
@@ -10,7 +12,7 @@ public class EventTest extends TestCase {
     }
 
     public void tearDown() throws Exception {
-
+        super.tearDown();
     }
 
     public void testGetLocalId() throws Exception {

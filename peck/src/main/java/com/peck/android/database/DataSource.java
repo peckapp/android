@@ -4,8 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
-import com.peck.android.abstracts.DataSourceHelper;
 import com.peck.android.interfaces.withLocal;
 
 import java.sql.SQLException;
@@ -14,11 +14,12 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class DataSource<T extends withLocal> {
+public class DataSource<T extends withLocal, S extends DataSourceHelper<T>> {
     private SQLiteDatabase database;
-    private com.peck.android.abstracts.DataSourceHelper dbHelper;
+    private S dbHelper;
+    private static final String TAG = "datasource";
 
-    public DataSource(Context context, DataSourceHelper<T> dbHelper) {
+    public DataSource(S dbHelper) {
         this.dbHelper = dbHelper;
         dbHelper.setDatabase(this);
     }
@@ -33,40 +34,36 @@ public class DataSource<T extends withLocal> {
 
 
     public T create(ContentValues contentValues) {
-        long insertId = database.insert(dbHelper.TABLE_NAME, null, contentValues);
-
-        Cursor cursor = database.query(dbHelper.TABLE_NAME, dbHelper.getColumns(),
-                dbHelper.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
-
-        T newT = cursorTo(cursor);
+        long insertId = database.insert(dbHelper.getTableName(), null, contentValues);
+        Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
+                dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
+        T newT = dbHelper.createFromCursor(cursor);
         cursor.close();
         return newT;
     }
     
     public void update(ContentValues values, int id){
 
-        database.update(dbHelper.TABLE_NAME,
+        database.update(dbHelper.getTableName(),
                 values,
-                dbHelper.COLUMN_LOC_ID + " = ?",
+                dbHelper.getColLocId() + " = ?",
                 new String[]{String.valueOf(id)});
     }
 
     public void delete(T t) {
         long id = t.getLocalId();
         System.out.println(t.getClass() + " deleted with id: " + id);
-        database.delete(dbHelper.TABLE_NAME, dbHelper.COLUMN_LOC_ID
+        database.delete(dbHelper.getTableName(), dbHelper.getColLocId()
                 + " = " + id, null);
     }
 
     public ArrayList<T> getAll() {
         ArrayList<T> ret = new ArrayList<T>();
-
-        Cursor cursor = database.query(dbHelper.TABLE_NAME,
+        Cursor cursor = database.query(dbHelper.getTableName(),
                 dbHelper.getColumns(), null, null, null, null, null);
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            T obj = cursorTo(cursor);
+            T obj = dbHelper.createFromCursor(cursor);
             ret.add(obj);
             cursor.moveToNext();
         }
@@ -75,7 +72,4 @@ public class DataSource<T extends withLocal> {
         return ret;
     }
 
-    private T cursorTo(Cursor cursor) {
-        return (T)dbHelper.createFromCursor(cursor);
-    }
 }

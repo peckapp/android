@@ -4,45 +4,45 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import com.peck.android.abstracts.DataSourceHelper;
 import com.peck.android.database.DataSource;
 import com.peck.android.database.EventOpenHelper;
 import com.peck.android.models.Event;
-
-import junit.framework.TestCase;
-
-import org.apache.http.util.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 public class DataSourceTest extends AndroidTestCase {
-    private final String testDB = "test.db"; //never set to the value in EventOpenHelper.DATABASE_NAME
-    private final String testStr = "mytest";
-    private final int testcol = 42;
-    private final int testsv = 1;
-    private final Date testcr = new Date(10000);
-    private final Date testup = new Date(20000);
-    private final String key = "key";
+    private final static String testDB = "test.db"; //never set to the value in EventOpenHelper.DATABASE_NAME
+    private final static String testStr = "mytest";
+    private final static int testcol = 42;
+    private final static int testsv = 1;
+    private final static Date testcr = new Date(10000);
+    private final static Date testup = new Date(20000);
+    private final static String key = "key";
+    private final static String TAG = "DataSourceTest";
 
-    //private DataSourceHelper<Event> dbHelper;
-    private DataSource<Event> dSource;
-    private Context context;
+    private DataSource<Event, EventOpenHelper> dSource;
     private EventOpenHelper dbHelper;
 
-    public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
         super.setUp();
-        context = getContext();
-        dbHelper = new EventOpenHelper(context, testDB);
-        dSource = new DataSource<Event>(context, dbHelper);
+        dbHelper = new EventOpenHelper(getContext(), testDB);
+        dSource = new DataSource<Event, EventOpenHelper>(dbHelper);
+        assertPre();
     }
 
-    public void tearDown() throws Exception {
+    @Override
+    protected void tearDown() throws Exception {
         try { getContext().deleteDatabase(testDB); }
         catch (Exception e) { throw new Exception("there wasn't a database to delete.", e); }
         dSource = null;
         dbHelper = null;
-        context = null;
+    }
+
+    private void assertPre() throws AssertionError {
+        assertNotNull(dSource);
+        assertNotNull(dbHelper);
     }
 
     public void testOpenClose() throws Exception {
@@ -66,8 +66,10 @@ public class DataSourceTest extends AndroidTestCase {
         values.put(dbHelper.COLUMN_CREATED, testcr.getTime());
         values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
         values.put(dbHelper.COLUMN_HIDDEN, 0);
+        dSource.open();
         Event e = dSource.create(values);
         Event f = new Event();
+        dSource.close();
         f.setServerId(testsv);
         f.setColor(testcol);
         f.setTitle(testStr);
@@ -76,7 +78,8 @@ public class DataSourceTest extends AndroidTestCase {
 
         f.setLocalId(e.getLocalId());
 
-        if (e.hashCode() != f.hashCode()) throw new Exception("database did not return an equivalent event");
+        if (e.equals(f)) throw new Exception("database did not return an equivalent event." +
+                "\ndatabase event hash: " + e.hashCode() + "\nconstructed event hash: " + f.hashCode());
     }
 
     public void testUpdate() throws Exception {
@@ -87,27 +90,51 @@ public class DataSourceTest extends AndroidTestCase {
         values.put(dbHelper.COLUMN_CREATED, testcr.getTime());
         values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
         values.put(dbHelper.COLUMN_HIDDEN, 0);
+        dSource.open();
         Event e = dSource.create(values);
-        int i = e.getColor();
+        dSource.close();
+        final int i = e.getColor();
         values.remove(dbHelper.COLUMN_COLOR);
-        values.put(dbHelper.COLUMN_COLOR, testcol+1);
+        values.put(dbHelper.COLUMN_COLOR, testcol + 1);
+        dSource.open();
         dSource.update(values, e.getLocalId());
         e = dbHelper.createFromCursor(dbHelper.getWritableDatabase().query(dbHelper.TABLE_NAME, dbHelper.getColumns(),
                 dbHelper.COLUMN_LOC_ID + " = " + e.getLocalId(), null, null, null, null));
-        if (e.getColor() != i) throw new Exception("event update failed");
+        dSource.close();
+        if (e.getColor() != i + 1) throw new Exception("event update failed; color is " + e.getColor() +
+        ", should be " + i + 1);
     }
 
     public void testDelete() throws Exception {
-
+        dSource.open();
+        final int sz = dSource.getAll().size();
+        dSource.close();
+        assertEquals(sz, 0);
+        ContentValues values = new ContentValues();
+        values.put(dbHelper.COLUMN_SERVER_ID, testsv);
+        values.put(dbHelper.COLUMN_COLOR, testcol);
+        values.put(dbHelper.COLUMN_TITLE, testStr);
+        values.put(dbHelper.COLUMN_CREATED, testcr.getTime());
+        values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
+        values.put(dbHelper.COLUMN_HIDDEN, 0);
+        dSource.open();
+        Event e = dSource.create(values);
+        dSource.delete(e);
+        int x = dSource.getAll().size();
+        dSource.close();
+        if (x != 0) throw new Exception("delete failed");
     }
 
     public void testGetAll() throws Exception {
-        ArrayList<Event> events = new ArrayList<Event>();
-        Event e = new Event();
-        e.setTitle(testStr);
-        events.add(e);
-
-
+        ContentValues cv = new ContentValues();
+        cv.put(dbHelper.COLUMN_TITLE, testStr);
+        dSource.open();
+        Event e = dSource.create(cv);
+        Event f = dSource.getAll().get(0);
+        dSource.close();
+        if (e.hashCode() != f.hashCode()) throw new Exception("object hashcodes differ." +
+                "\nconstructed event hash: " + e.hashCode() +
+                "\ndb event hash: " + f.hashCode());
 
     }
 }

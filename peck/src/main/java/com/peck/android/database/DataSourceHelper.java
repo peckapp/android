@@ -1,4 +1,4 @@
-package com.peck.android.abstracts;
+package com.peck.android.database;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,36 +7,28 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.database.DataSource;
+import com.peck.android.interfaces.withLocal;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DataSourceHelper<T> extends SQLiteOpenHelper {
+public abstract class DataSourceHelper<T extends withLocal> extends SQLiteOpenHelper {
 
-    public String TABLE_NAME; //name of the table
-    public String COLUMN_LOC_ID;
-    protected String DATABASE_CREATE;
-    protected DataSource dataSource;
-
-
-    public abstract String[] getColumns(); //return columns in a string array
+    DataSource<T, DataSourceHelper<T>> dataSource;
 
     public DataSourceHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version)
     {
         super(context, name, factory, version);
         try {
-        if (TABLE_NAME == null || DATABASE_CREATE == null) throw
+        if (getTableName() == null || getDatabaseCreate() == null) throw
                 new Exception("you MUST have a database creation string and a table name");}
         catch (Exception e) {e.printStackTrace();}
 
     }
 
-    public abstract T createFromCursor(Cursor cursor);
-
-
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(DATABASE_CREATE);
+        database.execSQL(getDatabaseCreate());
     }
 
     public void setDatabase(DataSource dataSource) {
@@ -45,12 +37,18 @@ public abstract class DataSourceHelper<T> extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (TABLE_NAME != null) {
+        if (getTableName() != null) {
             Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
-            db.execSQL("DROP TABLE IF EXISTS " + this.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + getTableName());
             onCreate(db);
         }
     }
+
+    protected abstract T createFromCursor(Cursor cursor);
+    protected abstract String getTableName();
+    protected abstract String getDatabaseCreate();
+    protected abstract String getColLocId();
+    protected abstract String[] getColumns(); //return columns in a string array
 
 
 }
