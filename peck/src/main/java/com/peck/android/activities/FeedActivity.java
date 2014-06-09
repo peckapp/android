@@ -1,33 +1,20 @@
 package com.peck.android.activities;
 
-import java.util.Locale;
-
-import android.app.TabActivity;
-import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TabHost;
-import android.widget.TextView;
-
 import com.peck.android.R;
-import com.peck.android.fragments.EventFeed;
+import com.peck.android.fragments.tabs.EventFeed;
+import com.peck.android.fragments.tabs.NewsFeed;
 
 
 public class FeedActivity extends FragmentActivity {
+
+    private final static Class[] tabs = {EventFeed.class, NewsFeed.class};
+    private final static String TAG = "FeedActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +24,14 @@ public class FeedActivity extends FragmentActivity {
         FragmentTabHost tabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
         tabHost.setup(this, getSupportFragmentManager(), R.id.realcontent);
 
-        FragmentTabHost.TabSpec test = tabHost.newTabSpec("test");
-        test.setIndicator("tab1");
-
-        tabHost.addTab(test, EventFeed.class, null);
+        for (Class i : tabs) {
+            String k = "";
+            try {
+                k = (String)i.getMethod("getTabTag", null).invoke(null, null);
+                Log.d(TAG, k);
+            } catch (Exception e) { e.printStackTrace(); }
+            tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i, null);
+        }
 
     }
 

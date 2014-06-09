@@ -101,7 +101,7 @@ public class DataSourceTest extends AndroidTestCase {
         e = dbHelper.createFromCursor(dbHelper.getWritableDatabase().query(dbHelper.TABLE_NAME, dbHelper.getColumns(),
                 dbHelper.COLUMN_LOC_ID + " = " + e.getLocalId(), null, null, null, null));
         dSource.close();
-        if (e.getColor() != i + 1) throw new Exception("event update failed; color is " + e.getColor() +
+        if (e.getColor() != i + 1) throw new Exception("event load failed; color is " + e.getColor() +
         ", should be " + i + 1);
     }
 

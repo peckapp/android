@@ -1,5 +1,9 @@
 package com.peck.android.models;
 
+import android.view.View;
+
+import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.withLocal;
 
 import java.util.Date;
@@ -7,7 +11,7 @@ import java.util.Date;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event implements withLocal {
+public class Event implements withLocal, SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
     private int color;
@@ -67,4 +71,13 @@ public class Event implements withLocal {
         return (int)(created.getTime()*13+updated.getTime()*17+getServerId()*307-getLocalId());
     }
 
+    @Override
+    public int getResourceId() { //TODO: implement, create layout
+        return 0;
+    }
+
+    @Override
+    public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
+
+    }
 }
