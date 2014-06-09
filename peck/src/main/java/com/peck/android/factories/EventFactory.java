@@ -17,7 +17,7 @@ public class EventFactory extends GenericFactory<Event> {
 
     }
 
-    public static EventFactory getFactory() {
+    public EventFactory getFactory() {
         return eventFactory;
     }
 

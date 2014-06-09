@@ -2,6 +2,8 @@ package com.peck.android.models;
 
 import android.view.View;
 
+import com.peck.android.factories.EventFactory;
+import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.withLocal;
@@ -80,4 +82,5 @@ public class Event implements withLocal, SelfSetup, HasFeedLayout {
     public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
 
     }
+
 }

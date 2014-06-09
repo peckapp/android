@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
+import com.peck.android.factories.EventFactory;
 import com.peck.android.interfaces.Feed;
 import com.peck.android.models.Event;
 
@@ -13,7 +14,7 @@ import com.peck.android.models.Event;
  * Created by mammothbane on 6/9/2014.
  */
 
-public class EventFeed extends Feed<Event> {
+public class EventFeed extends Feed<Event, EventFactory> {
 
     private final static String tag = "Events";
 
