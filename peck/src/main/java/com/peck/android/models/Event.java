@@ -63,6 +63,8 @@ public class Event implements withLocal {
         this.title = title;
     }
 
-
+    public int hashCode() {
+        return (int)(created.getTime()*13+updated.getTime()*17+getServerId()*307-getLocalId());
+    }
 
 }
