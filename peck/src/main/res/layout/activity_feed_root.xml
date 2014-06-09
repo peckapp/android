@@ -5,16 +5,45 @@
     android:layout_width="fill_parent"
     android:orientation="vertical">
 
-    <TabHost
+    <android.support.v4.app.FragmentTabHost
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/th_root"
-        android:orientation="vertical"/>
+        android:id="@android:id/tabhost"
+        android:orientation="vertical">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        tools:context="com.peck.android.activities.FeedActivity" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:id="@+id/ll_tb_root">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@android:id/tabcontent">
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/realcontent"
+                android:layout_weight="1">
+
+                </FrameLayout>
+
+            <TabWidget
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@android:id/tabs">
+
+            </TabWidget>
+
+        </LinearLayout>
+
+
+    </android.support.v4.app.FragmentTabHost>
+
+
 
 </RelativeLayout>
