@@ -19,7 +19,6 @@ import com.peck.android.managers.LoginManager;
 public class LoginActivity extends FragmentActivity {
 
     private static final String TAG = "LoginActivity";
-    //private boolean inDefaultState = false;
     private Bundle savedInstanceState;
 
     @Override
@@ -31,7 +30,6 @@ public class LoginActivity extends FragmentActivity {
 
         transact.add(R.id.ll_bt_login, new LoginFragment(), LoginFragment.buildTag());
         transact.commit();
-        //inDefaultState = true;
 
         LoginManager.getLoginManager().initialize(this);
     }
