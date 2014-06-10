@@ -1,12 +1,9 @@
 package com.peck.android.fragments.tabs;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.peck.android.R;
-import com.peck.android.interfaces.BaseEventFeed;
+import com.peck.android.adapters.EventFeedAdapter;
+import com.peck.android.database.EventDataSource;
+import com.peck.android.database.EventOpenHelper;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -15,9 +12,10 @@ import com.peck.android.interfaces.BaseEventFeed;
 public class EventFeed extends BaseEventFeed {
 
     private final static String tag = "EventFeed";
+    private final static int resId = R.layout.frag_eventfeed;
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_eventfeed, container, false);
+    public int getLayoutRes() {
+        return resId;
     }
 
     public static int getTabTag() {
@@ -27,6 +25,7 @@ public class EventFeed extends BaseEventFeed {
     public String tag() {
         return tag;
     }
+
 
 
 }

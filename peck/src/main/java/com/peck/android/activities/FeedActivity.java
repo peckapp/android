@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TabHost;
+
 import com.peck.android.R;
 import com.peck.android.fragments.tabs.DiningFeed;
 import com.peck.android.fragments.tabs.EventFeed;
@@ -34,9 +36,12 @@ public class FeedActivity extends FragmentActivity {
                 e.printStackTrace();
             }
             tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i, null);
+
+            //TODO: tabHost.setOnTabChangedListener
+
         }
 
-        //TODO: set async onclicklisteners for tabs to set up resource switching
+
 
     }
 

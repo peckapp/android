@@ -47,7 +47,8 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
     protected abstract String getTableName();
     protected abstract String getDatabaseCreate();
     protected abstract String getColLocId();
-    protected abstract String[] getColumns(); //return columns in a string array
+    protected abstract String[] getColumns(); //return columns in a string array;
+    protected abstract int getVersion();
 
 
 }

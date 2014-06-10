@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.peck.android.database.DataSource;
+import com.peck.android.database.DataSourceHelper;
 import com.peck.android.database.EventDataSource;
 import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
+public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
     private ArrayList<T> objs;
     private GenericFactory factory;
     private Context context;
@@ -61,29 +63,27 @@ public class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extend
         return view;
     }
 
-    public FeedAdapter<T> load(ArrayList<T> data) {
+    public <S extends DataSourceHelper<T>> FeedAdapter<T> load(ArrayList<T> data, final DataSource<T, S> dataSource) {
         //TODO: what else do we want to do here? obviously don't want to load *everything*
         //TODO: sharedpreferences for subscriptions to different things? going to want a filter somewhere
-        new AsyncTask<Void, Void, ArrayList<Event>>() {
-            EventDataSource eds = new EventDataSource(context);
+        new AsyncTask<Void, Void, ArrayList<T>>() {
             @Override
-            protected ArrayList<Event> doInBackground(Void... voids) {
-                ArrayList<Event> events = new ArrayList<Event>();
+            protected ArrayList<T> doInBackground(Void... voids) {
+                ArrayList<T> events = new ArrayList<T>();
                 try {
-                    eds.open();
-                    events = eds.getAll();
+                    dataSource.open();
+                    events = dataSource.getAll();
                 } catch (SQLException e) { e.printStackTrace(); }
                 finally {
-                    eds.close();
+                    dataSource.close();
                 }
                 return events;
             }
 
             @Override
-            protected void onPostExecute(ArrayList<Event> events) {
+            protected void onPostExecute(ArrayList<T> events) {
                 //super.onPostExecute(events);
                 notifyDataSetChanged();
-
             }
         }.execute();
         return this;

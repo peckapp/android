@@ -34,7 +34,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     // sql create database command
     private final String DATABASE_CREATE = "create table "
-            + TABLE_NAME + "(" + COLUMN_LOC_ID
+            + getTableName() + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
             + COLUMN_TITLE + " text not null, "
@@ -54,12 +54,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         super(context, test_name, null, DATABASE_VERSION);
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.w(EventOpenHelper.class.getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
-    }
 
     public void update(Event e) {
         ContentValues values = new ContentValues();
@@ -108,6 +102,10 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public int getVersion() {
+        return DATABASE_VERSION;
     }
 
 
