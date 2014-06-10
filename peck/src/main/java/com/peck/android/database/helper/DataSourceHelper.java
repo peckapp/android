@@ -33,7 +33,7 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
         database.execSQL(getDatabaseCreate());
     }
 
-    public void setDatabase(DataSource dataSource) {
+    public void setDatasource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

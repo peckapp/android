@@ -2,6 +2,7 @@ package com.peck.android.database.helper;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.peck.android.PeckApp;
 import com.peck.android.models.Meal;
@@ -26,9 +27,11 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
             COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE};
 
+
+    private static final String DATABASE_NAME = "dining.db";
     private static final int DATABASE_VERSION = 1;
 
-    // sql create database command
+    // sql create table command
     private final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
@@ -40,8 +43,17 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
+    private Context context;
+
     public MealOpenHelper(Context context) {
-        super(context, PeckApp.getDatabaseName(), null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase database) {
+        database.execSQL(getDatabaseCreate());
+        database.execSQL(new FoodOpenHelper(context).getDatabaseCreate());
     }
 
     public String getColLocId() {

@@ -21,7 +21,7 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
 
     public DataSource(S dbHelper) {
         this.dbHelper = dbHelper;
-        dbHelper.setDatabase(this);
+        dbHelper.setDatasource(this);
     }
 
     public void open() throws SQLException {

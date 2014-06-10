@@ -15,7 +15,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
-    public final String TABLE_NAME = "meals";
+    public final String TABLE_NAME = "food";
     public final String COLUMN_LOC_ID = "loc_id";
     public final String COLUMN_SERVER_ID = "sv_id";
     public final String COLUMN_TITLE = "title";
@@ -27,6 +27,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR, COLUMN_TITLE};
 
     private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "dining.db";
 
     // sql create database command
     private final String DATABASE_CREATE = "create table "
@@ -41,7 +42,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
             + ");";
 
     public FoodOpenHelper(Context context) {
-        super(context, PeckApp.getDatabaseName(), null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }
 

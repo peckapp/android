@@ -13,9 +13,9 @@ public class PeckApp extends Application {
     private RequestQueue requestQueue;
     private static final String DATABASE_NAME = "peck.db";
 
-    public static String getDatabaseName() {
-        return DATABASE_NAME;
-    }
+//    public static String getDatabaseName() {
+//        return DATABASE_NAME;
+//    }
 
     public RequestQueue getRequestQueue() {
         if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);
