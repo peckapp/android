@@ -32,6 +32,8 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
         this.resourceId = factory.generate().getResourceId();
     }
 
+    public Context getContext() { return context; }
+
     @Override
     public int getCount() {
         return objs.size();
@@ -61,31 +63,7 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
         return view;
     }
 
-    public <S extends DataSourceHelper<T>> FeedAdapter<T> load(ArrayList<T> data, final DataSource<T, S> dataSource) {
-        //TODO: what else do we want to do here? obviously don't want to load *everything*
-        //TODO: sharedpreferences for subscriptions to different things? going to want a filter somewhere
-        new AsyncTask<Void, Void, ArrayList<T>>() {
-            @Override
-            protected ArrayList<T> doInBackground(Void... voids) {
-                ArrayList<T> events = new ArrayList<T>();
-                try {
-                    dataSource.open();
-                    events = dataSource.getAll();
-                } catch (SQLException e) { e.printStackTrace(); }
-                finally {
-                    dataSource.close();
-                }
-                return events;
-            }
 
-            @Override
-            protected void onPostExecute(ArrayList<T> events) {
-                //super.onPostExecute(events);
-                notifyDataSetChanged();
-            }
-        }.execute();
-        return this;
-    }
 
     public FeedAdapter<T> removeCompleted() {
         //TODO: implement

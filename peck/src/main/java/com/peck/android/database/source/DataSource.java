@@ -72,4 +72,19 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
         return ret;
     }
 
+    public void getAll(ArrayList<T> ret) {
+        Cursor cursor = database.query(dbHelper.getTableName(),
+                dbHelper.getColumns(), null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            T obj = dbHelper.createFromCursor(cursor);
+            ret.add(obj);
+            cursor.moveToNext();
+        }
+        // Make sure to close the cursor
+        cursor.close();
+
+    }
+
+
 }

@@ -1,11 +1,15 @@
 package com.peck.android.models;
 
+import android.view.View;
+
+import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Food implements WithLocal {
+public class Food implements WithLocal, SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
     private int parentId;
@@ -79,4 +83,13 @@ public class Food implements WithLocal {
         return this;
     }
 
+    @Override
+    public int getResourceId() {
+        return 0;
+    }
+
+    @Override
+    public void setUp(View v) {
+
+    }
 }

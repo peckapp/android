@@ -46,12 +46,12 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
         }
     }
 
-    protected abstract T createFromCursor(Cursor cursor);
-    protected abstract String getTableName();
-    protected abstract String getDatabaseCreate();
-    protected abstract String getColLocId();
-    protected abstract String[] getColumns(); //return columns in a string array;
-    protected abstract int getVersion();
+    public abstract T createFromCursor(Cursor cursor);
+    public abstract String getTableName();
+    public abstract String getDatabaseCreate();
+    public abstract String getColLocId();
+    public abstract String[] getColumns(); //return columns in a string array;
+    public abstract int getVersion();
 
 
 }
