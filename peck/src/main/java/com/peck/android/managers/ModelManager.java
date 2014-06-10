@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
+public class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
         S extends DataSourceHelper<T>> {
 
     protected FeedAdapter<T> adapter;

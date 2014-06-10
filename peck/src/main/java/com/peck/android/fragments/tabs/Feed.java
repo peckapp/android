@@ -13,6 +13,7 @@ import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
+import com.peck.android.managers.ModelManager;
 
 import java.util.ArrayList;
 
@@ -22,16 +23,18 @@ import java.util.ArrayList;
 public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
         S extends GenericFactory<T>, V extends DataSourceHelper<T>> extends Fragment {
 
-    protected ArrayList<T> data;
     protected FeedAdapter<T> feedAdapter;
     protected DataSource<T, V> dataSource;
+    protected ModelManager<T, V> modelManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setUpAdapter();
-        feedAdapter.load(data, dataSource); //TODO: loading bar
+
+        modelManager = new ModelManager<T, V>();
+        modelManager.initialize(feedAdapter, dataSource); //TODO: loading bar
 
     }
 
