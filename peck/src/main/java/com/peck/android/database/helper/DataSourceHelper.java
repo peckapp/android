@@ -14,23 +14,25 @@ import com.peck.android.interfaces.WithLocal;
  */
 public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHelper {
 
-    DataSource<T, DataSourceHelper<T>> dataSource;
 
-    public DataSourceHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version)
+
+    DataSource<T, DataSourceHelper<T>> dataSource;
+    private Context context;
+
+    public DataSourceHelper(Context context, SQLiteDatabase.CursorFactory factory)
     {
-        super(context, name, factory, version);
+        super(context, DatabaseCreator.getDbName(), factory, DatabaseCreator.getDbVersion());
+        this.context = context;
         try {
-        if (getTableName() == null || getDatabaseCreate() == null) throw
-                new Exception("you MUST have a database creation string and a table name\n" +
-                        "table name " + ((getTableName() == null) ? "null" : getTableName()) +
-                "\ndbcreate " + ((getDatabaseCreate() == null) ? "null" : getDatabaseCreate()));}
+        if (getTableName() == null) throw new Exception("you must have a table name"); }
         catch (Exception e) {e.printStackTrace();}
 
     }
 
+
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(getDatabaseCreate());
+        DatabaseCreator.getDatabaseCreator(context).onCreate(database);
     }
 
     public void setDatasource(DataSource dataSource) {
@@ -39,19 +41,13 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (getTableName() != null) {
-            Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
-            db.execSQL("DROP TABLE IF EXISTS " + getTableName());
-            onCreate(db);
-        }
+        DatabaseCreator.getDatabaseCreator(context).onUpgrade(db, oldVersion, newVersion);
     }
 
     public abstract T createFromCursor(Cursor cursor);
     public abstract String getTableName();
-    public abstract String getDatabaseCreate();
     public abstract String getColLocId();
     public abstract String[] getColumns(); //return columns in a string array;
-    public abstract int getVersion();
 
 
 }

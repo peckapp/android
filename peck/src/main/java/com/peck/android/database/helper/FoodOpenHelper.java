@@ -15,15 +15,15 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
-    public final String TABLE_NAME = "food";
-    public final String COLUMN_LOC_ID = "loc_id";
-    public final String COLUMN_SERVER_ID = "sv_id";
-    public final String COLUMN_TITLE = "title";
-    public final String COLUMN_COLOR = "color";
-    public final String COLUMN_TEXT = "text";
-    public final String COLUMN_MEAL_ID = "meal";
-    public final String COLUMN_TYPE = "type";
-    public final String COLUMN_UPDATED_AT = "updated";
+    public static final String TABLE_NAME = "food";
+    public static final String COLUMN_LOC_ID = "loc_id";
+    public static final String COLUMN_SERVER_ID = "sv_id";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_COLOR = "color";
+    public static final String COLUMN_TEXT = "text";
+    public static final String COLUMN_MEAL_ID = "meal";
+    public static final String COLUMN_TYPE = "type";
+    public static final String COLUMN_UPDATED_AT = "updated";
 
     private final String[] ALL_COLUMNS = {
             COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR, COLUMN_TITLE, COLUMN_TEXT,
@@ -33,7 +33,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
     private static final String DATABASE_NAME = "dining.db";
 
     // sql create database command
-    private final String DATABASE_CREATE = "create table "
+    private static final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
@@ -46,7 +46,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
             + ");";
 
     public FoodOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, null);
         this.context = context;
     }
 
@@ -71,16 +71,12 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
         return TABLE_NAME;
     }
 
-    public String getDatabaseCreate() {
+    public static String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 
     public String[] getColumns() {
         return ALL_COLUMNS;
-    }
-
-    public int getVersion() {
-        return DATABASE_VERSION;
     }
 
 }

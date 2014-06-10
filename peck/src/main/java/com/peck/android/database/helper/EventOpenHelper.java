@@ -16,23 +16,20 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     private static final String TAG = "eventopenhelper";
 
-    public final String TABLE_NAME = "events";
-    public final String COLUMN_LOC_ID = "loc_id";
-    public final String COLUMN_SERVER_ID = "sv_id";
-    public final String COLUMN_TITLE = "title";
-    public final String COLUMN_COLOR = "color";
-    public final String COLUMN_CREATED = "created_at";
-    public final String COLUMN_UPDATED = "updated_at";
-    public final String COLUMN_HIDDEN = "hidden";
+    public static final String TABLE_NAME = "events";
+    public static final String COLUMN_LOC_ID = "loc_id";
+    public static final String COLUMN_SERVER_ID = "sv_id";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_COLOR = "color";
+    public static final String COLUMN_CREATED = "created_at";
+    public static final String COLUMN_UPDATED = "updated_at";
+    public static final String COLUMN_HIDDEN = "hidden";
 
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
             COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE};
 
-    private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "events.db";
-
     // sql create database command
-    private final String DATABASE_CREATE = "create table "
+    private static final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
@@ -45,13 +42,13 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
 
     public EventOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, null);
     }
 
-    //TODO: remove after testing
-    public EventOpenHelper(Context context, String test_name) {
-        super(context, test_name, null, DATABASE_VERSION);
-    }
+//    //TODO: remove after testing
+//    public EventOpenHelper(Context context, String test_name) {
+//        super(context);
+//    }
 
 
     public void update(Event e) {
@@ -90,7 +87,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         return TABLE_NAME;
     }
 
-    public String getDatabaseCreate() {
+    public static String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 
@@ -102,9 +99,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         return ALL_COLUMNS;
     }
 
-    public int getVersion() {
-        return DATABASE_VERSION;
-    }
 
 
 }

@@ -17,16 +17,16 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
-    public final String TABLE_NAME = "meals";
-    public final String COLUMN_LOC_ID = "loc_id";
-    public final String COLUMN_SERVER_ID = "sv_id";
-    public final String COLUMN_TITLE = "title";
-    public final String COLUMN_COLOR = "color";
-    public final String COLUMN_TIME = "time";
-    public final String COLUMN_UPDATED = "updated_at";
-    public final String COLUMN_HIDDEN = "hidden";
-    public final String COLUMN_LOCATION_ID = "location";
-    public final String COLUMN_MEAL_TYPE = "mealtype";
+    public static final String TABLE_NAME = "meals";
+    public static final String COLUMN_LOC_ID = "loc_id";
+    public static final String COLUMN_SERVER_ID = "sv_id";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_COLOR = "color";
+    public static final String COLUMN_TIME = "time";
+    public static final String COLUMN_UPDATED = "updated_at";
+    public static final String COLUMN_HIDDEN = "hidden";
+    public static final String COLUMN_LOCATION_ID = "location";
+    public static final String COLUMN_MEAL_TYPE = "mealtype";
 
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
             COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE, COLUMN_LOCATION_ID, COLUMN_MEAL_TYPE};
@@ -36,7 +36,7 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
     private static final int DATABASE_VERSION = 1;
 
     // sql create table command
-    private final String DATABASE_CREATE = "create table "
+    private static final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
@@ -44,15 +44,15 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
             + COLUMN_COLOR + " integer, "
             + COLUMN_HIDDEN + " integer, "
             + COLUMN_TIME + " integer, "
-            + COLUMN_LOCATION_ID + " integer "
-            + COLUMN_MEAL_TYPE + " integer "
+            + COLUMN_LOCATION_ID + " integer, "
+            + COLUMN_MEAL_TYPE + " integer, "
             + COLUMN_UPDATED + " integer"
             + ");";
 
     private Context context;
 
     public MealOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, null);
         this.context = context;
     }
 
@@ -84,16 +84,12 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
                 .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
     }
 
-    public String getDatabaseCreate() {
+    public static String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 
     public String[] getColumns() {
         return ALL_COLUMNS;
-    }
-
-    public int getVersion() {
-        return DATABASE_VERSION;
     }
 
 

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.peck.android.R;
+import com.peck.android.fragments.tabs.Circles;
 import com.peck.android.fragments.tabs.DiningFeed;
 import com.peck.android.fragments.tabs.EventFeed;
 import com.peck.android.fragments.tabs.Profile;
@@ -13,7 +14,7 @@ import com.peck.android.fragments.tabs.NewsFeed;
 
 public class FeedActivity extends FragmentActivity {
 
-    private final static Class[] tabs = {EventFeed.class, NewsFeed.class, DiningFeed.class, Profile.class};
+    private final static Class[] tabs = {EventFeed.class, NewsFeed.class, DiningFeed.class, Circles.class, Profile.class};
     private final static String TAG = "FeedActivity";
 
     @Override
