@@ -21,7 +21,6 @@ public class DatabaseCreator extends SQLiteOpenHelper {
         return version;
     }
 
-
     public static DatabaseCreator getDatabaseCreator(Context context) {
         if (dbCreator == null) dbCreator = new DatabaseCreator(context);
         return dbCreator;

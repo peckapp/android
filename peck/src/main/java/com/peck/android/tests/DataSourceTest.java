@@ -2,7 +2,9 @@ package com.peck.android.tests;
 
 import android.content.ContentValues;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
+import com.peck.android.database.helper.DatabaseCreator;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.database.helper.EventOpenHelper;
 import com.peck.android.models.Event;
@@ -10,7 +12,6 @@ import com.peck.android.models.Event;
 import java.util.Date;
 
 public class DataSourceTest extends AndroidTestCase {
-    private final static String testDB = "test.db"; //never set to the value in EventOpenHelper.DATABASE_NAME
     private final static String testStr = "mytest";
     private final static int testcol = 42;
     private final static int testsv = 1;
@@ -25,15 +26,17 @@ public class DataSourceTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        dbHelper = new EventOpenHelper(getContext(), testDB);
+        try { getContext().deleteDatabase(DatabaseCreator.getDbName()); } catch (Exception e) {
+            Log.e(TAG, "there wasn't a database to delete");
+            e.printStackTrace();
+        }
+        dbHelper = new EventOpenHelper(getContext());
         dSource = new DataSource<Event, EventOpenHelper>(dbHelper);
         assertPre();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        try { getContext().deleteDatabase(testDB); }
-        catch (Exception e) { throw new Exception("there wasn't a database to delete.", e); }
         dSource = null;
         dbHelper = null;
     }
