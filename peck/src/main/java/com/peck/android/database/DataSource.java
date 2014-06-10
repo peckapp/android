@@ -1,12 +1,10 @@
 package com.peck.android.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
-import com.peck.android.interfaces.withLocal;
+import com.peck.android.interfaces.WithLocal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,7 +12,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class DataSource<T extends withLocal, S extends DataSourceHelper<T>> {
+public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
     private SQLiteDatabase database;
     private S dbHelper;
     private static final String TAG = "datasource";

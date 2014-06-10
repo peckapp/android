@@ -8,20 +8,25 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
+import com.peck.android.interfaces.BaseEventFeed;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class NewsFeed extends Fragment {
+public class NewsFeed extends BaseEventFeed {
 
-    private final static String TAB_TAG = "News Feed";
+    private static final String tag = "NewsFeed";
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.frag_newsfeed, container, false);
     }
 
-    public static String getTabTag() {
-        return TAB_TAG;
+    public static int getTabTag() {
+        return R.string.tb_newsfeed;
+    }
+
+    public String tag() {
+        return tag;
     }
 
 }

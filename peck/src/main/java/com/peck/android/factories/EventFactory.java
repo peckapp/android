@@ -13,12 +13,6 @@ public class EventFactory extends GenericFactory<Event> {
         return new Event();
     }
 
-    private EventFactory() {
-
-    }
-
-    public EventFactory getFactory() {
-        return eventFactory;
-    }
+    //public EventFactory getFactory() { return getEventFactory(); }
 
 }

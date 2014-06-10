@@ -7,6 +7,6 @@ public abstract class GenericFactory<T> {
 
     public abstract T generate();
 
-    abstract protected GenericFactory<T> getFactory();
+    //abstract protected GenericFactory<T> getFactory();
 
 }

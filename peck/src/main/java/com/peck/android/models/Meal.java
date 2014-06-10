@@ -3,8 +3,6 @@ package com.peck.android.models;
 import android.view.View;
 
 import com.peck.android.R;
-import com.peck.android.factories.EventFactory;
-import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
@@ -12,12 +10,12 @@ import com.peck.android.interfaces.WithLocal;
 import java.util.Date;
 
 /**
- * Created by mammothbane on 5/28/2014.
+ * Created by mammothbane on 6/10/2014.
  */
-public class Event implements WithLocal, SelfSetup, HasFeedLayout {
+public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
-    private int color;
+
     private Date created;
     private Date updated;
     private String title;
@@ -26,7 +24,7 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
         return localId;
     }
 
-    public Event setLocalId(int id) {
+    public Meal setLocalId(int id) {
         this.localId = id;
         return this;
     }
@@ -35,17 +33,8 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
         return serverId;
     }
 
-    public Event setServerId(int serverId) {
+    public Meal setServerId(int serverId) {
         this.serverId = serverId;
-        return this;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public Event setColor(int color) {
-        this.color = color;
         return this;
     }
 
@@ -53,7 +42,7 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
         return created;
     }
 
-    public Event setCreated(Date created) {
+    public Meal setCreated(Date created) {
         this.created = created;
         return this;
     }
@@ -62,7 +51,7 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
         return updated;
     }
 
-    public Event setUpdated(Date updated) {
+    public Meal setUpdated(Date updated) {
         this.updated = updated;
         return this;
     }
@@ -71,7 +60,7 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
         return title;
     }
 
-    public Event setTitle(String title) {
+    public Meal setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -82,7 +71,7 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
 
     @Override
     public int getResourceId() { //TODO: implement, create layout
-        return R.layout.frag_event;
+        return R.layout.frag_meal;
     }
 
     @Override

@@ -4,8 +4,10 @@ import android.app.Application;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.peck.android.database.EventOpenHelper;
 import com.peck.android.factories.EventFactory;
 import com.peck.android.factories.GenericFactory;
+import com.peck.android.fragments.tabs.EventFeed;
 
 import java.util.HashMap;
 
@@ -15,12 +17,6 @@ import java.util.HashMap;
 public class PeckApp extends Application {
 
     private RequestQueue requestQueue;
-    private HashMap<Class, GenericFactory> map = new HashMap<Class, GenericFactory>();
-
-
-    public EventFactory getEventFactory() {
-        return EventFactory.getFactory();
-    }
 
     public RequestQueue getRequestQueue() {
         if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);

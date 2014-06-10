@@ -12,8 +12,8 @@
     <string name="bt_create_acct">Create</string>
     <string name="bt_acct_suggest">Need an account?</string>
     <string name="title_activity_feed_root">FeedRoot</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
+    <string name="tb_events">Events</string>
+    <string name="tb_newsfeed">News Feed</string>
+    <string name="tb_diningfeed">Dining</string>
 
 </resources>

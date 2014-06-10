@@ -1,6 +1,5 @@
 package com.peck.android.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -12,7 +11,7 @@ import com.peck.android.database.EventDataSource;
 import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.interfaces.withLocal;
+import com.peck.android.interfaces.WithLocal;
 import com.peck.android.models.Event;
 
 import java.sql.SQLException;
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class FeedAdapter<T extends withLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
+public class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
     private ArrayList<T> objs;
     private GenericFactory factory;
     private Context context;
@@ -62,7 +61,7 @@ public class FeedAdapter<T extends withLocal & SelfSetup & HasFeedLayout> extend
         return view;
     }
 
-    public void load(ArrayList<T> data) {
+    public FeedAdapter<T> load(ArrayList<T> data) {
         //TODO: what else do we want to do here? obviously don't want to load *everything*
         //TODO: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         new AsyncTask<Void, Void, ArrayList<Event>>() {
@@ -87,10 +86,12 @@ public class FeedAdapter<T extends withLocal & SelfSetup & HasFeedLayout> extend
 
             }
         }.execute();
+        return this;
     }
 
-    public void removeCompleted() {
+    public FeedAdapter<T> removeCompleted() {
         //TODO: implement
+        return this;
     }
 
 }

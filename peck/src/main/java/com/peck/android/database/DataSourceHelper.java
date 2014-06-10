@@ -6,13 +6,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.peck.android.database.DataSource;
-import com.peck.android.interfaces.withLocal;
+import com.peck.android.interfaces.WithLocal;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DataSourceHelper<T extends withLocal> extends SQLiteOpenHelper {
+public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHelper {
 
     DataSource<T, DataSourceHelper<T>> dataSource;
 
