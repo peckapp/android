@@ -18,14 +18,35 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
     private int serverId;
 
     private int color;
+    private int type;
 
     private Date mealtime;
+    private Date updated;
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public Meal setUpdated(Date updated) {
+        this.updated = updated;
+        return this;
+    }
+
     private String title;
 
     private int location;
 
     public int getColor() {
         return color;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public Meal setType(int type) {
+        this.type = type;
+        return this;
     }
 
     public Meal setColor(int color) {

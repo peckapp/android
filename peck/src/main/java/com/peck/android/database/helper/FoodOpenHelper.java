@@ -23,8 +23,11 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
     public final String COLUMN_TEXT = "text";
     public final String COLUMN_MEAL_ID = "meal";
     public final String COLUMN_TYPE = "type";
+    public final String COLUMN_UPDATED_AT = "updated";
 
-    private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR, COLUMN_TITLE};
+    private final String[] ALL_COLUMNS = {
+            COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR, COLUMN_TITLE, COLUMN_TEXT,
+            COLUMN_TYPE, COLUMN_MEAL_ID, COLUMN_UPDATED_AT};
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "dining.db";
@@ -38,6 +41,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
             + COLUMN_COLOR + " integer, "
             + COLUMN_TEXT + " text, "
             + COLUMN_MEAL_ID + " integer, "
+            + COLUMN_UPDATED_AT + " integer, "
             + COLUMN_TYPE + " integer"
             + ");";
 

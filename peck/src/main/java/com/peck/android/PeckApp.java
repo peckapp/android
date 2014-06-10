@@ -10,12 +10,17 @@ import com.android.volley.toolbox.Volley;
  */
 public class PeckApp extends Application {
 
+    public static class Constants {
+
+        public final static int BREAKFAST = 1;
+        public final static int LUNCH = 2;
+        public final static int DINNER = 3;
+        public final static int NIGHT_MEAL = 4;
+
+    }
+
     private RequestQueue requestQueue;
     private static final String DATABASE_NAME = "peck.db";
-
-//    public static String getDatabaseName() {
-//        return DATABASE_NAME;
-//    }
 
     public RequestQueue getRequestQueue() {
         if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);
