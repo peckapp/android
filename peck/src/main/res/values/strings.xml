@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Peck</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="login">Login</string>
-    <string name="username">username</string>
-    <string name="password">password</string>
-    <string name="bt_login">@string/login</string>
-    <string name="bt_cancel">Cancel</string>
-    <string name="bt_create_acct">Create</string>
-    <string name="bt_acct_suggest">Need an account?</string>
-    <string name="title_activity_feed_root">FeedRoot</string>
-    <string name="tb_events">Events</string>
-    <string name="tb_newsfeed">News Feed</string>
-    <string name="tb_diningfeed">Dining</string>
-    <string name="tb_profile">Profile</string>
+    <string title="app_name">Peck</string>
+    <string title="hello_world">Hello world!</string>
+    <string title="action_settings">Settings</string>
+    <string title="login">Login</string>
+    <string title="username">username</string>
+    <string title="password">password</string>
+    <string title="bt_login">@string/login</string>
+    <string title="bt_cancel">Cancel</string>
+    <string title="bt_create_acct">Create</string>
+    <string title="bt_acct_suggest">Need an account?</string>
+    <string title="title_activity_feed_root">FeedRoot</string>
+    <string title="tb_events">Events</string>
+    <string title="tb_newsfeed">News Feed</string>
+    <string title="tb_diningfeed">Dining</string>
+    <string title="tb_profile">Profile</string>
 
 </resources>

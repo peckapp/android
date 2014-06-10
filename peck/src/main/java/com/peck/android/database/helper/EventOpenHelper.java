@@ -1,11 +1,10 @@
-package com.peck.android.database;
+package com.peck.android.database.helper;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
+import com.peck.android.PeckApp;
 import com.peck.android.models.Event;
 
 import java.util.Date;
@@ -29,7 +28,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
             COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE};
 
-    private static final String DATABASE_NAME = "events.db";
     private static final int DATABASE_VERSION = 1;
 
     // sql create database command
@@ -46,7 +44,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
 
     public EventOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, PeckApp.getDatabaseName(), null, DATABASE_VERSION);
     }
 
     //TODO: remove after testing
@@ -72,20 +70,19 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         values.put(COLUMN_UPDATED, updated.getTime());
         values.put(COLUMN_HIDDEN, 0);
 
-        return (Event)dataSource.create(values);
+        return dataSource.create(values);
     }
 
     public Event createFromCursor(Cursor cursor) {
         Event e = new Event();
         cursor.moveToFirst();
-        Log.d(TAG, Integer.toString(cursor.getColumnIndex(getColLocId())));
-        e.setLocalId(cursor.getInt(cursor.getColumnIndex(getColLocId())));
-        e.setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)));
-        e.setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)));
-        e.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
-        e.setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))));
-        e.setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))));
-        return e;
+
+        return e.setLocalId(cursor.getInt(cursor.getColumnIndex(getColLocId())))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
+                .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
+                .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)))
+                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))))
+                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))));
     }
 
     public String getTableName() {

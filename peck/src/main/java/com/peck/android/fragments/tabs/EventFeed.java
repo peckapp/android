@@ -1,9 +1,6 @@
 package com.peck.android.fragments.tabs;
 
 import com.peck.android.R;
-import com.peck.android.adapters.EventFeedAdapter;
-import com.peck.android.database.EventDataSource;
-import com.peck.android.database.EventOpenHelper;
 
 /**
  * Created by mammothbane on 6/9/2014.

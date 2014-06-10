@@ -7,14 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.peck.android.database.DataSource;
-import com.peck.android.database.DataSourceHelper;
-import com.peck.android.database.EventDataSource;
+import com.peck.android.database.source.DataSource;
+import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
-import com.peck.android.models.Event;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

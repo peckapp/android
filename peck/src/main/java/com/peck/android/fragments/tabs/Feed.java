@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
-import com.peck.android.database.DataSourceHelper;
+import com.peck.android.database.source.DataSource;
+import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;

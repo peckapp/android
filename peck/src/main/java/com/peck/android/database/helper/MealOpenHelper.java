@@ -1,8 +1,9 @@
-package com.peck.android.database;
+package com.peck.android.database.helper;
 
 import android.content.Context;
 import android.database.Cursor;
 
+import com.peck.android.PeckApp;
 import com.peck.android.models.Meal;
 
 /**
@@ -25,7 +26,6 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
             COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE};
 
-    private static final String DATABASE_NAME = "events.db";
     private static final int DATABASE_VERSION = 1;
 
     // sql create database command
@@ -41,7 +41,7 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
             + ");";
 
     public MealOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, PeckApp.getDatabaseName(), null, DATABASE_VERSION);
     }
 
     public String getColLocId() {

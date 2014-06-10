@@ -7,6 +7,7 @@ import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -16,9 +17,23 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
 
-    private Date created;
-    private Date updated;
+    private int color;
+
+    private Date mealtime;
     private String title;
+
+    private int location;
+
+    public int getColor() {
+        return color;
+    }
+
+    public Meal setColor(int color) {
+        this.color = color;
+        return this;
+    }
+
+    private ArrayList<Food> courses;
 
     public int getLocalId() {
         return localId;
@@ -38,21 +53,12 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public Date getCreated() {
-        return created;
+    public Date getMealtime() {
+        return mealtime;
     }
 
-    public Meal setCreated(Date created) {
-        this.created = created;
-        return this;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public Meal setUpdated(Date updated) {
-        this.updated = updated;
+    public Meal setMealtime(Date mealtime) {
+        this.mealtime = mealtime;
         return this;
     }
 
@@ -65,8 +71,26 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
         return this;
     }
 
+    public int getLocation() {
+        return location;
+    }
+
+    public Meal setLocation(int location) {
+        this.location = location;
+        return this;
+    }
+
+    public ArrayList<Food> getCourses() {
+        return courses;
+    }
+
+    public Meal setCourses(ArrayList<Food> courses) {
+        this.courses = courses;
+        return this;
+    }
+
     public int hashCode() {
-        return (int)(created.getTime()*13+updated.getTime()*17+getServerId()*307-getLocalId());
+        return (int)(mealtime.getTime()*13+location*17+getServerId()*307-getLocalId());
     }
 
     @Override
@@ -78,6 +102,12 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
     public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
 
 
+    }
+
+    public Meal link(Food food) {
+        courses.add(food);
+        food.setMealId(getLocalId());
+        return this;
     }
 
 }

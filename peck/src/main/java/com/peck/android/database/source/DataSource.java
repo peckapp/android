@@ -1,9 +1,11 @@
-package com.peck.android.database;
+package com.peck.android.database.source;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.interfaces.WithLocal;
 
 import java.sql.SQLException;
@@ -50,7 +52,7 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
 
     public void delete(T t) {
         long id = t.getLocalId();
-        System.out.println(t.getClass() + " deleted with id: " + id);
+        Log.d(TAG, t.getClass() + " deleted with id: " + id);
         database.delete(dbHelper.getTableName(), dbHelper.getColLocId()
                 + " = " + id, null);
     }

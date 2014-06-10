@@ -1,14 +1,12 @@
 package com.peck.android.tests;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.test.AndroidTestCase;
 
-import com.peck.android.database.DataSource;
-import com.peck.android.database.EventOpenHelper;
+import com.peck.android.database.source.DataSource;
+import com.peck.android.database.helper.EventOpenHelper;
 import com.peck.android.models.Event;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class DataSourceTest extends AndroidTestCase {

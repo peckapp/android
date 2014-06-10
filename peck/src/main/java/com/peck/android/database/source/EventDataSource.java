@@ -1,7 +1,8 @@
-package com.peck.android.database;
+package com.peck.android.database.source;
 
 import android.content.Context;
 
+import com.peck.android.database.helper.EventOpenHelper;
 import com.peck.android.models.Event;
 
 /**
