@@ -13,6 +13,4 @@ public class EventFeedAdapter extends FeedAdapter<Event> {
     public EventFeedAdapter(Context context, EventFactory factory) {
         super(context, factory);
     }
-
-
 }

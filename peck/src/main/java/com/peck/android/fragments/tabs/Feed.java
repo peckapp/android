@@ -1,8 +1,7 @@
-package com.peck.android.interfaces;
+package com.peck.android.fragments.tabs;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,11 @@ import android.view.ViewGroup;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.database.DataSourceHelper;
-import com.peck.android.factories.EventFactory;
 import com.peck.android.factories.GenericFactory;
-import com.peck.android.fragments.tabs.NewsFeed;
-import com.peck.android.models.Event;
+import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.interfaces.WithLocal;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 
 /**

@@ -20,7 +20,9 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
         super(context, name, factory, version);
         try {
         if (getTableName() == null || getDatabaseCreate() == null) throw
-                new Exception("you MUST have a database creation string and a table name");}
+                new Exception("you MUST have a database creation string and a table name\n" +
+                        "table name " + ((getTableName() == null) ? "null" : getTableName()) +
+                "\ndbcreate " + ((getDatabaseCreate() == null) ? "null" : getDatabaseCreate()));}
         catch (Exception e) {e.printStackTrace();}
 
     }

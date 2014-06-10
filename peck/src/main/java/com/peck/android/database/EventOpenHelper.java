@@ -34,7 +34,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     // sql create database command
     private final String DATABASE_CREATE = "create table "
-            + getTableName() + "(" + COLUMN_LOC_ID
+            + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
             + COLUMN_TITLE + " text not null, "

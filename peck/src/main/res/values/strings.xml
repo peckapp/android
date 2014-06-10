@@ -15,5 +15,6 @@
     <string name="tb_events">Events</string>
     <string name="tb_newsfeed">News Feed</string>
     <string name="tb_diningfeed">Dining</string>
+    <string name="tb_profile">Profile</string>
 
 </resources>

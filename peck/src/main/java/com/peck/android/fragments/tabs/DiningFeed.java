@@ -5,7 +5,6 @@ import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.database.MealDataSource;
 import com.peck.android.database.MealOpenHelper;
 import com.peck.android.factories.MealFactory;
-import com.peck.android.interfaces.Feed;
 import com.peck.android.models.Meal;
 
 /**
@@ -38,7 +37,7 @@ public class DiningFeed extends Feed<Meal, MealFactory, MealOpenHelper> {
     }
 
     public int getLayoutRes() {
-        return resId;
+        return R.layout.frag_diningfeed;
     }
 
 }
