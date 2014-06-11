@@ -10,14 +10,14 @@
     tools:context="com.peck.android.activities.LoginActivity">
 
     <EditText
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/login_et_vert_pad"
         android:id="@+id/et_username"
         android:hint="@string/username" />
 
     <EditText
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/et_password"
         android:layout_marginTop="@dimen/login_et_vert_margin"
@@ -27,7 +27,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_marginTop="@dimen/login_bt_margin"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:id="@+id/ll_bt_login">

@@ -1,9 +1,11 @@
-<RelativeLayout
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="fill_parent"
-    android:layout_width="fill_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:gravity="top">
 
     <android.support.v4.app.FragmentTabHost
         android:layout_width="match_parent"
@@ -12,8 +14,8 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/ll_tb_root">
 
@@ -33,7 +35,7 @@
                 </FrameLayout>
 
             <TabWidget
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@android:id/tabs">
 
@@ -45,6 +47,10 @@
 
     </android.support.v4.app.FragmentTabHost>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
-</RelativeLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

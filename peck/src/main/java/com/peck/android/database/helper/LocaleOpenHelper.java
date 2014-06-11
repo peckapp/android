@@ -26,7 +26,6 @@ public class LocaleOpenHelper extends DataSourceHelper {
             + COLUMN_LOC_ID + " integer primary key autoincrement, "
             + COLUMN_LAT + " double, "
             + COLUMN_LONG + " double, "
-
             + COLUMN_NAME + " text not null"
             + ");";
 

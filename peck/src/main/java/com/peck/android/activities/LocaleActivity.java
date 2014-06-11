@@ -1,9 +1,13 @@
 package com.peck.android.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.Button;
 
 import com.peck.android.R;
 import com.peck.android.managers.LocaleManager;
@@ -40,6 +44,14 @@ public class LocaleActivity extends ActionBarActivity {
                 notifyPopulated();
             }
         }.execute();
+
+        ((Button)findViewById(R.id.swapperbutton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
