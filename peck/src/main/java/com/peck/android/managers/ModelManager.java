@@ -1,6 +1,8 @@
 package com.peck.android.managers;
 
+import android.graphics.AvoidXfermode;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.helper.DataSourceHelper;
@@ -15,22 +17,45 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
+public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
         S extends DataSourceHelper<T>> {
 
-    protected FeedAdapter<T> adapter;
-    ArrayList<T> data;
-    protected DataSource<T, S> dSource;
+    //every modelmanager **must** implement a static version of getManager and be a singleton
 
-    public void initialize(FeedAdapter<T> adapter, DataSource<T, S> dSource) {
+    protected FeedAdapter<T> adapter;
+    ArrayList<T> data = new ArrayList<T>();
+    protected DataSource<T, S> dSource;
+    public final static String tag = "ModelManager";
+
+    public static ModelManager getModelManager(Class clss) {
+        try {
+            return (ModelManager)clss.getMethod("getManager", null).invoke(null, null); }
+        catch (Exception e) {
+            Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    ModelManager() {
+
+    }
+
+    public ModelManager<T, S> initialize(FeedAdapter<T> adapter, DataSource<T, S> dSource) {
         this.adapter = adapter;
         this.dSource = dSource;
 
-        loadFromDatabase(dSource, data);
+        data = loadFromDatabase(dSource);
+
+        downloadFromServer();//TODO: server communication and project sync happens here
+
+        adapter.update(data);
+
+        return this;
     }
 
     public <V extends WithLocal, G extends DataSourceHelper<V>>
-    void loadFromDatabase(final DataSource<V, G> dataSource, ArrayList<V> delta) {
+    ArrayList<V> loadFromDatabase(final DataSource<V, G> dataSource) {
         //TODO: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
         //TODO: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
@@ -52,11 +77,22 @@ public class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
                 adapter.notifyDataSetChanged();
             }
         }.execute();
-        delta = items;
+        return items;
     }
 
-    void update(ArrayList<T> list) {
-        this.data = list;
+    public ArrayList<T> downloadFromServer() {
+        return null; //TODO: implement
+    }
+
+    public ArrayList<T> getData() {
+        return data;
+    }
+
+    public ModelManager<T, S> add(T item) {
+        data.add(item);
+        adapter.update(data);
+        adapter.notifyDataSetChanged();
+        return this;
     }
 
 

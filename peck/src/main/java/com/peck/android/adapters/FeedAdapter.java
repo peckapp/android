@@ -13,6 +13,7 @@ import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
+import com.peck.android.managers.ModelManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,14 +22,12 @@ import java.util.ArrayList;
  * Created by mammothbane on 6/9/2014.
  */
 public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<T> objs;
-    private GenericFactory factory;
+    private ArrayList<T> objs = new ArrayList<T>();
     private Context context;
     private int resourceId;
 
     public FeedAdapter(Context context, GenericFactory<T> factory) {
         this.context = context;
-        this.factory = factory;
         this.resourceId = factory.generate().getResourceId();
     }
 
@@ -49,7 +48,6 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
         return objs.get(i).getLocalId();
     }
 
-
     @Override
     public View getView(int i, View view, ViewGroup viewGroup)
     {
@@ -69,5 +67,11 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
         //TODO: implement
         return this;
     }
+
+    public FeedAdapter<T> update(ArrayList<T> data) {
+        objs = data;
+        return this;
+    }
+
 
 }

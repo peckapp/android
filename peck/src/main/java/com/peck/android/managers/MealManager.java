@@ -24,13 +24,14 @@ public class MealManager extends ModelManager<Meal, MealOpenHelper> {
 
     private MealManager() { } //singleton
 
-    public static MealManager getMealManager() { return manager; }
+    public static MealManager getManager() { return manager; }
 
     @Override
-    public void initialize(FeedAdapter<Meal> adapter, DataSource<Meal, MealOpenHelper> dSource) {
+    public MealManager initialize(FeedAdapter<Meal> adapter, DataSource<Meal, MealOpenHelper> dSource) {
         super.initialize(adapter, dSource);
-        loadFromDatabase(new FoodDataSource(adapter.getContext()), courses);
+        courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
         linkAll(adapter);
+        return this;
     }
 
     public void linkAll(final FeedAdapter<Meal> adapter) {
@@ -52,15 +53,5 @@ public class MealManager extends ModelManager<Meal, MealOpenHelper> {
         }.execute();
 
     }
-
-    public void linkAll() {
-        linkAll(null);
-    }
-
-    public void initialize(DiningFeedAdapter adapter) {
-        this.adapter = adapter;
-    }
-
-
 
 }

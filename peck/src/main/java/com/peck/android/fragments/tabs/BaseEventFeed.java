@@ -16,8 +16,6 @@ public abstract class BaseEventFeed extends Feed<Event, EventFactory, EventOpenH
         return new EventFactory();
     }
 
-
-
     protected BaseEventFeed setUpAdapter() {
         if (feedAdapter == null) {
             feedAdapter = new EventFeedAdapter(getActivity(), getFactory());

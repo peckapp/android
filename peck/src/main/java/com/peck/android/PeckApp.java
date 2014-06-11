@@ -19,6 +19,9 @@ public class PeckApp extends Application {
         public final static int DINNER = 3;
         public final static int NIGHT_MEAL = 4;
 
+        public final static int RETRY = 10;
+        public final static int UI_TIMEOUT = 20;
+
     }
 
     private RequestQueue requestQueue;
