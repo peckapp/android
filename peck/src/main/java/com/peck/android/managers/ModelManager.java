@@ -56,8 +56,8 @@ public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayo
 
     public <V extends WithLocal, G extends DataSourceHelper<V>>
     ArrayList<V> loadFromDatabase(final DataSource<V, G> dataSource) {
-        //TODO: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
-        //TODO: sharedpreferences for subscriptions to different things? going to want a filter somewhere
+        //META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
+        //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
         new AsyncTask<Void, Void, ArrayList<V>>() {
             @Override

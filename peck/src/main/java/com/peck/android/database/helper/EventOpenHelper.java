@@ -49,7 +49,9 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     EventOpenHelper() { super(); }
 
-//    //TODO: remove after testing
+
+    //TODO: fix, and write a working implementation for unit testing
+//    //TEST: remove after testing
 //    public EventOpenHelper(Context context, String test_name) {
 //        super(context);
 //    }

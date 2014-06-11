@@ -40,7 +40,7 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
         setUpAdapter();
         congfigureManager();
 
-        getActivity().deleteDatabase(PeckApp.Constants.DATABASE_NAME);
+        getActivity().deleteDatabase(PeckApp.Constants.DATABASE_NAME); //TEST: remove before production
 
 
 
@@ -54,7 +54,8 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
 
 
     protected void congfigureManager() {
-        modelManager = ModelManager.getModelManager(getManagerClass()).initialize(feedAdapter, dataSource); //TODO: loading bar
+        modelManager = ModelManager.getModelManager(getManagerClass()).initialize(feedAdapter, dataSource);
+        //TODO: loading bar
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
