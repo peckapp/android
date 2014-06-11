@@ -1,6 +1,7 @@
 package com.peck.android.models;
 
 import android.view.View;
+import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.factories.EventFactory;
@@ -8,6 +9,8 @@ import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
+
+import org.w3c.dom.Text;
 
 import java.util.Date;
 
@@ -21,6 +24,17 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
     private Date created;
     private Date updated;
     private String title;
+    private String text;
+
+
+    public String getText() {
+        return text;
+    }
+
+    public Event setText(String text) {
+        this.text = text;
+        return this;
+    }
 
     public int getLocalId() {
         return localId;
@@ -87,8 +101,8 @@ public class Event implements WithLocal, SelfSetup, HasFeedLayout {
 
     @Override
     public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
-
-
+        ((TextView)v.findViewById(R.id.tv_title)).setText(title);
+        ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }
 
 }

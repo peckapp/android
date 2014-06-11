@@ -50,10 +50,10 @@ public class DataSourceTest extends AndroidTestCase {
         boolean bool = false;
         try {
         dSource.open();
-        dbHelper.create(testStr, testcol, testsv, testcr, testup);
+        dbHelper.create(testStr, testStr, testcol, testsv, testcr, testup);
         dSource.close();
         } catch (Exception e) { throw new Exception("event creation threw an exception", e);}
-        try { dbHelper.create(testStr, testcol*2, testsv*2, testcr, testup); }
+        try { dbHelper.create(testStr, testStr, testcol*2, testsv*2, testcr, testup); }
         catch (Exception e) { bool = true; }
 
         if (!bool) throw new Exception("event creation succeeded.");

@@ -24,9 +24,10 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
     public static final String COLUMN_CREATED = "created_at";
     public static final String COLUMN_UPDATED = "updated_at";
     public static final String COLUMN_HIDDEN = "hidden";
+    public static final String COLUMN_TEXT = "text";
 
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_SERVER_ID, COLUMN_COLOR,
-            COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE};
+            COLUMN_CREATED, COLUMN_UPDATED, COLUMN_HIDDEN, COLUMN_TITLE, COLUMN_TEXT};
 
     // sql create database command
     private static final String DATABASE_CREATE = "create table "
@@ -37,6 +38,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
             + COLUMN_COLOR + " integer, "
             + COLUMN_HIDDEN + " integer, "
             + COLUMN_CREATED + " integer, "
+            + COLUMN_TEXT + " text, "
             + COLUMN_UPDATED + " integer"
             + ");";
 
@@ -53,7 +55,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 //    }
 
 
-    public void update(Event e) {
+    public void update(Event e) { //TODO: finish this
         ContentValues values = new ContentValues();
         values.put(COLUMN_SERVER_ID, e.getLocalId());
         values.put(COLUMN_COLOR, e.getColor());
@@ -61,7 +63,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         dataSource.update(values, e.getLocalId());
     }
 
-    public Event create(String title, int color, int serverId, Date created, Date updated) {
+    public Event create(String title, String text, int color, int serverId, Date created, Date updated) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_SERVER_ID, serverId);
         values.put(COLUMN_COLOR, color);
@@ -69,6 +71,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         values.put(COLUMN_CREATED, created.getTime());
         values.put(COLUMN_UPDATED, updated.getTime());
         values.put(COLUMN_HIDDEN, 0);
+        values.put(COLUMN_TEXT, text);
 
         return dataSource.create(values);
     }
@@ -82,7 +85,8 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
                 .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
                 .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)))
                 .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))));
+                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))))
+                .setText(cursor.getString(cursor.getColumnIndex(COLUMN_TEXT)));
     }
 
     public String getTableName() {

@@ -1,28 +1,23 @@
 package com.peck.android.adapters;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.peck.android.database.source.DataSource;
-import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.WithLocal;
-import com.peck.android.managers.ModelManager;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
 public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<T> objs = new ArrayList<T>();
+    private ArrayList<T> data = new ArrayList<T>();
     private Context context;
     private int resourceId;
 
@@ -35,17 +30,17 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
 
     @Override
     public int getCount() {
-        return objs.size();
+        return data.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return objs.get(i);
+        return data.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return objs.get(i).getLocalId();
+        return data.get(i).getLocalId();
     }
 
     @Override
@@ -69,7 +64,7 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
     }
 
     public FeedAdapter<T> update(ArrayList<T> data) {
-        objs = data;
+        this.data = data;
         return this;
     }
 

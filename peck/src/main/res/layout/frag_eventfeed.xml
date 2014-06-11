@@ -7,7 +7,10 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:id="@+id/lv_events">
+        android:id="@+id/lv_events"
+        android:layout_marginLeft="@dimen/feed_horz_margin"
+        android:layout_marginRight="@dimen/feed_horz_margin"
+        >
 
         </ListView>
 

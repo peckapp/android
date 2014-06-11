@@ -40,6 +40,7 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
         setUpAdapter();
         congfigureManager();
 
+        getActivity().deleteDatabase(PeckApp.Constants.DATABASE_NAME);
 
 
 

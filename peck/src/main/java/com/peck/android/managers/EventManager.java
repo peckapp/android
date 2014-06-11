@@ -1,7 +1,6 @@
 package com.peck.android.managers;
 
 import com.peck.android.database.helper.EventOpenHelper;
-import com.peck.android.database.source.EventDataSource;
 import com.peck.android.models.Event;
 
 /**
