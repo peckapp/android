@@ -12,20 +12,28 @@ public class PeckApp extends Application {
 
     public static class Constants {
 
-        public static final String DATABASE_NAME = "peck.db";
+        public static class Food {
 
-        public final static int BREAKFAST = 1;
-        public final static int LUNCH = 2;
-        public final static int DINNER = 3;
-        public final static int NIGHT_MEAL = 4;
 
-        public final static int RETRY = 10;
-        public final static int UI_TIMEOUT = 20;
+            public final static int BREAKFAST = 1;
+            public final static int LUNCH = 2;
+            public final static int DINNER = 3;
+            public final static int NIGHT_MEAL = 4;
+        }
+
+
+        public static class Database {
+
+            public static final String DATABASE_NAME = "peck.db";
+            public final static int RETRY = 10;
+            public final static int UI_TIMEOUT = 20;
+        }
 
     }
 
-    private RequestQueue requestQueue;
 
+
+    private RequestQueue requestQueue;
 
     public RequestQueue getRequestQueue() {
         if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);

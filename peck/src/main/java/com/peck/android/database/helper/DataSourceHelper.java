@@ -13,8 +13,6 @@ import com.peck.android.interfaces.WithLocal;
  */
 public abstract class DataSourceHelper<model extends WithLocal> extends SQLiteOpenHelper {
 
-
-
     DataSource<model, DataSourceHelper<model>> dataSource;
     private Context context;
 

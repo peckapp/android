@@ -48,7 +48,7 @@ public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout,
         //TODO: loading bar
 
 
-        getActivity().deleteDatabase(PeckApp.Constants.DATABASE_NAME); //TEST: remove before production
+        getActivity().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
 
     }
 
@@ -71,10 +71,10 @@ public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout,
             ListView lv = (ListView)getActivity().findViewById(getListViewRes());
             @Override
             protected ListView doInBackground(Void... voids) {
-                for (int i = 0; i < PeckApp.Constants.RETRY && (lv == null); i++) {
+                for (int i = 0; i < PeckApp.Constants.Database.RETRY && (lv == null); i++) {
                     lv = (ListView)getActivity().findViewById(getListViewRes());
                     try {
-                        Thread.sleep(PeckApp.Constants.UI_TIMEOUT);
+                        Thread.sleep(PeckApp.Constants.Database.UI_TIMEOUT);
                     } catch (InterruptedException e) { Log.e(tag(), "thread was interrupted"); }
                     if (lv == null) cancel(false); //if we can't get the listview, throw an exception
                 }
@@ -90,8 +90,8 @@ public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout,
             @Override
             protected void onCancelled(ListView listView) {
                 super.onCancelled();
-                throw new CancellationException("Couldn't find the listview, tried " + PeckApp.Constants.RETRY + " times, over a duration of " +
-                        PeckApp.Constants.RETRY*PeckApp.Constants.UI_TIMEOUT + " seconds.");
+                throw new CancellationException("Couldn't find the listview, tried " + PeckApp.Constants.Database.RETRY + " times, over a duration of " +
+                        PeckApp.Constants.Database.RETRY* PeckApp.Constants.Database.UI_TIMEOUT + " seconds.");
             }
 
         }.execute();
