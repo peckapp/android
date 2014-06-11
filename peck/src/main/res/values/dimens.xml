@@ -7,4 +7,6 @@
     <dimen name="login_bt_margin">24dp</dimen>
     <dimen name="acct_bt_spacing">24dp</dimen>
     <dimen name="login_sp_margin">16dp</dimen>
+    <dimen name="feed_vert_margin">16dp</dimen>
+    <dimen name="feed_horz_margin">16dp</dimen>
 </resources>

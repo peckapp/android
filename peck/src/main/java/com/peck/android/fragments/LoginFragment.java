@@ -13,9 +13,17 @@ import com.peck.android.R;
  */
 public class LoginFragment extends android.support.v4.app.Fragment {
 
+
+    private final static String TAG = "login_fragment_";
+    private static int counter = 0;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        counter++;
+    }
 
+    public static String buildTag() {
+        return TAG + counter;
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

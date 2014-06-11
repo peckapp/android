@@ -1,18 +1,17 @@
 package com.peck.android.tests;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
-import com.peck.android.database.DataSource;
-import com.peck.android.database.EventOpenHelper;
+import com.peck.android.database.helper.DatabaseCreator;
+import com.peck.android.database.source.DataSource;
+import com.peck.android.database.helper.EventOpenHelper;
 import com.peck.android.models.Event;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class DataSourceTest extends AndroidTestCase {
-    private final static String testDB = "test.db"; //never set to the value in EventOpenHelper.DATABASE_NAME
     private final static String testStr = "mytest";
     private final static int testcol = 42;
     private final static int testsv = 1;
@@ -27,15 +26,17 @@ public class DataSourceTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        dbHelper = new EventOpenHelper(getContext(), testDB);
+        try { getContext().deleteDatabase(DatabaseCreator.getDbName()); } catch (Exception e) {
+            Log.e(TAG, "there wasn't a database to delete");
+            e.printStackTrace();
+        }
+        dbHelper = new EventOpenHelper(getContext());
         dSource = new DataSource<Event, EventOpenHelper>(dbHelper);
         assertPre();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        try { getContext().deleteDatabase(testDB); }
-        catch (Exception e) { throw new Exception("there wasn't a database to delete.", e); }
         dSource = null;
         dbHelper = null;
     }
@@ -49,10 +50,10 @@ public class DataSourceTest extends AndroidTestCase {
         boolean bool = false;
         try {
         dSource.open();
-        dbHelper.create(testStr, testcol, testsv, testcr, testup);
+        dbHelper.create(testStr, testStr, testcol, testsv, testcr, testup);
         dSource.close();
         } catch (Exception e) { throw new Exception("event creation threw an exception", e);}
-        try { dbHelper.create(testStr, testcol*2, testsv*2, testcr, testup); }
+        try { dbHelper.create(testStr, testStr, testcol*2, testsv*2, testcr, testup); }
         catch (Exception e) { bool = true; }
 
         if (!bool) throw new Exception("event creation succeeded.");
@@ -101,7 +102,7 @@ public class DataSourceTest extends AndroidTestCase {
         e = dbHelper.createFromCursor(dbHelper.getWritableDatabase().query(dbHelper.TABLE_NAME, dbHelper.getColumns(),
                 dbHelper.COLUMN_LOC_ID + " = " + e.getLocalId(), null, null, null, null));
         dSource.close();
-        if (e.getColor() != i + 1) throw new Exception("event update failed; color is " + e.getColor() +
+        if (e.getColor() != i + 1) throw new Exception("event loadFromDatabase failed; color is " + e.getColor() +
         ", should be " + i + 1);
     }
 
