@@ -45,6 +45,8 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         super(context, null);
     }
 
+    EventOpenHelper() { super(); }
+
 //    //TODO: remove after testing
 //    public EventOpenHelper(Context context, String test_name) {
 //        super(context);
@@ -87,7 +89,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
         return TABLE_NAME;
     }
 
-    public static String getDatabaseCreate() {
+    public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 

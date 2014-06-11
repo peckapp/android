@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.peck.android.PeckApp;
 import com.peck.android.models.Meal;
 
 import java.util.Date;
@@ -56,6 +55,10 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
         this.context = context;
     }
 
+    MealOpenHelper() {
+        super();
+    }
+
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(getDatabaseCreate());
@@ -84,7 +87,7 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
                 .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
     }
 
-    public static String getDatabaseCreate() {
+    public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 

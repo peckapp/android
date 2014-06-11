@@ -12,6 +12,8 @@ public class PeckApp extends Application {
 
     public static class Constants {
 
+        public static final String DATABASE_NAME = "peck.db";
+
         public final static int BREAKFAST = 1;
         public final static int LUNCH = 2;
         public final static int DINNER = 3;
@@ -20,7 +22,7 @@ public class PeckApp extends Application {
     }
 
     private RequestQueue requestQueue;
-    private static final String DATABASE_NAME = "peck.db";
+
 
     public RequestQueue getRequestQueue() {
         if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);

@@ -50,6 +50,8 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
         this.context = context;
     }
 
+    public FoodOpenHelper() { super(); }
+
     //TODO: implement this method
     public Food createFromCursor(Cursor cursor) { //does not link to meal
         Food f = new Food();
@@ -71,7 +73,7 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
         return TABLE_NAME;
     }
 
-    public static String getDatabaseCreate() {
+    public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
 

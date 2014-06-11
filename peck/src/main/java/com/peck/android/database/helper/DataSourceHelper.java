@@ -29,6 +29,12 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
 
     }
 
+    DataSourceHelper() {
+        super(null, DatabaseCreator.getDbName(), null, DatabaseCreator.getDbVersion());
+        //this constructor is **only** to access individual instantiations for getTableName()
+        //and getCreateSql
+    }
+
 
     @Override
     public void onCreate(SQLiteDatabase database) {
@@ -45,9 +51,10 @@ public abstract class DataSourceHelper<T extends WithLocal> extends SQLiteOpenHe
     }
 
     public abstract T createFromCursor(Cursor cursor);
-    public abstract String getTableName();
     public abstract String getColLocId();
     public abstract String[] getColumns(); //return columns in a string array;
+    public abstract String getTableName();
+    public abstract String getDatabaseCreate();
 
 
 }
