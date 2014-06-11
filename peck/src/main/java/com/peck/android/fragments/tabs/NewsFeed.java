@@ -15,7 +15,7 @@ public class NewsFeed extends BaseEventFeed {
         return resId;
     }
 
-    public static int getTabTag() {
+    public int getTabTag() {
         return R.string.tb_newsfeed;
     }
 

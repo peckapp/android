@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
-import com.peck.android.interfaces.HasStatic;
 
 /**
  * Created by mammothbane on 6/10/2014.

@@ -20,7 +20,7 @@ public class DiningFeed extends Feed<Meal, MealFactory, MealOpenHelper> {
         return new MealFactory();
     }
 
-    public static int getTabTag() { //this method *is used*, don't delete
+    public int getTabTag() { //this method *is used*, don't delete
         return resId;
     }
 
