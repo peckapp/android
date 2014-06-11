@@ -1,11 +1,13 @@
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
-    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:gravity="top">
+    android:gravity="top"
+    android:paddingTop="?android:actionBarSize">
+    <!--action bar's in overlay mode, need to pad content down a distance equal to its height-->
+
 
     <android.support.v4.app.FragmentTabHost
         android:layout_width="match_parent"
@@ -47,10 +49,6 @@
 
     </android.support.v4.app.FragmentTabHost>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 
-
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</RelativeLayout>
