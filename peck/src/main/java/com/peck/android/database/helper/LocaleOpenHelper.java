@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
 
-import com.peck.android.interfaces.WithLocal;
 import com.peck.android.models.Locale;
 
 /**
@@ -25,8 +24,8 @@ public class LocaleOpenHelper extends DataSourceHelper {
     private final String DATABASE_CREATE = "create table "
             + TABLE_NAME + "("
             + COLUMN_LOC_ID + " integer primary key autoincrement, "
-            + COLUMN_LAT + " integer, "
-            + COLUMN_LONG + " integer, "
+            + COLUMN_LAT + " double, "
+            + COLUMN_LONG + " double, "
 
             + COLUMN_NAME + " text not null"
             + ");";
@@ -47,10 +46,14 @@ public class LocaleOpenHelper extends DataSourceHelper {
 
     @Override
     public Locale createFromCursor(Cursor cursor) {
+        Location t = new Location("database");
+        t.setLatitude(cursor.getDouble(cursor.getColumnIndex(COLUMN_LAT)));
+        t.setLongitude(cursor.getDouble(cursor.getColumnIndex(COLUMN_LONG)));
+
         return new Locale().setLocalId(cursor.getInt(cursor.getColumnIndex(COLUMN_LOC_ID)))
             .setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SV_ID)))
                 .setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)))
-                .setLocation(new Location("database"))
+                .setLocation(t);
     }
 
     @Override
