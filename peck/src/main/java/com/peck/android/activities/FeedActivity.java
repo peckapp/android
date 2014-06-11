@@ -11,11 +11,19 @@ import com.peck.android.fragments.tabs.DiningFeed;
 import com.peck.android.fragments.tabs.EventFeed;
 import com.peck.android.fragments.tabs.Profile;
 import com.peck.android.fragments.tabs.NewsFeed;
+import com.peck.android.interfaces.HasTabTag;
 
 public class FeedActivity extends FragmentActivity {
 
-    private final static Class[] tabs = {EventFeed.class, NewsFeed.class, DiningFeed.class, Circles.class, Profile.class};
     private final static String TAG = "FeedActivity";
+
+    private final static HasTabTag[] tabs = {
+            new EventFeed(),
+            new NewsFeed(),
+            new DiningFeed(),
+            new Circles(),
+            new Profile()
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,20 +33,13 @@ public class FeedActivity extends FragmentActivity {
         FragmentTabHost tabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
         tabHost.setup(this, getSupportFragmentManager(), R.id.realcontent);
 
-        for (Class i : tabs) {
-            String k = "";
-            try {
-                k = getResources().getString((Integer)(i.getMethod("getTabTag", null).invoke(null, null)));
-            } catch (Exception e) {
-                Log.e(TAG, "Every feed must implement getTabTag");
-                e.printStackTrace();
-            }
-            tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i, null);
-
-            //TODO: tabHost.setOnTabChangedListener
-
+        String k;
+        for (HasTabTag i : tabs) {
+            k = getResources().getString(i.getTabTag());
+            tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i.getClass(), null);
         }
 
+        //TODO: tabHost.setOnTabChangedListener
 
 
     }
