@@ -11,7 +11,7 @@ import com.peck.android.models.Meal;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class DiningFeed extends Feed<Meal, MealFactory, MealOpenHelper> {
+public class DiningFeed extends Feed<Meal, MealFactory, MealOpenHelper, MealManager> {
     private final static String tag = "DiningFeed";
     private final static int resId = R.string.tb_diningfeed;
     private final static int lvId = R.id.lv_dining;
@@ -51,7 +51,7 @@ public class DiningFeed extends Feed<Meal, MealFactory, MealOpenHelper> {
         return lvId;
     }
 
-    public Class getManagerClass() {
+    public Class<MealManager> getManagerClass() {
         return MealManager.class;
     }
 

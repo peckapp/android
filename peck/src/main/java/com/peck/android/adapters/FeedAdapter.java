@@ -16,12 +16,12 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<T> data = new ArrayList<T>();
+public abstract class FeedAdapter<model extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
+    private ArrayList<model> data = new ArrayList<model>();
     private Context context;
     private int resourceId;
 
-    public FeedAdapter(Context context, GenericFactory<T> factory) {
+    public FeedAdapter(Context context, GenericFactory<model> factory) {
         this.context = context;
         this.resourceId = factory.generate().getResourceId();
     }
@@ -51,19 +51,19 @@ public abstract class FeedAdapter<T extends WithLocal & SelfSetup & HasFeedLayou
             view = inflater.inflate(resourceId, null);
         }
 
-        T res = (T)getItem(i);
+        model res = (model)getItem(i);
         res.setUp(view);
         return view;
     }
 
 
 
-    public FeedAdapter<T> removeCompleted() {
+    public FeedAdapter<model> removeCompleted() {
         //TODO: implement
         return this;
     }
 
-    public FeedAdapter<T> update(ArrayList<T> data) {
+    public FeedAdapter<model> update(ArrayList<model> data) {
         this.data = data;
         return this;
     }

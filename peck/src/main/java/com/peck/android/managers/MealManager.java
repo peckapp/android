@@ -7,6 +7,7 @@ import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.helper.MealOpenHelper;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.database.source.FoodDataSource;
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Food;
 import com.peck.android.models.Meal;
 
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealManager extends ModelManager<Meal, MealOpenHelper> {
+public class MealManager extends ModelManager<Meal, MealOpenHelper> implements Singleton {
     private static MealManager manager = new MealManager();
 
     //these are the root lists that everything syncs from

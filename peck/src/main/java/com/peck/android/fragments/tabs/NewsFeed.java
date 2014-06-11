@@ -29,7 +29,7 @@ public class NewsFeed extends BaseEventFeed {
         return lvId;
     }
 
-    public Class getManagerClass() {
+    public Class<EventManager> getManagerClass() {
         return EventManager.class;
     }
 

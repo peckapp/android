@@ -5,13 +5,14 @@ import android.view.View;
 
 import com.peck.android.R;
 import com.peck.android.activities.LoginActivity;
+import com.peck.android.interfaces.Singleton;
 
 import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 5/22/2014.
  */
-public class LoginManager {
+public class LoginManager implements Singleton {
     private boolean inDefaultState;
     private ButtonManager buttonManager;
     private LoginActivity activity;

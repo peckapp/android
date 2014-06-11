@@ -36,7 +36,7 @@ public class EventFeed extends BaseEventFeed implements HasTabTag {
         return lvId;
     }
 
-    public Class getManagerClass() { return EventManager.class; }
+    public Class<EventManager> getManagerClass() { return EventManager.class; }
 
 
 

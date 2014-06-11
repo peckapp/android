@@ -14,12 +14,12 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
+public class DataSource<model extends WithLocal, helper extends DataSourceHelper<model>> {
     private SQLiteDatabase database;
-    private S dbHelper;
+    private helper dbHelper;
     private static final String TAG = "datasource";
 
-    public DataSource(S dbHelper) {
+    public DataSource(helper dbHelper) {
         this.dbHelper = dbHelper;
         dbHelper.setDatasource(this);
     }
@@ -33,13 +33,13 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
     }
 
 
-    public T create(ContentValues contentValues) {
+    public model create(ContentValues contentValues) {
         long insertId = database.insert(dbHelper.getTableName(), null, contentValues);
         Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
                 dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
-        T newT = dbHelper.createFromCursor(cursor);
+        model newModel = dbHelper.createFromCursor(cursor);
         cursor.close();
-        return newT;
+        return newModel;
     }
     
     public void update(ContentValues values, int id){
@@ -50,20 +50,20 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
                 new String[]{String.valueOf(id)});
     }
 
-    public void delete(T t) {
-        long id = t.getLocalId();
-        Log.d(TAG, t.getClass() + " deleted with id: " + id);
+    public void delete(model model) {
+        long id = model.getLocalId();
+        Log.d(TAG, model.getClass() + " deleted with id: " + id);
         database.delete(dbHelper.getTableName(), dbHelper.getColLocId()
                 + " = " + id, null);
     }
 
-    public ArrayList<T> getAll() {
-        ArrayList<T> ret = new ArrayList<T>();
+    public ArrayList<model> getAll() {
+        ArrayList<model> ret = new ArrayList<model>();
         Cursor cursor = database.query(dbHelper.getTableName(),
                 dbHelper.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            T obj = dbHelper.createFromCursor(cursor);
+            model obj = dbHelper.createFromCursor(cursor);
             ret.add(obj);
             cursor.moveToNext();
         }
@@ -72,12 +72,12 @@ public class DataSource<T extends WithLocal, S extends DataSourceHelper<T>> {
         return ret;
     }
 
-    public void getAll(ArrayList<T> ret) {
+    public void getAll(ArrayList<model> ret) {
         Cursor cursor = database.query(dbHelper.getTableName(),
                 dbHelper.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            T obj = dbHelper.createFromCursor(cursor);
+            model obj = dbHelper.createFromCursor(cursor);
             ret.add(obj);
             cursor.moveToNext();
         }

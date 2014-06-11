@@ -1,6 +1,5 @@
 package com.peck.android.managers;
 
-import android.graphics.AvoidXfermode;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,6 +8,7 @@ import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.interfaces.WithLocal;
 
 import java.sql.SQLException;
@@ -17,17 +17,17 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayout,
-        S extends DataSourceHelper<T>> {
+public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeedLayout,
+       helper extends DataSourceHelper<model>> {
 
     //every modelmanager **must** implement a static version of getManager and be a singleton
 
-    protected FeedAdapter<T> adapter;
-    ArrayList<T> data = new ArrayList<T>();
-    protected DataSource<T, S> dSource;
+    protected FeedAdapter<model> adapter;
+    ArrayList<model> data = new ArrayList<model>();
+    protected DataSource<model, helper> dSource;
     public final static String tag = "ModelManager";
 
-    public static ModelManager getModelManager(Class clss) {
+    public static <V extends Singleton> ModelManager getModelManager(Class<V> clss) {
         try {
             return (ModelManager)clss.getMethod("getManager", null).invoke(null, null); }
         catch (Exception e) {
@@ -41,7 +41,7 @@ public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayo
 
     }
 
-    public ModelManager<T, S> initialize(FeedAdapter<T> adapter, DataSource<T, S> dSource) {
+    public ModelManager<model, helper> initialize(FeedAdapter<model> adapter, DataSource<model, helper> dSource) {
         this.adapter = adapter;
         this.dSource = dSource;
 
@@ -80,15 +80,15 @@ public abstract class ModelManager<T extends WithLocal & SelfSetup & HasFeedLayo
         return items;
     }
 
-    public ArrayList<T> downloadFromServer() {
+    public ArrayList<model> downloadFromServer() {
         return null; //TODO: implement
     }
 
-    public ArrayList<T> getData() {
+    public ArrayList<model> getData() {
         return data;
     }
 
-    public ModelManager<T, S> add(T item) {
+    public ModelManager<model, helper> add(model item) {
         data.add(item);
         adapter.update(data);
         adapter.notifyDataSetChanged();

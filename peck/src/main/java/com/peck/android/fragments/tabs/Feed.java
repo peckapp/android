@@ -17,21 +17,27 @@ import com.peck.android.factories.GenericFactory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.interfaces.WithLocal;
 import com.peck.android.managers.ModelManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CancellationException;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
-        S extends GenericFactory<T>, V extends DataSourceHelper<T>> extends Fragment implements HasTabTag {
+public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout,
+        modelFactory extends GenericFactory<model>, dbHelper extends DataSourceHelper<model>, manager extends Singleton> extends Fragment implements HasTabTag {
 
-    protected FeedAdapter<T> feedAdapter;
-    protected DataSource<T, V> dataSource;
-    protected ModelManager<T, V> modelManager;
+    //generics, in order:
+    // T: model
+    // S: factory for model
+    // V: datasource for model
+    // Y: manager for model
+
+    protected FeedAdapter<model> feedAdapter;
+    protected DataSource<model, dbHelper> dataSource;
+    protected ModelManager<model, dbHelper> modelManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,27 +45,29 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
 
         setUpAdapter();
         congfigureManager();
+        //TODO: loading bar
+
 
         getActivity().deleteDatabase(PeckApp.Constants.DATABASE_NAME); //TEST: remove before production
-
-
-
-//        Log.e(tag(), (lv == null) ? "list view is null" :
-//                (feedAdapter == null) ? "feed adapter null" :
-//                        "no problem..?");
 
     }
 
 
+    /**
+     * call abstract getManagerClass(), returns subclass's manager.
+     * pass manager class to Modelmanager's static method,
+     * which uses reflection to invoke the manager's singleton get method.
+     * set modelManager to the singleton instance of the modelmanager we want.
+     */
 
-
+    @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        modelManager = ModelManager.getModelManager(getManagerClass()).initialize(feedAdapter, dataSource);
-        //TODO: loading bar
+        modelManager = ((ModelManager<model, dbHelper>)ModelManager.getModelManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         new AsyncTask<Void, Void, ListView>() {
+            //when we create a view, check for the listview asynchronously
             ListView lv = (ListView)getActivity().findViewById(getListViewRes());
             @Override
             protected ListView doInBackground(Void... voids) {
@@ -67,18 +75,23 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
                     lv = (ListView)getActivity().findViewById(getListViewRes());
                     try {
                         Thread.sleep(PeckApp.Constants.UI_TIMEOUT);
-                        //Log.e(tag(), Integer.toString(i));
-                    } catch (InterruptedException e) { Log.e(tag(), "was interrupted"); }
+                    } catch (InterruptedException e) { Log.e(tag(), "thread was interrupted"); }
+                    if (lv == null) cancel(false); //if we can't get the listview, throw an exception
                 }
                 return lv;
             }
 
             @Override
             protected void onPostExecute(ListView listView) {
-                //Log.e(tag(), (listView == null) ? "list view null" : "lv not null");
-                //Log.e(tag(), (feedAdapter == null) ? "adapter null" : "adapter not null");
-
+                //once we have the
                 listView.setAdapter(feedAdapter);
+            }
+
+            @Override
+            protected void onCancelled(ListView listView) {
+                super.onCancelled();
+                throw new CancellationException("Couldn't find the listview, tried " + PeckApp.Constants.RETRY + " times, over a duration of " +
+                        PeckApp.Constants.RETRY*PeckApp.Constants.UI_TIMEOUT + " seconds.");
             }
 
         }.execute();
@@ -90,17 +103,17 @@ public abstract class Feed<T extends WithLocal & SelfSetup & HasFeedLayout,
         super.onResume();
     }
 
-    protected abstract Feed<T, S, V> setUpAdapter(); //should set adapter and datasource
+    protected abstract Feed<model, modelFactory, dbHelper, manager> setUpAdapter(); //set adapter and datasource
 
     protected abstract String tag();
 
-    protected abstract GenericFactory<T> getFactory();
+    protected abstract GenericFactory<model> getFactory(); //don't remove this method; it gets called in subclasses
 
     public abstract int getLayoutRes();
 
     public abstract int getListViewRes();
 
-    public abstract Class getManagerClass();
+    public abstract Class<manager> getManagerClass();
 
 }
 
