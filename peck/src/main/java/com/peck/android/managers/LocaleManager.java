@@ -13,7 +13,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleManager implements Singleton {
+public class LocaleManager extends Manager<Locale> implements Singleton {
     private static LocaleManager localeManager = new LocaleManager();
     private static ArrayList<Locale> locales;
     private static Location location;

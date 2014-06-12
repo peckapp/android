@@ -16,18 +16,19 @@ public class EventFeed extends BaseEventFeed implements HasTabTag {
     private final static String tag = "EventFeed";
     private final static int resId = R.layout.frag_eventfeed;
     private final static int lvId = R.id.lv_events;
+    private final static int tabId = R.string.tb_events;
 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         Event e;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i < 11; i++) {
             e = new Event();
             e.setServerId(i);
-            e.setText(Integer.toString(i));
-            e.setTitle(Integer.toString(i));
-            modelManager.add(e);
+            e.setTitle("Event " + Integer.toString(i));
+            e.setText("Text " + Integer.toString(i));
+            feedManager.add(e);
         }
 
     }
@@ -37,7 +38,7 @@ public class EventFeed extends BaseEventFeed implements HasTabTag {
     }
 
     public int getTabTag() {
-        return R.string.tb_events;
+        return tabId;
     }
 
     public String tag() {
@@ -49,7 +50,5 @@ public class EventFeed extends BaseEventFeed implements HasTabTag {
     }
 
     public Class<EventManager> getManagerClass() { return EventManager.class; }
-
-
 
 }

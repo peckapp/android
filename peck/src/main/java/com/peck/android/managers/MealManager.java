@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealManager extends ModelManager<Meal> implements Singleton {
+public class MealManager extends FeedManager<Meal> implements Singleton {
     private static MealManager manager = new MealManager();
     //TODO: implement this, rework this class. //private static FoodManager fManager = new foodManager();
 

@@ -16,30 +16,19 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public abstract class ModelManager<T extends DBOperable & SelfSetup & HasFeedLayout> {
+public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayout> extends Manager<T> {
 
-    //every modelmanager **must** implement a static version of getManager and be a singleton
+    //every FeedManager **must** implement a static version of getManager/be a singleton
 
     protected FeedAdapter<T> adapter;
-    ArrayList<T> data = new ArrayList<T>();
-    protected DataSource<T> dSource;
-    public final static String tag = "ModelManager";
 
-    public static ModelManager getModelManager(Class<? extends Singleton> clss) {
-        try {
-            return (ModelManager)clss.getMethod("getManager", null).invoke(null, null); }
-        catch (Exception e) {
-            Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
-            e.printStackTrace();
-            return null;
-        }
-    }
+    public final static String tag = "FeedManager";
 
-    ModelManager() {
+    FeedManager() {
 
     }
 
-    public ModelManager<T> initialize(FeedAdapter<T> adapter, DataSource<T> dSource) {
+    public FeedManager<T> initialize(FeedAdapter<T> adapter, DataSource<T> dSource) {
         this.adapter = adapter;
         this.dSource = dSource;
 
@@ -81,17 +70,16 @@ public abstract class ModelManager<T extends DBOperable & SelfSetup & HasFeedLay
         return null; //TODO: implement
     }
 
-    public ArrayList<T> getData() {
-        return data;
-    }
 
-    public ModelManager<T> add(T item) {
+    public FeedManager<T> add(T item) {
         data.add(item);
-        dSource.create(item);
+        //dSource.create(item);
         adapter.update(data);
         adapter.notifyDataSetChanged();
         return this;
     }
+
+
 
 
 }

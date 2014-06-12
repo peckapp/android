@@ -111,9 +111,10 @@ public class Event extends DBOperable implements SelfSetup, HasFeedLayout {
         cv.put(EventOpenHelper.COLUMN_COLOR, getColor());
         cv.put(EventOpenHelper.COLUMN_TITLE, getTitle());
         cv.put(EventOpenHelper.COLUMN_TEXT, getText());
-        cv.put(EventOpenHelper.COLUMN_UPDATED, getUpdated().getTime());
         cv.put(EventOpenHelper.COLUMN_LOC_ID, getLocalId());
-        cv.put(EventOpenHelper.COLUMN_CREATED, getCreated().getTime());
+
+        cv.put(EventOpenHelper.COLUMN_UPDATED, dateToInt(getUpdated()));
+        cv.put(EventOpenHelper.COLUMN_CREATED, dateToInt(getCreated()));
 
         return cv;
     }

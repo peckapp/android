@@ -3,17 +3,18 @@ package com.peck.android.activities;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 
 import com.peck.android.R;
 import com.peck.android.fragments.tabs.Circles;
 import com.peck.android.fragments.tabs.DiningFeed;
 import com.peck.android.fragments.tabs.EventFeed;
-import com.peck.android.fragments.tabs.Profile;
+import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.fragments.tabs.NewsFeed;
 import com.peck.android.interfaces.HasTabTag;
 
-public class FeedActivity extends FragmentActivity {
+public class FeedActivity extends ActionBarActivity {
 
     private final static String TAG = "FeedActivity";
 
@@ -22,7 +23,7 @@ public class FeedActivity extends FragmentActivity {
             new NewsFeed(),
             new DiningFeed(),
             new Circles(),
-            new Profile()
+            new ProfileTab()
     };
 
     @Override

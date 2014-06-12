@@ -2,7 +2,6 @@ package com.peck.android.fragments.tabs;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,19 +12,16 @@ import com.peck.android.PeckApp;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.DBOperable;
-import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.ModelManager;
+import com.peck.android.managers.FeedManager;
 
 import java.util.concurrent.CancellationException;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment implements HasTabTag {
+public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
 
     //generics, in order:
     // T: model
@@ -35,7 +31,7 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
 
     protected FeedAdapter<model> feedAdapter;
     protected DataSource<model> dataSource;
-    protected ModelManager<model> modelManager;
+    protected FeedManager<model> feedManager;
     protected ListView lv;
 
 
@@ -61,7 +57,7 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        modelManager = ((ModelManager<model>)ModelManager.getModelManager(getManagerClass())).initialize(feedAdapter, dataSource);
+        feedManager = ((FeedManager<model>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -111,14 +107,7 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
     }
 
     protected abstract Feed<model> setUpAdapter(); //set adapter and datasource
-
-    protected abstract String tag();
-
-    public abstract int getLayoutRes();
-
     public abstract int getListViewRes();
-
-    public abstract Class<? extends Singleton> getManagerClass();
 
 }
 

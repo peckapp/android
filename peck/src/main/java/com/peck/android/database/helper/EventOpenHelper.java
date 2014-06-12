@@ -56,20 +56,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 //        super(context);
 //    }
 
-
-    public Event createFromCursor(Cursor cursor) {
-        Event e = new Event();
-        cursor.moveToFirst();
-
-        return e.setLocalId(cursor.getInt(cursor.getColumnIndex(getColLocId())))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))))
-                .setText(cursor.getString(cursor.getColumnIndex(COLUMN_TEXT)));
-    }
-
     public String getTableName() {
         return TABLE_NAME;
     }

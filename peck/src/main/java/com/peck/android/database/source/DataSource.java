@@ -36,6 +36,10 @@ public abstract class DataSource<T extends DBOperable> implements Factory<T> {
 
     public T create(T t) {
         ContentValues contentValues = t.toContentValues();
+
+        Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
+        Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
+
         long insertId = database.insert(dbHelper.getTableName(), null, contentValues);
         Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
                 dbHelper.getColLocId() + " = " + insertId, null, null, null, null);

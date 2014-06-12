@@ -1,18 +1,20 @@
 package com.peck.android.fragments.tabs;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 
 import com.peck.android.R;
+import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.managers.ProfileManager;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Circles extends BaseTab {
+public class ProfileTab extends BaseTab {
 
-    private static final String tag = "Circles";
-    private static final int tagId = R.string.tb_circles;
-    private static final int resId = R.layout.frag_circles;
+    private static final int tabId = R.string.tb_profile;
+    private static final int resId = R.layout.frag_profile;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,7 +24,7 @@ public class Circles extends BaseTab {
     }
 
     public int getTabTag() {
-        return tagId;
+        return tabId;
     }
 
     @Override
@@ -32,6 +34,6 @@ public class Circles extends BaseTab {
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
-        return null;
+        return ProfileManager.class;
     }
 }
