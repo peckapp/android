@@ -6,14 +6,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.peck.android.database.source.DataSource;
-import com.peck.android.interfaces.WithLocal;
+import com.peck.android.interfaces.DBOperable;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DataSourceHelper<model extends WithLocal> extends SQLiteOpenHelper {
+public abstract class DataSourceHelper<T extends DBOperable> extends SQLiteOpenHelper {
 
-    DataSource<model> dataSource;
+    DataSource<T> dataSource;
     private Context context;
 
     public DataSourceHelper(Context context, SQLiteDatabase.CursorFactory factory)
@@ -47,7 +47,6 @@ public abstract class DataSourceHelper<model extends WithLocal> extends SQLiteOp
         DatabaseCreator.getDatabaseCreator(context).onUpgrade(db, oldVersion, newVersion);
     }
 
-    public abstract model createFromCursor(Cursor cursor);
     public abstract String getColLocId();
     public abstract String[] getColumns(); //return columns in a string array;
     public abstract String getTableName();

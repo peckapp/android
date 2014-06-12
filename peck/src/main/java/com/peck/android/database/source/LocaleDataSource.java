@@ -19,5 +19,8 @@ public class LocaleDataSource extends DataSource<Locale> {
         super(new LocaleOpenHelper(context));
     }
 
-
+    @Override
+    public Locale generate() {
+        return new Locale();
+    }
 }

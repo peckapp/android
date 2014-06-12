@@ -1,5 +1,6 @@
 package com.peck.android.database.helper;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -59,32 +60,12 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
         super();
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase database) {
-        database.execSQL(getDatabaseCreate());
-        database.execSQL(new FoodOpenHelper(context).getDatabaseCreate());
-    }
-
     public String getColLocId() {
         return COLUMN_LOC_ID;
     }
 
     public String getTableName() {
         return TABLE_NAME;
-    }
-
-    //TODO: implement this method
-    public Meal createFromCursor(Cursor cursor) {
-        Meal m = new Meal();
-        return m.setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
-                .setType(cursor.getInt(cursor.getColumnIndex(COLUMN_MEAL_TYPE)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
-                .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(COLUMN_TIME))))
-                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(COLUMN_UPDATED))))
-                .setLocalId(cursor.getInt(cursor.getColumnIndex(COLUMN_LOC_ID)))
-                .setLocation(cursor.getInt(cursor.getColumnIndex(COLUMN_LOCATION_ID)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
     }
 
     public String getDatabaseCreate() {

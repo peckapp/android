@@ -16,4 +16,8 @@ public class FoodDataSource extends DataSource<Food> {
 
     }
 
+    @Override
+    public Food generate() {
+        return new Food();
+    }
 }

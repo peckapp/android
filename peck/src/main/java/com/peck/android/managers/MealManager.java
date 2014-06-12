@@ -16,6 +16,8 @@ import java.util.ArrayList;
  */
 public class MealManager extends ModelManager<Meal> implements Singleton {
     private static MealManager manager = new MealManager();
+    //TODO: implement this, rework this class. //private static FoodManager fManager = new foodManager();
+
 
     //these are the root lists that everything syncs from
     //data = meals

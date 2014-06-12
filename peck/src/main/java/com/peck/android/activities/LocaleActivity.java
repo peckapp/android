@@ -45,7 +45,7 @@ public class LocaleActivity extends ActionBarActivity {
             }
         }.execute();
 
-        ((Button)findViewById(R.id.swapperbutton)).setOnClickListener(new View.OnClickListener() {
+        (findViewById(R.id.swapperbutton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
@@ -61,6 +61,11 @@ public class LocaleActivity extends ActionBarActivity {
             protected Locale doInBackground(Void... voids) {
                 LocaleManager.findClosest();
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Locale locale) {
+                super.onPostExecute(locale);
             }
         }.execute();
     }

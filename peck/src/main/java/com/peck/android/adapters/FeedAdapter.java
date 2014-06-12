@@ -6,22 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.peck.android.factories.GenericFactory;
+import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.interfaces.WithLocal;
 
 import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class FeedAdapter<model extends WithLocal & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<model> data = new ArrayList<model>();
+public abstract class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
+    private ArrayList<T> data = new ArrayList<T>();
     private Context context;
     private int resourceId;
 
-    public FeedAdapter(Context context, GenericFactory<model> factory) {
+    public FeedAdapter(Context context, Factory<T> factory) {
         this.context = context;
         this.resourceId = factory.generate().getResourceId();
     }
@@ -51,19 +51,18 @@ public abstract class FeedAdapter<model extends WithLocal & SelfSetup & HasFeedL
             view = inflater.inflate(resourceId, null);
         }
 
-        model res = (model)getItem(i);
+        T res = (T)getItem(i);
         res.setUp(view);
         return view;
     }
 
 
-
-    public FeedAdapter<model> removeCompleted() {
+    public FeedAdapter<T> removeCompleted() {
         //TODO: implement
         return this;
     }
 
-    public FeedAdapter<model> update(ArrayList<model> data) {
+    public FeedAdapter<T> update(ArrayList<T> data) {
         this.data = data;
         return this;
     }

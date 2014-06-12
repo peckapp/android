@@ -10,11 +10,12 @@ import com.peck.android.models.Event;
  */
 public class EventDataSource extends DataSource<Event> {
 
-    private Context context;
-    private EventOpenHelper dbHelper;
-
     public EventDataSource(Context context) {
         super(new EventOpenHelper(context));
     }
 
+    @Override
+    public Event generate() {
+        return new Event();
+    }
 }

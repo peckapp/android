@@ -12,22 +12,20 @@ import android.widget.ListView;
 import com.peck.android.PeckApp;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.DataSource;
-import com.peck.android.factories.GenericFactory;
+import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.interfaces.WithLocal;
 import com.peck.android.managers.ModelManager;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.CancellationException;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout> extends Fragment implements HasTabTag {
+public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment implements HasTabTag {
 
     //generics, in order:
     // T: model
@@ -48,7 +46,6 @@ public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout> 
         setUpAdapter();
         congfigureManager();
         //TODO: loading bar
-
 
         getActivity().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
 
@@ -116,8 +113,6 @@ public abstract class Feed<model extends WithLocal & SelfSetup & HasFeedLayout> 
     protected abstract Feed<model> setUpAdapter(); //set adapter and datasource
 
     protected abstract String tag();
-
-    protected abstract GenericFactory<model> getFactory(); //don't remove this method; it gets called in subclasses
 
     public abstract int getLayoutRes();
 

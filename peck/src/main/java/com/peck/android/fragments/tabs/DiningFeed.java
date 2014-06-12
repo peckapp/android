@@ -3,7 +3,6 @@ package com.peck.android.fragments.tabs;
 import com.peck.android.R;
 import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.database.source.MealDataSource;
-import com.peck.android.factories.MealFactory;
 import com.peck.android.managers.MealManager;
 import com.peck.android.models.Meal;
 
@@ -17,22 +16,20 @@ public class DiningFeed extends Feed<Meal> {
 
     public String tag() { return tag; }
 
-    public MealFactory getFactory() {
-        return new MealFactory();
-    }
-
     public int getTabTag() { //this method *is used*, don't delete
         return resId;
     }
 
     public DiningFeed setUpAdapter() {
-        if (feedAdapter == null) {
-            feedAdapter = new DiningFeedAdapter(getActivity(), getFactory());
-        }
 
         if (dataSource == null) {
             dataSource = new MealDataSource(getActivity());
         }
+
+        if (feedAdapter == null) {
+            feedAdapter = new DiningFeedAdapter(getActivity(), dataSource);
+        }
+
 
         return this;
     }

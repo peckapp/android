@@ -1,15 +1,18 @@
 package com.peck.android.models;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.view.View;
 
+import com.peck.android.PeckApp;
+import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.interfaces.WithLocal;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Food implements WithLocal, SelfSetup, HasFeedLayout {
+public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
     private int parentId;
@@ -92,4 +95,15 @@ public class Food implements WithLocal, SelfSetup, HasFeedLayout {
     public void setUp(View v) {
 
     }
+
+    @Override
+    public ContentValues toContentValues() {
+        return null;
+    }
+
+    @Override
+    public Food fromCursor(Cursor cursor) {
+        return null;
+    }
+
 }

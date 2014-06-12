@@ -1,11 +1,14 @@
 package com.peck.android.models;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.view.View;
 
 import com.peck.android.R;
+import com.peck.android.database.helper.MealOpenHelper;
+import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.interfaces.WithLocal;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,7 +16,7 @@ import java.util.Date;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
+public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     private int localId;
     private int serverId;
 
@@ -131,4 +134,31 @@ public class Meal implements WithLocal, SelfSetup, HasFeedLayout {
         return this;
     }
 
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues();
+        cv.put(MealOpenHelper.COLUMN_SERVER_ID, getServerId());
+        cv.put(MealOpenHelper.COLUMN_LOC_ID, getLocalId());
+        cv.put(MealOpenHelper.COLUMN_COLOR, getColor());
+        cv.put(MealOpenHelper.COLUMN_MEAL_TYPE, getType());
+        cv.put(MealOpenHelper.COLUMN_TITLE, getTitle());
+        cv.put(MealOpenHelper.COLUMN_TIME, getMealtime().getTime());
+        cv.put(MealOpenHelper.COLUMN_UPDATED, getUpdated().getTime());
+        cv.put(MealOpenHelper.COLUMN_LOCATION_ID, getLocation());
+
+        return cv;
+
+    }
+
+    @Override
+    public Meal fromCursor(Cursor cursor) {
+        return this.setServerId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_SERVER_ID)))
+                .setType(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_MEAL_TYPE)))
+                .setColor(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_COLOR)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_SERVER_ID)))
+                .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_TIME))))
+                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_UPDATED))))
+                .setLocalId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_LOC_ID)))
+                .setLocation(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_LOCATION_ID)))
+                .setTitle(cursor.getString(cursor.getColumnIndex(MealOpenHelper.COLUMN_TITLE)));
+    }
 }

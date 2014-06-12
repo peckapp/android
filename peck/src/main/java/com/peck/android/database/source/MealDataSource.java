@@ -13,5 +13,8 @@ public class MealDataSource extends DataSource<Meal> {
 
     public MealDataSource(Context context) { super(new MealOpenHelper(context)); }
 
-
+    @Override
+    public Meal generate() {
+        return new Meal();
+    }
 }
