@@ -19,5 +19,8 @@
     <string name="tb_circles">Circles</string>
     <string name="title_activity_locale">LocaleActivity</string>
     <string name="desc_iv_profile">Profile Picture</string>
+    <string name="tv_findLocale">Where are you?</string>
+    <string name="pb_working">Working</string>
+    <string name="pb_loc">Locating You</string>
 
 </resources>

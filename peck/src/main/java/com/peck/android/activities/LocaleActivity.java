@@ -1,36 +1,35 @@
 package com.peck.android.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.SparseArray;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
-import java.util.ArrayList;
-
 
 public class LocaleActivity extends ActionBarActivity {
     private Locale closest;
+    private boolean loaded;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //getSupportActionBar().hide();
 
         //TODO: sharedpreferences: check if user has picked a locale before
 
+        //load all locales into localemanager
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 setContentView(R.layout.activity_locale);
+                //start the progress tracker
+                findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -41,33 +40,57 @@ public class LocaleActivity extends ActionBarActivity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                notifyPopulated();
+                notifyMe();
             }
         }.execute();
 
-        (findViewById(R.id.swapperbutton)).setOnClickListener(new View.OnClickListener() {
+
+        //locate the user
+        new AsyncTask<Void, Void, Void>() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                startActivity(intent);
+            protected void onPreExecute() {
+                TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+                tv.setVisibility(View.VISIBLE);
+                tv.setText(R.string.pb_loc);
             }
-        });
 
-    }
-
-    private void notifyPopulated() {
-        new AsyncTask<Void, Void, Locale>() {
             @Override
-            protected Locale doInBackground(Void... voids) {
-                LocaleManager.findClosest();
+            protected Void doInBackground(Void... voids) {
+                LocaleManager.getLocation();
                 return null;
             }
 
             @Override
-            protected void onPostExecute(Locale locale) {
-                super.onPostExecute(locale);
+            protected void onPostExecute(Void aVoid) {
+                notifyMe();
             }
         }.execute();
+    }
+
+
+    private void notifyMe() {
+        if (loaded) {
+            new AsyncTask<Void, Void, Void>() {
+                TextView tv;
+                @Override
+                protected void onPreExecute() {
+                    tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+                    tv.setVisibility(View.VISIBLE);
+                    tv.setText(R.string.pb_loc);
+                }
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    LocaleManager.findClosest();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    tv.setVisibility(View.GONE);
+                }
+            }.execute();
+        } else loaded = true;
     }
 
 }
