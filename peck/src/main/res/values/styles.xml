@@ -5,4 +5,9 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <style name="lv_style">
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0px</item>
+    </style>
+
 </resources>
