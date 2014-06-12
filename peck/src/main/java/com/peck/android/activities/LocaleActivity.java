@@ -23,7 +23,7 @@ public class LocaleActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();
+        //getSupportActionBar().hide();
 
         //TODO: sharedpreferences: check if user has picked a locale before
 

@@ -1,10 +1,8 @@
 <resources>
     <style name="PeckTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-
-    </style>
-
-    <style name="PeckTheme.SlidingPanel">
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 </resources>

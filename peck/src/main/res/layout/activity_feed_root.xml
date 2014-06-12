@@ -4,8 +4,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:gravity="top"
-    android:paddingTop="?android:actionBarSize">
+    android:gravity="top">
     <!--action bar's in overlay mode, need to pad content down a distance equal to its height-->
 
 
@@ -20,6 +19,13 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/ll_tb_root">
+
+            <TabWidget
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@android:id/tabs">
+
+            </TabWidget>
 
             <FrameLayout
                 android:layout_width="0dp"
@@ -36,13 +42,7 @@
 
                 </FrameLayout>
 
-            <TabWidget
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@android:id/tabs">
 
-
-            </TabWidget>
 
         </LinearLayout>
 
