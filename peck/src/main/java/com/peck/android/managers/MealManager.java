@@ -2,9 +2,7 @@ package com.peck.android.managers;
 
 import android.os.AsyncTask;
 
-import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.MealOpenHelper;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.database.source.FoodDataSource;
 import com.peck.android.interfaces.Singleton;
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealManager extends ModelManager<Meal, MealOpenHelper> implements Singleton {
+public class MealManager extends ModelManager<Meal> implements Singleton {
     private static MealManager manager = new MealManager();
 
     //these are the root lists that everything syncs from
@@ -28,7 +26,7 @@ public class MealManager extends ModelManager<Meal, MealOpenHelper> implements S
     public static MealManager getManager() { return manager; }
 
     @Override
-    public MealManager initialize(FeedAdapter<Meal> adapter, DataSource<Meal, MealOpenHelper> dSource) {
+    public MealManager initialize(FeedAdapter<Meal> adapter, DataSource<Meal> dSource) {
         super.initialize(adapter, dSource);
         courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
         linkAll(adapter);

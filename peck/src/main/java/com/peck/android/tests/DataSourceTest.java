@@ -20,7 +20,7 @@ public class DataSourceTest extends AndroidTestCase {
     private final static String key = "key";
     private final static String TAG = "DataSourceTest";
 
-    private DataSource<Event, EventOpenHelper> dSource;
+    private DataSource<Event> dSource;
     private EventOpenHelper dbHelper;
 
     @Override
@@ -31,7 +31,7 @@ public class DataSourceTest extends AndroidTestCase {
             e.printStackTrace();
         }
         dbHelper = new EventOpenHelper(getContext());
-        dSource = new DataSource<Event, EventOpenHelper>(dbHelper);
+        dSource = new DataSource<Event>(dbHelper);
         assertPre();
     }
 

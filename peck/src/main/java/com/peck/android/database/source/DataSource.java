@@ -14,12 +14,12 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class DataSource<model extends WithLocal, helper extends DataSourceHelper<model>> {
+public class DataSource<model extends WithLocal> {
     private SQLiteDatabase database;
-    private helper dbHelper;
+    private DataSourceHelper<model> dbHelper;
     private static final String TAG = "datasource";
 
-    public DataSource(helper dbHelper) {
+    public DataSource(DataSourceHelper<model> dbHelper) {
         this.dbHelper = dbHelper;
         dbHelper.setDatasource(this);
     }

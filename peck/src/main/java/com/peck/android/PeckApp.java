@@ -25,8 +25,8 @@ public class PeckApp extends Application {
         public static class Database {
 
             public static final String DATABASE_NAME = "peck.db";
-            public final static int RETRY = 10;
-            public final static int UI_TIMEOUT = 20;
+            public final static int RETRY = 20;
+            public final static int UI_TIMEOUT = 50;
         }
 
     }

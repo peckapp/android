@@ -17,17 +17,16 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeedLayout,
-       helper extends DataSourceHelper<model>> {
+public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeedLayout> {
 
     //every modelmanager **must** implement a static version of getManager and be a singleton
 
     protected FeedAdapter<model> adapter;
     ArrayList<model> data = new ArrayList<model>();
-    protected DataSource<model, helper> dSource;
+    protected DataSource<model> dSource;
     public final static String tag = "ModelManager";
 
-    public static <V extends Singleton> ModelManager getModelManager(Class<V> clss) {
+    public static ModelManager getModelManager(Class<? extends Singleton> clss) {
         try {
             return (ModelManager)clss.getMethod("getManager", null).invoke(null, null); }
         catch (Exception e) {
@@ -41,7 +40,7 @@ public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeed
 
     }
 
-    public ModelManager<model, helper> initialize(FeedAdapter<model> adapter, DataSource<model, helper> dSource) {
+    public ModelManager<model> initialize(FeedAdapter<model> adapter, DataSource<model> dSource) {
         this.adapter = adapter;
         this.dSource = dSource;
 
@@ -54,8 +53,7 @@ public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeed
         return this;
     }
 
-    public <V extends WithLocal, G extends DataSourceHelper<V>>
-    ArrayList<V> loadFromDatabase(final DataSource<V, G> dataSource) {
+    public <V extends WithLocal> ArrayList<V> loadFromDatabase(final DataSource<V> dataSource) {
         //META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
         //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
@@ -88,7 +86,7 @@ public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeed
         return data;
     }
 
-    public ModelManager<model, helper> add(model item) {
+    public ModelManager<model> add(model item) {
         data.add(item);
         adapter.update(data);
         adapter.notifyDataSetChanged();

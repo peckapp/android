@@ -4,11 +4,12 @@ import android.content.Context;
 
 import com.peck.android.database.helper.EventOpenHelper;
 import com.peck.android.database.helper.LocaleOpenHelper;
+import com.peck.android.models.Locale;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleDataSource extends DataSource {
+public class LocaleDataSource extends DataSource<Locale> {
 
 
     private Context context;

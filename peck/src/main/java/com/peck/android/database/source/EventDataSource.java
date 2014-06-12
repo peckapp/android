@@ -8,7 +8,7 @@ import com.peck.android.models.Event;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class EventDataSource extends DataSource<Event, EventOpenHelper> {
+public class EventDataSource extends DataSource<Event> {
 
     private Context context;
     private EventOpenHelper dbHelper;

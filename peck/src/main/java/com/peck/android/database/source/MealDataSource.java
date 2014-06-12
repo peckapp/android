@@ -8,7 +8,7 @@ import com.peck.android.models.Meal;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealDataSource extends DataSource<Meal, MealOpenHelper> {
+public class MealDataSource extends DataSource<Meal> {
 
 
     public MealDataSource(Context context) { super(new MealOpenHelper(context)); }
