@@ -18,5 +18,6 @@
     <string name="tb_profile">Profile</string>
     <string name="tb_circles">Circles</string>
     <string name="title_activity_locale">LocaleActivity</string>
+    <string name="desc_iv_profile">Profile Picture</string>
 
 </resources>
