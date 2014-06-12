@@ -22,7 +22,7 @@ public class NewsFeed extends BaseEventFeed {
         super.onCreate(savedInstanceState);
 
         Event e;
-        for (int i = 1; i < 11; i++) {
+        for (int i = 1; i < 21; i++) {
             e = new Event();
             e.setServerId(i);
             e.setTitle("News Feed Item " + Integer.toString(i));

@@ -3,6 +3,7 @@ package com.peck.android.models;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.view.View;
+import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.database.helper.MealOpenHelper;
@@ -123,8 +124,9 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     @Override
-    public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
-
+    public void setUp(View v) {
+        ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
+        ((TextView)v.findViewById(R.id.tv_location)).setText(Integer.toString(getLocation()));
 
     }
 

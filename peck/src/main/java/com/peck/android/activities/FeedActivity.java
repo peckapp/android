@@ -29,7 +29,6 @@ public class FeedActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //getSupportActionBar().hide();
         setContentView(R.layout.activity_feed_root);
 
         FragmentTabHost tabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);

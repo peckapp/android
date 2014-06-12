@@ -21,7 +21,7 @@ import java.util.concurrent.CancellationException;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
+public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
 
     //generics, in order:
     // T: model
@@ -29,9 +29,9 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
     // V: datasource for model
     // Y: manager for model
 
-    protected FeedAdapter<model> feedAdapter;
-    protected DataSource<model> dataSource;
-    protected FeedManager<model> feedManager;
+    protected FeedAdapter<T> feedAdapter;
+    protected DataSource<T> dataSource;
+    protected FeedManager<T> feedManager;
     protected ListView lv;
 
 
@@ -57,28 +57,27 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        feedManager = ((FeedManager<model>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
-    }
-
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        return inflater.inflate(getLayoutRes(), container, false);
+        feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
     public void onResume() {
-        if (lv == null) assignListView();
+        if (lv == null) ((ListView)getActivity().findViewById(getListViewRes())).setAdapter(feedAdapter);;
         feedAdapter.removeCompleted();
         super.onResume();
     }
 
     public void assignListView() {
+        //lv = (ListView)getActivity().findViewById(getListViewRes());
+        //lv.setAdapter(feedAdapter);
         new AsyncTask<Void, Void, ListView>() {
             //when we create a view, check for the listview asynchronously
             ListView lv = (ListView)getActivity().findViewById(getListViewRes());
             @Override
             protected ListView doInBackground(Void... voids) {
                 long diff = System.nanoTime();
+                Log.d(tag(), "executing number " );
                 for (int i = 0; i < PeckApp.Constants.Database.RETRY && (lv == null); i++) {
+                    Log.d(tag(), "executing number " + i );
                     lv = (ListView)getActivity().findViewById(getListViewRes());
                     try {
                         Thread.sleep(PeckApp.Constants.Database.UI_TIMEOUT);
@@ -93,6 +92,7 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
             protected void onPostExecute(ListView listView) {
 
                 listView.setAdapter(feedAdapter);
+                feedAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -102,11 +102,11 @@ public abstract class Feed<model extends DBOperable & SelfSetup & HasFeedLayout>
                         Float.toString(((float)PeckApp.Constants.Database.RETRY)*((float)PeckApp.Constants.Database.UI_TIMEOUT)/((float)1000)) + " seconds.");
             }
 
-        }.execute();
+        };
 
     }
 
-    protected abstract Feed<model> setUpAdapter(); //set adapter and datasource
+    protected abstract Feed<T> setUpAdapter(); //set adapter and datasource
     public abstract int getListViewRes();
 
 }
