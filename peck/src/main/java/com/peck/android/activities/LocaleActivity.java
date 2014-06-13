@@ -28,7 +28,7 @@ public class LocaleActivity extends FragmentActivity {
         setContentView(R.layout.activity_locale);
 
         //TODO: sharedpreferences: check if user has picked a locale before
-
+        //TODO: check if google play services are enabled, skip all of this if they're not
     }
 
     @Override
@@ -119,6 +119,8 @@ public class LocaleActivity extends FragmentActivity {
                     trans.add(R.id.rl_loc_select, new LocaleSelectionFeed());
                     trans.commit();
                     getSupportFragmentManager().executePendingTransactions();
+
+
 
                     LocaleManager.getManager().add(closest);
                 }
