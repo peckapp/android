@@ -14,22 +14,25 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
 
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="120dp"
+        android:layout_marginBottom="120dp"
+        android:layout_marginRight="50dp"
+        android:id="@+id/rl_loc_select">
+
+    </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/rl_locale"
         android:visibility="visible">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="120dp"
-            android:layout_marginBottom="120dp"
-            android:layout_marginRight="50dp"
-            android:id="@+id/rl_loc_select">
 
-        </RelativeLayout>
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

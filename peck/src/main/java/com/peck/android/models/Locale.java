@@ -17,7 +17,7 @@ import com.peck.android.interfaces.SelfSetup;
  */
 public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
-    private final static int resId = R.layout.frag_locale_select;
+    private final static int resId = R.layout.frag_locale;
 
     private int localId;
     private int serverId;
@@ -101,7 +101,7 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public void setUp(View v) {
-        ((TextView)v.findViewById(R.id.tv_locale_name)).setText(name);
+        ((TextView)v.findViewById(R.id.tv_locale_name)).setText(toString());
     }
 
     @Override

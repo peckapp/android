@@ -94,7 +94,7 @@ public class LocaleActivity extends FragmentActivity {
 
     private void notifyMe() {
         if (loaded) {
-            Log.d(TAG, "notified twice");
+            //Log.d(TAG, "notified twice");
             new AsyncTask<Void, Void, Void>() {
                 TextView tv;
                 @Override
@@ -125,7 +125,6 @@ public class LocaleActivity extends FragmentActivity {
             }.execute();
         } else {
             loaded = true;
-            Log.d(TAG, "notified once");
         }
     }
 
