@@ -26,6 +26,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private static ArrayList<Locale> locales = new ArrayList<Locale>();
     private static Location location;
     private static LocationClient client;
+    private static Locale locale;
 
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
 
@@ -104,6 +105,16 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     }
 
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public LocaleManager setLocale(Locale l) {
+        locale = l;
+        return this;
+    }
+
+
     public static LocaleManager stopLocationServices() {
         client.disconnect();
         return manager;
@@ -122,7 +133,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         //TEST, TODO
         Locale l;
         Location lo;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 40; i++) {
             lo = new Location("test");
             lo.setLongitude((double) i * 9);
             lo.setLatitude((double)i*6);
@@ -161,6 +172,10 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return ret;
     }
 
+
+    public static ArrayList<Locale> returnAll() {
+        return locales;
+    }
 
 
 

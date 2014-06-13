@@ -9,5 +9,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/lv_locale_select"
         android:layout_gravity="center_horizontal"
-        android:headerDividersEnabled="false" />
+        android:divider="@null"
+        android:dividerHeight="0px"
+        android:headerDividersEnabled="false"
+        android:overScrollMode="never"
+        android:scrollbars="none"/>
 </LinearLayout>

@@ -1,11 +1,14 @@
 package com.peck.android.activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.peck.android.R;
@@ -18,6 +21,7 @@ public class LocaleActivity extends FragmentActivity {
     private Locale closest;
     private boolean loaded = false;
     private static final String TAG = "LocaleActivity";
+    private LocaleSelectionFeed lsf = new LocaleSelectionFeed();
 
 
     @Override
@@ -116,13 +120,28 @@ public class LocaleActivity extends FragmentActivity {
                     findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
                     FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-                    trans.add(R.id.rl_loc_select, new LocaleSelectionFeed());
+                    trans.add(R.id.rl_loc_select, lsf);
                     trans.commit();
                     getSupportFragmentManager().executePendingTransactions();
 
+                    for (Locale l : LocaleManager.returnAll()) {
+                        LocaleManager.getManager().add(l);
+                    }
+
+                    ((ListView)findViewById(new LocaleSelectionFeed().getListViewRes())).setOnItemClickListener(
+                            new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                    LocaleManager.getManager().setLocale((Locale) lsf.getAdapter().getItem(i));
+                                    Log.d(getClass().getName(),
+                                            (lsf.getAdapter().getItem(i)).toString());
+                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                    );
 
 
-                    LocaleManager.getManager().add(closest);
                 }
             }.execute();
         } else {

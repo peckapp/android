@@ -63,7 +63,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
                 adapter.notifyDataSetChanged();
             }
         }.execute();
-        return items;
+        return items; //TODO: doesn't work, because the method's async.
     }
 
     public ArrayList<T> downloadFromServer() {

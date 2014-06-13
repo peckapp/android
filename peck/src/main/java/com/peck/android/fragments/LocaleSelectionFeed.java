@@ -1,11 +1,16 @@
 package com.peck.android.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.peck.android.R;
+import com.peck.android.activities.FeedActivity;
 import com.peck.android.adapters.EventFeedAdapter;
 import com.peck.android.adapters.LocaleSelectAdapter;
 import com.peck.android.database.source.EventDataSource;
@@ -24,6 +29,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
     }
 
@@ -44,6 +50,8 @@ public class LocaleSelectionFeed extends Feed<Locale> {
 
         return this;
     }
+
+
 
     @Override
     public int getListViewRes() {

@@ -3,6 +3,7 @@ package com.peck.android.fragments;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.widget.ListView;
 
@@ -71,45 +72,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
         super.onResume();
     }
 
-    public void assignListView() {
-        //lv = (ListView)getActivity().findViewById(getListViewRes());
-        //lv.setAdapter(feedAdapter);
-        new AsyncTask<Void, Void, ListView>() {
-            //when we create a view, check for the listview asynchronously
-            ListView lv = (ListView)getActivity().findViewById(getListViewRes());
-            @Override
-            protected ListView doInBackground(Void... voids) {
-                long diff = System.nanoTime();
-                Log.d(tag(), "executing number " );
-                for (int i = 0; i < PeckApp.Constants.Database.RETRY && (lv == null); i++) {
-                    Log.d(tag(), "executing number " + i );
-                    lv = (ListView)getActivity().findViewById(getListViewRes());
-                    try {
-                        Thread.sleep(PeckApp.Constants.Database.UI_TIMEOUT);
-                    } catch (InterruptedException e) { Log.e(tag(), "thread was interrupted"); }
-                    if (lv == null) cancel(false); //if we can't get the listview, throw an exception
-                }
-                Log.d(tag(), "Completed in " + (System.nanoTime() - diff) + " ns.");
-                return lv;
-            }
-
-            @Override
-            protected void onPostExecute(ListView listView) {
-
-                listView.setAdapter(feedAdapter);
-                feedAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            protected void onCancelled(ListView listView) {
-                super.onCancelled();
-                throw new CancellationException("Couldn't find the listview.\nTried " + PeckApp.Constants.Database.RETRY + " times over a duration of " +
-                        Float.toString(((float)PeckApp.Constants.Database.RETRY)*((float)PeckApp.Constants.Database.UI_TIMEOUT)/((float)1000)) + " seconds.");
-            }
-
-        };
-
-    }
+    public FeedAdapter<T> getAdapter() { return feedAdapter; }
 
     protected abstract Feed<T> setUpFeed(); //set adapter and datasource
     public abstract int getListViewRes();
