@@ -6,13 +6,12 @@ import com.peck.android.R;
 import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.database.source.MealDataSource;
 import com.peck.android.managers.MealManager;
-import com.peck.android.models.Event;
 import com.peck.android.models.Meal;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class DiningFeed extends Feed<Meal> {
+public class DiningFeed extends TabFeed<Meal> {
     private final static String tag = "DiningFeed";
     private final static int tabId = R.string.tb_diningfeed;
     private final static int lvId = R.id.lv_dining;

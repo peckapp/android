@@ -16,10 +16,21 @@ public class Locale extends DBOperable {
     private int serverId;
     private String name;
     private Location location;
+    private double dist; //don't add to database
 
     public Location getLocation() {
         return location;
     }
+
+    public double getDist() {
+        return dist;
+    }
+
+    public Locale calcDist(Location l) {
+        dist = Math.sqrt(Math.pow((l.getLongitude() - getLocation().getLongitude()), 2) + Math.pow((l.getLatitude() - getLocation().getLatitude()), 2));
+        return this;
+    }
+
 
     public Locale setLocation(Location location) {
         this.location = location;
@@ -74,5 +85,9 @@ public class Locale extends DBOperable {
                 .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_SV_ID)))
                 .setName(cursor.getString(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_NAME)))
                 .setLocation(t);
+    }
+
+    public String toString() {
+        return name + " @ [" + getLocation().getLatitude() + ", " + getLocation().getLongitude() + "]";
     }
 }

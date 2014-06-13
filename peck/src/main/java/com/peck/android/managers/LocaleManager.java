@@ -6,6 +6,7 @@ import android.content.IntentSender;
 import android.location.GpsSatellite;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,9 +25,11 @@ import java.util.ArrayList;
 public class LocaleManager extends Manager<Locale> implements Singleton, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
     private static LocaleManager localeManager = new LocaleManager();
     private static LocaleActivity activity;
-    private static ArrayList<Locale> locales;
+    private static ArrayList<Locale> locales = new ArrayList<Locale>();
     private static Location location;
     private static LocationClient client;
+
+    private static final int RESOLUTION_REQUEST_FAILURE = 9000;
 
     public static LocaleManager getLocaleManager() {
         return localeManager;
@@ -35,14 +38,20 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
     public static LocaleManager initialize(LocaleActivity act) {
         client = new LocationClient(act, localeManager, localeManager);
         activity = act;
+        getLocation();
         return localeManager;
     }
 
 
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
+
+        //TEST
         Toast.makeText(activity, "Connected", Toast.LENGTH_SHORT).show();
 
+
+        location = client.getLastLocation();
+        Log.d(tag, location.toString());
     }
 
     /*
@@ -52,7 +61,8 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
     @Override
     public void onDisconnected() {
         // Display the connection status
-        Toast.makeText(activity, "Disconnected. Please re-connect.",
+        //location = client.getLastLocation();
+        Toast.makeText(activity, "Disconnected from location services. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -72,8 +82,8 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(
-                        this,
-                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                        activity,
+                        RESOLUTION_REQUEST_FAILURE);
                 /*
                  * Thrown if Google Play services canceled the original
                  * PendingIntent
@@ -87,7 +97,8 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
              * If no resolution is available, display a dialog to the
              * user with the error.
              */
-            showErrorDialog(connectionResult.getErrorCode());
+            //activity.showErrorDialog(connectionResult.getErrorCode());
+            Toast.makeText(activity, connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -95,29 +106,47 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
 
     }
 
-    public static LocaleManager update() {
-        return localeManager;
-    }
-
     public static LocaleManager stopLocationServices() {
         client.disconnect();
         return localeManager;
     }
 
-    public static Location getLocation() {
-        return null;
-
-    }
-
-    public static LocaleManager populate() {
+    public static LocaleManager getLocation() {
+        if (!client.isConnected() || client.isConnecting()) {
+            client.connect();
+        }
 
 
         return localeManager;
     }
 
-    public static Locale findClosest() {
+    public static LocaleManager populate() {
+        //TEST, TODO
+        Locale l;
+        Location lo;
+        for (int i = 0; i < 10; i++) {
+            lo = new Location("test");
+            lo.setLongitude((double) i * 9);
+            lo.setLatitude((double)i*6);
+            l = new Locale().setLocalId(i).setLocation(lo).setName(Integer.toString(i));
+            locales.add(l);
+        }
 
-        return null;
+        Log.d(tag, locales.toString());
+        return localeManager;
+    }
+
+    public static Locale findClosest() {
+        double dist = locales.get(0).calcDist(location).getDist();
+        Locale ret = new Locale();
+        for (Locale l : locales) {
+            if (l.calcDist(location).getDist() < dist) {
+                dist = l.getDist();
+                ret = l;
+            }
+        }
+
+        return ret;
     }
 
 

@@ -8,7 +8,7 @@ import com.peck.android.models.Event;
  * Created by mammothbane on 6/10/2014.
  */
 
-public abstract class BaseEventFeed extends Feed<Event> {
+public abstract class BaseEventFeed extends TabFeed<Event> {
 
     protected BaseEventFeed setUpAdapter() {
 

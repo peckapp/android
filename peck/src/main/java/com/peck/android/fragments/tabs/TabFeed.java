@@ -3,9 +3,6 @@ package com.peck.android.fragments.tabs;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.peck.android.PeckApp;
@@ -21,7 +18,7 @@ import java.util.concurrent.CancellationException;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
+public abstract class TabFeed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
 
     //generics, in order:
     // T: model
@@ -106,7 +103,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     }
 
-    protected abstract Feed<T> setUpAdapter(); //set adapter and datasource
+    protected abstract TabFeed<T> setUpAdapter(); //set adapter and datasource
     public abstract int getListViewRes();
 
 }

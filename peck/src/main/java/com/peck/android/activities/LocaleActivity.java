@@ -3,18 +3,23 @@ package com.peck.android.activities;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
+import com.peck.android.fragments.LocaleSelectionFragment;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
 
-public class LocaleActivity extends ActionBarActivity {
+public class LocaleActivity extends FragmentActivity {
     private Locale closest;
-    private boolean loaded;
+    private boolean loaded = false;
+    private static final String TAG = "LocaleActivity";
 
 
     @Override
@@ -25,7 +30,6 @@ public class LocaleActivity extends ActionBarActivity {
         setContentView(R.layout.activity_locale);
 
         //TODO: sharedpreferences: check if user has picked a locale before
-
 
     }
 
@@ -81,18 +85,18 @@ public class LocaleActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
         LocaleManager.stopLocationServices();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocaleManager.update();
+        LocaleManager.getLocation();
     }
 
 
     private void notifyMe() {
         if (loaded) {
+            Log.d(TAG, "notified twice");
             new AsyncTask<Void, Void, Void>() {
                 TextView tv;
                 @Override
@@ -104,16 +108,22 @@ public class LocaleActivity extends ActionBarActivity {
 
                 @Override
                 protected Void doInBackground(Void... voids) {
-                    LocaleManager.findClosest();
+                    closest = LocaleManager.findClosest();
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
                     tv.setVisibility(View.GONE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+                    trans.attach(new LocaleSelectionFragment());
                 }
             }.execute();
-        } else loaded = true;
+        } else {
+            loaded = true;
+            Log.d(TAG, "notified once");
+        }
     }
 
 }

@@ -32,6 +32,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         this.adapter = adapter;
         this.dSource = dSource;
 
+        //TODO: call localemanager for locale update
+
         data = loadFromDatabase(dSource);
 
         downloadFromServer();//TODO: server communication and sync happens here
