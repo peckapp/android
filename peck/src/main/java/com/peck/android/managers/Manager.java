@@ -16,9 +16,9 @@ public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
 
-    public static FeedManager getManager(Class<? extends Singleton> clss) {
+    public static Manager getManager(Class<? extends Singleton> clss) {
         try {
-            return (FeedManager)clss.getMethod("getManager", null).invoke(null, null); }
+            return (Manager)clss.getMethod("getManager", null).invoke(null, null); }
         catch (Exception e) {
             Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
             e.printStackTrace();

@@ -1,9 +1,6 @@
 package com.peck.android.managers;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.IntentSender;
-import android.location.GpsSatellite;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +9,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
+import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
@@ -22,8 +20,8 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleManager extends Manager<Locale> implements Singleton, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
-    private static LocaleManager localeManager = new LocaleManager();
+public class LocaleManager extends FeedManager<Locale> implements Singleton, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+    private static LocaleManager manager = new LocaleManager();
     private static LocaleActivity activity;
     private static ArrayList<Locale> locales = new ArrayList<Locale>();
     private static Location location;
@@ -31,15 +29,15 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
 
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
 
-    public static LocaleManager getLocaleManager() {
-        return localeManager;
+    public static LocaleManager getManager() {
+        return manager;
     }
 
     public static LocaleManager initialize(LocaleActivity act) {
-        client = new LocationClient(act, localeManager, localeManager);
+        client = new LocationClient(act, manager, manager);
         activity = act;
         getLocation();
-        return localeManager;
+        return manager;
     }
 
 
@@ -108,7 +106,7 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
 
     public static LocaleManager stopLocationServices() {
         client.disconnect();
-        return localeManager;
+        return manager;
     }
 
     public static LocaleManager getLocation() {
@@ -117,7 +115,7 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
         }
 
 
-        return localeManager;
+        return manager;
     }
 
     public static LocaleManager populate() {
@@ -132,19 +130,33 @@ public class LocaleManager extends Manager<Locale> implements Singleton, GoogleP
             locales.add(l);
         }
 
+        lo = new Location("test");
+        lo.setLongitude(-73.11);
+        lo.setLatitude(42.702);
+        Log.d(tag, lo.toString());
+        l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
+        locales.add(l);
+
         Log.d(tag, locales.toString());
-        return localeManager;
+        return manager;
     }
 
     public static Locale findClosest() {
-        double dist = locales.get(0).calcDist(location).getDist();
-        Locale ret = new Locale();
+        for (int i = 0; location == null; i++) {
+            try { Thread.sleep(300); } catch (InterruptedException e) { e.printStackTrace(); }
+            Log.d(tag, "[" + i + "] waiting for location, still null");
+        }
+        Locale ret = locales.get(0);
+        double dist = ret.calcDist(location).getDist();
+
         for (Locale l : locales) {
             if (l.calcDist(location).getDist() < dist) {
                 dist = l.getDist();
                 ret = l;
             }
         }
+
+        Log.d(tag, "closest: " + ret.toString());
 
         return ret;
     }

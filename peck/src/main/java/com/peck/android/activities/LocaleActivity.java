@@ -1,17 +1,15 @@
 package com.peck.android.activities;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.fragments.LocaleSelectionFragment;
+import com.peck.android.fragments.LocaleSelectionFeed;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
@@ -116,8 +114,13 @@ public class LocaleActivity extends FragmentActivity {
                 protected void onPostExecute(Void aVoid) {
                     tv.setVisibility(View.GONE);
                     findViewById(R.id.rl_locale).setVisibility(View.GONE);
+
                     FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-                    trans.attach(new LocaleSelectionFragment());
+                    trans.add(R.id.rl_loc_select, new LocaleSelectionFeed());
+                    trans.commit();
+                    getSupportFragmentManager().executePendingTransactions();
+
+                    LocaleManager.getManager().add(closest);
                 }
             }.execute();
         } else {

@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
 import com.peck.android.R;
+import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.Circles;
 import com.peck.android.fragments.tabs.DiningFeed;
 import com.peck.android.fragments.tabs.EventFeed;
@@ -18,7 +19,7 @@ public class FeedActivity extends ActionBarActivity {
 
     private final static String TAG = "FeedActivity";
 
-    private final static HasTabTag[] tabs = {
+    private final static BaseTab[] tabs = {
             new EventFeed(),
             new NewsFeed(),
             new DiningFeed(),

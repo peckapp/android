@@ -3,14 +3,21 @@ package com.peck.android.models;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.location.Location;
+import android.view.View;
+import android.widget.TextView;
 
+import com.peck.android.R;
 import com.peck.android.database.helper.LocaleOpenHelper;
 import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.SelfSetup;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class Locale extends DBOperable {
+public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
+
+    private final static int resId = R.layout.frag_locale_select;
 
     private int localId;
     private int serverId;
@@ -88,6 +95,17 @@ public class Locale extends DBOperable {
     }
 
     public String toString() {
-        return name + " @ [" + getLocation().getLatitude() + ", " + getLocation().getLongitude() + "]";
+        String ret = (name == null) ? "" : name;
+        return ret + " @ [" + getLocation().getLatitude() + ", " + getLocation().getLongitude() + "]";
+    }
+
+    @Override
+    public void setUp(View v) {
+        ((TextView)v.findViewById(R.id.tv_locale_name)).setText(name);
+    }
+
+    @Override
+    public int getResourceId() {
+        return resId;
     }
 }

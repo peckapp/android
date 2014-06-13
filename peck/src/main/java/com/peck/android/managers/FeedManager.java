@@ -32,8 +32,6 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         this.adapter = adapter;
         this.dSource = dSource;
 
-        //TODO: call localemanager for locale update
-
         data = loadFromDatabase(dSource);
 
         downloadFromServer();//TODO: server communication and sync happens here
@@ -73,9 +71,19 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
-    public FeedManager<T> add(T item) {
+    public FeedManager<T> add(T item) { //use for a single item
         data.add(item);
-        //dSource.create(item);
+        //TODO: dSource.create(item);
+        adapter.update(data);
+        adapter.notifyDataSetChanged();
+        return this;
+    }
+
+    public FeedManager<T> add(ArrayList<T> items) {
+        for (T i : items) {
+            data.add(i);
+            //TODO: dSource.create
+        }
         adapter.update(data);
         adapter.notifyDataSetChanged();
         return this;

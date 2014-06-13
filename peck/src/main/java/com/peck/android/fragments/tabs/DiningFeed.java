@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.peck.android.R;
 import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.database.source.MealDataSource;
+import com.peck.android.fragments.Feed;
 import com.peck.android.managers.MealManager;
 import com.peck.android.models.Meal;
 
@@ -37,7 +38,7 @@ public class DiningFeed extends TabFeed<Meal> {
 
     }
 
-    public DiningFeed setUpAdapter() {
+    public DiningFeed setUpFeed() {
 
         if (dataSource == null) {
             dataSource = new MealDataSource(getActivity());
