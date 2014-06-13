@@ -21,13 +21,22 @@ public class LocaleActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        LocaleManager.initialize(this);
+        setContentView(R.layout.activity_locale);
+
         //TODO: sharedpreferences: check if user has picked a locale before
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         //load all locales into localemanager
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
-                setContentView(R.layout.activity_locale);
                 //start the progress tracker
                 findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
             }
@@ -65,6 +74,20 @@ public class LocaleActivity extends ActionBarActivity {
                 notifyMe();
             }
         }.execute();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocaleManager.stopLocationServices();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocaleManager.update();
     }
 
 
