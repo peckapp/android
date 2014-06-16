@@ -38,19 +38,10 @@ public class FeedActivity extends PeckActivity {
         edit.clear();
         edit.commit();
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed_root);
-
-        FragmentTabHost tabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
-        tabHost.setup(this, getSupportFragmentManager(), R.id.realcontent);
-
-        String k;
-        for (HasTabTag i : tabs) {
-            k = getResources().getString(i.getTabTag());
-            tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i.getClass(), null);
-        }
-
         //TODO: swap tabs for buttons
+
+
+
 
 
     }
