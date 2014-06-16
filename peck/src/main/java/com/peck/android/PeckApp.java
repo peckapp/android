@@ -31,6 +31,14 @@ public class PeckApp extends Application {
             public final static int UI_TIMEOUT = 50;
         }
 
+        public static class Location {
+
+            public final static int INTERVAL = 300;
+            public final static int RETRY = 33;
+
+        }
+
+
     }
 
 

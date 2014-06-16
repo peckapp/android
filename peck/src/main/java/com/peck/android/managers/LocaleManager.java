@@ -182,24 +182,33 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-    public static Locale findClosest() {
-        for (int i = 0; location == null; i++) {
-            try { Thread.sleep(300); } catch (InterruptedException e) { e.printStackTrace(); }
-            Log.d(tag, "[" + i + "] waiting for location, still null");
-        }
-        Locale ret = locales.get(0);
-        double dist = ret.calcDist(location).getDist();
+    public static Locale calcDistances() {
+        for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
+            if (location == null) {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d(tag, "[" + i + "] waiting for location, still null");
+            } else {
+                Locale ret = locales.get(0);
+                double dist = ret.calcDist(location).getDist();
 
-        for (Locale l : locales) {
-            if (l.calcDist(location).getDist() < dist) {
-                dist = l.getDist();
-                ret = l;
+                for (Locale l : locales) {
+                    if (l.calcDist(location).getDist() < dist) {
+                        dist = l.getDist();
+                        ret = l;
+                    }
+                }
+
+                Log.d(tag, "closest: " + ret.toString());
+
+                return ret; //return the closest item
             }
         }
+        return null;
 
-        Log.d(tag, "closest: " + ret.toString());
-
-        return ret;
     }
 
 

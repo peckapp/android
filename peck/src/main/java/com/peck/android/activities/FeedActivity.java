@@ -42,12 +42,6 @@ public class FeedActivity extends PeckActivity {
         edit.clear();
         edit.commit();
 
-
-        if (LocaleManager.getManager().getLocale(new LocaleDataSource(this), this) == null) {
-            Intent intent = new Intent(this, LocaleActivity.class);
-            startActivity(intent);
-        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_root);
 
@@ -60,11 +54,17 @@ public class FeedActivity extends PeckActivity {
             tabHost.addTab(tabHost.newTabSpec(k).setIndicator(k), i.getClass(), null);
         }
 
-        //TODO: tabHost.setOnTabChangedListener
+        //TODO: swap tabs for buttons
 
 
     }
 
-
-
+    @Override
+    protected void onResume() {
+        if (LocaleManager.getManager().getLocale(new LocaleDataSource(this), this) == null) {
+            Intent intent = new Intent(this, LocaleActivity.class);
+            startActivity(intent);
+        }
+        super.onResume();
+    }
 }

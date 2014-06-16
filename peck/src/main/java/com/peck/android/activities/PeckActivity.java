@@ -14,6 +14,7 @@ public abstract class PeckActivity extends FragmentActivity {
         //set application theme here
 
 
+
         super.onCreate(savedInstanceState);
     }
 }
