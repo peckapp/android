@@ -6,7 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.peck.android.database.helper.DataSourceHelper;
-import com.peck.android.interfaces.WithLocal;
+import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.Factory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,12 +15,12 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class DataSource<model extends WithLocal, helper extends DataSourceHelper<model>> {
+public abstract class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
-    private helper dbHelper;
+    private DataSourceHelper<T> dbHelper;
     private static final String TAG = "datasource";
 
-    public DataSource(helper dbHelper) {
+    public DataSource(DataSourceHelper<T> dbHelper) {
         this.dbHelper = dbHelper;
         dbHelper.setDatasource(this);
     }
@@ -33,37 +34,41 @@ public class DataSource<model extends WithLocal, helper extends DataSourceHelper
     }
 
 
-    public model create(ContentValues contentValues) {
+    public T create(T t) {
+        ContentValues contentValues = t.toContentValues();
+
+        Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
+        Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
+
         long insertId = database.insert(dbHelper.getTableName(), null, contentValues);
         Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
                 dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
-        model newModel = dbHelper.createFromCursor(cursor);
+        T newT = (T) generate().fromCursor(cursor);
         cursor.close();
-        return newModel;
+        return newT;
     }
     
-    public void update(ContentValues values, int id){
-
+    public void update(T t){
         database.update(dbHelper.getTableName(),
-                values,
+                t.toContentValues(),
                 dbHelper.getColLocId() + " = ?",
-                new String[]{String.valueOf(id)});
+                new String[]{String.valueOf(t.getLocalId())});
     }
 
-    public void delete(model model) {
-        long id = model.getLocalId();
-        Log.d(TAG, model.getClass() + " deleted with id: " + id);
+    public void delete(T T) {
+        long id = T.getLocalId();
+        Log.d(TAG, T.getClass() + " deleted with id: " + id);
         database.delete(dbHelper.getTableName(), dbHelper.getColLocId()
                 + " = " + id, null);
     }
 
-    public ArrayList<model> getAll() {
-        ArrayList<model> ret = new ArrayList<model>();
+    public ArrayList<T> getAll() {
+        ArrayList<T> ret = new ArrayList<T>();
         Cursor cursor = database.query(dbHelper.getTableName(),
                 dbHelper.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            model obj = dbHelper.createFromCursor(cursor);
+            T obj = (T) generate().fromCursor(cursor);
             ret.add(obj);
             cursor.moveToNext();
         }
@@ -72,12 +77,12 @@ public class DataSource<model extends WithLocal, helper extends DataSourceHelper
         return ret;
     }
 
-    public void getAll(ArrayList<model> ret) {
+    public void getAll(ArrayList<T> ret) {
         Cursor cursor = database.query(dbHelper.getTableName(),
                 dbHelper.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            model obj = dbHelper.createFromCursor(cursor);
+            T obj = (T) generate().fromCursor(cursor);
             ret.add(obj);
             cursor.moveToNext();
         }
@@ -85,6 +90,14 @@ public class DataSource<model extends WithLocal, helper extends DataSourceHelper
         cursor.close();
 
     }
+
+    public T get(int id) {
+        Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(), dbHelper.getColLocId() + " = " + id, null, null, null, null);
+        return (T)generate().fromCursor(cursor);
+    }
+
+    
+    public abstract T generate();
 
 
 }

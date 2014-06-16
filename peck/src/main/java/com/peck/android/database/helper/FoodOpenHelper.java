@@ -52,17 +52,6 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
 
     public FoodOpenHelper() { super(); }
 
-    //TODO: implement this method
-    public Food createFromCursor(Cursor cursor) { //does not link to meal
-        Food f = new Food();
-        cursor.moveToFirst();
-        return f.setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)))
-                .setText(cursor.getString(cursor.getColumnIndex(COLUMN_TEXT)))
-                .setMealId(cursor.getInt(cursor.getColumnIndex(COLUMN_MEAL_ID)))
-                .setType(cursor.getInt(cursor.getColumnIndex(COLUMN_TYPE)));
-    }
 
 
     public String getColLocId() {

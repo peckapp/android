@@ -8,7 +8,7 @@ import com.peck.android.models.Food;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class FoodDataSource extends DataSource<Food, FoodOpenHelper> {
+public class FoodDataSource extends DataSource<Food> {
 
     public FoodDataSource(Context context) {
 
@@ -16,4 +16,8 @@ public class FoodDataSource extends DataSource<Food, FoodOpenHelper> {
 
     }
 
+    @Override
+    public Food generate() {
+        return new Food();
+    }
 }

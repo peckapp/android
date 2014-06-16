@@ -7,16 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
+import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.managers.ProfileManager;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Circles extends Fragment implements BaseTab {
+public class ProfileTab extends Fragment implements BaseTab {
 
-    private static final String tag = "Circles";
-    private static final int tagId = R.string.tb_circles;
-    private static final int resId = R.layout.frag_circles;
+    private static final int tabId = R.string.tb_profile;
+    private static final int resId = R.layout.frag_profile;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,24 +27,17 @@ public class Circles extends Fragment implements BaseTab {
     }
 
     public int getTabTag() {
-        return tagId;
+        return tabId;
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_circles, container, false);
+        return inflater.inflate(R.layout.frag_profile, container, false);
     }
-
-
-    //    @Override
-//    public int getLayoutRes() {
-//        return resId;
-//    }
-
-
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
-        return null;
+        return ProfileManager.class;
     }
 }

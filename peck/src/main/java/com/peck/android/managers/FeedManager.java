@@ -4,12 +4,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.DataSourceHelper;
 import com.peck.android.database.source.DataSource;
+import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.interfaces.WithLocal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,45 +16,32 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeedLayout,
-       helper extends DataSourceHelper<model>> {
+public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayout> extends Manager<T> {
 
-    //every modelmanager **must** implement a static version of getManager and be a singleton
+    //every FeedManager **must** implement a static version of getManager/be a singleton
 
-    protected FeedAdapter<model> adapter;
-    ArrayList<model> data = new ArrayList<model>();
-    protected DataSource<model, helper> dSource;
-    public final static String tag = "ModelManager";
+    protected FeedAdapter<T> adapter;
 
-    public static <V extends Singleton> ModelManager getModelManager(Class<V> clss) {
-        try {
-            return (ModelManager)clss.getMethod("getManager", null).invoke(null, null); }
-        catch (Exception e) {
-            Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
-            e.printStackTrace();
-            return null;
-        }
-    }
+    public final static String tag = "FeedManager";
 
-    ModelManager() {
+    FeedManager() {
 
     }
 
-    public ModelManager<model, helper> initialize(FeedAdapter<model> adapter, DataSource<model, helper> dSource) {
+    public FeedManager<T> initialize(FeedAdapter<T> adapter, DataSource<T> dSource) {
         this.adapter = adapter;
         this.dSource = dSource;
 
         data = loadFromDatabase(dSource);
 
-        downloadFromServer();//TODO: server communication and project sync happens here
+        downloadFromServer();//TODO: server communication and sync happens here
 
         adapter.update(data);
 
         return this;
     }
 
-    public <V extends WithLocal, G extends DataSourceHelper<V>>
-    ArrayList<V> loadFromDatabase(final DataSource<V, G> dataSource) {
+    public <V extends DBOperable> ArrayList<V> loadFromDatabase(final DataSource<V> dataSource) {
         //META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
         //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
@@ -77,23 +63,33 @@ public abstract class ModelManager<model extends WithLocal & SelfSetup & HasFeed
                 adapter.notifyDataSetChanged();
             }
         }.execute();
-        return items;
+        return items; //TODO: doesn't work, because the method's async.
     }
 
-    public ArrayList<model> downloadFromServer() {
+    public ArrayList<T> downloadFromServer() {
         return null; //TODO: implement
     }
 
-    public ArrayList<model> getData() {
-        return data;
-    }
 
-    public ModelManager<model, helper> add(model item) {
+    public FeedManager<T> add(T item) { //use for a single item
         data.add(item);
+        //TODO: dSource.create(item);
         adapter.update(data);
         adapter.notifyDataSetChanged();
         return this;
     }
+
+    public FeedManager<T> add(ArrayList<T> items) {
+        for (T i : items) {
+            data.add(i);
+            //TODO: dSource.create
+        }
+        adapter.update(data);
+        adapter.notifyDataSetChanged();
+        return this;
+    }
+
+
 
 
 }

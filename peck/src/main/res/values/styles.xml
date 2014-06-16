@@ -1,5 +1,14 @@
 <resources>
     <style name="PeckTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
 
     </style>
+
+    <style name="lv_style">
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0px</item>
+    </style>
+
 </resources>

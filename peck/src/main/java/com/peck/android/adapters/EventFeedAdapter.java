@@ -2,10 +2,7 @@ package com.peck.android.adapters;
 
 import android.content.Context;
 
-import com.peck.android.database.helper.EventOpenHelper;
-import com.peck.android.factories.EventFactory;
-import com.peck.android.managers.EventManager;
-import com.peck.android.managers.ModelManager;
+import com.peck.android.interfaces.Factory;
 import com.peck.android.models.Event;
 
 /**
@@ -13,7 +10,8 @@ import com.peck.android.models.Event;
  */
 public class EventFeedAdapter extends FeedAdapter<Event> {
 
-    public EventFeedAdapter(Context context, EventFactory factory) {
+    public EventFeedAdapter(Context context, Factory<Event> factory) {
         super(context, factory);
     }
+
 }

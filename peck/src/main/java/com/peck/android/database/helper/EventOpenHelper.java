@@ -56,41 +56,6 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 //        super(context);
 //    }
 
-
-    public void update(Event e) { //TODO: finish this
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_SERVER_ID, e.getLocalId());
-        values.put(COLUMN_COLOR, e.getColor());
-        values.put(COLUMN_TITLE, e.getTitle());
-        dataSource.update(values, e.getLocalId());
-    }
-
-    public Event create(String title, String text, int color, int serverId, Date created, Date updated) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_SERVER_ID, serverId);
-        values.put(COLUMN_COLOR, color);
-        values.put(COLUMN_TITLE, title);
-        values.put(COLUMN_CREATED, created.getTime());
-        values.put(COLUMN_UPDATED, updated.getTime());
-        values.put(COLUMN_HIDDEN, 0);
-        values.put(COLUMN_TEXT, text);
-
-        return dataSource.create(values);
-    }
-
-    public Event createFromCursor(Cursor cursor) {
-        Event e = new Event();
-        cursor.moveToFirst();
-
-        return e.setLocalId(cursor.getInt(cursor.getColumnIndex(getColLocId())))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(COLUMN_SERVER_ID)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(COLUMN_COLOR)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_UPDATED))))
-                .setText(cursor.getString(cursor.getColumnIndex(COLUMN_TEXT)));
-    }
-
     public String getTableName() {
         return TABLE_NAME;
     }

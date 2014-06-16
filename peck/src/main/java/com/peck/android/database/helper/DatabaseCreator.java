@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
+import com.peck.android.managers.LocaleManager;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -18,11 +19,12 @@ public class DatabaseCreator extends SQLiteOpenHelper {
     //do *not* use these database helpers to access the database; they don't set up fully
             new EventOpenHelper(),
             new FoodOpenHelper(),
-            new MealOpenHelper()
+            new MealOpenHelper(),
+            new LocaleOpenHelper()
     };
 
     public static String getDbName() {
-        return PeckApp.Constants.DATABASE_NAME;
+        return PeckApp.Constants.Database.DATABASE_NAME;
     }
 
     public static int getDbVersion() {
@@ -35,7 +37,7 @@ public class DatabaseCreator extends SQLiteOpenHelper {
     }
 
     private DatabaseCreator(Context context) {
-        super(context, PeckApp.Constants.DATABASE_NAME, null, version);
+        super(context, PeckApp.Constants.Database.DATABASE_NAME, null, version);
     }
 
     @Override
