@@ -1,54 +1,51 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:gravity="top">
-    <!--action bar's in overlay mode, need to pad content down a distance equal to its height-->
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bar_height"
+        android:background="@color/main_purple"
+        android:orientation="horizontal"
+        android:id="@+id/ll_moving">
 
 
-    <android.support.v4.app.FragmentTabHost
+        <Button
+            android:id="@+id/bt_peck"
+            android:text="[pecks]"
+            style="@style/bt_feed" />
+
+        <Button
+            android:id="@+id/bt_newsfeed"
+            android:text="[news feed]"
+            style="@style/bt_feed" />
+
+        <Button
+            android:id="@+id/bt_add"
+            android:text="[+]"
+            style="@style/bt_feed" />
+
+        <Button
+            android:id="@+id/bt_circles"
+            android:text="[circles]"
+            style="@style/bt_feed" />
+        <Button
+            android:id="@+id/bt_profile"
+            android:text="[profile]"
+            style="@style/bt_feed" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@android:id/tabhost"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/ll_tb_root">
-
-            <TabWidget
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@android:id/tabs">
-
-            </TabWidget>
-
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:id="@android:id/tabcontent">
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:id="@+id/realcontent"
-                android:layout_weight="1">
-
-                </FrameLayout>
-
+        android:id="@+id/ll_feed_content">
 
 
         </LinearLayout>
 
-
-    </android.support.v4.app.FragmentTabHost>
-
-
-
-</RelativeLayout>
+</LinearLayout>
