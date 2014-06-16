@@ -132,7 +132,7 @@ public class LocaleActivity extends FragmentActivity {
                     if (b) trans.attach(lsf);
                     else trans.add(R.id.rl_loc_select, lsf, fragmentTag);
 
-                    trans.commit();
+                    trans.commitAllowingStateLoss();
                     getSupportFragmentManager().executePendingTransactions();
 
                     for (Locale l : LocaleManager.returnAll()) {

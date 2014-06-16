@@ -29,7 +29,7 @@ public class LoginActivity extends FragmentActivity {
         FragmentTransaction transact = getSupportFragmentManager().beginTransaction(); //put the login button fragment
 
         transact.add(R.id.ll_bt_login, new LoginFragment(), LoginFragment.buildTag());
-        transact.commit();
+        transact.commitAllowingStateLoss();
 
         LoginManager.getLoginManager().initialize(this);
     }
@@ -42,7 +42,7 @@ public class LoginActivity extends FragmentActivity {
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
         trans.replace(id, fragment);
         trans.addToBackStack(null);
-        trans.commit();
+        trans.commitAllowingStateLoss();
     }
 
     public void setLoginState() { //set the login state
