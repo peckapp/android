@@ -12,7 +12,7 @@ import com.peck.android.interfaces.Singleton;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Circles extends Fragment implements BaseTab {
+public class CirclesTab extends Fragment implements BaseTab {
 
     private static final String tag = "Circles";
     private static final int tagId = R.string.tb_circles;
