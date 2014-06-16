@@ -2,7 +2,6 @@ package com.peck.android.fragments.tabs;
 
 import com.peck.android.adapters.EventFeedAdapter;
 import com.peck.android.database.source.EventDataSource;
-import com.peck.android.fragments.Feed;
 import com.peck.android.models.Event;
 
 /**
@@ -11,7 +10,7 @@ import com.peck.android.models.Event;
 
 public abstract class BaseEventFeed extends TabFeed<Event> {
 
-    protected BaseEventFeed setUpFeed() {
+    public BaseEventFeed setUpFeed() {
 
         if (dataSource == null) {
             dataSource = new EventDataSource(getActivity());

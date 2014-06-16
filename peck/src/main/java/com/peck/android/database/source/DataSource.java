@@ -90,6 +90,12 @@ public abstract class DataSource<T extends DBOperable> implements Factory<T> {
         cursor.close();
 
     }
+
+    public T get(int id) {
+        Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(), dbHelper.getColLocId() + " = " + id, null, null, null, null);
+        return (T)generate().fromCursor(cursor);
+    }
+
     
     public abstract T generate();
 

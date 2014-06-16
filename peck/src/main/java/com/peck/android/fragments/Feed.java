@@ -1,5 +1,6 @@
 package com.peck.android.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -29,20 +30,16 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     protected FeedAdapter<T> feedAdapter;
     protected DataSource<T> dataSource;
     protected FeedManager<T> feedManager;
-    protected ListView lv;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setUpFeed();
-        Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
+        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
         congfigureManager();
         super.onCreate(savedInstanceState);
 
 
         //TODO: loading bar
-
-        getActivity().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
 
     }
 
@@ -73,21 +70,16 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     public void onResume() {
-        Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
-        Log.d(tag(), "activity " + ((getActivity() == null) ? "null" : "not null"));
+        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
+        //Log.d(tag(), "activity " + ((getActivity() == null) ? "null" : "not null"));
         super.onResume();
         //assign();
         feedAdapter.removeCompleted();
     }
 
-    public Feed<T> assign() {
-        if (lv == null) ((ListView)getActivity().findViewById(getListViewRes())).setAdapter(feedAdapter);
-        return this;
-    }
-
     public FeedAdapter<T> getAdapter() { return feedAdapter; }
 
-    protected abstract Feed<T> setUpFeed(); //set adapter and datasource
+    public abstract Feed<T> setUpFeed(); //set adapter and datasource
     public abstract int getListViewRes();
     public abstract int getLayoutRes();
 

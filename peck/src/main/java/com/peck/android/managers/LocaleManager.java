@@ -1,6 +1,9 @@
 package com.peck.android.managers;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,9 +14,12 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
+import com.peck.android.database.source.DataSource;
+import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -28,6 +34,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private static LocationClient client;
     private static Locale locale;
 
+    private static final String LOCALE_ID = "locale local id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
 
     public static LocaleManager getManager() {
@@ -41,16 +48,15 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
 
         //TEST
-        Toast.makeText(activity, "Connected", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(activity, "Connected", Toast.LENGTH_SHORT).show();
 
 
         location = client.getLastLocation();
-        Log.d(tag, location.toString());
+        //Log.d(tag, location.toString());
     }
 
     /*
@@ -97,6 +103,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
              * user with the error.
              */
             //activity.showErrorDialog(connectionResult.getErrorCode());
+            //TODO: dialog
             Toast.makeText(activity, connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -105,12 +112,34 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     }
 
-    public Locale getLocale() {
-        return locale;
+    public Locale getLocale() throws NullPointerException {
+        return getLocale(dSource, activity);
+    }
+
+    public Locale getLocale(DataSource<Locale> dataSource, Activity act) {
+        if (locale != null) return locale;
+        else {
+            int i = act.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, 0);
+            if (i == 0) return null;
+            else {
+                try {
+                    dataSource.open();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                Locale ret = dataSource.get(i);
+                dataSource.close();
+                return ret;
+            }
+        }
     }
 
     public LocaleManager setLocale(Locale l) {
         locale = l;
+        SharedPreferences.Editor spEdit = activity.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).edit();
+        spEdit.putInt(LOCALE_ID, l.getLocalId());
+        spEdit.commit();
+
         return this;
     }
 
@@ -130,9 +159,10 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     public static LocaleManager populate() {
-        //TEST, TODO
+        //TEST, TODO: database
         Locale l;
         Location lo;
+
         for (int i = 0; i < 40; i++) {
             lo = new Location("test");
             lo.setLongitude((double) i * 9);

@@ -74,7 +74,6 @@ public class LocaleActivity extends FragmentActivity {
             }
         }.execute();
 
-        //TODO: sharedpreferences: check if user has picked a locale before
         //TODO: check if google play services are enabled, skip all of this if they're not
     }
 
@@ -147,8 +146,9 @@ public class LocaleActivity extends FragmentActivity {
                                     LocaleManager.getManager().setLocale((Locale) lsf.getAdapter().getItem(i));
                                     Log.d(getClass().getName(),
                                             (lsf.getAdapter().getItem(i)).toString());
-                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                                    startActivity(intent);
+//                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+//                                    startActivity(intent);
+                                    finish();
                                 }
                             }
                     );

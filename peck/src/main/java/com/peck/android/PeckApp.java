@@ -10,6 +10,8 @@ import com.android.volley.toolbox.Volley;
  */
 public class PeckApp extends Application {
 
+    public final static String USER_PREFS = "user preferences";
+
     public static class Constants {
 
         public static class Food {
