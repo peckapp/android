@@ -17,7 +17,7 @@ import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
 
-public class LocaleActivity extends FragmentActivity {
+public class LocaleActivity extends PeckActivity {
     private Locale closest;
     private boolean loaded = false;
     private static final String TAG = "LocaleActivity";

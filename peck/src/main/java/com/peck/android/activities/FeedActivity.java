@@ -21,7 +21,7 @@ import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
-public class FeedActivity extends ActionBarActivity {
+public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
 

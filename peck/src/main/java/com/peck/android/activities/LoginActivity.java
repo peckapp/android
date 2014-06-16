@@ -16,7 +16,7 @@ import com.peck.android.fragments.LoginFragment;
 import com.peck.android.managers.LoginManager;
 
 
-public class LoginActivity extends FragmentActivity {
+public class LoginActivity extends PeckActivity {
 
     private static final String TAG = "LoginActivity";
     private Bundle savedInstanceState;
