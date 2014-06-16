@@ -22,5 +22,7 @@
     <string name="tv_findLocale">Where are you?</string>
     <string name="pb_working">Working</string>
     <string name="pb_loc">Locating You</string>
+    <string name="tb_newpost">New Post</string>
+    <string name="tb_pecks">Pecks</string>
 
 </resources>

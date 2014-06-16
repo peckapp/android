@@ -20,7 +20,8 @@ public class DatabaseCreator extends SQLiteOpenHelper {
             new EventOpenHelper(),
             new FoodOpenHelper(),
             new MealOpenHelper(),
-            new LocaleOpenHelper()
+            new LocaleOpenHelper(),
+            new PeckOpenHelper()
     };
 
     public static String getDbName() {
