@@ -61,10 +61,10 @@ public class FeedActivity extends PeckActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         if (LocaleManager.getManager().getLocale(new LocaleDataSource(this), this) == null) {
             Intent intent = new Intent(this, LocaleActivity.class);
             startActivity(intent);
         }
-        super.onResume();
     }
 }
