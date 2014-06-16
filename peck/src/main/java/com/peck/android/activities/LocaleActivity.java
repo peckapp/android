@@ -97,6 +97,10 @@ public class LocaleActivity extends FragmentActivity {
         LocaleManager.getLocation();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+    }
 
     private void notifyMe() {
         if (loaded) {
