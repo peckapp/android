@@ -21,11 +21,13 @@
 
         <activity
             android:name=".activities.LoginActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".activities.FeedActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +35,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.LocaleActivity" >
+            android:name=".activities.LocaleActivity"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
