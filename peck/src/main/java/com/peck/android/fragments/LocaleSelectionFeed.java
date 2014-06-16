@@ -33,9 +33,9 @@ public class LocaleSelectionFeed extends Feed<Locale> {
 
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_locale_select, container, false);
-    }
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+//        return inflater.inflate(R.layout.frag_locale_select, container, false);
+//    }
 
 
     @Override
@@ -58,6 +58,10 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         return lvRes;
     }
 
+    @Override
+    public int getLayoutRes() {
+        return R.layout.frag_locale_select;
+    }
 
     @Override
     public Class<? extends Singleton> getManagerClass() {

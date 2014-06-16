@@ -38,6 +38,7 @@ public class DiningFeed extends TabFeed<Meal> {
 
     }
 
+
     public DiningFeed setUpFeed() {
 
         if (dataSource == null) {

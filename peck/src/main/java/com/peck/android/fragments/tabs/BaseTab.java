@@ -13,9 +13,8 @@ import com.peck.android.interfaces.Singleton;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public interface BaseTab extends HasTabTag, HasManager{
+public interface BaseTab extends HasTabTag, HasManager {
 
-    public abstract int getLayoutRes();
 
 
 }

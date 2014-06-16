@@ -2,6 +2,9 @@ package com.peck.android.fragments.tabs;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.peck.android.R;
 import com.peck.android.interfaces.HasTabTag;
@@ -27,9 +30,10 @@ public class ProfileTab extends Fragment implements BaseTab {
         return tabId;
     }
 
+
     @Override
-    public int getLayoutRes() {
-        return resId;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.frag_profile, container, false);
     }
 
     @Override

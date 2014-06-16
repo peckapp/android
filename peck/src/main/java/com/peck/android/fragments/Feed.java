@@ -1,10 +1,11 @@
 package com.peck.android.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.peck.android.PeckApp;
@@ -15,8 +16,6 @@ import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.FeedManager;
-
-import java.util.concurrent.CancellationException;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -35,6 +34,9 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        setUpFeed();
+        Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
+        congfigureManager();
         super.onCreate(savedInstanceState);
 
 
@@ -47,8 +49,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     public void onStart() {
         super.onStart();
-        setUpFeed();
-        congfigureManager();
+
     }
 
     /**
@@ -64,18 +65,31 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
         feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
-
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(getLayoutRes(), container, false);
+        ((ListView)v.findViewById(getListViewRes())).setAdapter(feedAdapter);
+        return v;
+    }
 
     public void onResume() {
-        if (lv == null) ((ListView)getActivity().findViewById(getListViewRes())).setAdapter(feedAdapter);;
-        feedAdapter.removeCompleted();
+        Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
+        Log.d(tag(), "activity " + ((getActivity() == null) ? "null" : "not null"));
         super.onResume();
+        //assign();
+        feedAdapter.removeCompleted();
+    }
+
+    public Feed<T> assign() {
+        if (lv == null) ((ListView)getActivity().findViewById(getListViewRes())).setAdapter(feedAdapter);
+        return this;
     }
 
     public FeedAdapter<T> getAdapter() { return feedAdapter; }
 
     protected abstract Feed<T> setUpFeed(); //set adapter and datasource
     public abstract int getListViewRes();
+    public abstract int getLayoutRes();
 
 }
 

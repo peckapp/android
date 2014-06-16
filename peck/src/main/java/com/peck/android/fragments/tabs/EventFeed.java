@@ -33,6 +33,8 @@ public class EventFeed extends BaseEventFeed {
 
     }
 
+
+
     public int getLayoutRes() {
         return resId;
     }

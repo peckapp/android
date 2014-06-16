@@ -22,6 +22,7 @@ public class LocaleActivity extends FragmentActivity {
     private boolean loaded = false;
     private static final String TAG = "LocaleActivity";
     private LocaleSelectionFeed lsf = new LocaleSelectionFeed();
+    private static final String fragmentTag = "locale selection feed";
 
 
     @Override
@@ -30,14 +31,6 @@ public class LocaleActivity extends FragmentActivity {
 
         LocaleManager.initialize(this);
         setContentView(R.layout.activity_locale);
-
-        //TODO: sharedpreferences: check if user has picked a locale before
-        //TODO: check if google play services are enabled, skip all of this if they're not
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         //load all locales into localemanager
         new AsyncTask<Void, Void, Void>() {
@@ -81,6 +74,16 @@ public class LocaleActivity extends FragmentActivity {
             }
         }.execute();
 
+        //TODO: sharedpreferences: check if user has picked a locale before
+        //TODO: check if google play services are enabled, skip all of this if they're not
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+
     }
 
     @Override
@@ -119,8 +122,17 @@ public class LocaleActivity extends FragmentActivity {
                     tv.setVisibility(View.GONE);
                     findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
+                    boolean b = false;
+
                     FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-                    trans.add(R.id.rl_loc_select, lsf);
+
+                    try {
+                        if (getSupportFragmentManager().findFragmentByTag(fragmentTag) != null) b = true; }
+                    catch ( Exception e ) { }
+
+                    if (b) trans.attach(lsf);
+                    else trans.add(R.id.rl_loc_select, lsf, fragmentTag);
+
                     trans.commit();
                     getSupportFragmentManager().executePendingTransactions();
 
