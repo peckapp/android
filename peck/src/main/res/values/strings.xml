@@ -26,5 +26,15 @@
     <string name="pb_loc">Locating You</string>
     <string name="tb_newpost">New Post</string>
     <string name="tb_pecks">Pecks</string>
+    <string name="newPost">New Post</string>
+
+    <string name="tb_event">Event</string>
+    <string name="tb_message">Message</string>
+    <string name="tb_photo">Photo</string>
+
+    <string name="bt_share">select shares</string>
+    
+    <string name="ht_np_title">title</string>
+
 
 </resources>

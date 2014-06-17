@@ -7,9 +7,6 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/lv_pecks">
-
-        </ListView>
-
+        android:id="@+id/lv_pecks"/>
 
 </LinearLayout>

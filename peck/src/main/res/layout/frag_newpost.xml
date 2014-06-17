@@ -4,11 +4,80 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
+
+    <TabHost
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/tabHost">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bt_share"
+                android:id="@+id/bt_share"
+                android:layout_gravity="center_horizontal"
+                android:singleLine="true"
+                android:layout_marginTop="50dp"
+                android:layout_below="@android:id/tabs"
+                android:layout_centerHorizontal="true" /> <!-- todo: add share arrow -->
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@android:id/tabs">
+
+                <LinearLayout
+                    android:id="@+id/tb_events"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical">
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tb_message"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical">
+
+
+                    </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tb_photo"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical">
+
+
+                    </LinearLayout>
+            </FrameLayout>
+
+        </RelativeLayout>
+    </TabHost>
+
+    <EditText
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
-        android:id="@+id/textView"
-        android:layout_gravity="center_horizontal" />
+        android:id="@+id/et_post_title"
+        android:layout_gravity="center_horizontal"
+        android:inputType="text"
+        android:singleLine="true"
+        android:hint="@string/newPost" />
+
+
 </LinearLayout>

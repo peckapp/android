@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <ImageView
             android:layout_width="match_parent"
             android:layout_gravity="center_horizontal"
@@ -26,24 +27,19 @@
             android:text="Full Name"/>
 
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="unix"
-                android:id="@+id/et_unix" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="unix"
+            android:id="@+id/et_unix"
+            android:inputType="textEmailAddress"
+            android:singleLine="true" />
 
         <com.facebook.widget.LoginButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Link to Facebook"
             android:id="@+id/bt_fb_link"
             android:layout_gravity="center_horizontal" />
-
-
-        <!-- test -->
-
-
-
 
 
     </LinearLayout>

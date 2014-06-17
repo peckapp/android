@@ -1,10 +1,13 @@
 package com.peck.android.fragments.tabs;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.accessibility.AccessibilityManagerCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
 import com.peck.android.R;
 import com.peck.android.interfaces.HasTabTag;
@@ -23,6 +26,16 @@ public class ProfileTab extends Fragment implements BaseTab {
     public void onCreate(Bundle savedInstanceState) {
         //TODO: set onclicklisteners for list items
         super.onCreate(savedInstanceState);
+
+//        final AccessibilityManager accessibilityManager = (AccessibilityManager)getActivity().getSystemService(Context.ACCESSIBILITY_SERVICE);
+//        accessibilityManager.addAccessibilityStateChangeListener(new AccessibilityManager.AccessibilityStateChangeListener() {
+//            @Override
+//            public void onAccessibilityStateChanged(boolean b) {
+//
+//            }
+//        });
+
+
 
     }
 
