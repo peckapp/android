@@ -11,5 +11,6 @@
     <dimen name="feed_horz_margin">16dp</dimen>
     <dimen name="bar_height">100dp</dimen>
     <dimen name="new_bar_height">70dp</dimen>
+    <dimen name="bt_post_height">60dp</dimen>
 
 </resources>

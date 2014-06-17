@@ -28,9 +28,9 @@
     <string name="tb_pecks">Pecks</string>
     <string name="newPost">New Post</string>
 
-    <string name="tb_event">Event</string>
-    <string name="tb_message">Message</string>
-    <string name="tb_photo">Photo</string>
+    <string name="bt_event">Event</string>
+    <string name="bt_message">Message</string>
+    <string name="bt_photo">Photo</string>
 
     <string name="bt_share">select shares</string>
     
