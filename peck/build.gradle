@@ -25,4 +25,5 @@ dependencies {
     compile 'com.android.support:support-v4:19.1.0'
     compile 'com.google.android.gms:play-services:4.4.52'
     compile project(':facebook')
+    compile project(':pullToRefreshListView')
 }

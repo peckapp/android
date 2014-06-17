@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.facebook.Session;
+import com.facebook.SessionState;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.source.LocaleDataSource;
@@ -82,7 +84,6 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
         switch (requestCode) {
             case RESULT_OK: {
                 switch (resultCode){
-                case RESULT_LOAD_IMAGE
 
 
                 }

@@ -1,2 +1,1 @@
-include ':peck', ':facebook'
-include ':pullToRefreshListView'
+include ':peck', ':facebook', ':pullToRefreshListView'
