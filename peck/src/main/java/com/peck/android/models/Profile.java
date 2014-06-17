@@ -24,11 +24,6 @@ public class Profile extends DBOperable implements SelfSetup {
     }
 
     @Override
-    public int getLocalId() {
-        return 0;
-    }
-
-    @Override
     public ContentValues toContentValues() {
         return null;
     }

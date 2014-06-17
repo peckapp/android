@@ -18,7 +18,6 @@ import java.util.Date;
  * Created by mammothbane on 6/10/2014.
  */
 public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int localId;
     private int serverId;
 
     private int color;
@@ -59,10 +58,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     private ArrayList<Food> courses;
-
-    public int getLocalId() {
-        return localId;
-    }
 
     public Meal setLocalId(int id) {
         this.localId = id;

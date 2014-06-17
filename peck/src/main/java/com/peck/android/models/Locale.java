@@ -19,7 +19,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     private final static int resId = R.layout.frag_locale;
 
-    private int localId;
     private int serverId;
     private String name;
     private Location location;
@@ -60,10 +59,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     public Locale setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public int getLocalId() {
-        return localId;
     }
 
     public Locale setLocalId(int id) {
