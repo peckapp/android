@@ -12,7 +12,7 @@ import com.peck.android.interfaces.SelfSetup;
  */
 public class Profile extends DBOperable implements SelfSetup {
 
-    //todo: extend user
+    //todo: extend user?
 
     //todo: implement inherited methods
 
@@ -20,7 +20,6 @@ public class Profile extends DBOperable implements SelfSetup {
     @Override
     public void setUp(View v) {
         //if
-
 
     }
 

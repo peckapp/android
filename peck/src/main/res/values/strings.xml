@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Peck</string>
-    <string name="app_id">5</string> <!-- set this to get facebook to work -->
+    <string name="app_id">291944037642057</string> <!-- set this to get facebook to work -->
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

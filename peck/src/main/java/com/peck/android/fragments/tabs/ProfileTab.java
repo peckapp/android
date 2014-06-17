@@ -35,8 +35,6 @@ public class ProfileTab extends Fragment implements BaseTab {
 //            }
 //        });
 
-
-
     }
 
     public int getTabTag() {

@@ -76,6 +76,28 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RESULT_OK: {
+                switch (resultCode){
+                case RESULT_LOAD_IMAGE
+
+
+                }
+
+                break;
+            }
+            default: {
+                break;
+            }
+
+        }
+
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (LocaleManager.getManager().getLocale(new LocaleDataSource(this), this) == null) {
