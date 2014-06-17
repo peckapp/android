@@ -29,6 +29,7 @@ import com.facebook.internal.ImageRequest;
 import com.facebook.internal.ImageResponse;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
+import com.facebook.widget.ProfilePictureView;
 import com.peck.android.R;
 import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.Singleton;
@@ -45,6 +46,8 @@ public class ProfileTab extends Fragment implements BaseTab {
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.frag_profile;
     private UiLifecycleHelper lifecycleHelper;
+    private TextView tv;
+    private ProfilePictureView ppv;
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
@@ -70,14 +73,6 @@ public class ProfileTab extends Fragment implements BaseTab {
         lifecycleHelper = new UiLifecycleHelper(getActivity(), callback);
         lifecycleHelper.onCreate(savedInstanceState);
 
-//        final AccessibilityManager accessibilityManager = (AccessibilityManager)getActivity().getSystemService(Context.ACCESSIBILITY_SERVICE);
-//        accessibilityManager.addAccessibilityStateChangeListener(new AccessibilityManager.AccessibilityStateChangeListener() {
-//            @Override
-//            public void onAccessibilityStateChanged(boolean b) {
-//
-//            }
-//        });
-
     }
 
     @Override
@@ -91,28 +86,7 @@ public class ProfileTab extends Fragment implements BaseTab {
                         @Override
                         public void onCompleted(final GraphUser user, Response response) {
                             updateUserName(user.getName());
-
-
-                            new AsyncTask<Void, Void, Void>() {
-                                URL img_value = null;
-                                Bitmap img = null;
-
-                                @Override
-                                protected Void doInBackground(Void... voids) {
-                                    try {
-                                        img_value = new URL("https://graph.facebook.com/" + user.getId() + "/picture?type=large");
-                                        img = BitmapFactory.decodeStream(img_value.openConnection().getInputStream());
-                                    } catch (Exception e) {
-                                        Log.e(getClass().getName(), e.toString());
-                                    }
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    updateProfilePicture(img);
-                                }
-                            }.execute();
+                            ppv.setProfileId(user.getId());
                         }
                     }
             ).executeAsync();
@@ -161,19 +135,22 @@ public class ProfileTab extends Fragment implements BaseTab {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
+        tv = (TextView)view.findViewById(R.id.tv_realname);
+        ppv = (ProfilePictureView)view.findViewById(R.id.ppv);
+        ppv.setCropped(true);
+        ppv.setPresetSize(ProfilePictureView.NORMAL);
+        //todo: do ppv.setdefault to a cached imagage
 
         return view;
     }
 
     private void updateUserName(String s) {
-        ((TextView)getActivity().findViewById(R.id.tv_realname)).setText(s);
+        tv.setText(s);
 
         //todo: update stored username
     }
 
     private void updateProfilePicture(Bitmap bm) {
-        ImageView iv = ((ImageView)getActivity().findViewById(R.id.iv_profile));
-        iv.setImageBitmap(bm);
 
         //todo: update stored profile picture
     }
