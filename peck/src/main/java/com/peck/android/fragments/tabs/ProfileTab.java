@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
 import com.facebook.Session;
+import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.LoginButton;
 import com.peck.android.R;
 import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.interfaces.Singleton;
@@ -101,7 +103,10 @@ public class ProfileTab extends Fragment implements BaseTab {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_profile, container, false);
+        View view = inflater.inflate(R.layout.frag_profile, container, false);
+        LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
+        authButton.setFragment(this);
+        return view;
     }
 
     @Override
