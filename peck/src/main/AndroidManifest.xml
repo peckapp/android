@@ -16,6 +16,11 @@
         android:theme="@style/PeckTheme" >
 
         <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/app_id"
+            />
+
+        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
@@ -24,6 +29,11 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait">
         </activity>
+
+        <activity android:name="com.facebook.LoginActivity"
+            android:screenOrientation="portrait"
+            />
+
         <activity
             android:name=".activities.FeedActivity"
             android:label="@string/app_name"
