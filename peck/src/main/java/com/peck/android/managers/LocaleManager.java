@@ -104,7 +104,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
              */
             //activity.showErrorDialog(connectionResult.getErrorCode());
             //TODO: dialog
-            Toast.makeText(activity, connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(activity, connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
         }
     }
 

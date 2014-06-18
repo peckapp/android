@@ -135,6 +135,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
 
             if (tempfrag != f) {
                 FragmentTransaction ft = fm.beginTransaction();
+                ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
                 if (tempfrag != null) {
                     ft.detach(tempfrag);
                 }
@@ -144,7 +145,6 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
                     ft.attach(f);
                 }
                 ft.commit();
-                //todo: ui update the selected button
             }
         }
     }
