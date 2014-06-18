@@ -59,7 +59,7 @@ public class DiningFragment extends FeedTab<Meal> {
     }
 
     public int getLayoutRes() {
-        return R.layout.frag_diningfeed;
+        return R.layout.tab_diningfeed;
     }
 
     public int getListViewRes() {

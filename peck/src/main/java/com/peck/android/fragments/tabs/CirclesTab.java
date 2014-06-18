@@ -16,7 +16,7 @@ public class CirclesTab extends Fragment implements BaseTab {
 
     private static final String tag = "Circles";
     private static final int tagId = R.string.tb_circles;
-    private static final int resId = R.layout.frag_circles;
+    private static final int resId = R.layout.tab_circles;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class CirclesTab extends Fragment implements BaseTab {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_circles, container, false);
+        return inflater.inflate(R.layout.tab_circles, container, false);
     }
 
 

@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.database.helper.EventOpenHelper;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.models.postItems.Post;
@@ -91,7 +90,7 @@ public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
 
     @Override
     public int getResourceId() { //TODO: implement, create layout
-        return R.layout.frag_event;
+        return R.layout.lvitem_event;
     }
 
 

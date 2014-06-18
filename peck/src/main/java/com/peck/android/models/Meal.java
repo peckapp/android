@@ -115,7 +115,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public int getResourceId() { //TODO: implement, create layout
-        return R.layout.frag_meal;
+        return R.layout.lvitem_meal;
     }
 
     @Override

@@ -97,7 +97,7 @@ public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public int getResourceId()
     {
-        return R.layout.frag_peck;
+        return R.layout.lvitem_peck;
     }
 
     @Override

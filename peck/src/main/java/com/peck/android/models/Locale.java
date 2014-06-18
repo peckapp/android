@@ -17,7 +17,7 @@ import com.peck.android.interfaces.SelfSetup;
  */
 public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
-    private final static int resId = R.layout.frag_locale;
+    private final static int resId = R.layout.lvitem_locale;
 
     private int serverId;
     private String name;

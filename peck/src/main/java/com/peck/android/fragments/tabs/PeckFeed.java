@@ -3,14 +3,11 @@ package com.peck.android.fragments.tabs;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.DiningFeedAdapter;
 import com.peck.android.adapters.PeckFeedAdapter;
-import com.peck.android.database.source.MealDataSource;
 import com.peck.android.database.source.PeckDataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
-import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 
 /**
@@ -54,7 +51,7 @@ public class PeckFeed extends FeedTab<Peck> {
 
     @Override
     public int getLayoutRes() {
-        return R.layout.frag_peckfeed;
+        return R.layout.tab_peckfeed;
     }
 
     @Override

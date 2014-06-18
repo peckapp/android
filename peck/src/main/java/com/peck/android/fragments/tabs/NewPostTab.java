@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ import java.util.HashMap;
  */
 public class NewPostTab extends Fragment implements BaseTab {
 
-    private final static HashMap<Integer, Integer> buttonIds = new HashMap<Integer, Integer>(3);
+    private final static HashMap<Integer, Integer> buttonIds = new HashMap<Integer, Integer>(3); //don't use a sparsearray, we need the keys
 
     static {
         buttonIds.put(R.id.bt_event, R.layout.pst_event);
@@ -31,7 +30,7 @@ public class NewPostTab extends Fragment implements BaseTab {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.frag_newpost, container, false);
+        View v = inflater.inflate(R.layout.tab_newpost, container, false);
 
         Bundle b;
         SimpleFragment frag;
