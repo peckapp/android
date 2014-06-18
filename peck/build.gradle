@@ -26,4 +26,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.4.52'
     compile project(':facebook')
     compile project(':pullToRefreshListView')
+    compile project(':androidHorizontalListView')
 }
