@@ -25,6 +25,17 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
     private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_COLOR, COLUMN_CREATED, COLUMN_SERVER_ID,
             COLUMN_TITLE, COLUMN_UPDATED, COLUMN_HIDDEN};
 
+    private static final String DATABASE_CREATE = "create table "
+            + TABLE_NAME + "(" + COLUMN_LOC_ID
+            + " integer primary key autoincrement, "
+            + COLUMN_SERVER_ID + " integer, "
+            + COLUMN_TITLE + " text not null, "
+            + COLUMN_COLOR + " integer, "
+            + COLUMN_HIDDEN + " integer, "
+            + COLUMN_CREATED + " integer, "
+            + COLUMN_UPDATED + " integer"
+            + ");";
+
 
     CirclesOpenHelper() {
 
@@ -36,7 +47,7 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
 
     @Override
     public String getColLocId() {
-        return null;
+        return COLUMN_LOC_ID;
     }
 
     @Override
@@ -46,11 +57,11 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
 
     @Override
     public String getTableName() {
-        return null;
+        return TABLE_NAME;
     }
 
     @Override
     public String getDatabaseCreate() {
-        return null;
+        return DATABASE_CREATE;
     }
 }

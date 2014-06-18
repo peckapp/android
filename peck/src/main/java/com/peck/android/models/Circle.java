@@ -8,14 +8,16 @@ import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
+import java.util.ArrayList;
+
 /**
  * Created by mammothbane on 6/12/2014.
  */
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
+    private ArrayList<User> users = new ArrayList<User>();
 
     //TODO: implement inherited methods
-
 
     @Override
     public void setUp(View v) {
