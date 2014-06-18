@@ -13,6 +13,7 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
     private static final String TAG = "circlesopenhelper";
 
     public static final String TABLE_NAME = "circles";
+
     public static final String COLUMN_LOC_ID = "loc_id";
     public static final String COLUMN_SERVER_ID = "sv_id";
     public static final String COLUMN_TITLE = "title";
@@ -20,7 +21,10 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
     public static final String COLUMN_CREATED = "created_at";
     public static final String COLUMN_UPDATED = "updated_at";
     public static final String COLUMN_HIDDEN = "hidden";
-    public static final String COLUMN_TEXT = "text";
+
+    private final String[] ALL_COLUMNS = { COLUMN_LOC_ID, COLUMN_COLOR, COLUMN_CREATED, COLUMN_SERVER_ID,
+            COLUMN_TITLE, COLUMN_UPDATED, COLUMN_HIDDEN};
+
 
     CirclesOpenHelper() {
 
@@ -37,7 +41,7 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
 
     @Override
     public String[] getColumns() {
-        return new String[0];
+        return ALL_COLUMNS;
     }
 
     @Override
