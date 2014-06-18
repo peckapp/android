@@ -13,6 +13,7 @@
     <dimen name="new_bar_height">70dp</dimen>
     <dimen name="bt_post_height">60dp</dimen>
     <dimen name="prof_picture_bound">180dp</dimen>
-
+    <item name="alpha_unauth" format="float" type="dimen">0.5</item>
+    <dimen name="share_height">30dp</dimen>
 
 </resources>

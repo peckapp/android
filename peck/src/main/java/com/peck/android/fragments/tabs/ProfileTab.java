@@ -37,6 +37,7 @@ public class ProfileTab extends Fragment implements BaseTab {
     private TextView tv;
     private Bitmap picture;
     private int profDimens;
+    private RoundedImageView riv;
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
@@ -45,8 +46,6 @@ public class ProfileTab extends Fragment implements BaseTab {
                     new Request.GraphUserCallback() {
                         @Override
                         public void onCompleted(final GraphUser user, Response response) {
-                            updateUserName(user.getName());
-
                             new AsyncTask<String, Void, Void>() {
                                 @Override
                                 protected Void doInBackground(String... strings) {
@@ -60,13 +59,20 @@ public class ProfileTab extends Fragment implements BaseTab {
 
                                 @Override
                                 protected void onPostExecute(Void aVoid) {
-                                    ((RoundedImageView)getActivity().findViewById(R.id.riv)).setImageBitmap(picture);
+                                    tv.setText(user.getName());
+                                    tv.setAlpha(1f);
+                                    riv.setImageBitmap(picture);
+                                    riv.setAlpha(1f);
                                 }
                             }.execute(user.getId());
 
                         }
                     }
             ).executeAsync();
+
+
+
+
         } else if (state.isClosed()) {
             Log.i(getClass().getName(), "Logged out...");
 
@@ -94,6 +100,8 @@ public class ProfileTab extends Fragment implements BaseTab {
         lifecycleHelper.onCreate(savedInstanceState);
 
     }
+
+    //todo: text resize method if name's too long
 
     @Override
     public void onResume() {
@@ -148,6 +156,7 @@ public class ProfileTab extends Fragment implements BaseTab {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
+        riv = (RoundedImageView)view.findViewById(R.id.riv);
         tv = (TextView)view.findViewById(R.id.tv_realname);
 
         return view;

@@ -4,4 +4,11 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/share_height"
+        android:text="[share]"
+        android:id="@+id/bt_sharewith"/>
+
+
 </LinearLayout>

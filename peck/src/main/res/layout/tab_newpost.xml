@@ -35,7 +35,8 @@
             android:text="@string/bt_message"
             android:id="@+id/bt_message"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="?android:attr/buttonBarButtonStyle"
+            android:clickable="false" />
 
         <Button
             android:layout_width="0dp"
