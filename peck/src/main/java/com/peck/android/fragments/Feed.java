@@ -9,9 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
-import com.peck.android.PeckApp;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.fragments.tabs.BaseTab;
@@ -20,6 +18,8 @@ import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.FeedManager;
+
+import java.util.List;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -68,9 +68,15 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(getLayoutRes(), container, false);
-        ((AdapterView<ListAdapter>)v.findViewById(getListViewRes())).setAdapter(feedAdapter);
+        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)inflater.inflate(getLayoutRes(), container, false).findViewById(getListViewRes());
+        associateAdapter(v);
         return v;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Feed<T> associateAdapter(AdapterView<ListAdapter> v) {
+        v.setAdapter(feedAdapter);
+        return this;
     }
 
     public void onResume() {

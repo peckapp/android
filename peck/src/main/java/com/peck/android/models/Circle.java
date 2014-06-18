@@ -1,11 +1,20 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.peck.android.R;
+import com.peck.android.adapters.FeedAdapter;
+import com.peck.android.fragments.tabs.UsersFeed;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -83,10 +92,16 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
     //TODO: implement inherited methods
 
     @Override
+    @SuppressWarnings("unchecked")
     public void setUp(View v) {
+
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
-        //v.getParent()
-        //v.findViewById(R.id.hlv_users);
+
+        UsersFeed uf = new UsersFeed();
+        uf.setUpFeed();
+        uf.associateAdapter((AdapterView<ListAdapter>)v.findViewById(R.id.hlv_users));
+
+
     }
 
     @Override
