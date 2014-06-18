@@ -2,7 +2,7 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/sv_profile">
 
@@ -14,14 +14,11 @@
         android:fadingEdge="none"
         android:weightSum="1">
 
-        <com.facebook.widget.ProfilePictureView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/ppv"
-            >
-
-
-            </com.facebook.widget.ProfilePictureView>
+        <com.peck.android.views.RoundedImageView
+            android:layout_width="@dimen/prof_picture_bound"
+            android:layout_height="@dimen/prof_picture_bound"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/riv"/> <!-- need to set source -->
 
         <TextView
             android:layout_width="wrap_content"
