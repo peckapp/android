@@ -29,7 +29,7 @@ import java.net.URL;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class ProfileTab extends Fragment implements BaseTab {
+public class ProfileTab extends BaseTab {
 
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.tab_profile;

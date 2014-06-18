@@ -12,6 +12,7 @@ import android.widget.ListView;
 import com.peck.android.PeckApp;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.DataSource;
+import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
@@ -21,7 +22,7 @@ import com.peck.android.managers.FeedManager;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment implements HasManager {
+public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
 
     protected String tag() {
         return getClass().getName();
