@@ -17,6 +17,7 @@ import com.facebook.SessionState;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.source.LocaleDataSource;
+import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.CirclesTab;
 import com.peck.android.fragments.DiningFragment;
@@ -60,6 +61,22 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
         edit.clear();
         edit.commit();
 
+
+        Bundle b;
+        SimpleFragment frag;
+
+        for (int i : hash.keySet()) {
+            b = new Bundle();
+            b.putInt(SimpleFragment.RESOURCE, hash.get(i));
+            frag = new SimpleFragment();
+            frag.setArguments(b);
+            findViewById(i).setOnClickListener(new newPostListener(frag, "btn " + i));
+        }
+
+
+
+
+
         for (final Integer i: hash.keySet()) {
             (findViewById(i)).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -76,6 +93,8 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
         ft.commit();
 
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -48,7 +48,7 @@ public class NewPostTab extends Fragment implements BaseTab {
         return v;
     }
 
-    private class newPostListener implements View.OnClickListener {
+    public class newPostListener implements View.OnClickListener {
         Fragment f;
         String tag;
 
