@@ -14,8 +14,13 @@ public class SimpleFragment extends Fragment {
     public static final String RESOURCE = "resId";
     private int resId;
 
+    @Override
+    public void setArguments(Bundle args) {
+        resId = args.getInt(RESOURCE, 0);
+    }
+
     public void onCreate(Bundle savedInstanceState) {
-        resId = savedInstanceState.getInt(RESOURCE, 0);
+        super.onCreate(savedInstanceState);
     }
 
     @Override
