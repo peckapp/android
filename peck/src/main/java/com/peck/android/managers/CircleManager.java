@@ -6,7 +6,7 @@ import com.peck.android.models.Circle;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class CircleManager extends Manager<Circle> implements Singleton {
+public class CircleManager extends FeedManager<Circle> implements Singleton {
 
     private CircleManager circleManager = new CircleManager();
 

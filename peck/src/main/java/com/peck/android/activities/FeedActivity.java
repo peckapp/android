@@ -7,15 +7,13 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.source.LocaleDataSource;
-import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.fragments.tabs.BaseTab;
-import com.peck.android.fragments.tabs.CirclesTab;
+import com.peck.android.fragments.tabs.CirclesFeed;
 import com.peck.android.fragments.tabs.EventFeed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.PeckFeed;
@@ -37,7 +35,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
         hash.put(R.id.bt_add, new NewPostTab());
         hash.put(R.id.bt_peck, new PeckFeed());
         hash.put(R.id.bt_profile, new ProfileTab());
-        hash.put(R.id.bt_circles, new CirclesTab());
+        hash.put(R.id.bt_circles, new CirclesFeed());
         hash.put(R.id.bt_newsfeed, new NewsFeed());
         hash.put(R.id.bt_null, new EventFeed());
     }

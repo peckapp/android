@@ -5,14 +5,13 @@ import android.database.Cursor;
 import android.view.View;
 
 import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable implements SelfSetup {
-
-
+public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
 
     //TODO: implement inherited methods
@@ -21,6 +20,11 @@ public class Circle extends DBOperable implements SelfSetup {
     @Override
     public void setUp(View v) {
 
+    }
+
+    @Override
+    public int getResourceId() {
+        return 0;
     }
 
     @Override
