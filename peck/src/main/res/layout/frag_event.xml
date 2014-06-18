@@ -3,13 +3,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="100dp">
 
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0px"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_gravity="center_vertical">
 
@@ -30,6 +30,7 @@
             android:layout_height="0px"
             android:layout_weight="1"
             android:id="@+id/tv_title"
+            android:text="hello, can you see me"
             android:layout_marginTop="@dimen/feed_vert_margin"
             android:layout_marginLeft="@dimen/feed_horz_margin"
             android:layout_marginRight="@dimen/feed_horz_margin"/>
