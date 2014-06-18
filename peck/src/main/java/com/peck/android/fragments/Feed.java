@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.peck.android.PeckApp;
@@ -22,10 +24,10 @@ import com.peck.android.managers.FeedManager;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab {
+public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab implements HasManager {
 
     protected String tag() {
-        return getClass().getName();
+        return ((Object)this).getClass().getName();
     }
 
     protected FeedAdapter<T> feedAdapter;
@@ -64,9 +66,10 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(getLayoutRes(), container, false);
-        ((ListView)v.findViewById(getListViewRes())).setAdapter(feedAdapter);
+        ((AdapterView<ListAdapter>)v.findViewById(getListViewRes())).setAdapter(feedAdapter);
         return v;
     }
 

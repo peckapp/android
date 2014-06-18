@@ -8,13 +8,13 @@ import com.peck.android.models.Circle;
  */
 public class CircleManager extends FeedManager<Circle> implements Singleton {
 
-    private CircleManager circleManager = new CircleManager();
+    private static CircleManager circleManager = new CircleManager();
 
     private CircleManager() {
 
     }
 
-    public CircleManager getCircleManager() {
+    public static CircleManager getManager() {
         return circleManager;
     }
 

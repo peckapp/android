@@ -30,11 +30,11 @@
             android:layout_marginLeft="@dimen/feed_horz_margin"
             android:layout_marginRight="@dimen/feed_horz_margin"/>
 
-        <Gallery
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1"
-            android:id="@+id/gl_users"
+            android:id="@+id/tv_text"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="@dimen/feed_vert_margin"
             android:layout_marginLeft="@dimen/feed_horz_margin"
