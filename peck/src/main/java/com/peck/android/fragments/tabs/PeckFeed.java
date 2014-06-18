@@ -3,7 +3,7 @@ package com.peck.android.fragments.tabs;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.PeckFeedAdapter;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.PeckDataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
@@ -38,7 +38,7 @@ public class PeckFeed extends FeedTab<Peck> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new PeckFeedAdapter(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Peck>(getActivity(), dataSource);
         }
 
         return this;

@@ -1,6 +1,6 @@
 package com.peck.android.fragments.tabs;
 
-import com.peck.android.adapters.EventFeedAdapter;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.EventDataSource;
 import com.peck.android.models.Event;
 
@@ -17,7 +17,7 @@ public abstract class BaseEventFeed extends FeedTab<Event> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new EventFeedAdapter(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Event>(getActivity(), dataSource);
         }
 
         return this;

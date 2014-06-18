@@ -3,7 +3,7 @@ package com.peck.android.fragments;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.LocaleSelectAdapter;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
@@ -35,7 +35,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new LocaleSelectAdapter(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Locale>(getActivity(), dataSource);
         }
 
         return this;

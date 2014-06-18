@@ -1,19 +1,14 @@
 package com.peck.android.fragments.tabs;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.peck.android.R;
-import com.peck.android.adapters.CirclesFeedAdapter;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.CirclesDataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
 import com.peck.android.models.Circle;
-import com.peck.android.models.Peck;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -49,7 +44,7 @@ public class CirclesFeed extends FeedTab<Circle> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new CirclesFeedAdapter(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Circle>(getActivity(), dataSource);
         }
 
         return this;

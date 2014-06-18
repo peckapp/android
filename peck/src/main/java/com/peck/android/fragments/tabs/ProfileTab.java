@@ -41,7 +41,7 @@ public class ProfileTab extends BaseTab {
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
-            Log.i(getClass().getName(), "Logged in...");
+            Log.i(((Object)this).getClass().getName(), "Logged in...");
             Request.newMeRequest(Session.getActiveSession(),
                     new Request.GraphUserCallback() {
                         @Override
@@ -74,7 +74,7 @@ public class ProfileTab extends BaseTab {
 
 
         } else if (state.isClosed()) {
-            Log.i(getClass().getName(), "Logged out...");
+            Log.i(((Object)this).getClass().getName(), "Logged out...");
 
             //TODO: revert non-peck facebook information
 
