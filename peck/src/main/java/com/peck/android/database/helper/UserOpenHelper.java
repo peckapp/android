@@ -19,7 +19,7 @@ public class UserOpenHelper extends DataSourceHelper<User> {
 
     @Override
     public String getColLocId() {
-        return null;
+        return "";
     }
 
     @Override
@@ -29,11 +29,11 @@ public class UserOpenHelper extends DataSourceHelper<User> {
 
     @Override
     public String getTableName() {
-        return null;
+        return "";
     }
 
     @Override
     public String getDatabaseCreate() {
-        return null;
+        return "";
     }
 }

@@ -46,6 +46,10 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     }
 
+    void getSuper(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
 
     public void onStart() {
         super.onStart();
@@ -61,16 +65,18 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        //Log.d(tag(), getManagerClass().getName());
+        Log.d(tag(), getManagerClass().getName() + " default initialize");
         feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)inflater.inflate(getLayoutRes(), container, false).findViewById(getListViewRes());
+        View r = inflater.inflate(getLayoutRes(), container, false);
+        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
         associateAdapter(v);
-        return v;
+        Log.d(tag(), feedAdapter + " associated");
+        return r;
     }
 
     @SuppressWarnings("unchecked")

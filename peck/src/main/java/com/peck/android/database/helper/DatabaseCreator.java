@@ -22,8 +22,8 @@ public class DatabaseCreator extends SQLiteOpenHelper {
             new MealOpenHelper(),
             new LocaleOpenHelper(),
             new PeckOpenHelper(),
-            new CirclesOpenHelper(),
-            new UserOpenHelper()
+            new CirclesOpenHelper()
+            //new UserOpenHelper()
     };
 
     public static String getDbName() {

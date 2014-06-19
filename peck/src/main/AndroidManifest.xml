@@ -48,6 +48,7 @@
             android:name=".activities.LocaleActivity"
             android:screenOrientation="portrait">
         </activity>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="147270e58be36f1b12187f08c0fa5ff034e701c8"/>
     </application>
 
 </manifest>

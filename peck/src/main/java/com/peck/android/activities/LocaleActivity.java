@@ -15,6 +15,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
+import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
@@ -63,8 +64,8 @@ public class LocaleActivity extends PeckActivity {
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
 
         if (!(servicesConnected() && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)))) { //if we can't locate the user, for some reason
-                //todo: catch errors from google play services
+                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)))) { //if we can't locate the user
+            //todo: catch errors from google play services
             locationServices = false;
             notifyMe();
             //todo: re-search when location services come up?
@@ -137,30 +138,30 @@ public class LocaleActivity extends PeckActivity {
             //Log.d(TAG, "notified twice");
 
             if (locationServices) {
-            new AsyncTask<Void, Void, Void>() {
-                TextView tv;
-                @Override
-                protected void onPreExecute() {
-                    tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-                    tv.setVisibility(View.VISIBLE);
-                    tv.setText(R.string.pb_loc);
-                }
+                new AsyncTask<Void, Void, Void>() {
+                    TextView tv;
+                    @Override
+                    protected void onPreExecute() {
+                        tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+                        tv.setVisibility(View.VISIBLE);
+                        tv.setText(R.string.pb_loc);
+                    }
 
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    LocaleManager.calcDistances(); //this only gets called if we know where the user is *and* have the location list loaded
-                    return null;
-                }
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        LocaleManager.calcDistances(); //this only gets called if we know where the user is *and* have the location list loaded
+                        return null;
+                    }
 
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    tv.setVisibility(View.GONE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        tv.setVisibility(View.GONE);
+                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
-                    addListFragment();
+                        addListFragment();
 
-                }
-            }.execute(); } else {
+                    }
+                }.execute(); } else {
                 findViewById(R.id.rl_locale).setVisibility(View.GONE);
                 Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
                 addListFragment();
@@ -171,38 +172,45 @@ public class LocaleActivity extends PeckActivity {
     }
 
     private void addListFragment() {
-        boolean b = false;
 
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
-        try {
-            if (getSupportFragmentManager().findFragmentByTag(fragmentTag) != null) b = true; }
-        catch ( Exception e ) { }
+        LocaleSelectionFeed lsf = (LocaleSelectionFeed)getSupportFragmentManager().findFragmentByTag(fragmentTag);
 
-        if (b) trans.attach(new LocaleSelectionFeed());
-        else trans.add(R.id.rl_loc_select, new LocaleSelectionFeed(), fragmentTag);
+//        Bundle bundle = new Bundle();
+//        bundle.putInt(SimpleFragment.RESOURCE, R.layout.frag_bt_create);
+//        SimpleFragment sf = new SimpleFragment();
+//        sf.setArguments(bundle);
+//        trans.add(R.id.rl_loc_select, sf);
+//        trans.commitAllowingStateLoss();
 
-        trans.commitAllowingStateLoss();
-        getSupportFragmentManager().executePendingTransactions();
+        if (lsf == null) {
+            final LocaleSelectionFeed losf = new LocaleSelectionFeed();
+            lsf = losf;
+            trans.add(R.id.rl_loc_select, lsf, fragmentTag);
+            trans.commitAllowingStateLoss();
+            getSupportFragmentManager().executePendingTransactions();
 
-        for (Locale l : LocaleManager.returnAll()) {
-            LocaleManager.getManager().add(l);
-        }
-
-        ((ListView)findViewById(new LocaleSelectionFeed().getListViewRes())).setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        LocaleSelectionFeed lsf = (LocaleSelectionFeed)getSupportFragmentManager().findFragmentByTag(fragmentTag);
-                        LocaleManager.getManager().setLocale((Locale) lsf.getAdapter().getItem(i));
-                        Log.d(getClass().getName(),
-                                (lsf.getAdapter().getItem(i)).toString());
+            ((ListView) findViewById(R.id.rl_loc_select).findViewById(new LocaleSelectionFeed().getListViewRes())).setOnItemClickListener(
+                    new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                            LocaleManager.getManager().setLocale((Locale) losf.getAdapter().getItem(i));
+                            Log.d(getClass().getName(),
+                                    (losf.getAdapter().getItem(i)).toString());
 //                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
 //                                    startActivity(intent);
-                        finish();
+                            finish();
+                        }
                     }
-                }
-        );
+            );
+        }
+        else {
+            trans.attach(lsf);
+            trans.commitAllowingStateLoss();
+            getSupportFragmentManager().executePendingTransactions();
+        }
+
 
     }
 

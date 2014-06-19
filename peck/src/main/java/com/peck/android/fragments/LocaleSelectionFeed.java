@@ -1,10 +1,17 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.LocaleDataSource;
+import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
@@ -18,30 +25,23 @@ public class LocaleSelectionFeed extends Feed<Locale> {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.getSuper(savedInstanceState);
 
 
     }
 
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        return inflater.inflate(R.layout.frag_locale_select, container, false);
-//    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.frag_locale_select, container, false);
+        ((ListView)view.findViewById(getListViewRes())).setAdapter(LocaleManager.getManager().getAdapter());
+        return view;
+    }
 
 
     @Override
     public Feed<Locale> setUpFeed() {
-        if (dataSource == null) {
-            dataSource = new LocaleDataSource(getActivity());
-        }
-
-        if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Locale>(getActivity(), dataSource);
-        }
 
         return this;
     }
-
-
 
     @Override
     public int getListViewRes() {

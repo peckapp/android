@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.animation.Animation;
 
+import com.crashlytics.android.Crashlytics;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.source.LocaleDataSource;
@@ -44,6 +45,8 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Crashlytics.start(this);
+
         setContentView(R.layout.activity_feed_root);
 
         //test: remove before production
@@ -58,7 +61,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
                     new FragmentSwitcherListener(hash.get(i), "btn " + i, this, R.id.ll_feed_content));
         }
 
-        findViewById(R.id.bt_null).performClick();
+        //findViewById(R.id.bt_null).performClick();
 
     }
 

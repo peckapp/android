@@ -6,6 +6,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.style.SuperscriptSpan;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,6 +15,8 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
+import com.peck.android.adapters.FeedAdapter;
+import com.peck.android.database.helper.LocaleOpenHelper;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
@@ -29,10 +32,10 @@ import java.util.ArrayList;
 public class LocaleManager extends FeedManager<Locale> implements Singleton, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
     private static LocaleManager manager = new LocaleManager();
     private static LocaleActivity activity;
-    private static ArrayList<Locale> locales = new ArrayList<Locale>();
     private static Location location;
     private static LocationClient client;
     private static Locale locale;
+    private static LocaleDataSource lds;
 
     private static final String LOCALE_ID = "locale local id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
@@ -42,10 +45,19 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     public static LocaleManager initialize(LocaleActivity act) {
+        Log.d(getManager().getClass().getName(), "localemanager initialize");
+
         client = new LocationClient(act, manager, manager);
         activity = act;
         getLocation();
+        manager.dSource = new LocaleDataSource(act);
+        manager.adapter = new FeedAdapter<Locale>(act, manager.dSource);
+
         return manager;
+    }
+
+    public FeedAdapter<Locale> getAdapter() {
+        return manager.adapter;
     }
 
     public void onConnected(Bundle dataBundle) {
@@ -168,7 +180,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             lo.setLongitude((double) i * 9);
             lo.setLatitude((double)i*6);
             l = new Locale().setLocalId(i).setLocation(lo).setName(Integer.toString(i));
-            locales.add(l);
+            getManager().add(l);
         }
 
         lo = new Location("test");
@@ -176,9 +188,9 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         lo.setLatitude(42.702);
         Log.d(tag, lo.toString());
         l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
-        locales.add(l);
+        getManager().add(l);
 
-        Log.d(tag, locales.toString());
+        Log.d(tag, manager.data.toString());
         return manager;
     }
 
@@ -192,10 +204,10 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                 }
                 Log.d(tag, "[" + i + "] waiting for location, still null");
             } else {
-                Locale ret = locales.get(0);
+                Locale ret = manager.data.get(0);
                 double dist = ret.calcDist(location).getDist();
 
-                for (Locale l : locales) {
+                for (Locale l : getManager().data) {
                     if (l.calcDist(location).getDist() < dist) {
                         dist = l.getDist();
                         ret = l;
@@ -213,7 +225,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
 
     public static ArrayList<Locale> returnAll() {
-        return locales;
+        return manager.data;
     }
 
 
