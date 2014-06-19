@@ -1,8 +1,6 @@
 package com.peck.android.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +16,6 @@ import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.FeedManager;
-
-import java.util.List;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -65,7 +61,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        Log.d(tag(), getManagerClass().getName() + " default initialize");
+        Log.d(tag(), getManagerClass().getName() + " default setActivity");
         feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 

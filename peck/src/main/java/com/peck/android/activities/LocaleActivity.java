@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,9 +13,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
-import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.managers.LocaleManager;
-import com.peck.android.models.Locale;
 
 
 public class LocaleActivity extends PeckActivity {
@@ -31,10 +27,12 @@ public class LocaleActivity extends PeckActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LocaleManager.initialize(this);
+        LocaleManager.setActivity(this);
         setContentView(R.layout.activity_locale);
 
-        //TODO: check if google play services are enabled, skip all of this if they're not
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.rl_loc_select, new LocaleSelectionFeed(), fragmentTag);
+        ft.commit();
     }
 
     @Override
@@ -158,60 +156,18 @@ public class LocaleActivity extends PeckActivity {
                         tv.setVisibility(View.GONE);
                         findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
-                        addListFragment();
+                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
 
                     }
                 }.execute(); } else {
                 findViewById(R.id.rl_locale).setVisibility(View.GONE);
                 Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
-                addListFragment();
+                findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
             }
         } else {
             loaded = true;
         }
     }
 
-    private void addListFragment() {
-
-        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-
-        LocaleSelectionFeed lsf = (LocaleSelectionFeed)getSupportFragmentManager().findFragmentByTag(fragmentTag);
-
-//        Bundle bundle = new Bundle();
-//        bundle.putInt(SimpleFragment.RESOURCE, R.layout.frag_bt_create);
-//        SimpleFragment sf = new SimpleFragment();
-//        sf.setArguments(bundle);
-//        trans.add(R.id.rl_loc_select, sf);
-//        trans.commitAllowingStateLoss();
-
-        if (lsf == null) {
-            final LocaleSelectionFeed losf = new LocaleSelectionFeed();
-            lsf = losf;
-            trans.add(R.id.rl_loc_select, lsf, fragmentTag);
-            trans.commitAllowingStateLoss();
-            getSupportFragmentManager().executePendingTransactions();
-
-            ((ListView) findViewById(R.id.rl_loc_select).findViewById(new LocaleSelectionFeed().getListViewRes())).setOnItemClickListener(
-                    new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                            LocaleManager.getManager().setLocale((Locale) losf.getAdapter().getItem(i));
-                            Log.d(getClass().getName(),
-                                    (losf.getAdapter().getItem(i)).toString());
-//                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-//                                    startActivity(intent);
-                            finish();
-                        }
-                    }
-            );
-        }
-        else {
-            trans.attach(lsf);
-            trans.commitAllowingStateLoss();
-            getSupportFragmentManager().executePendingTransactions();
-        }
-
-
-    }
 
 }

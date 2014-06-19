@@ -6,7 +6,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.text.style.SuperscriptSpan;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,8 +14,6 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.LocaleOpenHelper;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
@@ -44,20 +41,13 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-    public static LocaleManager initialize(LocaleActivity act) {
-        Log.d(getManager().getClass().getName(), "localemanager initialize");
+    public static LocaleManager setActivity(LocaleActivity act) {
+        Log.d(getManager().getClass().getName(), "localemanager setActivity");
 
         client = new LocationClient(act, manager, manager);
         activity = act;
         getLocation();
-        manager.dSource = new LocaleDataSource(act);
-        manager.adapter = new FeedAdapter<Locale>(act, manager.dSource);
-
         return manager;
-    }
-
-    public FeedAdapter<Locale> getAdapter() {
-        return manager.adapter;
     }
 
     public void onConnected(Bundle dataBundle) {
