@@ -33,7 +33,8 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static String userName;
     private static Bitmap profilePicture;
     private static URI unix;
-    private static PicturePref picturePref = null;
+    private static boolean facebookMode = false;
+    private static PicturePref picturePref = PicturePref.PECK;
 
     public static class NotDownloadedException extends Exception {
         public String failedResource;
@@ -57,10 +58,11 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     private PeckSessionManager() {}
 
-    private void init() {
+    public static void init() {
         Log.i(TAG, "initializing");
         File file = new File(PROFILE_FILENAME);
         if (file.exists()) {
+            Log.i(TAG, "loading from file saved to disk");
             FileInputStream in = null;
             try {
                 in = new FileInputStream(PROFILE_FILENAME);
@@ -75,40 +77,52 @@ public class PeckSessionManager extends Manager implements Singleton {
                 }
             }
         } else {
+            Log.i(TAG, "loading default");
             setProfileDefault();
         }
         Log.i(TAG, "initialized");
+        FacebookSessionManager.init();
     }
 
     public static PeckSessionManager getManager() {
         return manager;
     }
 
-    public void setProfileDefault() {
+    public static void setProfileDefault() {
         profilePicture = BitmapFactory.decodeResource(context.getResources(), PeckApp.Constants.Graphics.FILLER);
     }
 
-    public void setPicturePref(PicturePref pref) {
+    public static void setPicturePref(PicturePref pref) {
         picturePref = pref;
+    }
+
+    protected static void setFacebookMode(boolean bool) {
+        facebookMode = bool;
     }
 
     private static Bitmap getProfilePicture(int size, PicturePref pref) {
         Bitmap ret;
         switch (pref) {
+
             case FACEBOOK:
-                ret = Bitmap.createScaledBitmap(FacebookSessionManager.getFbProfilePicture(), size, size, false);
+                ret = scale(size, FacebookSessionManager.getFbProfilePicture());
                 break;
 
             case PECK:
-                ret = Bitmap.createScaledBitmap(profilePicture, size, size, false);
+                ret = scale(size, profilePicture);
                 break;
 
             default:
-                ret = Bitmap.createScaledBitmap(profilePicture, size, size, false);
+                ret = scale(size, profilePicture);
                 break;
 
         }
         return ret;
+    }
+
+    private static Bitmap scale(int size, Bitmap bmp) {
+        if (size == profileDimens) return bmp;
+        else return Bitmap.createScaledBitmap(bmp, size, size, false);
     }
 
     public static Bitmap getProfilePicture(int size) {

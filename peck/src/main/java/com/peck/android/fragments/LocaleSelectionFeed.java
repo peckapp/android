@@ -1,7 +1,6 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +30,6 @@ public class LocaleSelectionFeed extends Feed<Locale> {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         LocaleManager.getManager().setLocale((Locale) feedAdapter.getItem(i));
-                        Log.d(getClass().getName(),
-                                (feedAdapter.getItem(i)).toString());
                         getActivity().finish();
                     }
                 });

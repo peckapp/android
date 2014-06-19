@@ -29,6 +29,7 @@ public class FacebookSessionManager extends Manager implements Singleton {
     private final static int profileDimens;
     private final static String TAG = "FacebookSessionManager";
 
+    private static Session session;
     private static String userName;
     private static Context context;
     private static String token;
@@ -53,12 +54,23 @@ public class FacebookSessionManager extends Manager implements Singleton {
 
     public static void init() {
         Log.i(TAG, "initializing");
-        updateUserDetails(new Callback() {
-            @Override
-            public void callBack(Object obj) {
+        session = Session.openActiveSessionFromCache(context);
+
+        if (session == null) PeckSessionManager.setFacebookMode(false);
+        else {
+            PeckSessionManager.setFacebookMode(true);
+            if (Session.getActiveSession().isOpened()) {
+
+                updateUserDetails(new Callback() {
+                    @Override
+                    public void callBack(Object obj) {
+                    }
+                });
+
             }
-        });
-        Log.i(TAG, "initialized");
+        }
+        Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
+
     }
 
     public static void updateUserDetails(final Callback callback) {
@@ -96,12 +108,12 @@ public class FacebookSessionManager extends Manager implements Singleton {
                 new Callback<Bitmap>() {
                     @Override
                     public void callBack(Bitmap bmp) {
-                            fbProfilePicture = bmp;
+                        fbProfilePicture = bmp;
                         callback.callBack(bmp);
                     }
-                }, "Facebook profile picture");
+                }, "Facebook profile picture"
+        );
     }
-
 
 
     public static String getUserName() {
@@ -150,10 +162,12 @@ public class FacebookSessionManager extends Manager implements Singleton {
         private void onSessionStateChange(Session session, SessionState state, Exception exception) {
             if (state.isOpened()) {
                 Log.i(((Object)this).getClass().getName(), "Logged in...");
+                FacebookSessionManager.session = session;
                 FacebookSessionManager.updateUserDetails(callback);
 
             } else if (state.isClosed()) {
                 Log.i(((Object)this).getClass().getName(), "Logged out...");
+                FacebookSessionManager.session = null;
 
                 //TODO: revert non-peck facebook information
 

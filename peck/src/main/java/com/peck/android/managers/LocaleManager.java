@@ -162,15 +162,16 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     public static LocaleManager populate() {
         //TEST, TODO: database
-        Locale l;
+        final ArrayList<Locale> locales = new ArrayList<Locale>();
         Location lo;
+        Locale l;
 
         for (int i = 0; i < 40; i++) {
             lo = new Location("test");
             lo.setLongitude((double) i * 9);
             lo.setLatitude((double)i*6);
             l = new Locale().setLocalId(i).setLocation(lo).setName(Integer.toString(i));
-            getManager().add(l);
+            locales.add(l);
         }
 
         lo = new Location("test");
@@ -178,7 +179,14 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         lo.setLatitude(42.702);
         Log.d(tag, lo.toString());
         l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
-        getManager().add(l);
+        locales.add(l);
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getManager().add(locales);
+            }
+        });
 
         Log.d(tag, manager.data.toString());
         return manager;

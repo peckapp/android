@@ -2,8 +2,8 @@ package com.peck.android.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
@@ -17,9 +17,9 @@ import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.CirclesFeed;
 import com.peck.android.fragments.tabs.EventFeed;
 import com.peck.android.fragments.tabs.NewPostTab;
+import com.peck.android.fragments.tabs.NewsFeed;
 import com.peck.android.fragments.tabs.PeckFeed;
 import com.peck.android.fragments.tabs.ProfileTab;
-import com.peck.android.fragments.tabs.NewsFeed;
 import com.peck.android.managers.LocaleManager;
 
 import java.util.HashMap;
@@ -61,7 +61,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
                     new FragmentSwitcherListener(hash.get(i), "btn " + i, this, R.id.ll_feed_content));
         }
 
-        //findViewById(R.id.bt_null).performClick();
+        findViewById(R.id.bt_null).performClick();
 
     }
 

@@ -1,7 +1,6 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +60,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        Log.d(tag(), getManagerClass().getName() + " default setActivity");
         feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
@@ -71,7 +69,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
         View r = inflater.inflate(getLayoutRes(), container, false);
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
         associateAdapter(v);
-        Log.d(tag(), feedAdapter + " associated");
         return r;
     }
 
