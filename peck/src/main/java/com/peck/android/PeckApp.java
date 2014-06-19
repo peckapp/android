@@ -4,11 +4,21 @@ import android.app.Application;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.peck.android.interfaces.Singleton;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class PeckApp extends Application {
+public class PeckApp extends Application implements Singleton{
+    private static PeckApp peckApp = new PeckApp();
+
+    private PeckApp() {
+
+    }
+
+    public static PeckApp getApp() {
+        return peckApp;
+    }
 
     public final static String USER_PREFS = "user preferences";
 
