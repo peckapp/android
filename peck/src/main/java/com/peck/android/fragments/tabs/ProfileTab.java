@@ -2,29 +2,22 @@ package com.peck.android.fragments.tabs;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.facebook.Request;
-import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.managers.FacebookSessionManager;
+import com.peck.android.managers.PeckSessionManager;
 import com.peck.android.managers.ProfileManager;
 import com.peck.android.views.RoundedImageView;
-
-import java.net.URL;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -39,54 +32,7 @@ public class ProfileTab extends BaseTab {
     private int profDimens;
     private RoundedImageView riv;
 
-    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-        if (state.isOpened()) {
-            Log.i(((Object)this).getClass().getName(), "Logged in...");
-            Request.newMeRequest(Session.getActiveSession(),
-                    new Request.GraphUserCallback() {
-                        @Override
-                        public void onCompleted(final GraphUser user, Response response) {
-                            new AsyncTask<String, Void, Void>() {
-                                @Override
-                                protected Void doInBackground(String... strings) {
-                                    try {
-                                        picture = BitmapFactory.decodeStream(new URL("https://graph.facebook.com/" + strings[0] + "/picture?width=" + profDimens + "&height=" + profDimens).openConnection().getInputStream());
-                                    } catch (Exception e) {
-                                        Log.e(getClass().getName(), e.toString());
-                                    }
-                                    return null;
-                                }
 
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    tv.setText(user.getName());
-                                    tv.setAlpha(1f);
-                                    riv.setImageBitmap(picture);
-                                    riv.setAlpha(1f);
-                                }
-                            }.execute(user.getId());
-
-                        }
-                    }
-            ).executeAsync();
-
-
-
-
-        } else if (state.isClosed()) {
-            Log.i(((Object)this).getClass().getName(), "Logged out...");
-
-            //TODO: revert non-peck facebook information
-
-        }
-    }
-
-    private Session.StatusCallback callback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
 
 
     @Override
@@ -96,7 +42,16 @@ public class ProfileTab extends BaseTab {
 
         profDimens = getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
 
-        lifecycleHelper = new UiLifecycleHelper(getActivity(), callback);
+        lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionManager.SessionStatusCallback(new Callback() {
+            @Override
+            public void callBack(Object obj) {
+                tv.setText(FacebookSessionManager.getUserName());
+                tv.setAlpha(1f);
+                riv.setImageBitmap(PeckSessionManager.getProfilePicture());
+                riv.setAlpha(1f);
+            }
+        }));
+
         lifecycleHelper.onCreate(savedInstanceState);
 
     }
@@ -141,8 +96,6 @@ public class ProfileTab extends BaseTab {
         lifecycleHelper.onSaveInstanceState(outState);
     }
 
-
-
     public int getTabTag() {
         return tabId;
     }
@@ -158,6 +111,7 @@ public class ProfileTab extends BaseTab {
 
         riv = (RoundedImageView)view.findViewById(R.id.riv);
         tv = (TextView)view.findViewById(R.id.tv_realname);
+        tv.setText(FacebookSessionManager.getUserName());
 
         return view;
     }

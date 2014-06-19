@@ -1,6 +1,7 @@
 package com.peck.android;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -10,15 +11,32 @@ import com.peck.android.interfaces.Singleton;
  * Created by mammothbane on 5/28/2014.
  */
 public class PeckApp extends Application implements Singleton{
-    private static PeckApp peckApp = new PeckApp();
 
-    private PeckApp() {
+    public static class AppContext {
+        private static Context mContext;
+        private static AppContext appContext;
 
+        private AppContext() {}
+
+        protected static void init(Context context) {
+            mContext = context;
+        }
+
+        public static AppContext getAppContext() {
+            return appContext;
+        }
+
+        public static Context getContext() {
+            return mContext;
+        }
     }
 
-    public static PeckApp getApp() {
-        return peckApp;
+
+
+    public void onCreate() {
+        AppContext.init(this);
     }
+
 
     public final static String USER_PREFS = "user preferences";
 
@@ -45,6 +63,12 @@ public class PeckApp extends Application implements Singleton{
 
             public final static int INTERVAL = 300;
             public final static int RETRY = 33;
+
+        }
+
+        public static class Graphics {
+
+            public final static int FILLER = R.drawable.ic_launcher;
 
         }
 
