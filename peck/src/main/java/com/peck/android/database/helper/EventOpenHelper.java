@@ -17,6 +17,7 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
     private static final String TAG = "eventopenhelper";
 
     public static final String TABLE_NAME = "events";
+
     public static final String COLUMN_LOC_ID = "loc_id";
     public static final String COLUMN_SERVER_ID = "sv_id";
     public static final String COLUMN_TITLE = "title";

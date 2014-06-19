@@ -3,7 +3,7 @@ package com.peck.android.fragments;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.DiningFeedAdapter;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.source.MealDataSource;
 import com.peck.android.fragments.tabs.FeedTab;
 import com.peck.android.managers.MealManager;
@@ -46,7 +46,7 @@ public class DiningFragment extends FeedTab<Meal> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new DiningFeedAdapter(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Meal>(getActivity(), dataSource);
         }
 
 
@@ -59,7 +59,7 @@ public class DiningFragment extends FeedTab<Meal> {
     }
 
     public int getLayoutRes() {
-        return R.layout.frag_diningfeed;
+        return R.layout.tab_diningfeed;
     }
 
     public int getListViewRes() {

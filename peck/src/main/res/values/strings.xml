@@ -2,6 +2,8 @@
 <resources>
 
     <string name="app_name">Peck</string>
+    <string name="app_id">291944037642057</string> <!-- set this to get facebook to work -->
+
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="login">Login</string>
@@ -24,5 +26,15 @@
     <string name="pb_loc">Locating You</string>
     <string name="tb_newpost">New Post</string>
     <string name="tb_pecks">Pecks</string>
+    <string name="newPost">New Post</string>
+
+    <string name="bt_event">Event</string>
+    <string name="bt_message">Message</string>
+    <string name="bt_photo">Photo</string>
+    <string name="bt_share">select shares</string>
+    
+    <string name="ht_np_title">title</string>
+    <string name="ht_yourname">Your Name</string>
+
 
 </resources>

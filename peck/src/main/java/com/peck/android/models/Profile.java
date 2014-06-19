@@ -12,18 +12,15 @@ import com.peck.android.interfaces.SelfSetup;
  */
 public class Profile extends DBOperable implements SelfSetup {
 
+    //todo: extend user?
 
     //todo: implement inherited methods
 
 
     @Override
     public void setUp(View v) {
+        //if
 
-    }
-
-    @Override
-    public int getLocalId() {
-        return 0;
     }
 
     @Override

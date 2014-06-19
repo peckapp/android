@@ -16,7 +16,6 @@ import java.util.Date;
  * Created by mammothbane on 6/16/2014.
  */
 public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int localId;
     private int serverId;
     private Date created;
     private Date updated;
@@ -86,11 +85,6 @@ public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     @Override
-    public int getLocalId() {
-        return localId;
-    }
-
-    @Override
     public ContentValues toContentValues() {
         return null;
     }
@@ -103,7 +97,7 @@ public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public int getResourceId()
     {
-        return R.layout.frag_peck;
+        return R.layout.lvitem_peck;
     }
 
     @Override

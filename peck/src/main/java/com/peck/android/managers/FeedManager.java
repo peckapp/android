@@ -34,7 +34,9 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
         data = loadFromDatabase(dSource);
 
-        downloadFromServer();//TODO: server communication and sync happens here
+        downloadFromServer();
+
+        //TODO: server communication and sync happens here
 
         adapter.update(data);
 

@@ -11,11 +11,28 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_gravity">top</item>
+        <item name="android:textSize">10dp</item>
+    </style>
+
+    <style name="bt_feed_selected">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:textSize">10dp</item>
     </style>
     
     <style name="lv_style">
         <item name="android:divider">@null</item>
         <item name="android:dividerHeight">0px</item>
+    </style>
+
+    <style name="iv_wrapper">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">0px</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginLeft">15dp</item>
     </style>
 
 </resources>

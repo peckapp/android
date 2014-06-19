@@ -7,17 +7,16 @@ import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.database.helper.EventOpenHelper;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.models.postItems.Post;
 
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int localId;
+public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
     private int serverId;
     private int color;
     private Date created;
@@ -33,10 +32,6 @@ public class Event extends DBOperable implements SelfSetup, HasFeedLayout {
     public Event setText(String text) {
         this.text = text;
         return this;
-    }
-
-    public int getLocalId() {
-        return localId;
     }
 
     public Event setLocalId(int id) {
@@ -95,13 +90,19 @@ public class Event extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public int getResourceId() { //TODO: implement, create layout
-        return R.layout.frag_event;
+        return R.layout.lvitem_event;
     }
+
+
 
     @Override
     public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
+    }
+
+    public void setUpPost(View v) {
+
     }
 
     @Override

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public abstract class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
+public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
     private ArrayList<T> data = new ArrayList<T>();
     private Context context;
     private int resourceId;

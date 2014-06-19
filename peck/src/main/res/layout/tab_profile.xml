@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/sv_profile">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:fadingEdge="none"
+        android:weightSum="1">
+
+        <com.peck.android.views.RoundedImageView
+            android:layout_width="@dimen/prof_picture_bound"
+            android:layout_height="@dimen/prof_picture_bound"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/riv"
+            android:src="@drawable/ic_peck"
+            android:alpha="@dimen/alpha_unauth"
+            android:layout_marginTop="16dp" /> <!-- need to set source -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_realname"
+            android:layout_gravity="center_horizontal"
+            android:textSize="40sp"
+            android:layout_marginTop="16dp"
+            android:text="@string/ht_yourname"
+            android:alpha="@dimen/alpha_unauth"
+            android:singleLine="false" />
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="unix"
+            android:id="@+id/et_unix"
+            android:inputType="textEmailAddress"
+            android:singleLine="true"
+            android:layout_marginTop="24dp"
+            android:enabled="false"
+            android:editable="false" />
+
+        <com.facebook.widget.LoginButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bt_fb_link"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="300dp" />
+
+
+    </LinearLayout>
+
+
+</ScrollView>

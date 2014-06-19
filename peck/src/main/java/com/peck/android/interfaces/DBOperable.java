@@ -10,7 +10,11 @@ import java.util.Date;
  */
 public abstract class DBOperable {
 
-    public abstract int getLocalId();
+    protected int localId;
+
+    public int getLocalId() {
+        return localId;
+    }
 
     public abstract ContentValues toContentValues();
 

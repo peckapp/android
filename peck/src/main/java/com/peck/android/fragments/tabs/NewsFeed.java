@@ -13,7 +13,7 @@ import com.peck.android.models.Event;
 public class NewsFeed extends BaseEventFeed {
 
     private static final String tag = "NewsFeed";
-    private static final int resId = R.layout.frag_newsfeed;
+    private static final int resId = R.layout.tab_newsfeed;
     private static final int lvId = R.id.lv_newsfeed;
     private static final int tabId = R.string.tb_newsfeed;
 

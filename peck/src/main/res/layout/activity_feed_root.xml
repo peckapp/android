@@ -4,6 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <Button
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:visibility="gone"
+        android:id="@+id/bt_null"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/bar_height"
@@ -15,26 +21,46 @@
         <Button
             android:id="@+id/bt_peck"
             android:text="[pecks]"
-            style="@style/bt_feed" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_height="match_parent"
+            android:layout_width="0px"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text_dark_focused"/>
 
         <Button
             android:id="@+id/bt_newsfeed"
             android:text="[news feed]"
-            style="@style/bt_feed" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text_dark_focused" />
 
         <Button
             android:id="@+id/bt_add"
             android:text="[+]"
-            style="@style/bt_feed" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text_dark_focused" />
 
         <Button
             android:id="@+id/bt_circles"
             android:text="[circles]"
-            style="@style/bt_feed" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text_dark_focused" />
         <Button
             android:id="@+id/bt_profile"
             android:text="[profile]"
-            style="@style/bt_feed" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text_dark_focused" />
 
 
     </LinearLayout>

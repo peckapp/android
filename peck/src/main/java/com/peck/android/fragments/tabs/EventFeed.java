@@ -3,7 +3,6 @@ package com.peck.android.fragments.tabs;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.interfaces.HasTabTag;
 import com.peck.android.managers.EventManager;
 import com.peck.android.models.Event;
 
@@ -14,7 +13,7 @@ import com.peck.android.models.Event;
 public class EventFeed extends BaseEventFeed {
 
     private final static String tag = "EventFeed";
-    private final static int resId = R.layout.frag_eventfeed;
+    private final static int resId = R.layout.tab_eventfeed;
     private final static int lvId = R.id.lv_events;
     private final static int tabId = R.string.tb_events;
 
