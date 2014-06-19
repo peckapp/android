@@ -121,7 +121,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     public Locale getLocale(DataSource<Locale> dataSource, Activity act) {
         if (locale != null) return locale;
         else {
-            int i = act.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, 0);
+            int i = act.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, 0);
             if (i == 0) return null;
             else {
                 try {
@@ -138,7 +138,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     public LocaleManager setLocale(Locale l) {
         locale = l;
-        SharedPreferences.Editor spEdit = activity.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor spEdit = activity.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         spEdit.putInt(LOCALE_ID, l.getLocalId());
         spEdit.commit();
 

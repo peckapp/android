@@ -11,6 +11,7 @@ import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.models.User;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,11 +31,21 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static PeckSessionManager manager = new PeckSessionManager();
     private static int profileDimens;
     private static Context context;
+
+    private User user;
+
     private static String userName;
     private static Bitmap profilePicture;
     private static URI unix;
     private static boolean facebookMode = false;
     private static PicturePref picturePref = PicturePref.PECK;
+
+    static {
+        //load saved user id from sharedpreferences
+        user = UserManager.getManager().getById()
+
+    }
+
 
     public static class NotDownloadedException extends Exception {
         public String failedResource;

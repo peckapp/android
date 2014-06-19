@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.DBOperable;
-import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.interfaces.Singleton;
 
 import java.util.ArrayList;
@@ -36,5 +35,13 @@ public abstract class Manager<T extends DBOperable> {
     public ArrayList<T> getData() {
         return data;
     }
+
+    public T getById(int id) {
+        for (T t : data) {
+            if (t.getLocalId() == id) return t;
+        }
+        return null;
+    }
+
 
 }

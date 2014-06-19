@@ -51,7 +51,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
 
         //test: remove before production
         deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
-        SharedPreferences.Editor edit = getSharedPreferences(PeckApp.USER_PREFS, MODE_PRIVATE).edit();
+        SharedPreferences.Editor edit = getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit();
         edit.clear();
         edit.commit();
 

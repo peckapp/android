@@ -38,8 +38,6 @@ public class PeckApp extends Application implements Singleton{
     }
 
 
-    public final static String USER_PREFS = "user preferences";
-
     public static class Constants {
 
         public static class Food {
@@ -49,6 +47,12 @@ public class PeckApp extends Application implements Singleton{
             public final static int LUNCH = 2;
             public final static int DINNER = 3;
             public final static int NIGHT_MEAL = 4;
+        }
+
+        public static class Preferences {
+            public final static String USER_PREFS = "user preferences";
+            public final static String USER_ID = "persistent user id";
+
         }
 
 

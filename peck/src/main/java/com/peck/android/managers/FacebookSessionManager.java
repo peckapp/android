@@ -1,7 +1,6 @@
 package com.peck.android.managers;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -22,8 +21,6 @@ import java.net.URL;
  * Created by mammothbane on 6/19/2014.
  */
 public class FacebookSessionManager extends Manager implements Singleton {
-    private final static String FB_PREFS = "facebook preferences";
-    private final static String SESSION_KEY = "session key";
     protected final static String PROFILE_FILENAME = "fbProPicCache";
 
     private final static int profileDimens;
@@ -97,7 +94,6 @@ public class FacebookSessionManager extends Manager implements Singleton {
 
     protected static void updateFbProfilePicture(final int pixelDimens, final Callback<Bitmap> callback) {
         URL source = null;
-
         try {
             source = new URL("https://graph.facebook.com/" + profId + "/picture?width=" + pixelDimens + "&height=" + pixelDimens);
         } catch (MalformedURLException m) {
@@ -130,20 +126,6 @@ public class FacebookSessionManager extends Manager implements Singleton {
                     }
                 }
         ).executeAsync();
-    }
-
-    private static void saveToken() {
-        getSharedPreferences().edit().putString(SESSION_KEY, token).commit();
-    }
-
-
-    private static String getStoredToken() {
-        if (token == null) token = getSharedPreferences().getString(SESSION_KEY, "");
-        return token;
-    }
-
-    private static SharedPreferences getSharedPreferences() {
-        return context.getSharedPreferences(FB_PREFS, Context.MODE_PRIVATE);
     }
 
     public static class SessionStatusCallback implements Session.StatusCallback {

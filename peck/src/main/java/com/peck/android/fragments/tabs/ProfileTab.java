@@ -45,7 +45,7 @@ public class ProfileTab extends BaseTab {
         lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionManager.SessionStatusCallback(new Callback() {
             @Override
             public void callBack(Object obj) {
-                tv.setText(FacebookSessionManager.getUserName());
+                tv.setText(PeckSessionManager.getUserName());
                 tv.setAlpha(1f);
                 riv.setImageBitmap(PeckSessionManager.getProfilePicture());
                 riv.setAlpha(1f);
