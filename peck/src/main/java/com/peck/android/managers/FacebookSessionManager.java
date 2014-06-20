@@ -83,11 +83,6 @@ public class FacebookSessionManager extends Manager implements Singleton {
 
     }
 
-    protected static Bitmap getFbProfilePicture() {
-        //returns profile picture **in memory**
-        return fbProfilePicture;
-    }
-
     protected static void updateFbProfilePicture(Callback<Bitmap> callback) {
         updateFbProfilePicture(profileDimens, callback);
     }
@@ -100,7 +95,7 @@ public class FacebookSessionManager extends Manager implements Singleton {
             Log.e(TAG, m.toString());
         }
 
-        PeckSessionManager.updateProfilePicture(source, pixelDimens,
+        PeckSessionManager.getImageFromURL(source, pixelDimens,
                 new Callback<Bitmap>() {
                     @Override
                     public void callBack(Bitmap bmp) {

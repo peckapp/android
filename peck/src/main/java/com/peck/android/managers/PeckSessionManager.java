@@ -9,14 +9,12 @@ import android.widget.Toast;
 
 import com.peck.android.PeckApp;
 import com.peck.android.R;
+import com.peck.android.database.source.UserDataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.URI;
 import java.net.URL;
 
 /**
@@ -32,25 +30,29 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static int profileDimens;
     private static Context context;
 
-    private User user;
+    private static User user;
+    private static int userId;
+    private static UserDataSource dataSource;
 
-    private static String userName;
     private static Bitmap profilePicture;
-    private static URI unix;
     private static boolean facebookMode = false;
+    private static boolean peckAuth;
     private static PicturePref picturePref = PicturePref.PECK;
 
     static {
-        //load saved user id from sharedpreferences
-        user = UserManager.getManager().getById()
+        dataSource = new UserDataSource(context);
 
     }
 
+    public static User getUser() {
+        return user;
+    }
 
-    public static class NotDownloadedException extends Exception {
+
+    public static class NotAvailableException extends Exception {
         public String failedResource;
 
-        public NotDownloadedException(String message, String failedResource) {
+        public NotAvailableException(String message, String failedResource) {
             super(message);
             this.failedResource = failedResource;
         }
@@ -65,70 +67,65 @@ public class PeckSessionManager extends Manager implements Singleton {
     static {
         context = PeckApp.AppContext.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
+        dataSource = new UserDataSource(context);
     }
 
     private PeckSessionManager() {}
 
     public static void init() {
         Log.i(TAG, "initializing");
-        File file = new File(PROFILE_FILENAME);
-        if (file.exists()) {
-            Log.i(TAG, "loading from file saved to disk");
-            FileInputStream in = null;
-            try {
-                in = new FileInputStream(PROFILE_FILENAME);
-                profilePicture = BitmapFactory.decodeFile(PROFILE_FILENAME);
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-                setProfileDefault();
-            } finally {
-                try {
-                    in.close();
-                } catch (Throwable ignore) {
+
+        UserManager.getManager().initialize(dataSource, new Callback() {
+            @Override
+            public void callBack(Object obj) {
+                userId = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0);
+                //load saved user id from sharedpreferences
+                if (userId == 0) {
+                    peckAuth = false;
+                    user = dataSource.create(new User());
+                    userId = user.getLocalId();
+                } else {
+                    peckAuth = true;
+                    user = UserManager.getManager().getById(userId);
                 }
+
+                FacebookSessionManager.init();
+
+                ImageCacher.init(PROFILE_FILENAME, userId);
+
+                Log.i(TAG, "initialized with user " + user.getLocalId());
             }
-        } else {
-            Log.i(TAG, "loading default");
-            setProfileDefault();
-        }
-        Log.i(TAG, "initialized");
-        FacebookSessionManager.init();
+
+        });
+
+
+
     }
 
     public static PeckSessionManager getManager() {
         return manager;
     }
 
-    public static void setProfileDefault() {
-        profilePicture = BitmapFactory.decodeResource(context.getResources(), PeckApp.Constants.Graphics.FILLER);
-    }
-
     public static void setPicturePref(PicturePref pref) {
         picturePref = pref;
     }
 
-    protected static void setFacebookMode(boolean bool) {
-        facebookMode = bool;
+
+
+
+    protected static Bitmap getImage(int userId) throws NotAvailableException {
+        return getImage(userId, profileDimens);
     }
 
-    private static Bitmap getProfilePicture(int size, PicturePref pref) {
-        Bitmap ret;
-        switch (pref) {
+    protected static Bitmap getImage(int userId, int dimens) throws NotAvailableException {
 
-            case FACEBOOK:
-                ret = scale(size, FacebookSessionManager.getFbProfilePicture());
-                break;
+        return null; //this should be an api call to peck servers
 
-            case PECK:
-                ret = scale(size, profilePicture);
-                break;
+    }
 
-            default:
-                ret = scale(size, profilePicture);
-                break;
 
-        }
-        return ret;
+    protected static void setFacebookMode(boolean bool) {
+        facebookMode = bool;
     }
 
     private static Bitmap scale(int size, Bitmap bmp) {
@@ -136,52 +133,50 @@ public class PeckSessionManager extends Manager implements Singleton {
         else return Bitmap.createScaledBitmap(bmp, size, size, false);
     }
 
-    public static Bitmap getProfilePicture(int size) {
-        return getProfilePicture(size, picturePref);
-    }
-
-    public static Bitmap getProfilePicture() {
-        return getProfilePicture(profileDimens);
+    protected static int getUserId() {
+        return userId;
     }
 
 
-    protected static void updateProfilePicture(final URL source, final int pixelDimens,
-                                               final Callback<Bitmap> callback, final String resourceName) {
-            new AsyncTask<String, Void, Bitmap>() {
-                @Override
-                protected Bitmap doInBackground(String... strings) {
-                    try {
-                        return BitmapFactory.decodeStream(source.openConnection().getInputStream());
-                    } catch (Exception e) {
-                        Log.e(getClass().getName(), e.toString());
-                    }
-                    return null;
+
+
+
+    protected static void getImageFromURL(final URL source, final int pixelDimens,
+                                          final Callback<Bitmap> callback, final String resourceName) {
+        new AsyncTask<String, Void, Bitmap>() {
+            @Override
+            protected Bitmap doInBackground(String... strings) {
+                try {
+                    return BitmapFactory.decodeStream(source.openConnection().getInputStream());
+                } catch (Exception e) {
+                    Log.e(getClass().getName(), e.toString());
                 }
+                return null;
+            }
 
-                @Override
-                protected void onPostExecute(Bitmap bmp) {
-                    if (bmp == null) {
-                        handleNDE(new NotDownloadedException(TAG, resourceName));
-                    } else if (profileDimens == pixelDimens) {
-                        callback.callBack(bmp);
-                    }
+            @Override
+            protected void onPostExecute(Bitmap bmp) {
+                if (bmp == null) {
+                    handleNDE(new NotAvailableException(TAG, resourceName));
+                } else if (profileDimens == pixelDimens) {
                     callback.callBack(bmp);
                 }
-            }.execute();
+                callback.callBack(bmp);
+            }
+        }.execute();
 
     }
 
 
     private static void saveProfilePicture() {
-        saveProfilePicture(PROFILE_FILENAME, profilePicture);
-        saveProfilePicture(FacebookSessionManager.PROFILE_FILENAME, getProfilePicture(profileDimens, PicturePref.FACEBOOK));
+        saveImage(PROFILE_FILENAME, ImageCacher.get(userId));
     }
 
-    private static void saveProfilePicture(String filepath, Bitmap bmp) {
+    private static void saveImage(String filepath, Bitmap bmp) {
         FileOutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(filepath);
-            bmp.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
+            bmp.compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, outputStream);
         } catch (Exception e) {
             Log.e(manager.getClass().getName(), e.toString());
         } finally {
@@ -193,7 +188,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     //going to have to pull/push changes to/from server
 
-    protected static void handleNDE(NotDownloadedException nde) {
+    protected static void handleNDE(NotAvailableException nde) {
         Log.e(TAG, nde.toString());
         Toast.makeText(context, "Couldn't download your " + nde.getFailedResource(), Toast.LENGTH_SHORT).show();
     }
