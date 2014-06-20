@@ -5,14 +5,17 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.LruCache;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Singleton;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.Map;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.util.Calendar;
 import java.util.Vector;
 
 /**
@@ -90,22 +93,41 @@ public class ImageCacher implements Singleton {
 
     }
 
-    //todo
-    protected static void writeCacheToDisk() { //clears the cache
-        File cacheDir = PeckApp.AppContext.getContext().getCacheDir();
-        FileOutputStream out;
-        Map<Integer, Bitmap> snapshot = cache.snapshot();
-        for (Integer i : snapshot.keySet()) {
+    protected static void writeCacheToDisk() {
+        Gson gson = new Gson();
+        String ret = gson.toJson(cache, cache.getClass());
+
+        File cacheFil = new File(PeckApp.AppContext.getContext().getCacheDir(), Long.toString(Calendar.getInstance().getTimeInMillis()));
+        PrintStream printStream = null;
+
+        try {
+            printStream = new PrintStream(cacheFil);
+            printStream.println(ret);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Couldn't write the image cache to disk");
+        } finally {
             try {
-                out = new FileOutputStream(new File(cacheDir, i.toString()));
-                snapshot.get(i).compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "couldn't write cached image for user " + i + " to disk\n" + e.toString());
-            }
+            printStream.close(); } catch (Throwable ignore) {}
         }
+
     }
 
-    pri
+    private static void readCacheFromDisk() {
+        File[] fileList = PeckApp.AppContext.getContext().getCacheDir().listFiles();
+        File i = new File("0");
+        for ( File file : fileList ) {
+            if ( Long.parseLong(file.getName()) > Long.parseLong(i.getName())) i = file;
+        }
+
+        JsonParser jsonParser = new JsonParser();
+        Gson gson = new Gson();
+
+        try {
+            cache = gson.fromJson(jsonParser.parse(new FileReader(i)), (Class<LruCache<Integer, Bitmap>>) cache.getClass());
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Couldn't read cache from disk\n" + e.toString());
+        }
+    }
 
 
 }
