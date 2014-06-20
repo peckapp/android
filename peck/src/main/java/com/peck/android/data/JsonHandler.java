@@ -25,9 +25,8 @@ public class JsonHandler<T> {
     }
 
     public T get(File file) throws FileNotFoundException {
-        //file must be pure json from start to finish
+        //file must be pure json
         JsonParser jsonParser = new JsonParser();
-        T ret = null;
 
         return gson.fromJson(jsonParser.parse(new FileReader(file)), type);
     }
@@ -35,4 +34,5 @@ public class JsonHandler<T> {
     public String put(T t) {
         return gson.toJson(t, type);
     }
+
 }

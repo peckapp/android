@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.Calendar;
 import java.util.Vector;
 
 /**
@@ -24,6 +23,8 @@ public class ImageCacher implements Singleton {
 
     private static final Bitmap imageNotAvailable;
     private static final String TAG = "ImageCacher";
+    private static final String CACHE_NAME = "img_cache";
+    private static final File CACHE_DIR = PeckApp.AppContext.getContext().getCacheDir();
     private static Bitmap userImage;
 
     private static LruCache<Integer, Bitmap> cache = new LruCache<Integer, Bitmap>(PeckApp.Constants.Graphics.CACHE_SIZE);
@@ -94,7 +95,7 @@ public class ImageCacher implements Singleton {
     protected static void writeCacheToDisk() {
         String ret = new JsonHandler<LruCache<Integer, Bitmap>>().put(cache);
 
-        File cacheFil = new File(PeckApp.AppContext.getContext().getCacheDir(), Long.toString(Calendar.getInstance().getTimeInMillis()));
+        File cacheFil = new File(CACHE_DIR, CACHE_NAME);
         PrintStream printStream = null;
 
         try {
@@ -110,14 +111,8 @@ public class ImageCacher implements Singleton {
     }
 
     private static void readCacheFromDisk() {
-        File[] fileList = PeckApp.AppContext.getContext().getCacheDir().listFiles();
-        File i = new File("0");
-        for ( File file : fileList ) {
-            if ( Long.parseLong(file.getName()) > Long.parseLong(i.getName())) i = file;
-        }
-
         try {
-            cache = new JsonHandler<LruCache<Integer, Bitmap>>().get(i);
+            cache = new JsonHandler<LruCache<Integer, Bitmap>>().get(new File(CACHE_DIR, CACHE_NAME));
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't read cache from disk\n" + e.toString());
         }
