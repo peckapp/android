@@ -5,15 +5,13 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.LruCache;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
+import com.peck.android.data.JsonHandler;
 import com.peck.android.interfaces.Singleton;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Vector;
@@ -94,8 +92,7 @@ public class ImageCacher implements Singleton {
     }
 
     protected static void writeCacheToDisk() {
-        Gson gson = new Gson();
-        String ret = gson.toJson(cache, cache.getClass());
+        String ret = new JsonHandler<LruCache<Integer, Bitmap>>().put(cache);
 
         File cacheFil = new File(PeckApp.AppContext.getContext().getCacheDir(), Long.toString(Calendar.getInstance().getTimeInMillis()));
         PrintStream printStream = null;
@@ -107,7 +104,7 @@ public class ImageCacher implements Singleton {
             Log.e(TAG, "Couldn't write the image cache to disk");
         } finally {
             try {
-            printStream.close(); } catch (Throwable ignore) {}
+                printStream.close(); } catch (Throwable ignore) {}
         }
 
     }
@@ -119,14 +116,12 @@ public class ImageCacher implements Singleton {
             if ( Long.parseLong(file.getName()) > Long.parseLong(i.getName())) i = file;
         }
 
-        JsonParser jsonParser = new JsonParser();
-        Gson gson = new Gson();
-
         try {
-            cache = gson.fromJson(jsonParser.parse(new FileReader(i)), (Class<LruCache<Integer, Bitmap>>) cache.getClass());
+            cache = new JsonHandler<LruCache<Integer, Bitmap>>().get(i);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't read cache from disk\n" + e.toString());
         }
+
     }
 
 
