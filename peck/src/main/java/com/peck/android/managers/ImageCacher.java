@@ -10,6 +10,9 @@ import com.peck.android.interfaces.Singleton;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -87,6 +90,22 @@ public class ImageCacher implements Singleton {
 
     }
 
+    //todo
+    protected static void writeCacheToDisk() { //clears the cache
+        File cacheDir = PeckApp.AppContext.getContext().getCacheDir();
+        FileOutputStream out;
+        Map<Integer, Bitmap> snapshot = cache.snapshot();
+        for (Integer i : snapshot.keySet()) {
+            try {
+                out = new FileOutputStream(new File(cacheDir, i.toString()));
+                snapshot.get(i).compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "couldn't write cached image for user " + i + " to disk\n" + e.toString());
+            }
+        }
+    }
+
+    pri
 
 
 }
