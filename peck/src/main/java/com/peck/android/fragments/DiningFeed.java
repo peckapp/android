@@ -4,6 +4,8 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
+import com.peck.android.database.helper.MealOpenHelper;
+import com.peck.android.database.source.DataSource;
 import com.peck.android.fragments.tabs.FeedTab;
 import com.peck.android.managers.MealManager;
 import com.peck.android.models.Meal;
@@ -11,7 +13,7 @@ import com.peck.android.models.Meal;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class DiningFragment extends FeedTab<Meal> {
+public class DiningFeed extends FeedTab<Meal> {
     private final static String tag = "DiningFeed";
     private final static int tabId = R.string.tb_diningfeed;
     private final static int lvId = R.id.lv_dining;
@@ -38,10 +40,10 @@ public class DiningFragment extends FeedTab<Meal> {
     }
 
 
-    public DiningFragment setUpFeed() {
+    public DiningFeed setUpFeed() {
 
         if (dataSource == null) {
-            dataSource = new MealDataSource(getActivity());
+            dataSource = new DataSource<Meal>(MealOpenHelper.getHelper());
         }
 
         if (feedAdapter == null) {

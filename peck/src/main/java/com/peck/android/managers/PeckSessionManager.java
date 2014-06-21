@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import com.peck.android.PeckApp;
 import com.peck.android.R;
+import com.peck.android.database.helper.UserOpenHelper;
+import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
@@ -31,7 +33,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     private static User user;
     private static int userId;
-    private static UserDataSource dataSource;
+    private static DataSource<User> dataSource;
 
     private static Bitmap profilePicture;
     private static boolean facebookMode = false;
@@ -39,7 +41,7 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static PicturePref picturePref = PicturePref.PECK;
 
     static {
-        dataSource = new UserDataSource(context);
+        dataSource = new DataSource<User>(UserOpenHelper.getHelper());
 
     }
 
@@ -66,7 +68,6 @@ public class PeckSessionManager extends Manager implements Singleton {
     static {
         context = PeckApp.AppContext.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
-        dataSource = new UserDataSource(context);
     }
 
     private PeckSessionManager() {}

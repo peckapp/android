@@ -1,11 +1,12 @@
 package com.peck.android.database.helper;
 
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class UserOpenHelper extends DataSourceHelper<User> {
+public class UserOpenHelper extends DataSourceHelper<User> implements Singleton {
 
     private static UserOpenHelper helper = new UserOpenHelper();
     private static final String TAG = "PeckOpenHelper";
@@ -58,4 +59,9 @@ public class UserOpenHelper extends DataSourceHelper<User> {
     public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
+
+    public User generate() {
+        return new User();
+    }
+
 }

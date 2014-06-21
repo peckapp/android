@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DataSource<T extends DBOperable> implements Factory<T> {
+public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
     private DataSourceHelper<T> dbHelper;
     private static final String TAG = "datasource";
@@ -33,6 +33,7 @@ public abstract class DataSource<T extends DBOperable> implements Factory<T> {
         dbHelper.close();
     }
 
+    public T generate() { return dbHelper.generate(); }
 
     public T create(T t) {
         ContentValues contentValues = t.toContentValues();
@@ -40,19 +41,29 @@ public abstract class DataSource<T extends DBOperable> implements Factory<T> {
         Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
         Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
 
-        long insertId = database.insert(dbHelper.getTableName(), null, contentValues);
-        Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
-                dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
+        long insertId;
+        Cursor cursor;
+
+        synchronized (database) {
+            insertId = database.insert(dbHelper.getTableName(), null, contentValues);
+            cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
+                    dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
+        }
+
         T newT = (T) generate().fromCursor(cursor);
         cursor.close();
         return newT;
     }
     
-    public void update(T t){
-        database.update(dbHelper.getTableName(),
-                t.toContentValues(),
-                dbHelper.getColLocId() + " = ?",
-                new String[]{String.valueOf(t.getLocalId())});
+    public void update(T t) {
+
+        synchronized (database) {
+
+            database.update(dbHelper.getTableName(),
+                    t.toContentValues(),
+                    dbHelper.getColLocId() + " = ?",
+                    new String[]{String.valueOf(t.getLocalId())});
+        }
     }
 
     public void delete(T T) {
@@ -95,9 +106,6 @@ public abstract class DataSource<T extends DBOperable> implements Factory<T> {
         Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(), dbHelper.getColLocId() + " = " + id, null, null, null, null);
         return (T)generate().fromCursor(cursor);
     }
-
-    
-    public abstract T generate();
 
 
 }

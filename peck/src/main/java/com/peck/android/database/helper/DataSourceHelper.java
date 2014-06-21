@@ -7,12 +7,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.peck.android.PeckApp;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.Singleton;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DataSourceHelper<T extends DBOperable> extends SQLiteOpenHelper {
+public abstract class DataSourceHelper<T extends DBOperable> extends SQLiteOpenHelper implements Factory<T> {
 
     DataSource<T> dataSource;
     private static Context context;

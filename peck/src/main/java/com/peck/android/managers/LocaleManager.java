@@ -31,7 +31,6 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private static Location location;
     private static LocationClient client;
     private static Locale locale;
-    private static LocaleDataSource lds;
 
     private static final String LOCALE_ID = "locale local id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;

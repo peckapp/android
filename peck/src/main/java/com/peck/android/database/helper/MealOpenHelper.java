@@ -1,11 +1,12 @@
 package com.peck.android.database.helper;
 
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Meal;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealOpenHelper extends DataSourceHelper<Meal> {
+public class MealOpenHelper extends DataSourceHelper<Meal> implements Singleton {
 
     private static MealOpenHelper helper = new MealOpenHelper();
     private static final String TAG = "MealOpenHelper";
@@ -62,6 +63,10 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public Meal generate() {
+        return new Meal();
     }
 
 

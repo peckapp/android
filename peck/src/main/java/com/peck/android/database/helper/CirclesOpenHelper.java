@@ -1,11 +1,12 @@
 package com.peck.android.database.helper;
 
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Circle;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class CirclesOpenHelper extends DataSourceHelper<Circle> {
+public class CirclesOpenHelper extends DataSourceHelper<Circle> implements Singleton {
 
     private static CirclesOpenHelper helper = new CirclesOpenHelper();
     private static final String TAG = "circlesopenhelper";
@@ -62,4 +63,6 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
     public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
+
+    public Circle generate() { return new Circle(); }
 }

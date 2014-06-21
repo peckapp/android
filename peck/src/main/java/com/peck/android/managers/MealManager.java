@@ -29,7 +29,8 @@ public class MealManager extends FeedManager<Meal> implements Singleton {
     @Override
     public MealManager initialize(FeedAdapter<Meal> adapter, DataSource<Meal> dSource) {
         super.initialize(adapter, dSource);
-        courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
+        //todo: fix this whole thing
+        //courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
         linkAll(adapter);
         return this;
     }

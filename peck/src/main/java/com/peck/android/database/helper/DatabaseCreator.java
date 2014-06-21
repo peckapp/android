@@ -11,7 +11,7 @@ import com.peck.android.PeckApp;
  */
 public class DatabaseCreator extends SQLiteOpenHelper {
     private static DatabaseCreator dbCreator = new DatabaseCreator();
-    private static int version = 1;
+    private static final int version = 1;
 
     private DataSourceHelper[] dbHelpers = {
             EventOpenHelper.getHelper(),

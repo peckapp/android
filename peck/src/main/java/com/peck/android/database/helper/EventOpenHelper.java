@@ -1,11 +1,12 @@
 package com.peck.android.database.helper;
 
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Event;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class EventOpenHelper extends DataSourceHelper<Event> {
+public class EventOpenHelper extends DataSourceHelper<Event> implements Singleton {
 
     private static EventOpenHelper helper = new EventOpenHelper();
     private static final String TAG = "eventopenhelper";
@@ -59,6 +60,10 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public Event generate() {
+        return new Event();
     }
 
 

@@ -1,11 +1,12 @@
 package com.peck.android.database.helper;
 
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleOpenHelper extends DataSourceHelper<Locale> {
+public class LocaleOpenHelper extends DataSourceHelper<Locale> implements Singleton {
 
     private static LocaleOpenHelper helper = new LocaleOpenHelper();
 
@@ -53,5 +54,8 @@ public class LocaleOpenHelper extends DataSourceHelper<Locale> {
         return DATABASE_CREATE;
     }
 
+    public Locale generate() {
+        return new Locale();
+    }
 
 }
