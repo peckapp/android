@@ -1,6 +1,5 @@
 package com.peck.android.managers;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.peck.android.database.source.DataSource;
@@ -8,7 +7,6 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -48,7 +46,7 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public <V extends DBOperable> ArrayList<V> loadFromDatabase(final DataSource<V> dataSource, final Callback callback) {
-        //META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
+        /*//META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
         //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
         new AsyncTask<Void, Void, ArrayList<V>>() {
@@ -69,7 +67,8 @@ public abstract class Manager<T extends DBOperable> {
                 callback.callBack(null);
             }
         }.execute();
-        return items; //TODO: doesn't work, because the method's async.
+        return items; //TODO: doesn't work, because the method's async. */
+        return new ArrayList<V>();
     }
 
 

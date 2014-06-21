@@ -46,6 +46,7 @@ public class PeckSessionManager extends Manager implements Singleton {
     }
 
     public static User getUser() {
+        if (user == null) Log.e(TAG, "user is null");
         return user;
     }
 

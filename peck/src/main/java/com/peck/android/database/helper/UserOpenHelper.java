@@ -1,5 +1,7 @@
 package com.peck.android.database.helper;
 
+import android.util.Log;
+
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
@@ -37,6 +39,7 @@ public class UserOpenHelper extends DataSourceHelper<User> implements Singleton 
 
 
     public static UserOpenHelper getHelper() {
+        Log.d(TAG, "helper is " + ((helper == null) ? "null" : "not null"));
         return helper;
     }
 

@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.peck.android.PeckApp;
 
+import java.util.ArrayList;
+
 /**
  * Created by mammothbane on 6/10/2014.
  */
@@ -13,15 +15,7 @@ public class DatabaseCreator extends SQLiteOpenHelper {
     private static DatabaseCreator dbCreator = new DatabaseCreator();
     private static final int version = 1;
 
-    private DataSourceHelper[] dbHelpers = {
-            EventOpenHelper.getHelper(),
-            FoodOpenHelper.getHelper(),
-            MealOpenHelper.getHelper(),
-            LocaleOpenHelper.getHelper(),
-            PeckOpenHelper.getHelper(),
-            CirclesOpenHelper.getHelper(),
-            UserOpenHelper.getHelper()
-    };
+    ArrayList<DataSourceHelper> dbHelpers;
 
     public static String getDbName() {
         return PeckApp.Constants.Database.DATABASE_NAME;
@@ -41,6 +35,13 @@ public class DatabaseCreator extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
+        dbHelpers.add(EventOpenHelper.getHelper());
+        dbHelpers.add(FoodOpenHelper.getHelper());
+        dbHelpers.add(MealOpenHelper.getHelper());
+        dbHelpers.add(LocaleOpenHelper.getHelper());
+        dbHelpers.add(PeckOpenHelper.getHelper());
+        dbHelpers.add(CirclesOpenHelper.getHelper());
+        dbHelpers.add(UserOpenHelper.getHelper());
 
         for (DataSourceHelper i : dbHelpers) {
             database.execSQL(i.getDatabaseCreate());
