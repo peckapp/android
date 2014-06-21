@@ -1,7 +1,5 @@
 package com.peck.android.database.helper;
 
-import android.content.Context;
-
 import com.peck.android.models.User;
 
 /**
@@ -9,6 +7,7 @@ import com.peck.android.models.User;
  */
 public class UserOpenHelper extends DataSourceHelper<User> {
 
+    private static UserOpenHelper helper = new UserOpenHelper();
     private static final String TAG = "PeckOpenHelper";
 
     public static final String TABLE_NAME = "users";
@@ -36,12 +35,8 @@ public class UserOpenHelper extends DataSourceHelper<User> {
             + ");";
 
 
-    public UserOpenHelper(Context context) {
-        super(context, null);
-    }
-
-    public UserOpenHelper() {
-        super();
+    public static UserOpenHelper getHelper() {
+        return helper;
     }
 
     @Override

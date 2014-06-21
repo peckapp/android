@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.source.UserDataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;

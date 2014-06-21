@@ -12,7 +12,6 @@ import android.view.animation.Animation;
 import com.crashlytics.android.Crashlytics;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.CirclesFeed;
 import com.peck.android.fragments.tabs.EventFeed;

@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.CirclesDataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;

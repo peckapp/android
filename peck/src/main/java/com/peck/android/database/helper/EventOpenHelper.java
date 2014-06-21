@@ -1,19 +1,13 @@
 package com.peck.android.database.helper;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-
-import com.peck.android.PeckApp;
 import com.peck.android.models.Event;
-
-import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
 public class EventOpenHelper extends DataSourceHelper<Event> {
 
+    private static EventOpenHelper helper = new EventOpenHelper();
     private static final String TAG = "eventopenhelper";
 
     public static final String TABLE_NAME = "events";
@@ -43,19 +37,13 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-
-    public EventOpenHelper(Context context) {
-        super(context, null);
+    public EventOpenHelper() {
+        super();
     }
 
-    EventOpenHelper() { super(); }
-
-
-    //TODO: fix, and write a working implementation for unit testing
-//    //TEST: remove after testing
-//    public EventOpenHelper(Context context, String test_name) {
-//        super(context);
-//    }
+    public static EventOpenHelper getHelper() {
+        return helper;
+    }
 
     public String getTableName() {
         return TABLE_NAME;

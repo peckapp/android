@@ -1,7 +1,6 @@
 package com.peck.android.fragments.tabs;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.EventDataSource;
 import com.peck.android.models.Event;
 
 /**

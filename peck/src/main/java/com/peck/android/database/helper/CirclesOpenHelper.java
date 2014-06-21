@@ -1,7 +1,5 @@
 package com.peck.android.database.helper;
 
-import android.content.Context;
-
 import com.peck.android.models.Circle;
 
 /**
@@ -9,7 +7,7 @@ import com.peck.android.models.Circle;
  */
 public class CirclesOpenHelper extends DataSourceHelper<Circle> {
 
-
+    private static CirclesOpenHelper helper = new CirclesOpenHelper();
     private static final String TAG = "circlesopenhelper";
 
     public static final String TABLE_NAME = "circles";
@@ -36,13 +34,13 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-
-    CirclesOpenHelper() {
-
+    private CirclesOpenHelper() {
+        super();
     }
 
-    public CirclesOpenHelper(Context context) {
-        super(context, null);
+
+    public static CirclesOpenHelper getHelper() {
+        return helper;
     }
 
     @Override

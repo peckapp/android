@@ -1,12 +1,13 @@
 package com.peck.android.database.helper;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.peck.android.PeckApp;
 import com.peck.android.database.source.DataSource;
 import com.peck.android.interfaces.DBOperable;
+import com.peck.android.interfaces.Singleton;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -14,28 +15,28 @@ import com.peck.android.interfaces.DBOperable;
 public abstract class DataSourceHelper<T extends DBOperable> extends SQLiteOpenHelper {
 
     DataSource<T> dataSource;
-    private Context context;
+    private static Context context;
+    static {
+        context = PeckApp.AppContext.getContext();
+    }
 
-    public DataSourceHelper(Context context, SQLiteDatabase.CursorFactory factory)
+    DataSourceHelper()
     {
-        super(context, DatabaseCreator.getDbName(), factory, DatabaseCreator.getDbVersion());
-        this.context = context;
+        super(context, DatabaseCreator.getDbName(), null, DatabaseCreator.getDbVersion());
+        if (!(this instanceof Singleton)) throw new ClassCastException("DataSourceHelpers *must* be singletons");
+
         try {
         if (getTableName() == null) throw new Exception("you must have a table name"); }
         catch (Exception e) {e.printStackTrace();}
 
     }
 
-    DataSourceHelper() {
-        super(null, DatabaseCreator.getDbName(), null, DatabaseCreator.getDbVersion());
-        //this constructor is **only** to access individual instantiations for getTableName()
-        //and getCreateSql
-    }
+
 
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        DatabaseCreator.getDatabaseCreator(context).onCreate(database);
+        DatabaseCreator.getDatabaseCreator().onCreate(database);
     }
 
     public void setDatasource(DataSource dataSource) {
@@ -44,7 +45,7 @@ public abstract class DataSourceHelper<T extends DBOperable> extends SQLiteOpenH
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        DatabaseCreator.getDatabaseCreator(context).onUpgrade(db, oldVersion, newVersion);
+        DatabaseCreator.getDatabaseCreator().onUpgrade(db, oldVersion, newVersion);
     }
 
     public abstract String getColLocId();

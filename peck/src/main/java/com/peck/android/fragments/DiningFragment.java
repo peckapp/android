@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.MealDataSource;
 import com.peck.android.fragments.tabs.FeedTab;
 import com.peck.android.managers.MealManager;
 import com.peck.android.models.Meal;

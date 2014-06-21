@@ -1,16 +1,13 @@
 package com.peck.android.database.helper;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.location.Location;
-
 import com.peck.android.models.Locale;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
 public class LocaleOpenHelper extends DataSourceHelper<Locale> {
+
+    private static LocaleOpenHelper helper = new LocaleOpenHelper();
 
     public final static String TABLE_NAME = "locales";
     public final static String COLUMN_LOC_ID = "loc_id";
@@ -31,13 +28,8 @@ public class LocaleOpenHelper extends DataSourceHelper<Locale> {
             + COLUMN_NAME + " text not null"
             + ");";
 
-
-    public LocaleOpenHelper(Context context) {
-        super(context, null);
-    }
-
-    LocaleOpenHelper() {
-        super();
+    public static LocaleOpenHelper getHelper() {
+        return helper;
     }
 
     @Override

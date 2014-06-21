@@ -9,7 +9,6 @@ import android.widget.ListView;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;

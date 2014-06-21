@@ -1,7 +1,5 @@
 package com.peck.android.database.helper;
 
-import android.content.Context;
-
 import com.peck.android.models.Peck;
 
 /**
@@ -9,6 +7,7 @@ import com.peck.android.models.Peck;
  */
 public class PeckOpenHelper extends DataSourceHelper<Peck> {
 
+    private static PeckOpenHelper helper = new PeckOpenHelper();
     private static final String TAG = "MealOpenHelper";
 
     public static final String TABLE_NAME = "pecks";
@@ -37,12 +36,8 @@ public class PeckOpenHelper extends DataSourceHelper<Peck> {
             + ");";
 
 
-    public PeckOpenHelper(Context context) {
-        super(context, null);
-    }
-
-    PeckOpenHelper() {
-        super();
+    public static PeckOpenHelper getHelper() {
+        return helper;
     }
 
     @Override

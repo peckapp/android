@@ -1,4 +1,4 @@
-package com.peck.android.data;
+package com.peck.android.json;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

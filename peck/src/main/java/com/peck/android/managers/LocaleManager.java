@@ -15,7 +15,6 @@ import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
 import com.peck.android.database.source.DataSource;
-import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 

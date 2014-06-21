@@ -1,19 +1,13 @@
 package com.peck.android.database.helper;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
 import com.peck.android.models.Meal;
-
-import java.util.Date;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
 public class MealOpenHelper extends DataSourceHelper<Meal> {
 
+    private static MealOpenHelper helper = new MealOpenHelper();
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
@@ -49,16 +43,10 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-    private Context context;
-
-    public MealOpenHelper(Context context) {
-        super(context, null);
-        this.context = context;
+    public static MealOpenHelper getHelper() {
+        return helper;
     }
 
-    MealOpenHelper() {
-        super();
-    }
 
     public String getColLocId() {
         return COLUMN_LOC_ID;

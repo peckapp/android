@@ -1,9 +1,5 @@
 package com.peck.android.database.helper;
 
-import android.content.Context;
-import android.database.Cursor;
-
-import com.peck.android.PeckApp;
 import com.peck.android.models.Food;
 
 /**
@@ -11,7 +7,7 @@ import com.peck.android.models.Food;
  */
 public class FoodOpenHelper extends DataSourceHelper<Food> {
 
-    private Context context;
+    private static FoodOpenHelper helper = new FoodOpenHelper();
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
@@ -45,14 +41,9 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
             + COLUMN_TYPE + " integer"
             + ");";
 
-    public FoodOpenHelper(Context context) {
-        super(context, null);
-        this.context = context;
-    }
-
-    public FoodOpenHelper() { super(); }
-
-
+    public static FoodOpenHelper getHelper() {
+       return helper;
+   }
 
     public String getColLocId() {
         return COLUMN_LOC_ID;
