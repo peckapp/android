@@ -161,16 +161,15 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
             getProfilePicture(new Callback<Bitmap>() {
                 @Override
                 public void callBack(Bitmap obj) {
-                    ((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(obj);
-                    v.findViewById(R.id.riv_user).setAlpha(1f);
-                    Log.d("user model", "callback being called");
+                    ((RoundedImageView) v.findViewById(R.id.riv_user)).setImageBitmap(obj);
+                    //todo: check this: v.findViewById(R.id.riv_user).setAlpha(1f);
                     v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
                 }
-
-
             });
-            ((TextView)v.findViewById(R.id.tv_realname)).setText(getName());
-            v.findViewById(R.id.tv_realname).setAlpha(1f);
+            if (name != null && !name.equals("")) {
+                ((TextView) v.findViewById(R.id.tv_realname)).setText(getName());
+                v.findViewById(R.id.tv_realname).setAlpha(1f);
+            }
         }
 
 

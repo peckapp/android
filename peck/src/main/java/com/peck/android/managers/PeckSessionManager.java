@@ -20,7 +20,6 @@ import com.peck.android.models.User;
 import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.SQLException;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -39,8 +38,10 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static DataSource<User> dataSource;
 
     private static boolean facebookMode = false;
-    private static boolean peckAuth;
+    private static boolean peckAuth = false;
     private static SourcePref sourcePref = SourcePref.FACEBOOK;
+
+
 
     static {
         dataSource = new DataSource<User>(UserOpenHelper.getHelper());
@@ -59,6 +60,8 @@ public class PeckSessionManager extends Manager implements Singleton {
     public static void init() {
         Log.i(TAG, "initializing");
 
+        FacebookSessionManager.init();
+
         //test: remove before production
         context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
         SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
@@ -66,31 +69,18 @@ public class PeckSessionManager extends Manager implements Singleton {
         edit.commit();
         Log.i(TAG, "deleted database, cleared user prefs shared preferences");
 
-
         UserManager.getManager().initialize(dataSource, new Callback() {
             @Override
             public void callBack(Object obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
-                if (user.getLocalId() == 0) {
-                    try {
-                        dataSource.open();
-                        user = dataSource.create(user);
-                    } catch (SQLException e) {
-                        Log.e(TAG, "user couldn't be created in the database, instantiating my own");
-                        user = new User();
-                    } finally {
-                        dataSource.close();
-                        peckAuth = false;
-                    }
-                } else {
-                    peckAuth = true;
-                    user = UserManager.getManager().getById(user.getLocalId());
-                }
 
-                FacebookSessionManager.init();
+                user = UserManager.getManager().getById(user.getLocalId());
 
-                ImageCacher.init(PROFILE_FILENAME, user.getLocalId());
+                if (user == null) { user = UserManager.getManager().add( new User()); }
+                else peckAuth = true;
+
+                ImageCacher.init(user.getLocalId());
 
                 Log.i(TAG, "initialized with user " + user.getLocalId());
             }
@@ -101,20 +91,15 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     }
 
-    public static void notifyFbStateChanged(boolean loggedIn) {
+    public static void notifyFbStateChanged(final boolean loggedIn) {
         facebookMode = loggedIn;
-
-        if (!peckAuth && loggedIn) {
-            FacebookSessionManager.getGraphUser(new Callback<GraphUser>() {
-                @Override
-                public void callBack(GraphUser obj) {
-                    user.setFbId(obj.getId());
-                    user.setName(obj.getName());
-                }
-            });
-
-        }
-
+        FacebookSessionManager.getGraphUser(new Callback<GraphUser>() {
+            @Override
+            public void callBack(GraphUser obj) {
+                user.setFbId(obj.getId());
+                if (!peckAuth && loggedIn) user.setName(obj.getName());
+            }
+        });
     }
 
     public static User getUser() {
@@ -134,10 +119,12 @@ public class PeckSessionManager extends Manager implements Singleton {
 
         try {
             if (facebookMode && sourcePref == SourcePref.FACEBOOK) {
-                getImageFromURL(new URL("https://graph.facebook.com/" + user.getFbId() +
-                                "/picture?width=" + dimens + "&height=" + dimens),
-                        dimens, callback, "Facebook Profile Picture"
-                );
+                if (user.getFbId() == null || user.getFbId() == "")
+
+                    getImageFromURL(new URL("https://graph.facebook.com/" + user.getFbId() +
+                                    "/picture?width=" + dimens + "&height=" + dimens),
+                            dimens, callback, "Facebook Profile Picture"
+                    );
 
 
             } else if (peckAuth && sourcePref == SourcePref.PECK) {

@@ -1,6 +1,7 @@
 package com.peck.android.managers;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.facebook.Request;
@@ -23,6 +24,16 @@ public class FacebookSessionManager extends Manager implements Singleton {
     private static Context context;
     private static GraphUser user;
 
+    private static AsyncTask<Void, Void, Void> fbInit = new AsyncTask<Void, Void, Void>() {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.i(TAG, "initializing");
+            session = Session.openActiveSessionFromCache(context);
+            Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
+            return null;
+        }
+    };
+
     private static FacebookSessionManager manager = new FacebookSessionManager();
 
     static {
@@ -36,13 +47,9 @@ public class FacebookSessionManager extends Manager implements Singleton {
         return manager;
     }
 
+
     public static void init() {
-        Log.i(TAG, "initializing");
-        session = Session.openActiveSessionFromCache(context);
-
-
-        Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
-
+        fbInit.execute();
     }
 
     public static void getGraphUser(final Callback<GraphUser> callback) {

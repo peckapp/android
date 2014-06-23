@@ -24,14 +24,79 @@
         android:password="true"
         android:hint="@string/password" />
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/login_bt_margin"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/ll_bt_login">
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp">
 
-        </LinearLayout>
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sp_acct"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="60dp"
+            android:visibility="gone"/>
+
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/rl_login">
+
+            <Button
+                android:layout_width="@dimen/login_bt_width"
+                android:layout_height="wrap_content"
+                android:text="@string/bt_login"
+                android:id="@+id/bt_login"
+                android:layout_gravity="center_horizontal"
+                android:layout_alignParentTop="false"
+                android:layout_centerHorizontal="true" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bt_acct_suggest"
+
+                android:id="@+id/bt_account_suggest"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/rl_create"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/ll_buttons">
+
+                <Button
+                    android:layout_width="@dimen/login_bt_width"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bt_create_acct"
+                    android:id="@+id/bt_create_acct"
+                    android:layout_marginRight="8dp" />
+
+                <Button
+                    android:layout_width="@dimen/login_bt_width"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bt_cancel"
+                    android:id="@+id/bt_cancel" />
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>

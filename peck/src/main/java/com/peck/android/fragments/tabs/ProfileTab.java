@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
+import com.peck.android.activities.LoginActivity;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionManager;
 import com.peck.android.managers.PeckSessionManager;
-import com.peck.android.managers.ProfileManager;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -85,6 +85,14 @@ public class ProfileTab extends BaseTab {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
+        view.findViewById(R.id.bt_peck_login).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
         PeckSessionManager.getUser().setUp(view.findViewById(R.id.ll_profile));
 
         return view;
@@ -93,6 +101,6 @@ public class ProfileTab extends BaseTab {
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
-        return ProfileManager.class;
+        return null;
     }
 }

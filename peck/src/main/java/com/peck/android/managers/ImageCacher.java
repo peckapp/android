@@ -2,6 +2,7 @@ package com.peck.android.managers;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -10,7 +11,6 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Map;
@@ -37,63 +37,49 @@ public class ImageCacher implements Singleton {
         imageNotAvailable = BitmapFactory.decodeResource(PeckApp.AppContext.getContext().getResources(),
                 PeckApp.Constants.Graphics.FILLER);
         CACHE_DIR.mkdir();
+        noImageAvailable.add(0);
+
 
     }
 
-    public static void init(String defaultImageName, final int userId) {
-        if (defaultImageName != null)
-            if (new File(defaultImageName).exists()) {
-                Log.i(TAG, "loading from file saved to disk");
-                FileInputStream in = null;
-                try {
-                    in = new FileInputStream(defaultImageName);
-                    userImage = BitmapFactory.decodeFile(defaultImageName);
-                } catch (Exception e) {
-                    Log.e(TAG, e.toString());
-                    get(userId, new Callback<Bitmap>() {
-                        @Override
-                        public void callBack(Bitmap obj) {
-                            userImage = obj;
-                        }
-                    });
-                } finally {
-                    try {
-                        in.close();
-                    } catch (Throwable ignore) {
-                    }
-                }
-            } else {
-                Log.i(TAG, "loading default");
-                get(userId, new Callback<Bitmap>() {
-                    @Override
-                    public void callBack(Bitmap obj) {
-                        userImage = obj;
-                    }
-                });
+    public static void init(final int localId) {
+        userImage = imageNotAvailable;
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                readCacheFromDisk();
+                return null;
             }
 
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (cache.get(localId) != null) {
+                    userImage = cache.remove(localId);
+                }
+            }
+        }.execute();
     }
 
     public static ImageCacher getCacher() { return cacher; }
 
     public static void get(final int userId, final Callback<Bitmap> callback) {
-        Bitmap ret;
-
-        if (userId == PeckSessionManager.getUser().getLocalId() && userImage != null) ret = userImage;
-        else if (noImageAvailable.contains(userId)) ret = imageNotAvailable;
+        if (userId == PeckSessionManager.getUser().getLocalId() && userImage != null) callback.callBack(userImage);
+        else if (noImageAvailable.contains(userId)) callback.callBack(imageNotAvailable);
         else {
-            ret = cache.get(userId);
+            Bitmap ret = cache.get(userId);
             if (ret == null) {
-                    PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
-                        @Override
-                        public void callBack(Bitmap obj) {
-                            if (obj != null) {
+                PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
+                    @Override
+                    public void callBack(Bitmap obj) {
+                        if (obj != null) {
                             cache.put(userId, obj);
                             callback.callBack(obj); }
-                            else callback.callBack(imageNotAvailable);
-                        }
-                    });
+                        else callback.callBack(imageNotAvailable);
+                    }
+                });
             }
+            callback.callBack(ret);
         }
     }
 
@@ -102,8 +88,8 @@ public class ImageCacher implements Singleton {
         get(resId, callback);
     }
 
-    protected static void writeCacheToDisk() { //clears the cache
-        FileOutputStream out;
+    protected static void writeCacheToDisk() {
+        FileOutputStream out = null;
         Map<Integer, Bitmap> snapshot = cache.snapshot();
         for (Integer i : snapshot.keySet()) {
             try {
@@ -111,8 +97,26 @@ public class ImageCacher implements Singleton {
                 snapshot.get(i).compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "couldn't write cached image for user " + i + " to disk\n" + e.toString());
+            } finally {
+                try {
+                    out.close();
+                } catch (Exception e) {}
             }
         }
+
+        if (PeckSessionManager.getUser() != null && PeckSessionManager.getUser().getLocalId() > 0) {
+            try {
+                out = new FileOutputStream(new File(CACHE_DIR, Integer.toString(PeckSessionManager.getUser().getLocalId())));
+                userImage.compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "couldn't write app user's image to disk");
+            } finally {
+                try {
+                    out.close();
+                } catch (Exception e) {}
+            }
+        }
+
     }
 
     private static void readCacheFromDisk() {

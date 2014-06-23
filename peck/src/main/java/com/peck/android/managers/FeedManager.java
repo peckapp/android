@@ -45,18 +45,18 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
-    public FeedManager<T> add(T item) { //use for a single item
+    public T add(T item) { //use for a single item
         super.add(item);
         adapter.update(data);
         adapter.notifyDataSetChanged();
-        return this;
+        return item;
     }
 
-    public FeedManager<T> add(ArrayList<T> items) {
+    public ArrayList<T> add(ArrayList<T> items) {
         super.add(items);
         adapter.update(data);
         adapter.notifyDataSetChanged();
-        return this;
+        return items;
     }
 
 

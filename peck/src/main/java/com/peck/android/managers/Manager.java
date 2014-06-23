@@ -88,18 +88,18 @@ public abstract class Manager<T extends DBOperable> {
         return null;
     }
 
-    public Manager<T> add(T item) { //use for a single item
+    public T add(T item) { //use for a single item
         data.add(item);
         //TODO: dSource.create(item);
-        return this;
+        return item;
     }
 
-    public Manager<T> add(ArrayList<T> items) {
+    public ArrayList<T> add(ArrayList<T> items) {
         for (T i : items) {
             data.add(i);
             //TODO: dSource.create
         }
-        return this;
+        return items;
     }
 
 
