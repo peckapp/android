@@ -134,7 +134,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(MealOpenHelper.COLUMN_SERVER_ID, getServerId());
-        cv.put(MealOpenHelper.COLUMN_LOC_ID, getLocalId());
         cv.put(MealOpenHelper.COLUMN_COLOR, getColor());
         cv.put(MealOpenHelper.COLUMN_MEAL_TYPE, getType());
         cv.put(MealOpenHelper.COLUMN_TITLE, getTitle());

@@ -69,7 +69,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(LocaleOpenHelper.COLUMN_LOC_ID, getLocalId());
         cv.put(LocaleOpenHelper.COLUMN_SV_ID, getServerId());
         cv.put(LocaleOpenHelper.COLUMN_NAME, getName());
         cv.put(LocaleOpenHelper.COLUMN_LAT, getLocation().getLatitude());
