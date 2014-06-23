@@ -80,7 +80,6 @@ public class ProfileTab extends BaseTab {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //todo: set the user's profile picture to the one we've stored
 
         View view = inflater.inflate(resId, container, false);
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);

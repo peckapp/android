@@ -15,7 +15,7 @@ public class DatabaseCreator extends SQLiteOpenHelper {
     private static DatabaseCreator dbCreator = new DatabaseCreator();
     private static final int version = 1;
 
-    ArrayList<DataSourceHelper> dbHelpers;
+    ArrayList<DataSourceHelper> dbHelpers = new ArrayList<DataSourceHelper>();
 
     public static String getDbName() {
         return PeckApp.Constants.Database.DATABASE_NAME;

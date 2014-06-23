@@ -84,7 +84,6 @@ public class ImageCacher implements Singleton {
         else {
             ret = cache.get(userId);
             if (ret == null) {
-                try {
                     PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
                         @Override
                         public void callBack(Bitmap obj) {
@@ -94,16 +93,8 @@ public class ImageCacher implements Singleton {
                             else callback.callBack(imageNotAvailable);
                         }
                     });
-                    //cache.put(userId, ret);
-                    return;
-                } catch (Exception e) {
-                    Log.i(getCacher().getClass().getName(), "Image for user " + userId + " was unreachable.\n" + e.toString());
-                    //noImageAvailable.add(userId);
-                    ret = imageNotAvailable;
-                }
             }
         }
-        callback.callBack(ret);
     }
 
     public static void forceUpdate(int resId, Callback<Bitmap> callback) {

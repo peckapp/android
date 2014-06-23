@@ -1,7 +1,6 @@
 package com.peck.android.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.animation.Animation;
 
 import com.crashlytics.android.Crashlytics;
-import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.helper.LocaleOpenHelper;
 import com.peck.android.database.source.DataSource;
@@ -50,12 +48,6 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
         Crashlytics.start(this);
 
         setContentView(R.layout.activity_feed_root);
-
-        //test: remove before production
-        deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
-        SharedPreferences.Editor edit = getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit();
-        edit.clear();
-        edit.commit();
 
 
         for (int i : hash.keySet()) {

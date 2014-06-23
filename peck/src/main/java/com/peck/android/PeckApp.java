@@ -72,7 +72,7 @@ public class PeckApp extends Application implements Singleton{
 
         public static class Graphics {
 
-            public final static int FILLER = R.drawable.ic_launcher;
+            public final static int FILLER = R.drawable.ic_peck;
             public final static int CACHE_SIZE = 20;
             public final static int INT_CACHE_SIZE = 50;
             public final static int PNG_COMPRESSION = 90;

@@ -68,6 +68,7 @@ public abstract class Manager<T extends DBOperable> {
             }
         }.execute();
         return items; //TODO: doesn't work, because the method's async. */
+        callback.callBack(null);
         return new ArrayList<V>();
     }
 

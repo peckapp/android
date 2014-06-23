@@ -1,6 +1,7 @@
 package com.peck.android.managers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -17,7 +18,9 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -56,14 +59,30 @@ public class PeckSessionManager extends Manager implements Singleton {
     public static void init() {
         Log.i(TAG, "initializing");
 
+        //test: remove before production
+        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
+        SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
+        edit.clear();
+        edit.commit();
+        Log.i(TAG, "deleted database, cleared user prefs shared preferences");
+
+
         UserManager.getManager().initialize(dataSource, new Callback() {
             @Override
             public void callBack(Object obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
                 if (user.getLocalId() == 0) {
-                    user = dataSource.create(user);
-                    peckAuth = false;
+                    try {
+                        dataSource.open();
+                        user = dataSource.create(user);
+                    } catch (SQLException e) {
+                        Log.e(TAG, "user couldn't be created in the database, instantiating my own");
+                        user = new User();
+                    } finally {
+                        dataSource.close();
+                        peckAuth = false;
+                    }
                 } else {
                     peckAuth = true;
                     user = UserManager.getManager().getById(user.getLocalId());
@@ -107,25 +126,26 @@ public class PeckSessionManager extends Manager implements Singleton {
     }
 
 
-    protected static void getImage(int userId, Callback<Bitmap> callback) throws NotAvailableException {
+    protected static void getImage(int userId, Callback<Bitmap> callback) {
         getImage(userId, profileDimens, callback);
     }
 
-    protected static void getImage(int userId, int dimens, Callback<Bitmap> callback) throws NotAvailableException {
+    protected static void getImage(int userId, int dimens, Callback<Bitmap> callback) {
 
         try {
             if (facebookMode && sourcePref == SourcePref.FACEBOOK) {
                 getImageFromURL(new URL("https://graph.facebook.com/" + user.getFbId() +
                                 "/picture?width=" + dimens + "&height=" + dimens),
-                        dimens, callback, "Facebook Profile Picture");
+                        dimens, callback, "Facebook Profile Picture"
+                );
 
 
             } else if (peckAuth && sourcePref == SourcePref.PECK) {
 
-            } else {}
-        } catch (Exception e) {
-            throw new NotAvailableException("help", "something");
-        }
+            } else {
+            }
+        } catch (MalformedURLException e) { callback.callBack(null); }
+
 
     }
 

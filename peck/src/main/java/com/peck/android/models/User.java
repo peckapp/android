@@ -27,8 +27,8 @@ import java.util.Date;
  */
 public class User extends DBOperable implements HasFeedLayout, SelfSetup {
 
-    private String name;
-    private String fbId;
+    private String name = "";
+    private String fbId = "";
     private int serverId;
     private String bio = "";
     private ArrayList<Circle> circles = new ArrayList<Circle>();
@@ -113,7 +113,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         cv.put(UserOpenHelper.COLUMN_SERVER_ID, getLocalId());
         cv.put(UserOpenHelper.COLUMN_NAME, getName());
         cv.put(UserOpenHelper.COLUMN_BIO, getBio());
-        cv.put(UserOpenHelper.COLUMN_LOC_ID, getLocalId());
 
         cv.put(UserOpenHelper.COLUMN_UPDATED, dateToInt(getUpdated()));
         cv.put(UserOpenHelper.COLUMN_CREATED, dateToInt(getCreated()));
@@ -158,13 +157,17 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
             //((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(profilePicture);
         } else if (v instanceof LinearLayout) {
             //if this is a profile page
+            v.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
             getProfilePicture(new Callback<Bitmap>() {
                 @Override
                 public void callBack(Bitmap obj) {
                     ((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(obj);
                     v.findViewById(R.id.riv_user).setAlpha(1f);
                     Log.d("user model", "callback being called");
+                    v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
                 }
+
+
             });
             ((TextView)v.findViewById(R.id.tv_realname)).setText(getName());
             v.findViewById(R.id.tv_realname).setAlpha(1f);
