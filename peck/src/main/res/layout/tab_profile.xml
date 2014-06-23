@@ -3,8 +3,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/sv_profile">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,13 +11,14 @@
         android:padding="16dp"
         android:orientation="vertical"
         android:fadingEdge="none"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:id="@+id/ll_profile">
 
         <com.peck.android.views.RoundedImageView
             android:layout_width="@dimen/prof_picture_bound"
             android:layout_height="@dimen/prof_picture_bound"
             android:layout_gravity="center_horizontal"
-            android:id="@+id/riv"
+            android:id="@+id/riv_user"
             android:src="@drawable/ic_peck"
             android:alpha="@dimen/alpha_unauth"
             android:layout_marginTop="16dp" /> <!-- need to set source -->

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.util.LruCache;
 
 import com.peck.android.PeckApp;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class ImageCacher implements Singleton {
 
     }
 
-    public static void init(String defaultImageName, int userId) {
+    public static void init(String defaultImageName, final int userId) {
         if (defaultImageName != null)
             if (new File(defaultImageName).exists()) {
                 Log.i(TAG, "loading from file saved to disk");
@@ -49,7 +50,12 @@ public class ImageCacher implements Singleton {
                     userImage = BitmapFactory.decodeFile(defaultImageName);
                 } catch (Exception e) {
                     Log.e(TAG, e.toString());
-                    userImage = get(userId);
+                    get(userId, new Callback<Bitmap>() {
+                        @Override
+                        public void callBack(Bitmap obj) {
+                            userImage = obj;
+                        }
+                    });
                 } finally {
                     try {
                         in.close();
@@ -58,40 +64,51 @@ public class ImageCacher implements Singleton {
                 }
             } else {
                 Log.i(TAG, "loading default");
-                userImage = get(userId);
+                get(userId, new Callback<Bitmap>() {
+                    @Override
+                    public void callBack(Bitmap obj) {
+                        userImage = obj;
+                    }
+                });
             }
 
     }
 
     public static ImageCacher getCacher() { return cacher; }
 
-    public static Bitmap get(int userId) {
-        if (userId == PeckSessionManager.getUserId()) return userImage;
-        if (noImageAvailable.contains(userId)) return imageNotAvailable;
+    public static void get(final int userId, final Callback<Bitmap> callback) {
+        Bitmap ret;
 
-        Bitmap ret = cache.get(userId);
-        if (ret == null) {
-            try {
-                ret = PeckSessionManager.getImage(userId);
-                cache.put(userId, ret);
-            } catch (PeckSessionManager.NotAvailableException e) {
-                Log.i(getCacher().getClass().getName(), "Image for user " + userId + " was unreachable.");
-                noImageAvailable.add(userId);
-                ret = imageNotAvailable;
+        if (userId == PeckSessionManager.getUser().getLocalId() && userImage != null) ret = userImage;
+        else if (noImageAvailable.contains(userId)) ret = imageNotAvailable;
+        else {
+            ret = cache.get(userId);
+            if (ret == null) {
+                try {
+                    PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
+                        @Override
+                        public void callBack(Bitmap obj) {
+                            if (obj != null) {
+                            cache.put(userId, obj);
+                            callback.callBack(obj); }
+                            else callback.callBack(imageNotAvailable);
+                        }
+                    });
+                    //cache.put(userId, ret);
+                    return;
+                } catch (Exception e) {
+                    Log.i(getCacher().getClass().getName(), "Image for user " + userId + " was unreachable.\n" + e.toString());
+                    //noImageAvailable.add(userId);
+                    ret = imageNotAvailable;
+                }
             }
         }
-        return ret;
+        callback.callBack(ret);
     }
 
-    public static Bitmap forceUpdate(int resId) {
+    public static void forceUpdate(int resId, Callback<Bitmap> callback) {
         noImageAvailable.remove(Integer.valueOf(resId));
-        return get(resId);
-    }
-
-    public static boolean isAvailable(int userId) {
-        //returns false if we know we can't get the user's image, true otherwise
-        return !noImageAvailable.contains(userId);
-
+        get(resId, callback);
     }
 
     protected static void writeCacheToDisk() { //clears the cache

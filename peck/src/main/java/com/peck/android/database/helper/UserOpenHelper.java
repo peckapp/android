@@ -30,7 +30,7 @@ public class UserOpenHelper extends DataSourceHelper<User> implements Singleton 
             + TABLE_NAME + "(" + COLUMN_LOC_ID
             + " integer primary key autoincrement, "
             + COLUMN_SERVER_ID + " integer, "
-            + COLUMN_FACEBOOK_ID + " integer, "
+            + COLUMN_FACEBOOK_ID + " text, "
             + COLUMN_NAME + " text not null, "
             + COLUMN_CREATED + " integer, "
             + COLUMN_BIO + " text, "

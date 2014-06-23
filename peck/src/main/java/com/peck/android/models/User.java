@@ -3,17 +3,23 @@ package com.peck.android.models;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.meetme.android.horizontallistview.HorizontalListView;
 import com.peck.android.R;
 import com.peck.android.database.helper.UserOpenHelper;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
+import com.peck.android.views.RoundedImageView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -22,12 +28,12 @@ import java.util.Date;
 public class User extends DBOperable implements HasFeedLayout, SelfSetup {
 
     private String name;
-    private int fbId;
+    private String fbId;
     private int serverId;
-    private String bio;
-    private ArrayList<Circle> circles;
-    private Date created;
-    private Date updated;
+    private String bio = "";
+    private ArrayList<Circle> circles = new ArrayList<Circle>();
+    private Date created = new Date(Calendar.getInstance().getTimeInMillis());
+    private Date updated = new Date(Calendar.getInstance().getTimeInMillis());
 
     public Date getCreated() {
         return created;
@@ -47,11 +53,11 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public int getFbId() {
+    public String getFbId() {
         return fbId;
     }
 
-    public User setFbId(int fbId) {
+    public User setFbId(String fbId) {
         this.fbId = fbId;
         return this;
     }
@@ -92,13 +98,12 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public Bitmap getProfilePicture() {
-        return ImageCacher.get(localId);
+    public void getProfilePicture(Callback<Bitmap> callback) {
+        ImageCacher.get(localId, callback);
     }
 
     public User strip() {
-        circles = null;
-        bio = null;
+        circles = new ArrayList<Circle>();
         return this;
     }
 
@@ -132,7 +137,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
                 .setName(cursor.getString(cursor.getColumnIndex(UserOpenHelper.COLUMN_NAME)))
                 .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(UserOpenHelper.COLUMN_CREATED))))
                 .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(UserOpenHelper.COLUMN_UPDATED))))
-                .setFbId(cursor.getInt(cursor.getColumnIndex(UserOpenHelper.COLUMN_FACEBOOK_ID)));
+                .setFbId(cursor.getString(cursor.getColumnIndex(UserOpenHelper.COLUMN_FACEBOOK_ID)));
     }
 
     @Override
@@ -141,16 +146,28 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
     }
 
     @Override
-    public void setUp(View v) {
+    public void setUp(final View v) {
         //test
         //profilePicture = BitmapFactory.decodeResource(v.getResources(), R.drawable.ic_launcher);
+
+        Log.d("user model", "setting up " + ((v instanceof HorizontalListView) ? "hlv" :
+                (v instanceof LinearLayout) ? "linear layout" : "unknown"));
 
         if (v instanceof HorizontalListView) {
             //if this is a list item
             //((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(profilePicture);
-        } else {
+        } else if (v instanceof LinearLayout) {
             //if this is a profile page
-
+            getProfilePicture(new Callback<Bitmap>() {
+                @Override
+                public void callBack(Bitmap obj) {
+                    ((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(obj);
+                    v.findViewById(R.id.riv_user).setAlpha(1f);
+                    Log.d("user model", "callback being called");
+                }
+            });
+            ((TextView)v.findViewById(R.id.tv_realname)).setText(getName());
+            v.findViewById(R.id.tv_realname).setAlpha(1f);
         }
 
 
