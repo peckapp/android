@@ -3,11 +3,12 @@ package com.peck.android.managers;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
@@ -18,8 +19,6 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -78,11 +77,18 @@ public class PeckSessionManager extends Manager implements Singleton {
                 user = UserManager.getManager().getById(user.getLocalId());
 
                 if (user == null) { user = UserManager.getManager().add( new User()); }
-                else peckAuth = true;
+                else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
+                    @Override
+                    public void callBack(Boolean obj) {
 
-                ImageCacher.init(user.getLocalId());
+                    }
+                });
 
-                Log.i(TAG, "initialized with user " + user.getLocalId());
+                //todo: contact loginmanager, try to use cached credentials to authenticate with peck servers
+
+                ImageCacher.init(user.getServerId());
+
+                Log.i(TAG, "initialized with user " + user.getServerId());
             }
 
         });
@@ -115,23 +121,31 @@ public class PeckSessionManager extends Manager implements Singleton {
         getImage(userId, profileDimens, callback);
     }
 
-    protected static void getImage(int userId, int dimens, Callback<Bitmap> callback) {
+    protected static void getImage(final int userId, int dimens, final Callback<Bitmap> callback) {
+        String URL = "";
 
-        try {
             if (facebookMode && sourcePref == SourcePref.FACEBOOK) {
-                if (user.getFbId() == null || user.getFbId() == "")
-
-                    getImageFromURL(new URL("https://graph.facebook.com/" + user.getFbId() +
-                                    "/picture?width=" + dimens + "&height=" + dimens),
-                            dimens, callback, "Facebook Profile Picture"
-                    );
-
+                URL = "https://graph.facebook.com/" + UserManager.getManager().getById(userId).getFbId() +
+                        "/picture?width=" + dimens + "&height=" + dimens;
 
             } else if (peckAuth && sourcePref == SourcePref.PECK) {
 
             } else {
             }
-        } catch (MalformedURLException e) { callback.callBack(null); }
+
+        PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                callback.callBack(bitmap);
+            }
+        }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(context, "Request response " + volleyError.networkResponse.statusCode
+                + ". Couldn't get image for " + userId, Toast.LENGTH_LONG).show();
+                callback.callBack(null);
+            }
+        }));
 
 
     }
@@ -140,8 +154,6 @@ public class PeckSessionManager extends Manager implements Singleton {
         if (size == profileDimens) return bmp;
         else return Bitmap.createScaledBitmap(bmp, size, size, false);
     }
-
-
 
 
     private static void saveImage(String filepath, Bitmap bmp) {
@@ -154,57 +166,9 @@ public class PeckSessionManager extends Manager implements Singleton {
         } finally {
             try {
                 outputStream.close();
-            } catch (Throwable ignore) {}
-        }
-    }
-
-    //going to have to pull/push changes to/from server
-
-    protected static void handleNDE(NotAvailableException nde) {
-        Log.e(TAG, nde.toString());
-        Toast.makeText(context, "Couldn't download your " + nde.getFailedResource(), Toast.LENGTH_SHORT).show();
-    }
-
-
-
-    protected static void getImageFromURL(final URL source, final int pixelDimens,
-                                          final Callback<Bitmap> callback, final String resourceName) {
-        new AsyncTask<String, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(String... strings) {
-                try {
-                    return BitmapFactory.decodeStream(source.openConnection().getInputStream());
-                } catch (Exception e) {
-                    Log.e(getClass().getName(), e.toString());
-                }
-                return null;
+            } catch (Throwable ignore) {
             }
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                if (bmp == null) handleNDE(new NotAvailableException(TAG, resourceName));
-
-                callback.callBack(bmp);
-            }
-        }.execute();
-
-    }
-
-
-
-
-    public static class NotAvailableException extends Exception {
-        public String failedResource;
-
-        public NotAvailableException(String message, String failedResource) {
-            super(message);
-            this.failedResource = failedResource;
-        }
-
-        public String getFailedResource() {
-            return failedResource;
         }
     }
-
 
 }

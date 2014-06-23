@@ -42,7 +42,7 @@ public class ImageCacher implements Singleton {
 
     }
 
-    public static void init(final int localId) {
+    public static void init(final int serverId) {
         userImage = imageNotAvailable;
 
         new AsyncTask<Void, Void, Void>() {
@@ -54,8 +54,8 @@ public class ImageCacher implements Singleton {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                if (cache.get(localId) != null) {
-                    userImage = cache.remove(localId);
+                if (cache.get(serverId) != null) {
+                    userImage = cache.remove(serverId);
                 }
             }
         }.execute();
@@ -64,7 +64,7 @@ public class ImageCacher implements Singleton {
     public static ImageCacher getCacher() { return cacher; }
 
     public static void get(final int userId, final Callback<Bitmap> callback) {
-        if (userId == PeckSessionManager.getUser().getLocalId() && userImage != null) callback.callBack(userImage);
+        if (userId == PeckSessionManager.getUser().getServerId() && userImage != null) callback.callBack(userImage);
         else if (noImageAvailable.contains(userId)) callback.callBack(imageNotAvailable);
         else {
             Bitmap ret = cache.get(userId);
@@ -104,12 +104,12 @@ public class ImageCacher implements Singleton {
             }
         }
 
-        if (PeckSessionManager.getUser() != null && PeckSessionManager.getUser().getLocalId() > 0) {
+        if (PeckSessionManager.getUser() != null && PeckSessionManager.getUser().getServerId() >= 0) {
             try {
-                out = new FileOutputStream(new File(CACHE_DIR, Integer.toString(PeckSessionManager.getUser().getLocalId())));
+                out = new FileOutputStream(new File(CACHE_DIR, Integer.toString(PeckSessionManager.getUser().getServerId())));
                 userImage.compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "couldn't write app user's image to disk");
+            } catch (Exception e) {
+                Log.e(TAG, "couldn't write app user's image to disk\n" + e.toString());
             } finally {
                 try {
                     out.close();

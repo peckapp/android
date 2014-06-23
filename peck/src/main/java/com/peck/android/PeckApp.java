@@ -77,18 +77,15 @@ public class PeckApp extends Application implements Singleton{
             public final static int INT_CACHE_SIZE = 50;
             public final static int PNG_COMPRESSION = 90;
 
-
         }
-
 
     }
 
 
+    private static RequestQueue requestQueue;
 
-    private RequestQueue requestQueue;
-
-    public RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(this);
+    public static RequestQueue getRequestQueue() {
+        if (requestQueue == null) requestQueue = Volley.newRequestQueue(AppContext.getContext());
         return requestQueue;
     }
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
@@ -13,6 +14,7 @@ import com.peck.android.activities.LoginActivity;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionManager;
+import com.peck.android.managers.LoginManager;
 import com.peck.android.managers.PeckSessionManager;
 
 /**
@@ -45,6 +47,36 @@ public class ProfileTab extends BaseTab {
 
     @Override
     public void onResume() {
+        String btnText;
+        View.OnClickListener onClickListener;
+        if (LoginManager.isLoggedIn()) {
+
+            btnText = getActivity().getString(R.string.bt_peck_logout);
+
+            onClickListener = (new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    LoginManager.logout();
+                }
+            });
+
+
+        } else {
+            btnText = getActivity().getString(R.string.bt_peck_login);
+
+            onClickListener = (new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                }
+            });
+
+
+        }
+
+        ((Button) getView().findViewById(R.id.bt_peck_login)).setText(btnText);
+        getView().findViewById(R.id.bt_peck_login).setOnClickListener(onClickListener);
         super.onResume();
         lifecycleHelper.onResume();
     }
@@ -85,13 +117,7 @@ public class ProfileTab extends BaseTab {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
-        view.findViewById(R.id.bt_peck_login).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
-            }
-        });
+
 
         PeckSessionManager.getUser().setUp(view.findViewById(R.id.ll_profile));
 
