@@ -15,6 +15,8 @@ import java.util.ArrayList;
 public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
+    ArrayList<T> data = new ArrayList<T>();
+    protected DataSource<T> dSource;
 
     public static Manager getManager(Class<? extends Singleton> clss) {
         try {
@@ -37,9 +39,6 @@ public abstract class Manager<T extends DBOperable> {
 
         return this;
     }
-
-    ArrayList<T> data = new ArrayList<T>();
-    protected DataSource<T> dSource;
 
     public ArrayList<T> downloadFromServer() {
         return null; //TODO: implement
@@ -88,18 +87,16 @@ public abstract class Manager<T extends DBOperable> {
         return null;
     }
 
-    public T add(T item) { //use for a single item
-        data.add(item);
-        //TODO: dSource.create(item);
+    public T add(T item) {
+        data.add(dSource.create(item));
         return item;
     }
 
-    public ArrayList<T> add(ArrayList<T> items) {
-        for (T i : items) {
-            data.add(i);
-            //TODO: dSource.create
+    public void update(T item) {
+        if (data.contains(item)) {
+            dSource.update(item);
         }
-        return items;
+
     }
 
 

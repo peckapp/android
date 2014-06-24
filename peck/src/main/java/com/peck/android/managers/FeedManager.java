@@ -53,13 +53,13 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
     public ArrayList<T> add(ArrayList<T> items) {
-        super.add(items);
+        for (T i : items) {
+            super.add(i);
+        }
         adapter.update(data);
         adapter.notifyDataSetChanged();
         return items;
     }
-
-
 
 
 }

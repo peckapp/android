@@ -3,6 +3,7 @@ package com.peck.android.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 import com.peck.android.database.dataspec.DataSpec;
@@ -43,6 +44,9 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         Cursor cursor;
 
         insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+
+        if (insertId == -1) throw new SQLiteException("Row could not be inserted into the database");
+
         cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
                 dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
 
