@@ -8,6 +8,7 @@ import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -28,14 +29,14 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         super.initialize(dSource, new Callback() {
             @Override
             public void callBack(Object obj) {
-                adapter.update(data);
+                adapter.setSource(FeedManager.this);
             }
         });
         this.adapter = adapter;
         return this;
     }
 
-    public <V extends DBOperable> ArrayList<V> loadFromDatabase(DataSource<V> dataSource) {
+    public <V extends DBOperable> HashMap<Integer, V> loadFromDatabase(DataSource<V> dataSource) {
         return super.loadFromDatabase(dataSource, new Callback() {
             @Override
             public void callBack(Object obj) {
@@ -45,18 +46,16 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
-    public T add(T item) { //use for a single item
+    public synchronized T add(T item) {
         super.add(item);
-        adapter.update(data);
         adapter.notifyDataSetChanged();
         return item;
     }
 
-    public ArrayList<T> add(ArrayList<T> items) {
+    public synchronized ArrayList<T> add(ArrayList<T> items) {
         for (T i : items) {
             super.add(i);
         }
-        adapter.update(data);
         adapter.notifyDataSetChanged();
         return items;
     }

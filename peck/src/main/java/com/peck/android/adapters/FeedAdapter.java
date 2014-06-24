@@ -6,54 +6,56 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.peck.android.PeckApp;
 import com.peck.android.interfaces.DBOperable;
-import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.managers.FeedManager;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
 public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<T> data = new ArrayList<T>();
-    private Context context;
+    private FeedManager<T> manager;
     private int resourceId;
 
-    public FeedAdapter(Context context, Factory<T> factory) {
-        this.context = context;
-        this.resourceId = factory.generate().getResourceId();
+    public FeedAdapter(int resourceId) {
+        this.resourceId = resourceId;
     }
-
-    public Context getContext() { return context; }
 
     @Override
     public int getCount() {
-        return data.size();
+        return getData().size();
     }
 
     @Override
-    public Object getItem(int i) {
-        return data.get(i);
+    public T getItem(int i) {
+        T[] ts = (T[])(getData().values().toArray());
+        return ts[i];
     }
 
     @Override
     public long getItemId(int i) {
-        return data.get(i).getLocalId();
+        return getItem(i).getLocalId();
     }
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         if (view == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) PeckApp.AppContext.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(resourceId, null);
         }
 
-        T res = (T)getItem(i);
+        T res = getItem(i);
         res.setUp(view);
         return view;
+    }
+
+    private HashMap<Integer, T> getData() {
+        return manager.getData();
     }
 
 
@@ -62,9 +64,8 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         return this;
     }
 
-    public FeedAdapter<T> update(ArrayList<T> data) {
-
-        this.data = data;
+    public FeedAdapter<T> setSource(FeedManager<T> manager) {
+        this.manager = manager;
         return this;
     }
 

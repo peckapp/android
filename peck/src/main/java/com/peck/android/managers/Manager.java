@@ -7,7 +7,7 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/12/2014.
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
-    ArrayList<T> data = new ArrayList<T>();
+    protected HashMap<Integer, T> data = new HashMap<Integer, T>();
     protected DataSource<T> dSource;
 
     public static Manager getManager(Class<? extends Singleton> clss) {
@@ -40,11 +40,11 @@ public abstract class Manager<T extends DBOperable> {
         return this;
     }
 
-    public ArrayList<T> downloadFromServer() {
+    public HashMap<Integer, T> downloadFromServer() {
         return null; //TODO: implement
     }
 
-    public <V extends DBOperable> ArrayList<V> loadFromDatabase(final DataSource<V> dataSource, final Callback callback) {
+    public <V extends DBOperable> HashMap<Integer, V> loadFromDatabase(final DataSource<V> dataSource, final Callback callback) {
         /*//META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
         //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
         final ArrayList<V> items = new ArrayList<V>();
@@ -68,7 +68,7 @@ public abstract class Manager<T extends DBOperable> {
         }.execute();
         return items; //TODO: doesn't work, because the method's async. */
         callback.callBack(null);
-        return new ArrayList<V>();
+        return new HashMap<Integer, V>();
     }
 
 
@@ -76,26 +76,24 @@ public abstract class Manager<T extends DBOperable> {
         return getClass().getName();
     }
 
-    public ArrayList<T> getData() {
+    public HashMap<Integer, T> getData() {
         return data;
     }
 
     public T getById(int id) {
-        for (T t : data) {
-            if (t.getLocalId() == id) return t;
-        }
-        return null;
+        return data.get(id);
     }
 
-    public T add(T item) {
-        data.add(dSource.create(item));
+    public synchronized T add(T item) {
+        T temp = dSource.create(item);
+        data.put(temp.getLocalId(), temp);
         return item;
     }
 
-    public void update(T item) {
-        if (data.contains(item)) {
+    public synchronized void update(T item) {
+        if (data.keySet().contains(item.getLocalId())) {
             dSource.update(item);
-        }
+        } else add(item);
 
     }
 
