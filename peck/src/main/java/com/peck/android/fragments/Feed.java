@@ -32,7 +32,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setUpFeed();
-        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
         congfigureManager();
         super.onCreate(savedInstanceState);
 
@@ -79,10 +78,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     public void onResume() {
-        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
-        //Log.d(tag(), "activity " + ((getActivity() == null) ? "null" : "not null"));
         super.onResume();
-        //assign();
         feedAdapter.removeCompleted();
     }
 

@@ -29,7 +29,7 @@ public class LocaleDataSpec extends DataSpec<Locale> implements Singleton {
             + COLUMN_NAME + " text not null"
             + ");";
 
-    public static LocaleDataSpec getHelper() {
+    public static LocaleDataSpec getInstance() {
         return helper;
     }
 

@@ -2,10 +2,12 @@ package com.peck.android.managers;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Event;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by mammothbane on 6/11/2014.
@@ -32,7 +34,12 @@ public class EventManager extends FeedManager<Event> implements Singleton {
             e.setText("Text " + Integer.toString(i));
             events.add(e);
         }
-        add(events);
+        add(events, new Callback<Collection<Event>>() {
+            @Override
+            public void callBack(Collection<Event> obj) {
+
+            }
+        });
         return this;
     }
 

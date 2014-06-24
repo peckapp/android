@@ -40,7 +40,7 @@ public class CirclesDataSpec extends DataSpec<Circle> implements Singleton {
     }
 
 
-    public static CirclesDataSpec getHelper() {
+    public static CirclesDataSpec getInstance() {
         return helper;
     }
 

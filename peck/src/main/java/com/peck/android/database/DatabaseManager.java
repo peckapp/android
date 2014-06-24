@@ -29,13 +29,13 @@ public class DatabaseManager {
     private static ArrayList<DataSpec> dbSpecs = new ArrayList<DataSpec>();
 
     static {
-        dbSpecs.add(EventDataSpec.getHelper());
-        dbSpecs.add(FoodDataSpec.getHelper());
-        dbSpecs.add(MealDataSpec.getHelper());
-        dbSpecs.add(LocaleDataSpec.getHelper());
-        dbSpecs.add(PeckDataSpec.getHelper());
-        dbSpecs.add(CirclesDataSpec.getHelper());
-        dbSpecs.add(UserDataSpec.getHelper());
+        dbSpecs.add(EventDataSpec.getInstance());
+        dbSpecs.add(FoodDataSpec.getInstance());
+        dbSpecs.add(MealDataSpec.getInstance());
+        dbSpecs.add(LocaleDataSpec.getInstance());
+        dbSpecs.add(PeckDataSpec.getInstance());
+        dbSpecs.add(CirclesDataSpec.getInstance());
+        dbSpecs.add(UserDataSpec.getInstance());
     }
 
     public static String getDbName() {

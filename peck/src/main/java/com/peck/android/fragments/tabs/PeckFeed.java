@@ -7,6 +7,7 @@ import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.database.dataspec.PeckDataSpec;
 import com.peck.android.fragments.Feed;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
 import com.peck.android.models.Peck;
@@ -26,7 +27,12 @@ public class PeckFeed extends FeedTab<Peck> {
             p.setServerId(i);
             p.setTitle("Peck " + Integer.toString(i));
             p.setText("Text " + Integer.toString(i));
-            feedManager.add(p);
+            feedManager.add(p, new Callback<Peck>() {
+                @Override
+                public void callBack(Peck obj) {
+
+                }
+            });
         }
 
 
@@ -35,7 +41,7 @@ public class PeckFeed extends FeedTab<Peck> {
     @Override
     public Feed<Peck> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Peck>(PeckDataSpec.getHelper());
+            dataSource = new DataSource<Peck>(PeckDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {

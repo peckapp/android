@@ -44,7 +44,7 @@ public class MealDataSpec extends DataSpec<Meal> implements Singleton {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-    public static MealDataSpec getHelper() {
+    public static MealDataSpec getInstance() {
         return helper;
     }
 

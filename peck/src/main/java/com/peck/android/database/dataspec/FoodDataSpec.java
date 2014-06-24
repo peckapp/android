@@ -42,7 +42,7 @@ public class FoodDataSpec extends DataSpec<Food> implements Singleton {
             + COLUMN_TYPE + " integer"
             + ");";
 
-    public static FoodDataSpec getHelper() {
+    public static FoodDataSpec getInstance() {
        return helper;
    }
 

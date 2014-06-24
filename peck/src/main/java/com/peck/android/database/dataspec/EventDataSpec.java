@@ -42,7 +42,7 @@ public class EventDataSpec extends DataSpec<Event> implements Singleton {
         super();
     }
 
-    public static EventDataSpec getHelper() {
+    public static EventDataSpec getInstance() {
         return helper;
     }
 

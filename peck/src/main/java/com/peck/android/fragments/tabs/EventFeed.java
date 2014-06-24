@@ -1,7 +1,5 @@
 package com.peck.android.fragments.tabs;
 
-import android.os.Bundle;
-
 import com.peck.android.R;
 import com.peck.android.managers.EventManager;
 
@@ -15,16 +13,6 @@ public class EventFeed extends BaseEventFeed {
     private final static int resId = R.layout.tab_eventfeed;
     private final static int lvId = R.id.lv_events;
     private final static int tabId = R.string.tb_events;
-
-    public void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-
-
-
-    }
-
-
 
     public int getLayoutRes() {
         return resId;

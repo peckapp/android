@@ -38,7 +38,7 @@ public class UserDataSpec extends DataSpec<User> implements Singleton {
             + ");";
 
 
-    public static UserDataSpec getHelper() {
+    public static UserDataSpec getInstance() {
         Log.d(TAG, "helper is " + ((helper == null) ? "null" : "not null"));
         return helper;
     }

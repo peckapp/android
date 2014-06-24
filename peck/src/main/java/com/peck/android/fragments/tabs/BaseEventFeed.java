@@ -14,7 +14,7 @@ public abstract class BaseEventFeed extends FeedTab<Event> {
     public BaseEventFeed setUpFeed() {
 
         if (dataSource == null) {
-            dataSource = new DataSource<Event>(EventDataSpec.getHelper());
+            dataSource = new DataSource<Event>(EventDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {

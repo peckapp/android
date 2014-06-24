@@ -19,7 +19,7 @@ public class UsersFeed extends Feed<User> {
         //call manager to associate users
 
         if (dataSource == null) {
-            dataSource = new DataSource<User>(UserDataSpec.getHelper());
+            dataSource = new DataSource<User>(UserDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {

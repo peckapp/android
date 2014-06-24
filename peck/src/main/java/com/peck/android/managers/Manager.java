@@ -7,7 +7,6 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -83,39 +82,43 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public T getById(int id) {
+        //TODO: need to account for current data set not containing wanted item -- throw db req
         return data.get(id);
     }
 
-    public synchronized T add(T item) {
+    public synchronized void add(T item, final Callback<T> callback) {
         //todo: check to see if we already have an item with this localid
 
-        dSource.open();
-        T temp = dSource.create(item);
-        dSource.close();
-        data.put(temp.getLocalId(), temp);
-        return temp;
+        dSource.create(item, new Callback<T>() {
+            @Override
+            public void callBack(T obj) {
+                data.put(obj.getLocalId(), obj);
+                callback.callBack(obj);
+            }
+        });
     }
 
-    public synchronized Collection<T> add(Collection<T> items) {
-        dSource.open();
-        Collection<T> ret = new ArrayList<T>();
-        for (T item : items) {
-            ret.add(dSource.create(item));
-            data.put(item.getLocalId(), item);
-        }
-        dSource.close();
-        return ret;
+    public synchronized void add(Collection<T> items, final Callback<Collection<T>> callback) {
+        dSource.createMult(items, new Callback<Collection<T>>() {
+            @Override
+            public void callBack(Collection<T> obj) {
+                for (T i : obj) {
+                    data.put(i.getLocalId(), i);
+                    callback.callBack(obj);
+                }
+            }
+        });
+
+
     }
 
 
     public synchronized void update(T item) {
         if (item.getLocalId() >= 0 && data.keySet().contains(item.getLocalId())) {
-            dSource.open();
             dSource.update(item);
-            dSource.close();
         } else {
-            add(item);
-            update(item);
+            add(item, new Callback<T>() { public void callBack(T obj) {update(obj);} });
+
         }
 
     }

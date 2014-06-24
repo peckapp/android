@@ -37,7 +37,7 @@ public class PeckDataSpec extends DataSpec<Peck> implements Singleton {
             + ");";
 
 
-    public static PeckDataSpec getHelper() {
+    public static PeckDataSpec getInstance() {
         return helper;
     }
 

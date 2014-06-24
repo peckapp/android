@@ -43,7 +43,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
 
     static {
-        dataSource = new DataSource<User>(UserDataSpec.getHelper());
+        dataSource = new DataSource<User>(UserDataSpec.getInstance());
         context = PeckApp.AppContext.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }
@@ -76,19 +76,26 @@ public class PeckSessionManager extends Manager implements Singleton {
 
                 user = UserManager.getManager().getById(user.getLocalId());
 
-                if (user == null) { user = UserManager.getManager().add( new User()); }
+                if (user == null) {
+                    UserManager.getManager().add( new User(), new Callback<User>() {
+                        @Override
+                        public void callBack(User obj) {
+                            user = obj;
+                        }
+                    });
+                }
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override
                     public void callBack(Boolean obj) {
+                        ImageCacher.init(user.getServerId());
 
+                        Log.i(TAG, "initialized with user " + user.getServerId());
                     }
                 });
 
                 //todo: contact loginmanager, try to use cached credentials to authenticate with peck servers
 
-                ImageCacher.init(user.getServerId());
 
-                Log.i(TAG, "initialized with user " + user.getServerId());
             }
 
         });
@@ -124,15 +131,15 @@ public class PeckSessionManager extends Manager implements Singleton {
     protected static void getImage(final int userId, int dimens, final Callback<Bitmap> callback) {
         String URL = "";
 
-            if ((facebookMode) && (sourcePref == SourcePref.FACEBOOK)) {
-                URL = "https://graph.facebook.com/" + UserManager.getManager().getById(userId).getFbId() +
-                        "/picture?width=" + dimens + "&height=" + dimens;
+        if ((facebookMode) && (sourcePref == SourcePref.FACEBOOK)) {
+            URL = "https://graph.facebook.com/" + UserManager.getManager().getById(userId).getFbId() +
+                    "/picture?width=" + dimens + "&height=" + dimens;
 
-            } else if (peckAuth && sourcePref == SourcePref.PECK) {
-                URL = "https://herpderp.com";
-            } else {
-                URL = "https://derpherp.com";
-            }
+        } else if (peckAuth && sourcePref == SourcePref.PECK) {
+            URL = "https://herpderp.com";
+        } else {
+            URL = "https://derpherp.com";
+        }
 
         PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
             @Override

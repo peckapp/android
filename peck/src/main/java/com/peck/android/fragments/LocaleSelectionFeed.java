@@ -44,7 +44,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     @Override
     public Feed<Locale> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Locale>(LocaleDataSpec.getHelper());
+            dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {

@@ -46,16 +46,25 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
-    public synchronized T add(T item) {
-        T ret = super.add(item);
-        adapter.notifyDataSetChanged();
-        return ret;
+    public synchronized void add(T item, final Callback<T> callback) {
+        super.add(item, new Callback<T>() {
+            @Override
+            public void callBack(T obj) {
+                adapter.notifyDataSetChanged();
+                callback.callBack(obj);
+            }
+        });
     }
 
-    public synchronized Collection<T> add(Collection<T> items) {
-        Collection<T> ret = super.add(items);
-        adapter.notifyDataSetChanged();
-        return ret;
+    @Override
+    public synchronized void add(Collection<T> items, final Callback<Collection<T>> callback) {
+        super.add(items, new Callback<Collection<T>>() {
+            @Override
+            public void callBack(Collection<T> obj) {
+                adapter.notifyDataSetChanged();
+                callback.callBack(obj);
+            }
+        });
     }
 
 

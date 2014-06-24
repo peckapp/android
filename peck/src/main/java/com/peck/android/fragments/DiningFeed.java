@@ -1,7 +1,5 @@
 package com.peck.android.fragments;
 
-import android.os.Bundle;
-
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
@@ -25,25 +23,10 @@ public class DiningFeed extends FeedTab<Meal> {
         return tabId;
     }
 
-    public void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-
-        Meal e;
-        for (int i = 1; i < 11; i++) {
-            e = new Meal();
-            e.setServerId(i);
-            e.setTitle("Meal " + Integer.toString(i));
-            feedManager.add(e);
-        }
-
-    }
-
-
     public DiningFeed setUpFeed() {
 
         if (dataSource == null) {
-            dataSource = new DataSource<Meal>(MealDataSpec.getHelper());
+            dataSource = new DataSource<Meal>(MealDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {
