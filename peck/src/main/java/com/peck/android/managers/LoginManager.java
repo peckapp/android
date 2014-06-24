@@ -13,6 +13,7 @@ import com.peck.android.interfaces.Singleton;
 public class LoginManager implements Singleton {
     private static LoginManager loginManager = new LoginManager();
     private static final String tag = "LoginManager";
+    private static boolean loginstate = true;
 
     public static LoginManager getLoginManager() {
         return loginManager;
@@ -27,6 +28,7 @@ public class LoginManager implements Singleton {
         //TODO: implement login
         //meta: password should probably also be hashed
         callback.callBack(true);
+        loginstate = true;
     }
 
     static void authenticateUsingCached(final Callback callback) {
@@ -42,12 +44,12 @@ public class LoginManager implements Singleton {
     }
 
     public static boolean isLoggedIn() {
-        return true; //todo: work on this; perhaps an async check with the server
+        return loginstate; //todo: work on this; perhaps an async check with the server
     }
 
     public static void logout() {
         //meta: what do we do here?
-
+        loginstate = false;
     }
 
 

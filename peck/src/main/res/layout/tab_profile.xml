@@ -62,7 +62,7 @@
             android:enabled="false"
             android:editable="false" />
 
-        <Button
+        <com.peck.android.views.PeckAuthButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bt_peck_login"
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/bt_fb_link"
             android:layout_gravity="center_horizontal"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_marginTop="16dp" />
 
 

@@ -142,8 +142,7 @@ public class PeckSessionManager extends Manager implements Singleton {
         }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(context, "Request response " + volleyError.networkResponse.statusCode
-                + ". Couldn't get image for " + userId, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Network error. Couldn't get image for " + userId, Toast.LENGTH_LONG).show();
                 callback.callBack(null);
             }
         }));

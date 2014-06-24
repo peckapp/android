@@ -5,17 +5,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
-import com.peck.android.activities.LoginActivity;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionManager;
-import com.peck.android.managers.LoginManager;
 import com.peck.android.managers.PeckSessionManager;
+import com.peck.android.views.PeckAuthButton;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -29,7 +27,6 @@ public class ProfileTab extends BaseTab {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //TODO: set onclicklisteners for list items
         super.onCreate(savedInstanceState);
 
         lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionManager.SessionStatusCallback(new Callback() {
@@ -47,36 +44,7 @@ public class ProfileTab extends BaseTab {
 
     @Override
     public void onResume() {
-        String btnText;
-        View.OnClickListener onClickListener;
-        if (LoginManager.isLoggedIn()) {
-
-            btnText = getActivity().getString(R.string.bt_peck_logout);
-
-            onClickListener = (new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    LoginManager.logout();
-                }
-            });
-
-
-        } else {
-            btnText = getActivity().getString(R.string.bt_peck_login);
-
-            onClickListener = (new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                    startActivity(intent);
-                }
-            });
-
-
-        }
-
-        ((Button) getView().findViewById(R.id.bt_peck_login)).setText(btnText);
-        getView().findViewById(R.id.bt_peck_login).setOnClickListener(onClickListener);
+        ((PeckAuthButton)getView().findViewById(R.id.bt_peck_login)).update();
         super.onResume();
         lifecycleHelper.onResume();
     }
@@ -117,7 +85,8 @@ public class ProfileTab extends BaseTab {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
-
+        PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
+        peckAuthButton.setFragment(this);
 
         PeckSessionManager.getUser().setUp(view.findViewById(R.id.ll_profile));
 

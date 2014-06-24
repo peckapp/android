@@ -78,8 +78,9 @@ public class ImageCacher implements Singleton {
                         else callback.callBack(imageNotAvailable);
                     }
                 });
+            } else {
+                callback.callBack(ret);
             }
-            callback.callBack(ret);
         }
     }
 
