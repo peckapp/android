@@ -133,8 +133,6 @@ public class LocaleActivity extends PeckActivity {
 
     private void notifyMe() {
         if (loaded) {
-            //Log.d(TAG, "notified twice");
-
             if (locationServices) {
                 new AsyncTask<Void, Void, Void>() {
                     TextView tv;

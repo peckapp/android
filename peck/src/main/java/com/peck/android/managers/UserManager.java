@@ -20,7 +20,7 @@ public class UserManager extends Manager<User> implements Singleton {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                CircleManager.getManager().associate(data);
+                CircleManager.getManager().associate(data.values());
                 return null;
             }
 

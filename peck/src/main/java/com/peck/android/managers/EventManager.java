@@ -27,6 +27,7 @@ public class EventManager extends FeedManager<Event> implements Singleton {
         for (int i = 1; i < 21; i++) {
             e = new Event();
             e.setServerId(i);
+            e.setLocalId(i);
             e.setTitle("Event " + Integer.toString(i));
             e.setText("Text " + Integer.toString(i));
             events.add(e);

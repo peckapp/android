@@ -47,7 +47,7 @@ public class DiningFeed extends FeedTab<Meal> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Meal>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Meal>(dataSource.generate().getResourceId());
         }
 
 

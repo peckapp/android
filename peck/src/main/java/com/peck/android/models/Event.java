@@ -121,8 +121,6 @@ public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
 
     @Override
     public Event fromCursor(Cursor cursor) {
-        cursor.moveToFirst();
-
         return this.setLocalId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_LOC_ID)))
                 .setServerId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_SERVER_ID)))
                 .setColor(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_COLOR)))

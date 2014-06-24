@@ -39,7 +39,7 @@ public class PeckFeed extends FeedTab<Peck> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Peck>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Peck>(dataSource.generate().getResourceId());
         }
 
         return this;

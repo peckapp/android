@@ -73,7 +73,7 @@ public class DatabaseManager {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
                 for (DataSpec i : dbSpecs) {
-                    database.execSQL(i.getDatabaseCreate());
+                    sqLiteDatabase.execSQL(i.getDatabaseCreate());
                 }
             }
 
@@ -82,7 +82,7 @@ public class DatabaseManager {
                 Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
 
                 for (DataSpec i : dbSpecs) {
-                    database.execSQL("DROP TABLE IF EXISTS "+ i.getTableName());
+                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ i.getTableName());
                 }
             }
         };

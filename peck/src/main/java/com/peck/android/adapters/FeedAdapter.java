@@ -10,15 +10,16 @@ import com.peck.android.PeckApp;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.FeedManager;
+import com.peck.android.managers.Manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
 public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private FeedManager<T> manager;
+    private Manager<T> manager;
     private int resourceId;
 
     public FeedAdapter(int resourceId) {
@@ -32,8 +33,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
 
     @Override
     public T getItem(int i) {
-        T[] ts = (T[])(getData().values().toArray());
-        return ts[i];
+        return new ArrayList<T>(getData().values()).get(i);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         return this;
     }
 
-    public FeedAdapter<T> setSource(FeedManager<T> manager) {
+    public FeedAdapter<T> setSource(Manager<T> manager) {
         this.manager = manager;
         return this;
     }

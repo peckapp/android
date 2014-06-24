@@ -197,7 +197,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             } else {
                 Locale ret = manager.data.get(0);
 
-                for (Locale l : getManager().data) {
+                for (Locale l : getManager().data.values()) {
                     if (l.calcDist(location).getDist() < ret.getDist()) {
                         ret = l;
                     }
@@ -211,13 +211,6 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return null;
 
     }
-
-
-    public static ArrayList<Locale> returnAll() {
-        return manager.data;
-    }
-
-
 
 
 }

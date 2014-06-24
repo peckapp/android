@@ -50,29 +50,38 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
                 dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
 
+        cursor.moveToFirst();
+
         T newT = (T) generate().fromCursor(cursor);
         cursor.close();
+
         return newT;
     }
 
     public void update(T t) {
+        open();
         database.update(dbSpec.getTableName(),
                 t.toContentValues(),
                 dbSpec.getColLocId() + " = ?",
                 new String[]{String.valueOf(t.getLocalId())});
+        close();
     }
 
     public void delete(T T) {
         long id = T.getLocalId();
+        open();
         Log.d(TAG, T.getClass() + " deleted with id: " + id);
         database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
                 + " = " + id, null);
+        close();
     }
 
     public ArrayList<T> getAll() {
         ArrayList<T> ret = new ArrayList<T>();
+        open();
         Cursor cursor = database.query(dbSpec.getTableName(),
                 dbSpec.getColumns(), null, null, null, null, null);
+        close();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             T obj = (T) generate().fromCursor(cursor);
@@ -100,6 +109,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     public T get(int id) {
         Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
+        cursor.moveToFirst();
         return (T)generate().fromCursor(cursor);
     }
 

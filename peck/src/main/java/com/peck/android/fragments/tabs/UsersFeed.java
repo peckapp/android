@@ -23,7 +23,7 @@ public class UsersFeed extends Feed<User> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<User>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<User>(dataSource.generate().getResourceId());
         }
 
         return this;

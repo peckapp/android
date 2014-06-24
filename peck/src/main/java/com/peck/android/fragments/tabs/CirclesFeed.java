@@ -45,7 +45,7 @@ public class CirclesFeed extends FeedTab<Circle> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Circle>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Circle>(dataSource.generate().getResourceId());
         }
 
         return this;

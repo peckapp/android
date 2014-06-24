@@ -48,7 +48,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Locale>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Locale>(new Locale().getResourceId());
         }
 
         return this;

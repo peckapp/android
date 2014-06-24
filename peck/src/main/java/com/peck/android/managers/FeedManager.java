@@ -7,7 +7,7 @@ import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -47,17 +47,15 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
 
     public synchronized T add(T item) {
-        super.add(item);
+        T ret = super.add(item);
         adapter.notifyDataSetChanged();
-        return item;
+        return ret;
     }
 
-    public synchronized ArrayList<T> add(ArrayList<T> items) {
-        for (T i : items) {
-            super.add(i);
-        }
+    public synchronized Collection<T> add(Collection<T> items) {
+        Collection<T> ret = super.add(items);
         adapter.notifyDataSetChanged();
-        return items;
+        return ret;
     }
 
 

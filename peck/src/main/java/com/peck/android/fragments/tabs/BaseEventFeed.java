@@ -18,7 +18,7 @@ public abstract class BaseEventFeed extends FeedTab<Event> {
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Event>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Event>(dataSource.generate().getResourceId());
         }
 
         return this;

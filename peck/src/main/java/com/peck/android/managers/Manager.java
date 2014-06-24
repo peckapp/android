@@ -7,6 +7,8 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -85,15 +87,34 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public synchronized T add(T item) {
+        dSource.open();
         T temp = dSource.create(item);
+        dSource.close();
         data.put(temp.getLocalId(), temp);
         return item;
     }
 
+    public synchronized Collection<T> add(Collection<T> items) {
+        dSource.open();
+        Collection<T> ret = new ArrayList<T>();
+        for (T item : items) {
+            ret.add(dSource.create(item));
+            data.put(item.getLocalId(), item);
+        }
+        dSource.close();
+        return ret;
+    }
+
+
     public synchronized void update(T item) {
         if (data.keySet().contains(item.getLocalId())) {
+            dSource.open();
             dSource.update(item);
-        } else add(item);
+            dSource.close();
+        } else {
+            add(item);
+            update(item);
+        }
 
     }
 

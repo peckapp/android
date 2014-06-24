@@ -39,7 +39,7 @@ public class MealManager extends FeedManager<Meal> implements Singleton {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                for (Meal meal : data) {
+                for (Meal meal : data.values()) {
                     for (Food course: courses) {
                         if (course.getMealId() == meal.getLocalId()) meal.link(course);
                     }

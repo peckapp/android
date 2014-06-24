@@ -1,23 +1,19 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.fragments.tabs.UsersFeed;
+import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.managers.UserManager;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,20 +84,24 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-
-    //TODO: implement inherited methods
-
     @Override
     @SuppressWarnings("unchecked")
     public void setUp(View v) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
 
-        UsersFeed uf = new UsersFeed();
-        uf.setUpFeed();
-        uf.associateAdapter((AdapterView<ListAdapter>)v.findViewById(R.id.hlv_users));
+        //todo: this is temporary, just to get things working for now
+
+        FeedAdapter<User> feedAdapter = new FeedAdapter<User>(R.id.hlv_users);
+        feedAdapter.setSource(UserManager.getManager());
+        ((AdapterView<ListAdapter>)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
 
 
+    }
+
+    public Circle setLocalid(int localid) {
+        localId = localid;
+        return this;
     }
 
     @Override
@@ -111,11 +111,23 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public ContentValues toContentValues() {
-        return null;
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(CirclesDataSpec.COLUMN_SERVER_ID, serverId);
+        contentValues.put(CirclesDataSpec.COLUMN_CREATED, dateToInt(created));
+        contentValues.put(CirclesDataSpec.COLUMN_UPDATED, dateToInt(updated));
+        contentValues.put(CirclesDataSpec.COLUMN_TITLE, title);
+
+        return contentValues;
     }
 
     @Override
-    public DBOperable fromCursor(Cursor cursor) {
-        return null;
+    public Circle fromCursor(Cursor cursor) {
+        setServerId(cursor.getInt(cursor.getColumnIndex(CirclesDataSpec.COLUMN_SERVER_ID)))
+                .setTitle(cursor.getString(cursor.getColumnIndex(CirclesDataSpec.COLUMN_TITLE)))
+                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(CirclesDataSpec.COLUMN_UPDATED))))
+                .setCreated(new Date(cursor.getInt(cursor.getColumnIndex(CirclesDataSpec.COLUMN_CREATED))))
+                .setLocalid(cursor.getInt(cursor.getColumnIndex(CirclesDataSpec.COLUMN_LOC_ID)));
+        return this;
     }
 }
