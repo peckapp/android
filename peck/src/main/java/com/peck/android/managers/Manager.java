@@ -68,7 +68,7 @@ public abstract class Manager<T extends DBOperable> {
                 callback.callBack(null);
             }
         }.execute();
-        return items; //TODO: doesn't work, because the method's async. */
+        return items; //TODO: doesn't work because the method's async. */
         callback.callBack(null);
         return new HashMap<Integer, V>();
     }
@@ -87,11 +87,13 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public synchronized T add(T item) {
+        //todo: check to see if we already have an item with this localid
+
         dSource.open();
         T temp = dSource.create(item);
         dSource.close();
         data.put(temp.getLocalId(), temp);
-        return item;
+        return temp;
     }
 
     public synchronized Collection<T> add(Collection<T> items) {
@@ -107,7 +109,7 @@ public abstract class Manager<T extends DBOperable> {
 
 
     public synchronized void update(T item) {
-        if (data.keySet().contains(item.getLocalId())) {
+        if (item.getLocalId() >= 0 && data.keySet().contains(item.getLocalId())) {
             dSource.open();
             dSource.update(item);
             dSource.close();

@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public abstract class DBOperable {
 
-    protected int localId;
+    protected int localId = -1;
 
     public int getLocalId() {
         return localId;

@@ -10,7 +10,7 @@ import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -59,33 +59,27 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     }
 
     public void update(T t) {
-        open();
         database.update(dbSpec.getTableName(),
                 t.toContentValues(),
                 dbSpec.getColLocId() + " = ?",
                 new String[]{String.valueOf(t.getLocalId())});
-        close();
     }
 
     public void delete(T T) {
         long id = T.getLocalId();
-        open();
         Log.d(TAG, T.getClass() + " deleted with id: " + id);
         database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
                 + " = " + id, null);
-        close();
     }
 
-    public ArrayList<T> getAll() {
-        ArrayList<T> ret = new ArrayList<T>();
-        open();
+    public HashMap<Integer, T> getAll() {
+        HashMap<Integer, T> ret = new HashMap<Integer, T>();
         Cursor cursor = database.query(dbSpec.getTableName(),
                 dbSpec.getColumns(), null, null, null, null, null);
-        close();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             T obj = (T) generate().fromCursor(cursor);
-            ret.add(obj);
+            ret.put(obj.getLocalId(), obj);
             cursor.moveToNext();
         }
         // Make sure to close the cursor
@@ -93,13 +87,13 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         return ret;
     }
 
-    public void getAll(ArrayList<T> ret) {
+    public void getAll(HashMap<Integer, T> ret) {
         Cursor cursor = database.query(dbSpec.getTableName(),
                 dbSpec.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             T obj = (T) generate().fromCursor(cursor);
-            ret.add(obj);
+            ret.put(obj.getLocalId(), obj);
             cursor.moveToNext();
         }
         // Make sure to close the cursor
