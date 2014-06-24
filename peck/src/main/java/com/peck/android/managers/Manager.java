@@ -104,8 +104,8 @@ public abstract class Manager<T extends DBOperable> {
             public void callBack(Collection<T> obj) {
                 for (T i : obj) {
                     data.put(i.getLocalId(), i);
-                    callback.callBack(obj);
                 }
+                callback.callBack(obj);
             }
         });
 

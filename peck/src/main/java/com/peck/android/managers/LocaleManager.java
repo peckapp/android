@@ -150,9 +150,6 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     public static void populate(final Callback callback) {
         //TEST
-
-
-
         final ArrayList<Locale> locales = new ArrayList<Locale>();
         Location lo;
         Locale l;
@@ -172,16 +169,11 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
         locales.add(l);
 
-        activity.runOnUiThread(new Runnable() {
+        getManager().add(locales, new Callback<Collection<Locale>>() {
             @Override
-            public void run() {
-                getManager().add(locales, new Callback<Collection<Locale>>() {
-                    @Override
-                    public void callBack(Collection<Locale> obj) {
-                        Log.d(tag, manager.data.toString());
-                        callback.callBack(null);
-                    }
-                });
+            public void callBack(Collection<Locale> obj) {
+                Log.d(tag, manager.data.toString());
+                callback.callBack(null);
             }
         });
     }
@@ -199,7 +191,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                         }
                         Log.d(tag, "[" + i + "] waiting for location, still null");
                     } else {
-                        Locale ret = manager.data.get(0);
+                        Locale ret = manager.getData().values().iterator().next();
 
                         for (Locale l : getManager().data.values()) {
                             if (l.calcDist(location).getDist() < ret.getDist()) {
@@ -210,19 +202,9 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                         Log.d(tag, "closest: " + ret.toString());
 
                         callback.callBack(ret);
-                        try {
-                            join();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
-                callback.callBack(null);
-                try {
-                    join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             }
 
         }.start();
@@ -230,14 +212,24 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     @Override
-    public synchronized void add(Locale item, Callback<Locale> callback) {
+    public synchronized void add(final Locale item, final Callback<Locale> callback) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                super.add(item, callback);
-
+                LocaleManager.super.add(item, callback);
             }
         });
     }
+
+    @Override
+    public synchronized void add(final Collection<Locale> locales, final Callback<Collection<Locale>> callback) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LocaleManager.super.add(locales, callback);
+            }
+        });
+    }
+
 }
 

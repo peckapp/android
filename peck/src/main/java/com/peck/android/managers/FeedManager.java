@@ -50,7 +50,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         super.add(item, new Callback<T>() {
             @Override
             public void callBack(T obj) {
-                adapter.notifyDataSetChanged();
+                //adapter.notifyDataSetChanged();
                 callback.callBack(obj);
             }
         });
@@ -61,7 +61,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         super.add(items, new Callback<Collection<T>>() {
             @Override
             public void callBack(Collection<T> obj) {
-                adapter.notifyDataSetChanged();
+                //adapter.notifyDataSetChanged();
                 callback.callBack(obj);
             }
         });

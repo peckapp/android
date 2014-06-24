@@ -51,12 +51,16 @@ public class LocaleActivity extends PeckActivity {
                 LocaleManager.populate(new Callback() {
                     @Override
                     public void callBack(Object obj) {
-                        notifyMe();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyMe();
+                        }
+                    });
                     }
                 });
                 return null;
             }
-
         }.execute();
 
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
@@ -141,11 +145,17 @@ public class LocaleActivity extends PeckActivity {
                         LocaleManager.calcDistances( new Callback<Locale>() {
                             @Override
                             public void callBack(Locale obj) {
-                                tv.setVisibility(View.GONE);
-                                findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        tv.setVisibility(View.GONE);
+                                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
-                                findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
 
+                                        Log.d(TAG, "test");
+                                    }
+                                });
                             }
                         }); //this only gets called if we know where the user is *and* have the location list loaded
             } else {

@@ -30,7 +30,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        LocaleManager.getManager().setLocale((Locale) feedAdapter.getItem(i));
+                        LocaleManager.getManager().setLocale(feedAdapter.getItem(i));
                         getActivity().finish();
                     }
                 });
