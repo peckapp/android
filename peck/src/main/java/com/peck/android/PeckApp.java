@@ -61,6 +61,7 @@ public class PeckApp extends Application implements Singleton{
             public static final String DATABASE_NAME = "peck.db";
             public final static int RETRY = 20;
             public final static int UI_TIMEOUT = 50;
+            public final static int QUEUE_TIMEOUT = 1000;
         }
 
         public static class Location {
