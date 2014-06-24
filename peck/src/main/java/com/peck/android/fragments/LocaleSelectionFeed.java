@@ -9,8 +9,8 @@ import android.widget.ListView;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.LocaleOpenHelper;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
@@ -44,7 +44,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     @Override
     public Feed<Locale> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Locale>(LocaleOpenHelper.getHelper());
+            dataSource = new DataSource<Locale>(LocaleDataSpec.getHelper());
         }
 
         if (feedAdapter == null) {

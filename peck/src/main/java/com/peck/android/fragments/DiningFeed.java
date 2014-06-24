@@ -4,8 +4,8 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.MealOpenHelper;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.MealDataSpec;
 import com.peck.android.fragments.tabs.FeedTab;
 import com.peck.android.managers.MealManager;
 import com.peck.android.models.Meal;
@@ -43,7 +43,7 @@ public class DiningFeed extends FeedTab<Meal> {
     public DiningFeed setUpFeed() {
 
         if (dataSource == null) {
-            dataSource = new DataSource<Meal>(MealOpenHelper.getHelper());
+            dataSource = new DataSource<Meal>(MealDataSpec.getHelper());
         }
 
         if (feedAdapter == null) {

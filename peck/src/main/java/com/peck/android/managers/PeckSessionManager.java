@@ -12,8 +12,8 @@ import com.android.volley.toolbox.ImageRequest;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.helper.UserOpenHelper;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
@@ -43,7 +43,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
 
     static {
-        dataSource = new DataSource<User>(UserOpenHelper.getHelper());
+        dataSource = new DataSource<User>(UserDataSpec.getHelper());
         context = PeckApp.AppContext.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }

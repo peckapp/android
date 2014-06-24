@@ -1,15 +1,14 @@
-package com.peck.android.database.source;
+package com.peck.android.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.peck.android.database.helper.DataSourceHelper;
+import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -17,23 +16,22 @@ import java.util.ArrayList;
  */
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
-    private DataSourceHelper<T> dbHelper;
+    private DataSpec<T> dbSpec;
     private static final String TAG = "datasource";
 
-    public DataSource(DataSourceHelper<T> dbHelper) {
-        this.dbHelper = dbHelper;
-        dbHelper.setDatasource(this);
+    public DataSource(DataSpec<T> dbSpec) {
+        this.dbSpec = dbSpec;
     }
 
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
+    public void open() {
+        database = DatabaseManager.openDB();
     }
 
     public void close() {
-        dbHelper.close();
+        DatabaseManager.closeDB();
     }
 
-    public T generate() { return dbHelper.generate(); }
+    public T generate() { return dbSpec.generate(); }
 
     public T create(T t) {
         ContentValues contentValues = t.toContentValues();
@@ -44,39 +42,33 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         long insertId;
         Cursor cursor;
 
-        synchronized (database) {
-            insertId = database.insert(dbHelper.getTableName(), null, contentValues);
-            cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(),
-                    dbHelper.getColLocId() + " = " + insertId, null, null, null, null);
-        }
+        insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+        cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
+                dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
 
         T newT = (T) generate().fromCursor(cursor);
         cursor.close();
         return newT;
     }
-    
+
     public void update(T t) {
-
-        synchronized (database) {
-
-            database.update(dbHelper.getTableName(),
-                    t.toContentValues(),
-                    dbHelper.getColLocId() + " = ?",
-                    new String[]{String.valueOf(t.getLocalId())});
-        }
+        database.update(dbSpec.getTableName(),
+                t.toContentValues(),
+                dbSpec.getColLocId() + " = ?",
+                new String[]{String.valueOf(t.getLocalId())});
     }
 
     public void delete(T T) {
         long id = T.getLocalId();
         Log.d(TAG, T.getClass() + " deleted with id: " + id);
-        database.delete(dbHelper.getTableName(), dbHelper.getColLocId()
+        database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
                 + " = " + id, null);
     }
 
     public ArrayList<T> getAll() {
         ArrayList<T> ret = new ArrayList<T>();
-        Cursor cursor = database.query(dbHelper.getTableName(),
-                dbHelper.getColumns(), null, null, null, null, null);
+        Cursor cursor = database.query(dbSpec.getTableName(),
+                dbSpec.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             T obj = (T) generate().fromCursor(cursor);
@@ -89,8 +81,8 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     }
 
     public void getAll(ArrayList<T> ret) {
-        Cursor cursor = database.query(dbHelper.getTableName(),
-                dbHelper.getColumns(), null, null, null, null, null);
+        Cursor cursor = database.query(dbSpec.getTableName(),
+                dbSpec.getColumns(), null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             T obj = (T) generate().fromCursor(cursor);
@@ -103,7 +95,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     }
 
     public T get(int id) {
-        Cursor cursor = database.query(dbHelper.getTableName(), dbHelper.getColumns(), dbHelper.getColLocId() + " = " + id, null, null, null, null);
+        Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
         return (T)generate().fromCursor(cursor);
     }
 

@@ -3,7 +3,7 @@ package com.peck.android.managers;
 import android.os.AsyncTask;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Food;
 import com.peck.android.models.Meal;

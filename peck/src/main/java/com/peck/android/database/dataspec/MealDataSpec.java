@@ -1,4 +1,4 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Meal;
@@ -6,9 +6,9 @@ import com.peck.android.models.Meal;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealOpenHelper extends DataSourceHelper<Meal> implements Singleton {
+public class MealDataSpec extends DataSpec<Meal> implements Singleton {
 
-    private static MealOpenHelper helper = new MealOpenHelper();
+    private static MealDataSpec helper = new MealDataSpec();
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
@@ -44,7 +44,7 @@ public class MealOpenHelper extends DataSourceHelper<Meal> implements Singleton 
             + COLUMN_UPDATED + " integer"
             + ");";
 
-    public static MealOpenHelper getHelper() {
+    public static MealDataSpec getHelper() {
         return helper;
     }
 

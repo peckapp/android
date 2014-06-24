@@ -8,7 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;

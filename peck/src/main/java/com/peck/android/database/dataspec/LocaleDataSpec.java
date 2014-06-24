@@ -1,4 +1,4 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
@@ -6,9 +6,9 @@ import com.peck.android.models.Locale;
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleOpenHelper extends DataSourceHelper<Locale> implements Singleton {
+public class LocaleDataSpec extends DataSpec<Locale> implements Singleton {
 
-    private static LocaleOpenHelper helper = new LocaleOpenHelper();
+    private static LocaleDataSpec helper = new LocaleDataSpec();
 
     public final static String TABLE_NAME = "locales";
     public final static String COLUMN_LOC_ID = "loc_id";
@@ -29,7 +29,7 @@ public class LocaleOpenHelper extends DataSourceHelper<Locale> implements Single
             + COLUMN_NAME + " text not null"
             + ");";
 
-    public static LocaleOpenHelper getHelper() {
+    public static LocaleDataSpec getHelper() {
         return helper;
     }
 

@@ -14,11 +14,10 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -122,11 +121,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             int i = act.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, 0);
             if (i == 0) return null;
             else {
-                try {
-                    dataSource.open();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                dataSource.open();
                 Locale ret = dataSource.get(i);
                 dataSource.close();
                 return ret;
@@ -201,11 +196,9 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                 Log.d(tag, "[" + i + "] waiting for location, still null");
             } else {
                 Locale ret = manager.data.get(0);
-                double dist = ret.calcDist(location).getDist();
 
                 for (Locale l : getManager().data) {
-                    if (l.calcDist(location).getDist() < dist) {
-                        dist = l.getDist();
+                    if (l.calcDist(location).getDist() < ret.getDist()) {
                         ret = l;
                     }
                 }

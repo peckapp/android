@@ -4,8 +4,8 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.helper.CirclesOpenHelper;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
@@ -41,7 +41,7 @@ public class CirclesFeed extends FeedTab<Circle> {
     @Override
     public Feed<Circle> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Circle>(CirclesOpenHelper.getHelper());
+            dataSource = new DataSource<Circle>(CirclesDataSpec.getHelper());
         }
 
         if (feedAdapter == null) {

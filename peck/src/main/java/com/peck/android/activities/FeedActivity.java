@@ -10,8 +10,8 @@ import android.view.animation.Animation;
 
 import com.crashlytics.android.Crashlytics;
 import com.peck.android.R;
-import com.peck.android.database.helper.LocaleOpenHelper;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.CirclesFeed;
 import com.peck.android.fragments.tabs.EventFeed;
@@ -84,7 +84,7 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
     @Override
     protected void onResume() {
         super.onResume();
-        if (LocaleManager.getManager().getLocale(new DataSource<Locale>(LocaleOpenHelper.getHelper()), this) == null) {
+        if (LocaleManager.getManager().getLocale(new DataSource<Locale>(LocaleDataSpec.getHelper()), this) == null) {
             Intent intent = new Intent(this, LocaleActivity.class);
             startActivity(intent);
         }

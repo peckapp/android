@@ -1,4 +1,4 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
 import android.util.Log;
 
@@ -8,9 +8,9 @@ import com.peck.android.models.User;
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class UserOpenHelper extends DataSourceHelper<User> implements Singleton {
+public class UserDataSpec extends DataSpec<User> implements Singleton {
 
-    private static UserOpenHelper helper = new UserOpenHelper();
+    private static UserDataSpec helper = new UserDataSpec();
     private static final String TAG = "PeckOpenHelper";
 
     public static final String TABLE_NAME = "users";
@@ -38,7 +38,7 @@ public class UserOpenHelper extends DataSourceHelper<User> implements Singleton 
             + ");";
 
 
-    public static UserOpenHelper getHelper() {
+    public static UserDataSpec getHelper() {
         Log.d(TAG, "helper is " + ((helper == null) ? "null" : "not null"));
         return helper;
     }

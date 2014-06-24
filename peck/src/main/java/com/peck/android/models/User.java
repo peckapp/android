@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.meetme.android.horizontallistview.HorizontalListView;
 import com.peck.android.R;
-import com.peck.android.database.helper.UserOpenHelper;
+import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -110,13 +110,13 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
     @Override
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(UserOpenHelper.COLUMN_SERVER_ID, getLocalId());
-        cv.put(UserOpenHelper.COLUMN_NAME, getName());
-        cv.put(UserOpenHelper.COLUMN_BIO, getBio());
+        cv.put(UserDataSpec.COLUMN_SERVER_ID, getLocalId());
+        cv.put(UserDataSpec.COLUMN_NAME, getName());
+        cv.put(UserDataSpec.COLUMN_BIO, getBio());
 
-        cv.put(UserOpenHelper.COLUMN_UPDATED, dateToInt(getUpdated()));
-        cv.put(UserOpenHelper.COLUMN_CREATED, dateToInt(getCreated()));
-        cv.put(UserOpenHelper.COLUMN_FACEBOOK_ID, getFbId());
+        cv.put(UserDataSpec.COLUMN_UPDATED, dateToInt(getUpdated()));
+        cv.put(UserDataSpec.COLUMN_CREATED, dateToInt(getCreated()));
+        cv.put(UserDataSpec.COLUMN_FACEBOOK_ID, getFbId());
 
         return cv;
     }
@@ -130,13 +130,13 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
     public User fromCursor(Cursor cursor) {
         cursor.moveToFirst();
 
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(UserOpenHelper.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(UserOpenHelper.COLUMN_SERVER_ID)))
-                .setBio(cursor.getString(cursor.getColumnIndex(UserOpenHelper.COLUMN_BIO)))
-                .setName(cursor.getString(cursor.getColumnIndex(UserOpenHelper.COLUMN_NAME)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(UserOpenHelper.COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(UserOpenHelper.COLUMN_UPDATED))))
-                .setFbId(cursor.getString(cursor.getColumnIndex(UserOpenHelper.COLUMN_FACEBOOK_ID)));
+        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_LOC_ID)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_SERVER_ID)))
+                .setBio(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_BIO)))
+                .setName(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_NAME)))
+                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_CREATED))))
+                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_UPDATED))))
+                .setFbId(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_FACEBOOK_ID)));
     }
 
     @Override
