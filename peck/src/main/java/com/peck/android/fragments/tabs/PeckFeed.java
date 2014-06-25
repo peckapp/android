@@ -7,6 +7,7 @@ import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.database.dataspec.PeckDataSpec;
 import com.peck.android.fragments.Feed;
+import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
 import com.peck.android.models.Peck;

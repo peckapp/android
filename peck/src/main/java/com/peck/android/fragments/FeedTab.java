@@ -1,6 +1,5 @@
-package com.peck.android.fragments.tabs;
+package com.peck.android.fragments;
 
-import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;

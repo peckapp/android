@@ -6,9 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
-import com.peck.android.activities.FeedActivity;
+import com.peck.android.fragments.BaseTab;
 import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.PostManager;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 public class NewPostTab extends BaseTab {
 
     private final static HashMap<Integer, Integer> buttonIds = new HashMap<Integer, Integer>(3); //don't use a sparsearray, we need the keys
+    private FragmentSwitcherListener.Selector selector = new FragmentSwitcherListener.Selector();
 
     static {
         buttonIds.put(R.id.bt_event, R.layout.pst_event);
@@ -38,7 +40,7 @@ public class NewPostTab extends BaseTab {
             b.putInt(SimpleFragment.RESOURCE, buttonIds.get(i));
             frag = new SimpleFragment();
             frag.setArguments(b);
-            v.findViewById(i).setOnClickListener(new FeedActivity.FragmentSwitcherListener(frag, "btn " + i, getActivity(), R.id.post_content));
+            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), frag, "btn " + i, R.id.post_content, selector));
         }
 
         v.findViewById(R.id.bt_event).performClick();

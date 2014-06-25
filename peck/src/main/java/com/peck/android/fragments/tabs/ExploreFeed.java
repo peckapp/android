@@ -2,12 +2,13 @@ package com.peck.android.fragments.tabs;
 
 
 import com.peck.android.R;
+import com.peck.android.fragments.BaseEventFeed;
 import com.peck.android.managers.EventManager;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class NewsFeed extends BaseEventFeed {
+public class ExploreFeed extends BaseEventFeed {
 
     private static final String tag = "NewsFeed";
     private static final int resId = R.layout.tab_newsfeed;

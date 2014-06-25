@@ -1,4 +1,4 @@
-package com.peck.android.fragments.tabs;
+package com.peck.android.fragments;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;

@@ -1,4 +1,4 @@
-package com.peck.android.fragments.tabs;
+package com.peck.android.fragments;
 
 
 import android.support.v4.app.Fragment;
