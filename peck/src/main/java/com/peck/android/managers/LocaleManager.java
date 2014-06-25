@@ -173,60 +173,41 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             @Override
             public void callBack(Collection<Locale> obj) {
                 Log.d(tag, manager.data.toString());
-                callback.callBack(null);
+                callback.callBack(obj);
             }
         });
     }
 
-    public static void calcDistances(final Callback<Locale> callback) {
-        new Thread() {
-            @Override
-            public void run() {
-                for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
-                    if (location == null) {
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Log.d(tag, "[" + i + "] waiting for location, still null");
-                    } else {
-                        Locale ret = manager.getData().values().iterator().next();
-
-                        for (Locale l : getManager().data.values()) {
-                            if (l.calcDist(location).getDist() < ret.getDist()) {
-                                ret = l;
-                            }
-                        }
-
-                        Log.d(tag, "closest: " + ret.toString());
-
-                        callback.callBack(ret);
+    public void calcDistances() {
+        Locale ret = manager.getData().values().iterator().next();
+        for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
+            if (location == null) {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d(tag, "[" + i + "] waiting for location, still null");
+            } else {
+                for (Locale l : getManager().data.values()) {
+                    if (l.calcDist(location).getDist() < ret.getDist()) {
+                        ret = l;
                     }
                 }
 
+                break;
             }
-
-        }.start();
+        }
+        Log.d(tag, "closest: " + ret.toString());
 
     }
 
-    @Override
-    public synchronized void add(final Locale item, final Callback<Locale> callback) {
+    public void notifyAdapter() {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                LocaleManager.super.add(item, callback);
-            }
-        });
-    }
+                adapter.notifyDataSetChanged();
 
-    @Override
-    public synchronized void add(final Collection<Locale> locales, final Callback<Collection<Locale>> callback) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LocaleManager.super.add(locales, callback);
             }
         });
     }

@@ -7,6 +7,7 @@ import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -16,7 +17,7 @@ import java.util.HashMap;
 public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
-    protected HashMap<Integer, T> data = new HashMap<Integer, T>();
+    protected ArrayList<T> data = new ArrayList<T>();
     protected DataSource<T> dSource;
 
     public static Manager getManager(Class<? extends Singleton> clss) {
@@ -86,7 +87,7 @@ public abstract class Manager<T extends DBOperable> {
         return data.get(id);
     }
 
-    public synchronized void add(T item, final Callback<T> callback) {
+    public void add(T item, final Callback<T> callback) {
         //todo: check to see if we already have an item with this localid
 
         dSource.create(item, new Callback<T>() {
@@ -98,7 +99,7 @@ public abstract class Manager<T extends DBOperable> {
         });
     }
 
-    public synchronized void add(Collection<T> items, final Callback<Collection<T>> callback) {
+    public void add(Collection<T> items, final Callback<Collection<T>> callback) {
         dSource.createMult(items, new Callback<Collection<T>>() {
             @Override
             public void callBack(Collection<T> obj) {
@@ -113,7 +114,7 @@ public abstract class Manager<T extends DBOperable> {
     }
 
 
-    public synchronized void update(T item) {
+    public void update(T item) {
         if (item.getLocalId() >= 0 && data.keySet().contains(item.getLocalId())) {
             dSource.update(item);
         } else {

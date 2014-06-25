@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
-import com.peck.android.PeckApp;
 import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
@@ -25,7 +24,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     private DataSpec<T> dbSpec;
     private static final String TAG = "datasource";
 
-    private Boolean threadWorking = false;
+    private opThread workingThread;
 
     final LinkedBlockingQueue<dbOp> queue = new LinkedBlockingQueue<dbOp>() {
 
@@ -33,27 +32,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public boolean add(dbOp dbOp) {
             boolean ret = super.add(dbOp);
 
-            synchronized (threadWorking) {
-                if (!threadWorking) {
-                    try {
-                        threadWorking = true;
-                        take();
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "loop was interrupted");
-                        threadWorking = false;
-                    }
-                }
+            if (workingThread == null || workingThread.getState() == Thread.State.TERMINATED) workingThread = new opThread();
+
+            synchronized (workingThread) {
+                if (workingThread.getState() == Thread.State.NEW) workingThread.start();
             }
+
             return ret;
         }
 
-        @Override
-        public dbOp take() throws InterruptedException {
-            dbOp op = super.take();
-            op.start();
-
-            return op;
-        }};
+    };
 
     public DataSource(DataSpec<T> dbSpec) {
         this.dbSpec = dbSpec;
@@ -96,28 +84,23 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
-    private abstract class dbOp extends Thread {
 
+
+    private class opThread extends Thread {
+        @Override
         public void run() {
-            try {
-                join(PeckApp.Constants.Database.QUEUE_TIMEOUT);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "couldn't execute operation " + getClass() + "\n" + e.toString());
-            } finally {
-                synchronized (DataSource.this.queue) {
-                    if (queue.isEmpty()) {
-                        threadWorking = false;
-                    } else {
-                        try {
-                            queue.take().start();
-                        } catch (InterruptedException e) {
-                            Log.e(TAG, "couldn't execute " + this.getClass());
-                        }
-                    }
-
+            while (!queue.isEmpty()) {
+                try {
+                    queue.take().run();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, e.toString());
                 }
             }
-        }; //run the operation
+        }
+    }
+
+    private abstract class dbOp {
+        abstract void run();
     }
 
     private class get extends dbOp {
@@ -129,14 +112,12 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.callback = callback;
         }
 
-        @Override
         public void run() {
             DataSource.this.open();
             Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
             cursor.moveToFirst();
             callback.callBack((T) generate().fromCursor(cursor));
             DataSource.this.close();
-            super.run();
         }
     }
 
@@ -147,7 +128,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.callback = callback;
         }
 
-        @Override
         public void run() {
             HashMap<Integer, T> ret = new HashMap<Integer, T>();
             DataSource.this.open();
@@ -164,7 +144,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             DataSource.this.close();
 
             callback.callBack(ret);
-            super.run();
         }
     }
 
@@ -177,7 +156,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.callback = callback;
         }
 
-        @Override
         public void run() {
             DataSource.this.open();
             ContentValues contentValues = t.toContentValues();
@@ -202,7 +180,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             DataSource.this.close();
 
             callback.callBack(newT);
-            super.run();
         }
     }
 
@@ -245,7 +222,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             DataSource.this.close();
 
             callback.callBack(ret);
-            super.run();
         }
 
 
@@ -260,7 +236,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.t = t;
         }
 
-        @Override
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
@@ -268,7 +243,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
                     + " = " + id, null);
             DataSource.this.close();
-            super.run();
         }
     }
 
@@ -279,7 +253,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.t = t;
         }
 
-        @Override
         public void run() {
             DataSource.this.open();
             database.update(dbSpec.getTableName(),
@@ -287,7 +260,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     dbSpec.getColLocId() + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
             DataSource.this.close();
-            super.run();
         }
     }
 

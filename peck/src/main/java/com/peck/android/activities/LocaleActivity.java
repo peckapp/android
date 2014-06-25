@@ -15,7 +15,6 @@ import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.LocaleManager;
-import com.peck.android.models.Locale;
 
 
 public class LocaleActivity extends PeckActivity {
@@ -51,12 +50,13 @@ public class LocaleActivity extends PeckActivity {
                 LocaleManager.populate(new Callback() {
                     @Override
                     public void callBack(Object obj) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyMe();
-                        }
-                    });
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LocaleManager.getManager().notifyAdapter();
+                                notifyMe();
+                            }
+                        });
                     }
                 });
                 return null;
@@ -142,22 +142,21 @@ public class LocaleActivity extends PeckActivity {
             tv.setText(R.string.pb_loc);
 
             if (locationServices) {
-                        LocaleManager.calcDistances( new Callback<Locale>() {
-                            @Override
-                            public void callBack(Locale obj) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        tv.setVisibility(View.GONE);
-                                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        LocaleManager.getManager().calcDistances();
+                        return null;
+                    }
 
-                                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        tv.setVisibility(View.GONE);
+                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
-                                        Log.d(TAG, "test");
-                                    }
-                                });
-                            }
-                        }); //this only gets called if we know where the user is *and* have the location list loaded
+                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                    }
+                }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
             } else {
                 findViewById(R.id.rl_locale).setVisibility(View.GONE);
                 Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();

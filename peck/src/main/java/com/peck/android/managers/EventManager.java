@@ -21,15 +21,13 @@ public class EventManager extends FeedManager<Event> implements Singleton {
     }
 
     @Override
-    public FeedManager<Event> initialize(FeedAdapter<Event> adapter, DataSource<Event> dSource) {
+    public FeedManager<Event> initialize(final FeedAdapter<Event> adapter, DataSource<Event> dSource) {
         super.initialize(adapter, dSource);
         ArrayList<Event> events =  new ArrayList<Event>();
 
         Event e;
         for (int i = 1; i < 21; i++) {
             e = new Event();
-            e.setServerId(i);
-            e.setLocalId(i);
             e.setTitle("Event " + Integer.toString(i));
             e.setText("Text " + Integer.toString(i));
             events.add(e);
@@ -37,7 +35,7 @@ public class EventManager extends FeedManager<Event> implements Singleton {
         add(events, new Callback<Collection<Event>>() {
             @Override
             public void callBack(Collection<Event> obj) {
-
+                adapter.notifyDataSetChanged();
             }
         });
         return this;
