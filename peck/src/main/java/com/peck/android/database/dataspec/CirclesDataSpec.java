@@ -1,15 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.Context;
-
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Circle;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class CirclesOpenHelper extends DataSourceHelper<Circle> {
+public class CirclesDataSpec extends DataSpec<Circle> implements Singleton {
 
-
+    private static CirclesDataSpec helper = new CirclesDataSpec();
     private static final String TAG = "circlesopenhelper";
 
     public static final String TABLE_NAME = "circles";
@@ -36,13 +35,13 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-
-    CirclesOpenHelper() {
-
+    private CirclesDataSpec() {
+        super();
     }
 
-    public CirclesOpenHelper(Context context) {
-        super(context, null);
+
+    public static CirclesDataSpec getInstance() {
+        return helper;
     }
 
     @Override
@@ -64,4 +63,6 @@ public class CirclesOpenHelper extends DataSourceHelper<Circle> {
     public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
+
+    public Circle generate() { return new Circle(); }
 }

@@ -1,7 +1,6 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.DataSource;
+import com.peck.android.database.DataSource;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -33,7 +32,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setUpFeed();
-        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
         congfigureManager();
         super.onCreate(savedInstanceState);
 
@@ -61,7 +59,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        Log.d(tag(), getManagerClass().getName() + " default setActivity");
         feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
     }
 
@@ -71,7 +68,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
         View r = inflater.inflate(getLayoutRes(), container, false);
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
         associateAdapter(v);
-        Log.d(tag(), feedAdapter + " associated");
         return r;
     }
 
@@ -82,10 +78,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     public void onResume() {
-        //Log.d(tag(), "adapter " + ((feedAdapter == null) ? "null" : "not null"));
-        //Log.d(tag(), "activity " + ((getActivity() == null) ? "null" : "not null"));
         super.onResume();
-        //assign();
         feedAdapter.removeCompleted();
     }
 

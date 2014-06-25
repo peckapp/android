@@ -1,6 +1,5 @@
 package com.peck.android.managers;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -14,12 +13,12 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
-import com.peck.android.database.source.DataSource;
-import com.peck.android.database.source.LocaleDataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.LocaleDataSpec;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -32,7 +31,8 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private static Location location;
     private static LocationClient client;
     private static Locale locale;
-    private static LocaleDataSource lds;
+    private final static Object retLock = new Object();
+    private static DataSource<Locale> dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
 
     private static final String LOCALE_ID = "locale local id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
@@ -114,31 +114,18 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     }
 
-    public Locale getLocale() throws NullPointerException {
-        return getLocale(dSource, activity);
-    }
-
-    public Locale getLocale(DataSource<Locale> dataSource, Activity act) {
-        if (locale != null) return locale;
+    public void getLocale(Callback<Locale> callback) {
+        if (locale != null) callback.callBack(locale);
         else {
-            int i = act.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, 0);
-            if (i == 0) return null;
-            else {
-                try {
-                    dataSource.open();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                Locale ret = dataSource.get(i);
-                dataSource.close();
-                return ret;
-            }
+            int i = PeckApp.AppContext.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, -1);
+            if (i == -1) callback.callBack(null);
+            else { dataSource.get(i, callback); }
         }
     }
 
     public LocaleManager setLocale(Locale l) {
         locale = l;
-        SharedPreferences.Editor spEdit = activity.getSharedPreferences(PeckApp.USER_PREFS, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor spEdit = activity.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         spEdit.putInt(LOCALE_ID, l.getLocalId());
         spEdit.commit();
 
@@ -160,17 +147,24 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-    public static LocaleManager populate() {
-        //TEST, TODO: database
-        Locale l;
+    public void populate() {
+        //TEST
         Location lo;
+        Locale l;
+
+        data = new ArrayList<Locale>();
 
         for (int i = 0; i < 40; i++) {
             lo = new Location("test");
             lo.setLongitude((double) i * 9);
-            lo.setLatitude((double)i*6);
+            lo.setLatitude((double) i * 6);
             l = new Locale().setLocalId(i).setLocation(lo).setName(Integer.toString(i));
-            getManager().add(l);
+            add(l, new Callback<Locale>() {
+                @Override
+                public void callBack(Locale obj) {
+
+                }
+            });
         }
 
         lo = new Location("test");
@@ -178,13 +172,17 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         lo.setLatitude(42.702);
         Log.d(tag, lo.toString());
         l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
-        getManager().add(l);
+        add(l, new Callback<Locale>() {
+            @Override
+            public void callBack(Locale obj) {
 
-        Log.d(tag, manager.data.toString());
-        return manager;
+            }
+        });
+
     }
 
-    public static Locale calcDistances() {
+    public void calcDistances() {
+        Locale ret = data.get(0);
         for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
             if (location == null) {
                 try {
@@ -194,32 +192,17 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                 }
                 Log.d(tag, "[" + i + "] waiting for location, still null");
             } else {
-                Locale ret = manager.data.get(0);
-                double dist = ret.calcDist(location).getDist();
-
-                for (Locale l : getManager().data) {
-                    if (l.calcDist(location).getDist() < dist) {
-                        dist = l.getDist();
+                for (Locale l : data) {
+                    if (l.calcDist(location).getDist() < ret.getDist()) {
                         ret = l;
                     }
                 }
 
-                Log.d(tag, "closest: " + ret.toString());
-
-                return ret; //return the closest item
+                break;
             }
         }
-        return null;
+        Log.d(tag, "closest: " + ret.toString());
 
     }
-
-
-    public static ArrayList<Locale> returnAll() {
-        return manager.data;
-    }
-
-
-
-
 }
 

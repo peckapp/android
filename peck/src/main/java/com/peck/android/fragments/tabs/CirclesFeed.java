@@ -4,7 +4,8 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.CirclesDataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
@@ -25,12 +26,6 @@ public class CirclesFeed extends FeedTab<Circle> {
     public void onCreate(Bundle savedInstanceState) {
         //TODO: set onclicklisteners for list items
         super.onCreate(savedInstanceState);
-        Circle p;
-        for (int i = 1; i < 21; i++) {
-            p = new Circle();
-            p.setTitle("Test Circle " + i);
-            feedManager.add(p);
-        }
     }
 
     public int getTabTag() {
@@ -40,11 +35,11 @@ public class CirclesFeed extends FeedTab<Circle> {
     @Override
     public Feed<Circle> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new CirclesDataSource(getActivity());
+            dataSource = new DataSource<Circle>(CirclesDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Circle>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Circle>(dataSource.generate().getResourceId());
         }
 
         return this;

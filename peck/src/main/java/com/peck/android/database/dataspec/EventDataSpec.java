@@ -1,19 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-
-import com.peck.android.PeckApp;
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Event;
-
-import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class EventOpenHelper extends DataSourceHelper<Event> {
+public class EventDataSpec extends DataSpec<Event> implements Singleton {
 
+    private static EventDataSpec helper = new EventDataSpec();
     private static final String TAG = "eventopenhelper";
 
     public static final String TABLE_NAME = "events";
@@ -43,19 +38,13 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-
-    public EventOpenHelper(Context context) {
-        super(context, null);
+    public EventDataSpec() {
+        super();
     }
 
-    EventOpenHelper() { super(); }
-
-
-    //TODO: fix, and write a working implementation for unit testing
-//    //TEST: remove after testing
-//    public EventOpenHelper(Context context, String test_name) {
-//        super(context);
-//    }
+    public static EventDataSpec getInstance() {
+        return helper;
+    }
 
     public String getTableName() {
         return TABLE_NAME;
@@ -71,6 +60,10 @@ public class EventOpenHelper extends DataSourceHelper<Event> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public Event generate() {
+        return new Event();
     }
 
 

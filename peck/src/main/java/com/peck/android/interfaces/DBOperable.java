@@ -10,10 +10,14 @@ import java.util.Date;
  */
 public abstract class DBOperable {
 
-    protected int localId;
+    protected int localId = -1;
 
     public int getLocalId() {
         return localId;
+    }
+    public DBOperable setLocalId(int id) {
+        localId = id;
+        return this;
     }
 
     public abstract ContentValues toContentValues();

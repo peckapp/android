@@ -2,7 +2,8 @@ package com.peck.android.fragments.tabs;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.UserDataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.UserManager;
@@ -18,11 +19,11 @@ public class UsersFeed extends Feed<User> {
         //call manager to associate users
 
         if (dataSource == null) {
-            dataSource = new UserDataSource(getActivity());
+            dataSource = new DataSource<User>(UserDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<User>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<User>(dataSource.generate().getResourceId());
         }
 
         return this;

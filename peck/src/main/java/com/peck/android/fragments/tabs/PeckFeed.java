@@ -4,7 +4,8 @@ import android.os.Bundle;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.PeckDataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.PeckDataSpec;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
@@ -19,26 +20,16 @@ public class PeckFeed extends FeedTab<Peck> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Peck p;
-        for (int i = 1; i < 21; i++) {
-            p = new Peck();
-            p.setServerId(i);
-            p.setTitle("Peck " + Integer.toString(i));
-            p.setText("Text " + Integer.toString(i));
-            feedManager.add(p);
-        }
-
-
     }
 
     @Override
     public Feed<Peck> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new PeckDataSource(getActivity());
+            dataSource = new DataSource<Peck>(PeckDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Peck>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Peck>(dataSource.generate().getResourceId());
         }
 
         return this;

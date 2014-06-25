@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.database.helper.MealOpenHelper;
+import com.peck.android.database.dataspec.MealDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -18,13 +18,17 @@ import java.util.Date;
  * Created by mammothbane on 6/10/2014.
  */
 public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId;
+    private int serverId = -1;
 
-    private int color;
-    private int type;
+    private int color = -1;
+    private int type = -1;
 
-    private Date mealtime;
-    private Date updated;
+    private Date mealtime = new Date(-1);
+    private Date updated = new Date(-1);
+
+    private String title = "";
+    private int location = -1;
+
 
     public Date getUpdated() {
         return updated;
@@ -34,10 +38,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
         this.updated = updated;
         return this;
     }
-
-    private String title;
-
-    private int location;
 
     public int getColor() {
         return color;
@@ -133,14 +133,13 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(MealOpenHelper.COLUMN_SERVER_ID, getServerId());
-        cv.put(MealOpenHelper.COLUMN_LOC_ID, getLocalId());
-        cv.put(MealOpenHelper.COLUMN_COLOR, getColor());
-        cv.put(MealOpenHelper.COLUMN_MEAL_TYPE, getType());
-        cv.put(MealOpenHelper.COLUMN_TITLE, getTitle());
-        cv.put(MealOpenHelper.COLUMN_TIME, getMealtime().getTime());
-        cv.put(MealOpenHelper.COLUMN_UPDATED, getUpdated().getTime());
-        cv.put(MealOpenHelper.COLUMN_LOCATION_ID, getLocation());
+        cv.put(MealDataSpec.COLUMN_SERVER_ID, getServerId());
+        cv.put(MealDataSpec.COLUMN_COLOR, getColor());
+        cv.put(MealDataSpec.COLUMN_MEAL_TYPE, getType());
+        cv.put(MealDataSpec.COLUMN_TITLE, getTitle());
+        cv.put(MealDataSpec.COLUMN_TIME, getMealtime().getTime());
+        cv.put(MealDataSpec.COLUMN_UPDATED, getUpdated().getTime());
+        cv.put(MealDataSpec.COLUMN_LOCATION_ID, getLocation());
 
         return cv;
 
@@ -148,14 +147,14 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public Meal fromCursor(Cursor cursor) {
-        return this.setServerId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_SERVER_ID)))
-                .setType(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_MEAL_TYPE)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_COLOR)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_SERVER_ID)))
-                .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_TIME))))
-                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_UPDATED))))
-                .setLocalId(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_LOC_ID)))
-                .setLocation(cursor.getInt(cursor.getColumnIndex(MealOpenHelper.COLUMN_LOCATION_ID)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(MealOpenHelper.COLUMN_TITLE)));
+        return this.setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
+                .setType(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_MEAL_TYPE)))
+                .setColor(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_COLOR)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
+                .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_TIME))))
+                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_UPDATED))))
+                .setLocalId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_LOC_ID)))
+                .setLocation(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_LOCATION_ID)))
+                .setTitle(cursor.getString(cursor.getColumnIndex(MealDataSpec.COLUMN_TITLE)));
     }
 }

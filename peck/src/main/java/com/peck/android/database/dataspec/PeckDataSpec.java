@@ -1,14 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.Context;
-
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Peck;
 
 /**
  * Created by mammothbane on 6/16/2014.
  */
-public class PeckOpenHelper extends DataSourceHelper<Peck> {
+public class PeckDataSpec extends DataSpec<Peck> implements Singleton {
 
+    private static PeckDataSpec helper = new PeckDataSpec();
     private static final String TAG = "MealOpenHelper";
 
     public static final String TABLE_NAME = "pecks";
@@ -37,12 +37,8 @@ public class PeckOpenHelper extends DataSourceHelper<Peck> {
             + ");";
 
 
-    public PeckOpenHelper(Context context) {
-        super(context, null);
-    }
-
-    PeckOpenHelper() {
-        super();
+    public static PeckDataSpec getInstance() {
+        return helper;
     }
 
     @Override
@@ -64,4 +60,9 @@ public class PeckOpenHelper extends DataSourceHelper<Peck> {
     public String getDatabaseCreate() {
         return DATABASE_CREATE;
     }
+
+    public Peck generate() {
+        return new Peck();
+    }
+
 }

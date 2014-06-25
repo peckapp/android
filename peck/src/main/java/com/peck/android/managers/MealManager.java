@@ -3,8 +3,7 @@ package com.peck.android.managers;
 import android.os.AsyncTask;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.DataSource;
-import com.peck.android.database.source.FoodDataSource;
+import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Food;
 import com.peck.android.models.Meal;
@@ -30,7 +29,8 @@ public class MealManager extends FeedManager<Meal> implements Singleton {
     @Override
     public MealManager initialize(FeedAdapter<Meal> adapter, DataSource<Meal> dSource) {
         super.initialize(adapter, dSource);
-        courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
+        //todo: fix this whole thing
+        //courses = loadFromDatabase(new FoodDataSource(adapter.getContext()));
         linkAll(adapter);
         return this;
     }

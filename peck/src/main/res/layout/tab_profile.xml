@@ -3,8 +3,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/sv_profile">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,16 +11,33 @@
         android:padding="16dp"
         android:orientation="vertical"
         android:fadingEdge="none"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:id="@+id/ll_profile">
 
-        <com.peck.android.views.RoundedImageView
+        <RelativeLayout
             android:layout_width="@dimen/prof_picture_bound"
             android:layout_height="@dimen/prof_picture_bound"
             android:layout_gravity="center_horizontal"
-            android:id="@+id/riv"
-            android:src="@drawable/ic_peck"
-            android:alpha="@dimen/alpha_unauth"
-            android:layout_marginTop="16dp" /> <!-- need to set source -->
+            android:layout_marginTop="16dp">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/pb_prof_loading"
+                android:layout_alignTop="@+id/riv_user"
+                android:layout_alignBottom="@+id/riv_user"
+                android:layout_alignRight="@+id/riv_user"
+                android:layout_alignLeft="@+id/riv_user"
+                android:visibility="invisible"/>
+
+            <com.peck.android.views.RoundedImageView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:id="@+id/riv_user"
+            android:src="@drawable/ic_launcher"
+            android:alpha="@dimen/alpha_unauth" />
+
+        </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -46,12 +62,21 @@
             android:enabled="false"
             android:editable="false" />
 
+        <com.peck.android.views.PeckAuthButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_peck_login"
+            android:id="@+id/bt_peck_login"
+            android:layout_marginTop="300dp"
+            android:layout_gravity="center_horizontal" />
+
         <com.facebook.widget.LoginButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_fb_link"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="300dp" />
+            android:visibility="gone"
+            android:layout_marginTop="16dp" />
 
 
     </LinearLayout>

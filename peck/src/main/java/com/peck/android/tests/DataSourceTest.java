@@ -1,12 +1,11 @@
 package com.peck.android.tests;
 
-import android.content.ContentValues;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import com.peck.android.database.helper.DatabaseCreator;
-import com.peck.android.database.source.DataSource;
-import com.peck.android.database.helper.EventOpenHelper;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.DatabaseManager;
+import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.models.Event;
 
 import java.util.Date;
@@ -21,16 +20,16 @@ public class DataSourceTest extends AndroidTestCase {
     private final static String TAG = "DataSourceTest";
 
     private DataSource<Event> dSource;
-    private EventOpenHelper dbHelper;
+    private EventDataSpec dbHelper;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        try { getContext().deleteDatabase(DatabaseCreator.getDbName()); } catch (Exception e) {
+        try { getContext().deleteDatabase(DatabaseManager.getDbName()); } catch (Exception e) {
             Log.e(TAG, "there wasn't a database to delete");
             e.printStackTrace();
         }
-        dbHelper = new EventOpenHelper(getContext());
+        //dbHelper = new EventOpenHelper(getContext());
         //fixme: dSource = new DataSource<Event>(dbHelper);
         assertPre();
     }

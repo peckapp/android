@@ -1,17 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.Context;
-import android.database.Cursor;
-
-import com.peck.android.PeckApp;
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Food;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class FoodOpenHelper extends DataSourceHelper<Food> {
+public class FoodDataSpec extends DataSpec<Food> implements Singleton {
 
-    private Context context;
+    private static FoodDataSpec helper = new FoodDataSpec();
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
@@ -45,14 +42,9 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
             + COLUMN_TYPE + " integer"
             + ");";
 
-    public FoodOpenHelper(Context context) {
-        super(context, null);
-        this.context = context;
-    }
-
-    public FoodOpenHelper() { super(); }
-
-
+    public static FoodDataSpec getInstance() {
+       return helper;
+   }
 
     public String getColLocId() {
         return COLUMN_LOC_ID;
@@ -68,6 +60,10 @@ public class FoodOpenHelper extends DataSourceHelper<Food> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public Food generate() {
+        return new Food();
     }
 
 }

@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.database.helper.LocaleOpenHelper;
+import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -19,9 +19,9 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     private final static int resId = R.layout.lvitem_locale;
 
-    private int serverId;
-    private String name;
-    private Location location;
+    private int serverId = -1;
+    private String name = "";
+    private Location location = new Location("null");
     private double dist; //don't add to database
 
     public Location getLocation() {
@@ -69,23 +69,22 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(LocaleOpenHelper.COLUMN_LOC_ID, getLocalId());
-        cv.put(LocaleOpenHelper.COLUMN_SV_ID, getServerId());
-        cv.put(LocaleOpenHelper.COLUMN_NAME, getName());
-        cv.put(LocaleOpenHelper.COLUMN_LAT, getLocation().getLatitude());
-        cv.put(LocaleOpenHelper.COLUMN_LONG, getLocation().getLongitude());
+        cv.put(LocaleDataSpec.COLUMN_SV_ID, getServerId());
+        cv.put(LocaleDataSpec.COLUMN_NAME, getName());
+        cv.put(LocaleDataSpec.COLUMN_LAT, getLocation().getLatitude());
+        cv.put(LocaleDataSpec.COLUMN_LONG, getLocation().getLongitude());
         return cv;
     }
 
     @Override
     public Locale fromCursor(Cursor cursor) {
         Location t = new Location("database");
-        t.setLatitude(cursor.getDouble(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_LAT)));
-        t.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_LONG)));
+        t.setLatitude(cursor.getDouble(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LAT)));
+        t.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LONG)));
 
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_SV_ID)))
-                .setName(cursor.getString(cursor.getColumnIndex(LocaleOpenHelper.COLUMN_NAME)))
+        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LOC_ID)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_SV_ID)))
+                .setName(cursor.getString(cursor.getColumnIndex(LocaleDataSpec.COLUMN_NAME)))
                 .setLocation(t);
     }
 

@@ -1,19 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Meal;
-
-import java.util.Date;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class MealOpenHelper extends DataSourceHelper<Meal> {
+public class MealDataSpec extends DataSpec<Meal> implements Singleton {
 
+    private static MealDataSpec helper = new MealDataSpec();
     private static final String TAG = "MealOpenHelper";
 
     //TODO: fix strings for meals
@@ -49,16 +44,10 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
             + COLUMN_UPDATED + " integer"
             + ");";
 
-    private Context context;
-
-    public MealOpenHelper(Context context) {
-        super(context, null);
-        this.context = context;
+    public static MealDataSpec getInstance() {
+        return helper;
     }
 
-    MealOpenHelper() {
-        super();
-    }
 
     public String getColLocId() {
         return COLUMN_LOC_ID;
@@ -74,6 +63,10 @@ public class MealOpenHelper extends DataSourceHelper<Meal> {
 
     public String[] getColumns() {
         return ALL_COLUMNS;
+    }
+
+    public Meal generate() {
+        return new Meal();
     }
 
 

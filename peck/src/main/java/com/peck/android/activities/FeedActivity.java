@@ -1,26 +1,25 @@
 package com.peck.android.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.animation.Animation;
 
 import com.crashlytics.android.Crashlytics;
-import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.source.LocaleDataSource;
 import com.peck.android.fragments.tabs.BaseTab;
 import com.peck.android.fragments.tabs.CirclesFeed;
 import com.peck.android.fragments.tabs.EventFeed;
 import com.peck.android.fragments.tabs.NewPostTab;
+import com.peck.android.fragments.tabs.NewsFeed;
 import com.peck.android.fragments.tabs.PeckFeed;
 import com.peck.android.fragments.tabs.ProfileTab;
-import com.peck.android.fragments.tabs.NewsFeed;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.LocaleManager;
+import com.peck.android.models.Locale;
 
 import java.util.HashMap;
 
@@ -49,19 +48,13 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
 
         setContentView(R.layout.activity_feed_root);
 
-        //test: remove before production
-        deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
-        SharedPreferences.Editor edit = getSharedPreferences(PeckApp.USER_PREFS, MODE_PRIVATE).edit();
-        edit.clear();
-        edit.commit();
-
 
         for (int i : hash.keySet()) {
             findViewById(i).setOnClickListener(
                     new FragmentSwitcherListener(hash.get(i), "btn " + i, this, R.id.ll_feed_content));
         }
 
-        //findViewById(R.id.bt_null).performClick();
+        findViewById(R.id.bt_null).performClick();
 
     }
 
@@ -90,10 +83,17 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
     @Override
     protected void onResume() {
         super.onResume();
-        if (LocaleManager.getManager().getLocale(new LocaleDataSource(this), this) == null) {
-            Intent intent = new Intent(this, LocaleActivity.class);
-            startActivity(intent);
-        }
+
+        LocaleManager.getManager().getLocale(new Callback<Locale>() {
+            @Override
+            public void callBack(Locale obj) {
+                if (obj == null) {
+                    Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
+
     }
 
     @Override

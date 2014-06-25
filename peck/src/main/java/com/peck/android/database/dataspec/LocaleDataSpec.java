@@ -1,16 +1,14 @@
-package com.peck.android.database.helper;
+package com.peck.android.database.dataspec;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.location.Location;
-
+import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class LocaleOpenHelper extends DataSourceHelper<Locale> {
+public class LocaleDataSpec extends DataSpec<Locale> implements Singleton {
+
+    private static LocaleDataSpec helper = new LocaleDataSpec();
 
     public final static String TABLE_NAME = "locales";
     public final static String COLUMN_LOC_ID = "loc_id";
@@ -31,13 +29,8 @@ public class LocaleOpenHelper extends DataSourceHelper<Locale> {
             + COLUMN_NAME + " text not null"
             + ");";
 
-
-    public LocaleOpenHelper(Context context) {
-        super(context, null);
-    }
-
-    LocaleOpenHelper() {
-        super();
+    public static LocaleDataSpec getInstance() {
+        return helper;
     }
 
     @Override
@@ -61,5 +54,8 @@ public class LocaleOpenHelper extends DataSourceHelper<Locale> {
         return DATABASE_CREATE;
     }
 
+    public Locale generate() {
+        return new Locale();
+    }
 
 }

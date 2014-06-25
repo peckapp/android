@@ -1,18 +1,16 @@
 package com.peck.android.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CursorAdapter;
-import android.widget.ListAdapter;
 
+import com.peck.android.PeckApp;
 import com.peck.android.interfaces.DBOperable;
-import com.peck.android.interfaces.Factory;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.managers.Manager;
 
 import java.util.ArrayList;
 
@@ -20,43 +18,43 @@ import java.util.ArrayList;
  * Created by mammothbane on 6/9/2014.
  */
 public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
-    private ArrayList<T> data = new ArrayList<T>();
-    private Context context;
+    private Manager<T> manager;
     private int resourceId;
 
-    public FeedAdapter(Context context, Factory<T> factory) {
-        this.context = context;
-        this.resourceId = factory.generate().getResourceId();
+    public FeedAdapter(int resourceId) {
+        this.resourceId = resourceId;
     }
-
-    public Context getContext() { return context; }
 
     @Override
     public int getCount() {
-        return data.size();
+        return getData().size();
     }
 
     @Override
-    public Object getItem(int i) {
-        return data.get(i);
+    public T getItem(int i) {
+        return getData().get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return data.get(i).getLocalId();
+        return getItem(i).getLocalId();
     }
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         if (view == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) PeckApp.AppContext.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(resourceId, null);
         }
 
-        T res = (T)getItem(i);
+        T res = getItem(i);
         res.setUp(view);
         return view;
+    }
+
+    private ArrayList<T> getData() {
+        return manager.getData();
     }
 
 
@@ -65,8 +63,8 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         return this;
     }
 
-    public FeedAdapter<T> update(ArrayList<T> data) {
-        this.data = data;
+    public FeedAdapter<T> setSource(Manager<T> manager) {
+        this.manager = manager;
         return this;
     }
 

@@ -1,7 +1,6 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,8 @@ import android.widget.ListView;
 
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.source.LocaleDataSource;
+import com.peck.android.database.DataSource;
+import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
@@ -30,9 +30,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        LocaleManager.getManager().setLocale((Locale) feedAdapter.getItem(i));
-                        Log.d(getClass().getName(),
-                                (feedAdapter.getItem(i)).toString());
+                        LocaleManager.getManager().setLocale(feedAdapter.getItem(i));
                         getActivity().finish();
                     }
                 });
@@ -46,11 +44,11 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     @Override
     public Feed<Locale> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new LocaleDataSource(getActivity());
+            dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Locale>(getActivity(), dataSource);
+            feedAdapter = new FeedAdapter<Locale>(new Locale().getResourceId());
         }
 
         return this;

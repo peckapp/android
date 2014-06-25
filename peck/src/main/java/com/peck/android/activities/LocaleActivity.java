@@ -39,17 +39,14 @@ public class LocaleActivity extends PeckActivity {
     protected void onStart() {
         super.onStart();
 
+        findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
+
         //load all locales into localemanager
         new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                //start the progress tracker
-                findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
-            }
 
             @Override
             protected Void doInBackground(Void... voids) {
-                LocaleManager.populate();
+                LocaleManager.getManager().populate();
                 return null;
             }
 
@@ -133,21 +130,15 @@ public class LocaleActivity extends PeckActivity {
 
     private void notifyMe() {
         if (loaded) {
-            //Log.d(TAG, "notified twice");
+            final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+            tv.setVisibility(View.VISIBLE);
+            tv.setText(R.string.pb_loc);
 
             if (locationServices) {
                 new AsyncTask<Void, Void, Void>() {
-                    TextView tv;
-                    @Override
-                    protected void onPreExecute() {
-                        tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-                        tv.setVisibility(View.VISIBLE);
-                        tv.setText(R.string.pb_loc);
-                    }
-
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        LocaleManager.calcDistances(); //this only gets called if we know where the user is *and* have the location list loaded
+                        LocaleManager.getManager().calcDistances();
                         return null;
                     }
 
@@ -157,9 +148,9 @@ public class LocaleActivity extends PeckActivity {
                         findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
                         findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-
                     }
-                }.execute(); } else {
+                }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
+            } else {
                 findViewById(R.id.rl_locale).setVisibility(View.GONE);
                 Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
                 findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
