@@ -26,8 +26,6 @@ public class FeedActivity extends PeckActivity {
 
     private final static HashMap<Integer, BaseTab> buttons = new HashMap<Integer, BaseTab>(); //don't use a sparsearray, we need the keyset
 
-    private FragmentSwitcherListener.Selector selector = new FragmentSwitcherListener.Selector();
-
     static {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_peck, new PeckFeed());
@@ -46,12 +44,12 @@ public class FeedActivity extends PeckActivity {
 
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
-            FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content, selector){
+            FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
                 @Override
                 public void onClick(View view) {
                     Fragment temp = getSupportFragmentManager().findFragmentById(R.id.ll_feed_content);
                     if (temp != null && temp.equals(buttons.get(i))) {
-                        getSupportFragmentManager().beginTransaction().detach(temp);
+                        detachCurrentFragment();
                     } else {
                         super.onClick(view);
                     }
@@ -103,8 +101,14 @@ public class FeedActivity extends PeckActivity {
 
     @Override
     public void onBackPressed() {
-        selector.clear();
-        getSupportFragmentManager().popBackStack();
+        detachCurrentFragment();
+    }
+
+    private void detachCurrentFragment() {
+        Fragment temp = getSupportFragmentManager().findFragmentById(R.id.ll_feed_content);
+        if (temp != null) {
+            getSupportFragmentManager().beginTransaction().detach(temp).commit();
+        }
     }
 
 }

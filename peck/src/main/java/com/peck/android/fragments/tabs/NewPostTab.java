@@ -20,7 +20,6 @@ import java.util.HashMap;
 public class NewPostTab extends BaseTab {
 
     private final static HashMap<Integer, Integer> buttonIds = new HashMap<Integer, Integer>(3); //don't use a sparsearray, we need the keys
-    private FragmentSwitcherListener.Selector selector = new FragmentSwitcherListener.Selector();
 
     static {
         buttonIds.put(R.id.bt_event, R.layout.pst_event);
@@ -40,7 +39,7 @@ public class NewPostTab extends BaseTab {
             b.putInt(SimpleFragment.RESOURCE, buttonIds.get(i));
             frag = new SimpleFragment();
             frag.setArguments(b);
-            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), frag, "btn " + i, R.id.post_content, selector));
+            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), frag, "btn " + i, R.id.post_content));
         }
 
         v.findViewById(R.id.bt_event).performClick();

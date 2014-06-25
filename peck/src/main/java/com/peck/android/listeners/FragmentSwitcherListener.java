@@ -13,22 +13,28 @@ public class FragmentSwitcherListener implements View.OnClickListener {
     private Fragment f;
     private String tag;
     private int containerId;
-    private Selector selector;
 
     private int animIn = -1;
     private int animOut = -1;
+    private int popIn = -1;
+    private int popOut = -1;
 
-    public FragmentSwitcherListener(FragmentManager fm, Fragment f, String tag, int containerId, Selector selector) {
+    public FragmentSwitcherListener(FragmentManager fm, Fragment f, String tag, int containerId) {
         this.fm = fm;
         this.f = f;
         this.tag = tag;
         this.containerId = containerId;
-        this.selector = selector;
     }
 
     public void setAnimations(int in, int out) {
         this.animIn = in;
         this.animOut = out;
+    }
+
+    public void setAnimations(int animIn, int animOut, int popIn, int popOut) {
+        setAnimations(animIn, animOut);
+        this.popIn = popIn;
+        this.popOut = popOut;
     }
 
 
@@ -41,7 +47,7 @@ public class FragmentSwitcherListener implements View.OnClickListener {
 
         if (contentFrag != null) { //detach the fragment that's currently attached
             ft.detach(contentFrag);
-        }
+        } else ft.addToBackStack(tag); //if we're going from null content (the home page) to something else, add this transaction to the backstack
 
         if (fm.findFragmentByTag(tag) == null) { //if the fragmentmanager doesn't have our fragment, add it
             ft.add(containerId, f, tag);
@@ -54,25 +60,6 @@ public class FragmentSwitcherListener implements View.OnClickListener {
         }
 
         ft.commit();
-        fm.executePendingTransactions();
-
-        selector.setSelected(fm.findFragmentByTag(tag));
     }
 
-    public static class Selector {
-        private Fragment selected;
-
-        public Fragment getSelected() {
-            return selected;
-        }
-
-        private void setSelected(Fragment selected) {
-            this.selected = selected;
-        }
-
-        public void clear() {
-            this.selected = null;
-        }
-
-    }
 }

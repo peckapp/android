@@ -56,4 +56,5 @@ public class CirclesFeed extends FeedTab<Circle> {
     public Class<? extends Singleton> getManagerClass() {
         return CircleManager.class;
     }
+
 }
