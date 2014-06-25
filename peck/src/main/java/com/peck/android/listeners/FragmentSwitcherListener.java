@@ -28,8 +28,8 @@ public class FragmentSwitcherListener implements View.OnClickListener {
 
         Fragment tempfrag = fm.findFragmentById(containerId);
 
-        if (tempfrag != f) {
-            FragmentTransaction ft = fm.beginTransaction();
+        FragmentTransaction ft = fm.beginTransaction();
+        if (tempfrag == null || !tempfrag.equals(f)) {
             ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
             if (tempfrag != null) {
                 ft.detach(tempfrag);
@@ -39,13 +39,13 @@ public class FragmentSwitcherListener implements View.OnClickListener {
             } else {
                 ft.attach(f);
             }
-            ft.commit();
-            selector.setSelected(f);
+        } else {
+            ft.attach(f);
         }
-    }
+        ft.addToBackStack("test");
+        ft.commit();
+        selector.setSelected(f);
 
-    protected Fragment getFragment() {
-        return f;
     }
 
     public static class Selector {
@@ -57,6 +57,10 @@ public class FragmentSwitcherListener implements View.OnClickListener {
 
         private void setSelected(Fragment selected) {
             this.selected = selected;
+        }
+
+        public void clear() {
+            this.selected = null;
         }
 
     }

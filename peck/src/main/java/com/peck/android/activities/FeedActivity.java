@@ -2,10 +2,7 @@ package com.peck.android.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.view.animation.Animation;
 
 import com.crashlytics.android.Crashlytics;
 import com.peck.android.R;
@@ -22,15 +19,13 @@ import com.peck.android.models.Locale;
 
 import java.util.HashMap;
 
-public class FeedActivity extends PeckActivity implements Animation.AnimationListener {
+public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
 
     private final static HashMap<Integer, BaseTab> buttons = new HashMap<Integer, BaseTab>(); //don't use a sparsearray, we need the keyset
 
     private FragmentSwitcherListener.Selector selector = new FragmentSwitcherListener.Selector();
-
-    private Fragment selected = null;
 
     static {
         buttons.put(R.id.bt_add, new NewPostTab());
@@ -102,23 +97,8 @@ public class FeedActivity extends PeckActivity implements Animation.AnimationLis
 
     @Override
     public void onBackPressed() {
-        selected = null;
-        findViewById(R.id.frag_home).setVisibility(View.VISIBLE);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.detach(getSupportFragmentManager().findFragmentById(R.id.ll_feed_content));
-        fragmentTransaction.commit();
+        selector.clear();
+        getSupportFragmentManager().popBackStack();
     }
 
-    @Override
-    public void onAnimationEnd(Animation animation) {
-    }
-
-    @Override
-    public void onAnimationRepeat(Animation animation) {
-    }
-
-    @Override
-    public void onAnimationStart(Animation animation) {
-
-    }
 }
