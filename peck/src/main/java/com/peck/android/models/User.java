@@ -155,6 +155,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Log.d("User " + getLocalId(), "I was clicked");
                     //todo: open the user's profile page
                 }
             });

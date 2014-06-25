@@ -25,23 +25,15 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
     public FeedManager<T> initialize(final FeedAdapter<T> adapter, DataSource<T> dSource) {
+        this.adapter = adapter;
+        adapter.setSource(FeedManager.this);
+
         super.initialize(dSource, new Callback() {
             @Override
             public void callBack(Object obj) {
             }
         });
-        this.adapter = adapter;
-        adapter.setSource(FeedManager.this);
 
-        T t;
-        for (int i = 1; i < 21; i++) {
-            t = dSource.generate();
-            t.setServerId(i);
-            add(t, new Callback<T>() {
-                public void callBack(T obj) {
-                }
-            });
-        }
         return this;
 
         //testing

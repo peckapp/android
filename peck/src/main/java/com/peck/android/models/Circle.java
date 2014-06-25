@@ -84,6 +84,11 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
+    public Circle strip() {
+        users = new ArrayList<User>();
+        return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void setUp(View v) {
