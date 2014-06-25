@@ -15,6 +15,9 @@ public class FragmentSwitcherListener implements View.OnClickListener {
     private int containerId;
     private Selector selector;
 
+    private int animIn = -1;
+    private int animOut = -1;
+
     public FragmentSwitcherListener(FragmentManager fm, Fragment f, String tag, int containerId, Selector selector) {
         this.fm = fm;
         this.f = f;
@@ -23,29 +26,37 @@ public class FragmentSwitcherListener implements View.OnClickListener {
         this.selector = selector;
     }
 
+    public void setAnimations(int in, int out) {
+        this.animIn = in;
+        this.animOut = out;
+    }
+
+
     @Override
     public void onClick(View view) {
 
-        Fragment tempfrag = fm.findFragmentById(containerId);
+        Fragment contentFrag = fm.findFragmentById(containerId);
 
         FragmentTransaction ft = fm.beginTransaction();
-        if (tempfrag == null || !tempfrag.equals(f)) {
-            ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-            if (tempfrag != null) {
-                ft.detach(tempfrag);
-            }
-            if (fm.findFragmentByTag(tag) == null) {
-                ft.add(containerId, f, tag);
-            } else {
-                ft.attach(f);
-            }
-        } else {
-            ft.attach(f);
-        }
-        ft.addToBackStack("test");
-        ft.commit();
-        selector.setSelected(f);
 
+        if (contentFrag != null) { //detach the fragment that's currently attached
+            ft.detach(contentFrag);
+        }
+
+        if (fm.findFragmentByTag(tag) == null) { //if the fragmentmanager doesn't have our fragment, add it
+            ft.add(containerId, f, tag);
+        } else {
+            ft.attach(fm.findFragmentByTag(tag)); //otherwise attach it
+        }
+
+        if (animIn > 0 && animOut > 0) { //if we have custom animations, set them
+            ft.setCustomAnimations(animIn, animOut);
+        }
+
+        ft.commit();
+        fm.executePendingTransactions();
+
+        selector.setSelected(fm.findFragmentByTag(tag));
     }
 
     public static class Selector {

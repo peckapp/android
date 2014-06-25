@@ -2,6 +2,7 @@ package com.peck.android.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
@@ -44,16 +45,21 @@ public class FeedActivity extends PeckActivity {
         setContentView(R.layout.activity_feed_root);
 
         for (final int i : buttons.keySet()) {
-            findViewById(i).setOnClickListener(new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), "btn " + i, R.id.ll_feed_content, selector){
+            final String tag = "btn " + i;
+            FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content, selector){
                 @Override
                 public void onClick(View view) {
-                    if (!(selector.getSelected() == null) && selector.getSelected().equals(buttons.get(i))) onBackPressed();
-                    else {
-                        findViewById(R.id.frag_home).setVisibility(View.GONE);
+                    Fragment temp = getSupportFragmentManager().findFragmentById(R.id.ll_feed_content);
+                    if (temp != null && temp.equals(buttons.get(i))) {
+                        getSupportFragmentManager().beginTransaction().detach(temp);
+                    } else {
                         super.onClick(view);
                     }
+
                 }
-            } );
+            };
+            fragmentSwitcherListener.setAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
     }
 
