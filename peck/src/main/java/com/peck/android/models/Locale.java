@@ -19,9 +19,9 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     private final static int resId = R.layout.lvitem_locale;
 
-    private int serverId;
-    private String name;
-    private Location location;
+    private int serverId = -1;
+    private String name = "";
+    private Location location = new Location("null");
     private double dist; //don't add to database
 
     public Location getLocation() {

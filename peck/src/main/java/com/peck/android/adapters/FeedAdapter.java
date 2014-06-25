@@ -13,7 +13,6 @@ import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.Manager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -33,7 +32,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
 
     @Override
     public T getItem(int i) {
-        return new ArrayList<T>(getData().values()).get(i);
+        return getData().get(i);
     }
 
     @Override
@@ -54,7 +53,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         return view;
     }
 
-    private HashMap<Integer, T> getData() {
+    private ArrayList<T> getData() {
         return manager.getData();
     }
 

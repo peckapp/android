@@ -13,7 +13,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.LocaleManager;
 
 
@@ -47,19 +46,13 @@ public class LocaleActivity extends PeckActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                LocaleManager.populate(new Callback() {
-                    @Override
-                    public void callBack(Object obj) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LocaleManager.getManager().notifyAdapter();
-                                notifyMe();
-                            }
-                        });
-                    }
-                });
+                LocaleManager.getManager().populate();
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                notifyMe();
             }
         }.execute();
 

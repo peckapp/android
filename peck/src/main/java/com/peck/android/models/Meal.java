@@ -18,13 +18,17 @@ import java.util.Date;
  * Created by mammothbane on 6/10/2014.
  */
 public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId;
+    private int serverId = -1;
 
-    private int color;
-    private int type;
+    private int color = -1;
+    private int type = -1;
 
-    private Date mealtime;
-    private Date updated;
+    private Date mealtime = new Date(-1);
+    private Date updated = new Date(-1);
+
+    private String title = "";
+    private int location = -1;
+
 
     public Date getUpdated() {
         return updated;
@@ -34,10 +38,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
         this.updated = updated;
         return this;
     }
-
-    private String title;
-
-    private int location;
 
     public int getColor() {
         return color;

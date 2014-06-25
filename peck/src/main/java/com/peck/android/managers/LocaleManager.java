@@ -20,7 +20,6 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 
 /**
@@ -148,18 +147,24 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-    public static void populate(final Callback callback) {
+    public void populate() {
         //TEST
-        final ArrayList<Locale> locales = new ArrayList<Locale>();
         Location lo;
         Locale l;
+
+        data = new ArrayList<Locale>();
 
         for (int i = 0; i < 40; i++) {
             lo = new Location("test");
             lo.setLongitude((double) i * 9);
-            lo.setLatitude((double)i*6);
+            lo.setLatitude((double) i * 6);
             l = new Locale().setLocalId(i).setLocation(lo).setName(Integer.toString(i));
-            locales.add(l);
+            add(l, new Callback<Locale>() {
+                @Override
+                public void callBack(Locale obj) {
+
+                }
+            });
         }
 
         lo = new Location("test");
@@ -167,19 +172,17 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         lo.setLatitude(42.702);
         Log.d(tag, lo.toString());
         l = new Locale().setLocalId(50).setLocation(lo).setName("my loc");
-        locales.add(l);
-
-        getManager().add(locales, new Callback<Collection<Locale>>() {
+        add(l, new Callback<Locale>() {
             @Override
-            public void callBack(Collection<Locale> obj) {
-                Log.d(tag, manager.data.toString());
-                callback.callBack(obj);
+            public void callBack(Locale obj) {
+
             }
         });
+
     }
 
     public void calcDistances() {
-        Locale ret = manager.getData().values().iterator().next();
+        Locale ret = data.get(0);
         for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
             if (location == null) {
                 try {
@@ -189,7 +192,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
                 }
                 Log.d(tag, "[" + i + "] waiting for location, still null");
             } else {
-                for (Locale l : getManager().data.values()) {
+                for (Locale l : data) {
                     if (l.calcDist(location).getDist() < ret.getDist()) {
                         ret = l;
                     }
@@ -201,16 +204,5 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         Log.d(tag, "closest: " + ret.toString());
 
     }
-
-    public void notifyAdapter() {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-
-            }
-        });
-    }
-
 }
 

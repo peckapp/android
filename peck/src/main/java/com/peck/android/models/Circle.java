@@ -24,11 +24,11 @@ import java.util.Date;
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
     private ArrayList<User> users = new ArrayList<User>();
-    private String title;
-    private Date created;
-    private Date updated;
+    private String title = "";
+    private Date created = new Date(-1);
+    private Date updated = new Date(-1);
     private boolean hidden;
-    private int serverId;
+    private int serverId = -1;
 
     public ArrayList<User> getUsers() {
         return users;

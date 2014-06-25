@@ -29,7 +29,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
 
     private String name = "";
     private String fbId = "";
-    private int serverId;
+    private int serverId = -1;
     private String bio = "";
     private ArrayList<Circle> circles = new ArrayList<Circle>();
     private Date created = new Date(Calendar.getInstance().getTimeInMillis());

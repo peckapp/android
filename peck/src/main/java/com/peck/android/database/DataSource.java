@@ -89,6 +89,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     private class opThread extends Thread {
         @Override
         public void run() {
+            open();
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
@@ -96,6 +97,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     Log.e(TAG, e.toString());
                 }
             }
+            close();
         }
     }
 
@@ -113,11 +115,9 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            DataSource.this.open();
             Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
             cursor.moveToFirst();
             callback.callBack((T) generate().fromCursor(cursor));
-            DataSource.this.close();
         }
     }
 
@@ -130,7 +130,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             HashMap<Integer, T> ret = new HashMap<Integer, T>();
-            DataSource.this.open();
             Cursor cursor = database.query(dbSpec.getTableName(),
                     dbSpec.getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
@@ -141,7 +140,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             }
             // Make sure to close the cursor
             cursor.close();
-            DataSource.this.close();
 
             callback.callBack(ret);
         }
@@ -157,7 +155,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            DataSource.this.open();
             ContentValues contentValues = t.toContentValues();
 
             Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
@@ -177,7 +174,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
             T newT = (T) generate().fromCursor(cursor);
             cursor.close();
-            DataSource.this.close();
 
             callback.callBack(newT);
         }
@@ -193,7 +189,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            DataSource.this.open();
             long insertId;
             Cursor cursor;
 
@@ -219,7 +214,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                 ret.add((T)generate().fromCursor(cursor));
                 cursor.close();
             }
-            DataSource.this.close();
 
             callback.callBack(ret);
         }
@@ -239,10 +233,8 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            DataSource.this.open();
             database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
                     + " = " + id, null);
-            DataSource.this.close();
         }
     }
 
@@ -254,12 +246,10 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            DataSource.this.open();
             database.update(dbSpec.getTableName(),
                     t.toContentValues(),
                     dbSpec.getColLocId() + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
-            DataSource.this.close();
         }
     }
 

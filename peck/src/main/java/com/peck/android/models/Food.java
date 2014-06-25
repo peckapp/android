@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.view.View;
 
-import com.peck.android.PeckApp;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -13,12 +12,12 @@ import com.peck.android.interfaces.SelfSetup;
  * Created by mammothbane on 6/10/2014.
  */
 public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId;
-    private int parentId;
-    private String title;
-    private String text;
-    private int color;
-    private int type; //vegetable, meat, starch, etc.
+    private int serverId = -1;
+    private int parentId = -1;
+    private String title = "";
+    private String text = "";
+    private int color = -1;
+    private int type = -1; //vegetable, meat, starch, etc.
 
 
     public int getType() {

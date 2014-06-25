@@ -15,6 +15,10 @@ public abstract class DBOperable {
     public int getLocalId() {
         return localId;
     }
+    public DBOperable setLocalId(int id) {
+        localId = id;
+        return this;
+    }
 
     public abstract ContentValues toContentValues();
 

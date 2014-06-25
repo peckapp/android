@@ -17,12 +17,12 @@ import java.util.Date;
  * Created by mammothbane on 5/28/2014.
  */
 public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
-    private int serverId;
-    private int color;
-    private Date created;
-    private Date updated;
-    private String title;
-    private String text;
+    private int serverId = -1;
+    private int color = -1;
+    private Date created = new Date(-1);
+    private Date updated = new Date(-1);
+    private String title = "";
+    private String text = "";
 
 
     public String getText() {

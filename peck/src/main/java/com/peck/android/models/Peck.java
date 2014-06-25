@@ -17,12 +17,12 @@ import java.util.Date;
  * Created by mammothbane on 6/16/2014.
  */
 public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId;
-    private Date created;
-    private Date updated;
-    private String title;
-    private String text;
-    private int color;
+    private int serverId = -1;
+    private Date created = new Date(-1);
+    private Date updated = new Date(-1);
+    private String title = "";
+    private String text = "";
+    private int color = -1;
     private boolean seen;
 
     public boolean isSeen() {
