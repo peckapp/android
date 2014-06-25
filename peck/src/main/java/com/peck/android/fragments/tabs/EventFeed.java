@@ -18,10 +18,6 @@ public class EventFeed extends BaseEventFeed {
         return resId;
     }
 
-    public int getTabTag() {
-        return tabId;
-    }
-
     public String tag() {
         return tag;
     }

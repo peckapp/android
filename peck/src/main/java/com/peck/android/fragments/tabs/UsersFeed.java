@@ -44,8 +44,4 @@ public class UsersFeed extends Feed<User> {
         return UserManager.class;
     }
 
-    @Override
-    public int getTabTag() { //don't worry about this; we don't need it
-        return 0;
-    }
 }

@@ -28,10 +28,6 @@ public class CirclesFeed extends FeedTab<Circle> {
         super.onCreate(savedInstanceState);
     }
 
-    public int getTabTag() {
-        return tagId;
-    }
-
     @Override
     public Feed<Circle> setUpFeed() {
         if (dataSource == null) {

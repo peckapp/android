@@ -73,11 +73,6 @@ public class ProfileTab extends BaseTab {
         lifecycleHelper.onSaveInstanceState(outState);
     }
 
-    public int getTabTag() {
-        return tabId;
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 

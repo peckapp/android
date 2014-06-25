@@ -69,8 +69,4 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         return LocaleManager.class;
     }
 
-    @Override
-    public int getTabTag() {
-        return 0;
-    }
 }

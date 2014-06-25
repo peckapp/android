@@ -50,8 +50,4 @@ public class PeckFeed extends FeedTab<Peck> {
         return PeckManager.class;
     }
 
-    @Override
-    public int getTabTag() {
-        return R.string.tb_pecks;
-    }
 }

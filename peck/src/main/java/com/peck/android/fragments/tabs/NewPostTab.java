@@ -52,9 +52,5 @@ public class NewPostTab extends BaseTab {
         return PostManager.class;
     }
 
-    @Override
-    public int getTabTag() {
-        return R.string.tb_newpost;
-    }
 
 }

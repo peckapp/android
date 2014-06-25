@@ -19,10 +19,6 @@ public class DiningFeed extends FeedTab<Meal> {
 
     public String tag() { return tag; }
 
-    public int getTabTag() { //this method *is used*, don't delete
-        return tabId;
-    }
-
     public DiningFeed setUpFeed() {
 
         if (dataSource == null) {
