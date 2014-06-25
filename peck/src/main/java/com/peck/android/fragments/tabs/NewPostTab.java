@@ -10,7 +10,6 @@ import com.peck.android.fragments.BaseTab;
 import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.listeners.FragmentSwitcherListener;
-import com.peck.android.managers.PostManager;
 
 import java.util.HashMap;
 
@@ -50,7 +49,7 @@ public class NewPostTab extends BaseTab {
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
-        return PostManager.class;
+        return null;
     }
 
 

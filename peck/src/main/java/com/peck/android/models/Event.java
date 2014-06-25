@@ -7,16 +7,16 @@ import android.widget.TextView;
 
 import com.peck.android.R;
 import com.peck.android.database.dataspec.EventDataSpec;
+import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.models.postItems.Post;
 
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
+public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     private int serverId = -1;
     private int color = -1;
     private Date created = new Date(-1);

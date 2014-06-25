@@ -80,12 +80,21 @@ public abstract class Manager<T extends DBOperable> {
         return data;
     }
 
-    public T getById(int id) {
+    public T getByLocalId(int id) {
         //TODO: need to account for current data set not containing wanted item -- throw db req
 
         if (data.size() == 0) return null;
 
-        return data.get(id);
+        for (T i: data) {
+            if (i.getLocalId() == id) return i;
+        }
+
+        return null;
+    }
+
+    public T getByServerId(int id) {
+
+        return null;
     }
 
     public void add(final T item, final Callback<T> callback) {

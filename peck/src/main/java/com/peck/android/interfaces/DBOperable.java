@@ -11,10 +11,41 @@ import java.util.Date;
 public abstract class DBOperable {
 
     protected int localId = -1;
+    protected int serverId = -1;
+    protected Date created = new Date(-1);
+    protected Date updated = new Date(-1);
+
+    public int getServerId() {
+        return serverId;
+    }
+
+    public DBOperable setServerId(int serverId) {
+        this.serverId = serverId;
+        return this;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public DBOperable setCreated(Date created) {
+        this.created = created;
+        return this;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public DBOperable setUpdated(Date updated) {
+        this.updated = updated;
+        return this;
+    }
 
     public int getLocalId() {
         return localId;
     }
+
     public DBOperable setLocalId(int id) {
         localId = id;
         return this;

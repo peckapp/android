@@ -36,6 +36,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         T t;
         for (int i = 1; i < 21; i++) {
             t = dSource.generate();
+            t.setServerId(i);
             add(t, new Callback<T>() {
                 public void callBack(T obj) {
                 }

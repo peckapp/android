@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.meetme.android.horizontallistview.HorizontalListView;
 import com.peck.android.R;
 import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
@@ -149,12 +148,22 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         //test
         //profilePicture = BitmapFactory.decodeResource(v.getResources(), R.drawable.ic_launcher);
 
-        Log.d("user model", "setting up " + ((v instanceof HorizontalListView) ? "hlv" :
-                (v instanceof LinearLayout) ? "linear layout" : "unknown"));
+        Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RoundedImageView) ? "circles user item." :
+                (v instanceof LinearLayout) ? "profile." : "unknown view."));
 
-        if (v instanceof HorizontalListView) {
-            //if this is a list item
-            //((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(profilePicture);
+        if (v instanceof RoundedImageView) {
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //todo: open the user's profile page
+                }
+            });
+            getProfilePicture(new Callback<Bitmap>() {
+                @Override
+                public void callBack(Bitmap obj) {
+                    ((RoundedImageView) v).setImageBitmap(obj);
+                }
+            });
         } else if (v instanceof LinearLayout) {
             //if this is a profile page
             v.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);

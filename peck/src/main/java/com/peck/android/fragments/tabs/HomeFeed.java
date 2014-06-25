@@ -13,7 +13,6 @@ public class HomeFeed extends BaseEventFeed {
     private final static String tag = "EventFeed";
     private final static int resId = R.layout.tab_homefeed;
     private final static int lvId = R.id.lv_events;
-    private final static int tabId = R.string.tb_home;
 
     public int getLayoutRes() {
         return resId;

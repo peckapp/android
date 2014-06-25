@@ -69,7 +69,7 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(LocaleDataSpec.COLUMN_SV_ID, getServerId());
+        cv.put(LocaleDataSpec.COLUMN_SERVER_ID, getServerId());
         cv.put(LocaleDataSpec.COLUMN_NAME, getName());
         cv.put(LocaleDataSpec.COLUMN_LAT, getLocation().getLatitude());
         cv.put(LocaleDataSpec.COLUMN_LONG, getLocation().getLongitude());
@@ -83,7 +83,7 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
         t.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LONG)));
 
         return this.setLocalId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_SV_ID)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_SERVER_ID)))
                 .setName(cursor.getString(cursor.getColumnIndex(LocaleDataSpec.COLUMN_NAME)))
                 .setLocation(t);
     }

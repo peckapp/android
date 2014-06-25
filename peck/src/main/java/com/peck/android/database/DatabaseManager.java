@@ -72,9 +72,7 @@ public class DatabaseManager {
         openHelper = new SQLiteOpenHelper(PeckApp.AppContext.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
-                for (DataSpec i : dbSpecs) {
-                    sqLiteDatabase.execSQL(i.getDatabaseCreate());
-                }
+                for (DataSpec i : dbSpecs) sqLiteDatabase.execSQL(i.getDbCreate());
             }
 
             @Override

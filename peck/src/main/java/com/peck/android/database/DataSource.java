@@ -2,6 +2,7 @@ package com.peck.android.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
@@ -118,7 +119,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
+            Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), DataSpec.COLUMN_LOC_ID + " = " + id, null, null, null, null);
             cursor.moveToFirst();
             callback.callBack((T) generate().fromCursor(cursor));
         }
@@ -163,19 +164,26 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             long insertId;
             Cursor cursor;
 
-            insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+            try {
 
-            if (insertId == -1) throw new SQLiteException("Row could not be inserted into the database");
+                insertId = database.insert(dbSpec.getTableName(), null, contentValues);
 
-            cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                    dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
+                if (insertId == -1)
+                    throw new SQLiteException("Row could not be inserted into the database");
 
-            cursor.moveToFirst();
+                cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
+                        DataSpec.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
+                cursor.moveToFirst();
 
-            T newT = (T) generate().fromCursor(cursor);
-            cursor.close();
+                T newT = (T) generate().fromCursor(cursor);
+                cursor.close();
+                callback.callBack(newT);
 
-            callback.callBack(newT);
+            } catch (SQLiteConstraintException e) {
+                Log.e(TAG, "item broke a constraint: " + e.toString());
+                callback.callBack(null);
+            }
+
         }
     }
 
@@ -207,7 +215,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     throw new SQLiteException("Row could not be inserted into the database");
 
                 cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                        dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
+                        DataSpec.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
 
                 cursor.moveToFirst();
 
@@ -233,7 +241,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
+            database.delete(dbSpec.getTableName(), DataSpec.COLUMN_LOC_ID
                     + " = " + id, null);
         }
     }
@@ -248,7 +256,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             database.update(dbSpec.getTableName(),
                     t.toContentValues(),
-                    dbSpec.getColLocId() + " = ?",
+                    DataSpec.COLUMN_LOC_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
         }
     }

@@ -62,11 +62,11 @@ public class PeckSessionManager extends Manager implements Singleton {
         FacebookSessionManager.init();
 
         //test: remove before production
-        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
+        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
         SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         edit.clear();
         edit.commit();
-        Log.i(TAG, "deleted database, cleared user prefs shared preferences");
+        Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
         UserManager.getManager().initialize(dataSource, new Callback() {
             @Override
@@ -74,7 +74,7 @@ public class PeckSessionManager extends Manager implements Singleton {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
 
-                user = UserManager.getManager().getById(user.getLocalId());
+                user = UserManager.getManager().getByLocalId(user.getLocalId());
 
                 if (user == null) {
                     UserManager.getManager().add( new User(), new Callback<User>() {
@@ -87,14 +87,15 @@ public class PeckSessionManager extends Manager implements Singleton {
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override
                     public void callBack(Boolean obj) {
-                        ImageCacher.init(user.getServerId());
+                        if (obj) {
+                            ImageCacher.init(user.getServerId());
+                            Log.i(TAG, "initialized with user " + user.getServerId());
+                        } else {
+                            //todo: give the user an alert dialog, prompting them to log in
 
-                        Log.i(TAG, "initialized with user " + user.getServerId());
+                        }
                     }
                 });
-
-                //todo: contact loginmanager, try to use cached credentials to authenticate with peck servers
-
 
             }
 
@@ -132,7 +133,7 @@ public class PeckSessionManager extends Manager implements Singleton {
         String URL = "";
 
         if ((facebookMode) && (sourcePref == SourcePref.FACEBOOK)) {
-            URL = "https://graph.facebook.com/" + UserManager.getManager().getById(userId).getFbId() +
+            URL = "https://graph.facebook.com/" + UserManager.getManager().getByLocalId(userId).getFbId() +
                     "/picture?width=" + dimens + "&height=" + dimens;
 
         } else if (peckAuth && sourcePref == SourcePref.PECK) {

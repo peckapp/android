@@ -134,7 +134,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(MealDataSpec.COLUMN_SERVER_ID, getServerId());
-        cv.put(MealDataSpec.COLUMN_COLOR, getColor());
         cv.put(MealDataSpec.COLUMN_MEAL_TYPE, getType());
         cv.put(MealDataSpec.COLUMN_TITLE, getTitle());
         cv.put(MealDataSpec.COLUMN_TIME, getMealtime().getTime());
@@ -149,7 +148,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     public Meal fromCursor(Cursor cursor) {
         return this.setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
                 .setType(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_MEAL_TYPE)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_COLOR)))
                 .setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
                 .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_TIME))))
                 .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_UPDATED))))

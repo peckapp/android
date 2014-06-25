@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Created by mammothbane on 6/20/2014.
@@ -28,8 +27,14 @@ public class ImageCacher implements Singleton {
     private static final File CACHE_DIR = new File(PeckApp.AppContext.getContext().getCacheDir(), CACHE_NAME);
     private static Bitmap userImage;
 
-    private static LruCache<Integer, Bitmap> cache = new LruCache<Integer, Bitmap>(PeckApp.Constants.Graphics.CACHE_SIZE);
-    private static Vector<Integer> noImageAvailable = new Vector<Integer>(PeckApp.Constants.Graphics.INT_CACHE_SIZE);
+    private static LruCache<Integer, Bitmap> cache = new LruCache<Integer, Bitmap>(PeckApp.Constants.Graphics.CACHE_SIZE) {
+
+        @Override
+        protected int sizeOf(Integer key, Bitmap value) {
+            return value.getByteCount();
+        }
+
+    };
 
     private ImageCacher() { }
 
@@ -37,9 +42,7 @@ public class ImageCacher implements Singleton {
         imageNotAvailable = BitmapFactory.decodeResource(PeckApp.AppContext.getContext().getResources(),
                 PeckApp.Constants.Graphics.FILLER);
         CACHE_DIR.mkdir();
-        noImageAvailable.add(0);
-
-
+        cache.put(0, imageNotAvailable);
     }
 
     public static void init(final int serverId) {
@@ -65,17 +68,15 @@ public class ImageCacher implements Singleton {
 
     public static void get(final int userId, final Callback<Bitmap> callback) {
         if (userId == PeckSessionManager.getUser().getServerId() && userImage != null) callback.callBack(userImage);
-        else if (noImageAvailable.contains(userId)) callback.callBack(imageNotAvailable);
         else {
             Bitmap ret = cache.get(userId);
             if (ret == null) {
                 PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
                     @Override
                     public void callBack(Bitmap obj) {
-                        if (obj != null) {
-                            cache.put(userId, obj);
-                            callback.callBack(obj); }
-                        else callback.callBack(imageNotAvailable);
+                        if (obj == null) obj = imageNotAvailable;
+                        cache.put(userId, obj);
+                        callback.callBack(obj);
                     }
                 });
             } else {
@@ -85,7 +86,7 @@ public class ImageCacher implements Singleton {
     }
 
     public static void forceUpdate(int resId, Callback<Bitmap> callback) {
-        noImageAvailable.remove(Integer.valueOf(resId));
+        cache.remove(resId);
         get(resId, callback);
     }
 
