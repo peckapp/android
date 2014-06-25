@@ -22,7 +22,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
     private DataSpec<T> dbSpec;
-    private static final String TAG = "datasource";
+    private static final String TAG = "DataSource";
+
 
     private opThread workingThread;
 
@@ -90,14 +91,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         @Override
         public void run() {
             open();
+            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "running");
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
                 } catch (InterruptedException e) {
-                    Log.e(TAG, e.toString());
+                    Log.e(TAG + ": "  + generate().getClass().getSimpleName(), e.toString());
                 }
             }
             close();
+            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "dying");
         }
     }
 
@@ -156,9 +159,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             ContentValues contentValues = t.toContentValues();
-
-            Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
-            Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
 
             long insertId;
             Cursor cursor;
