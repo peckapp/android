@@ -19,6 +19,7 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -68,16 +69,17 @@ public class PeckSessionManager extends Manager implements Singleton {
         edit.commit();
         Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
-        UserManager.getManager().initialize(dataSource, new Callback() {
+        UserManager.getManager().initialize(dataSource, new Callback<ArrayList<User>>() {
             @Override
-            public void callBack(Object obj) {
+            public void callBack(ArrayList<User> obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
 
-                user = UserManager.getManager().getByLocalId(user.getLocalId());
+                user = UserManager.getManager().getByLocalId(user.getLocalId()); //todo: change to serverid
 
                 if (user == null) {
-                    UserManager.getManager().add( new User(), new Callback<User>() {
+                    user = new User();
+                    UserManager.getManager().add( user, new Callback<User>() {
                         @Override
                         public void callBack(User obj) {
                             user = obj;

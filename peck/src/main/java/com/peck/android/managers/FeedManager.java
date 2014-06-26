@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayout> extends Manager<T> {
 
-    //every FeedManager **must** implement a static version of getManager/be a singleton
+    //every FeedManager must be a singleton
 
     protected FeedAdapter<T> adapter;
 
@@ -28,9 +28,9 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         this.adapter = adapter;
         adapter.setSource(FeedManager.this);
 
-        super.initialize(dSource, new Callback() {
+        super.initialize(dSource, new Callback<ArrayList<T>>() {
             @Override
-            public void callBack(Object obj) {
+            public void callBack(ArrayList<T> obj) {
             }
         });
 
@@ -40,10 +40,10 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public ArrayList<T> loadFromDatabase(DataSource<T> dataSource) {
-        return super.loadFromDatabase(dataSource, new Callback() {
+    public void loadFromDatabase(DataSource<T> dataSource) {
+        super.loadFromDatabase(dataSource, new Callback<ArrayList<T>>() {
             @Override
-            public void callBack(Object obj) {
+            public void callBack(ArrayList<T> obj) {
                 adapter.notifyDataSetChanged();
             }
         });

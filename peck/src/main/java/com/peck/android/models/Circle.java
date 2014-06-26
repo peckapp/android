@@ -10,8 +10,6 @@ import android.widget.TextView;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.dataspec.CirclesDataSpec;
-import com.peck.android.database.dataspec.joinspec.CircleJoinSpec;
-import com.peck.android.database.dataspec.joinspec.JoinDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -138,13 +136,4 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    @Override
-    public ArrayList<User> getJoins() {
-        return users;
-    }
-
-    @Override
-    public JoinDataSpec getDataSpec() {
-        return CircleJoinSpec.getJoinSpec();
-    }
 }

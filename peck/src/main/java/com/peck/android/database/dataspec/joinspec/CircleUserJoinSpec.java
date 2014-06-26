@@ -7,12 +7,12 @@ import com.peck.android.models.User;
 /**
  * Created by mammothbane on 6/26/2014.
  */
-public class CircleJoinSpec extends JoinDataSpec<User, Circle> implements Singleton {
-    private static CircleJoinSpec joinSpec = new CircleJoinSpec();
+public class CircleUserJoinSpec extends JoinDataSpec<User, Circle> implements Singleton {
+    private static CircleUserJoinSpec joinSpec = new CircleUserJoinSpec();
 
-    private CircleJoinSpec() {}
+    private CircleUserJoinSpec() {}
 
-    public static CircleJoinSpec getJoinSpec() {
+    public static CircleUserJoinSpec getJoinSpec() {
         return joinSpec;
     }
 

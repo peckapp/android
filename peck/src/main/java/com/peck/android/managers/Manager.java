@@ -28,11 +28,17 @@ public abstract class Manager<T extends DBOperable> {
         }
     }
 
-    public Manager<T> initialize(DataSource<T> dSource, Callback callback) {
+    public Manager<T> initialize(DataSource<T> dSource, final Callback<ArrayList<T>> callback) {
 
         this.dSource = dSource;
 
-        data = loadFromDatabase(dSource, callback);
+        loadFromDatabase(dSource,
+                new Callback<ArrayList<T>>() {
+                    @Override
+                    public void callBack(ArrayList<T> obj) {
+                        callback.callBack(obj);
+                    }
+                });
 
         downloadFromServer();
         //TODO: server communication and sync happens here
@@ -56,31 +62,14 @@ public abstract class Manager<T extends DBOperable> {
         return null; //TODO: implement
     }
 
-    public ArrayList<T> loadFromDatabase(final DataSource<T> dataSource, final Callback callback) {
-        /*//META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
-        //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
-        final ArrayList<V> items = new ArrayList<V>();
-        new AsyncTask<Void, Void, ArrayList<V>>() {
+    public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {
+        dataSource.getAll(new Callback<ArrayList<T>>() {
             @Override
-            protected ArrayList<V> doInBackground(Void... voids) {
-                try {
-                    dataSource.open();
-                    dataSource.getAll(items);
-                } catch (SQLException e) { e.printStackTrace(); }
-                finally {
-                    dataSource.close();
-                }
-                return items;
+            public void callBack(ArrayList<T> obj) {
+                callback.callBack(obj);
             }
+        });
 
-            @Override
-            protected void onPostExecute(ArrayList<V> items) {
-                callback.callBack(null);
-            }
-        }.execute();
-        return items; //TODO: doesn't work because the method's async. */
-        callback.callBack(null);
-        return new ArrayList<T>();
     }
 
 

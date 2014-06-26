@@ -60,4 +60,9 @@ public abstract class DBOperable {
         else return date.getTime();
     }
 
+    public DBOperable associate() { //run to load from database
+        return this;
+    }
+
+
 }

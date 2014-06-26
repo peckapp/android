@@ -1,10 +1,10 @@
 package com.peck.android.managers;
 
+import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Circle;
-import com.peck.android.models.User;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/12/2014.
@@ -21,12 +21,9 @@ public class CircleManager extends FeedManager<Circle> implements Singleton {
         return circleManager;
     }
 
-    protected void associate(Collection<User> users) {
-        for ( User u : users ) {
-            for ( Circle c: data) {
-                //dSource.
-            }
-        }
+    @Override
+    public ArrayList<Circle> loadFromDatabase(DataSource<Circle> dataSource) {
+        return super.loadFromDatabase(dataSource);
     }
 }
 

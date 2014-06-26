@@ -14,7 +14,6 @@ import com.peck.android.interfaces.Factory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -76,7 +75,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     }
 
-    public void getAll(Callback<HashMap<Integer, T>> callback) {
+    public void getAll(Callback<ArrayList<T>> callback) {
         queue.add(new getAll(callback));
     }
 
@@ -124,20 +123,20 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     }
 
     private class getAll extends dbOp {
-        private Callback<HashMap<Integer, T>> callback;
+        private Callback<ArrayList<T>> callback;
 
-        private getAll(Callback<HashMap<Integer, T>> callback) {
+        private getAll(Callback<ArrayList<T>> callback) {
             this.callback = callback;
         }
 
         public void run() {
-            HashMap<Integer, T> ret = new HashMap<Integer, T>();
+            ArrayList<T> ret = new ArrayList<T>();
             Cursor cursor = database.query(dbSpec.getTableName(),
                     dbSpec.getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 T obj = (T) generate().fromCursor(cursor);
-                ret.put(obj.getLocalId(), obj);
+                ret.add(obj);
                 cursor.moveToNext();
             }
             // Make sure to close the cursor
