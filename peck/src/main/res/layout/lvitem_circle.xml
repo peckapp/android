@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.peck.android.views.CirclesListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="160dp"
     android:baselineAligned="false">
 
     <LinearLayout style="@style/iv_wrapper">
@@ -34,7 +34,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="@dimen/feed_vert_margin"
             android:layout_marginLeft="@dimen/feed_horz_margin"
@@ -43,9 +43,7 @@
             <com.meetme.android.horizontallistview.HorizontalListView
                 android:layout_width="match_parent"
                 android:id="@+id/hlv_users"
-                android:layout_height="match_parent">
-
-                </com.meetme.android.horizontallistview.HorizontalListView>
+                android:layout_height="match_parent"/>
 
 
             <TextView
@@ -60,4 +58,4 @@
     </LinearLayout>
 
 
-</LinearLayout>
+</com.peck.android.views.CirclesListItem>

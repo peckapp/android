@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/tab_ll">
 
-    <ListView
+    <com.peck.android.views.CirclesListView
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/lv_circles"

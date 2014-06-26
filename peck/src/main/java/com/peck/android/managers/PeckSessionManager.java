@@ -82,7 +82,7 @@ public class PeckSessionManager extends Manager implements Singleton {
                     UserManager.getManager().add( user, new Callback<User>() {
                         @Override
                         public void callBack(User obj) {
-                            user = obj;
+                            user.setLocalId(obj.getLocalId());
                         }
                     });
                 }

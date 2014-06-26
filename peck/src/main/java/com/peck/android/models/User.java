@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.peck.android.R;
@@ -148,11 +149,12 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         //test
         //profilePicture = BitmapFactory.decodeResource(v.getResources(), R.drawable.ic_launcher);
 
-        Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RoundedImageView) ? "circles user item." :
+        Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));
 
-        if (v instanceof RoundedImageView) {
-            v.setOnClickListener(new View.OnClickListener() {
+        if (v instanceof RelativeLayout) { //todo: fix this, this is a stupid way to make this work
+            final RoundedImageView roundedImageView = (RoundedImageView)v.findViewById(R.id.riv_user);
+            roundedImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Log.d("User " + getLocalId(), "I was clicked");
@@ -162,7 +164,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
             getProfilePicture(new Callback<Bitmap>() {
                 @Override
                 public void callBack(Bitmap obj) {
-                    ((RoundedImageView) v).setImageBitmap(obj);
+                    roundedImageView.setImageBitmap(obj);
                 }
             });
         } else if (v instanceof LinearLayout) {

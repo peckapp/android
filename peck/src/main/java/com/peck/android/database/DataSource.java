@@ -13,7 +13,6 @@ import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -60,10 +59,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     public void create(T t, Callback<T> callback) {
         queue.add(new create(t, callback));
-    }
-
-    public void createMult(Collection<T> ts, Callback<Collection<T>> callback) {
-        queue.add(new createMult(ts, callback));
     }
 
     public void update(T t) {
@@ -184,49 +179,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
     }
 
-    private class createMult extends dbOp {
-        Collection<T> ts;
-        Callback<Collection<T>> callback;
-
-        private createMult(Collection<T> ts, Callback<Collection<T>> callback) {
-            this.ts = ts;
-            this.callback = callback;
-        }
-
-        public void run() {
-            long insertId;
-            Cursor cursor;
-
-            Collection<T> ret = new ArrayList<T>();
-
-            for (T t : ts) {
-
-                ContentValues contentValues = t.toContentValues();
-
-                Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
-                Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
-
-                insertId = database.insert(dbSpec.getTableName(), null, contentValues);
-
-                if (insertId == -1)
-                    throw new SQLiteException("Row could not be inserted into the database");
-
-                cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                        DataSpec.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
-
-                cursor.moveToFirst();
-
-                ret.add((T)generate().fromCursor(cursor));
-                cursor.close();
-            }
-
-            callback.callBack(ret);
-        }
-
-
-    }
-
-
     private class delete extends dbOp {
 
         private T t;
@@ -257,16 +209,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     new String[]{String.valueOf(t.getLocalId())});
         }
     }
-
-    private class relationshipQuery extends dbOp {
-
-
-        @Override
-        void run() {
-
-        }
-    }
-
 
 
 }

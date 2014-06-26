@@ -40,7 +40,12 @@ public class PeckApp extends Application implements Singleton{
 
     public static class Constants {
 
-        public static class Food {
+        public final static class Network {
+            public final static String API_STRING = "https://thor.peckapp.com/";
+            public final static String
+        }
+
+        public final static class Food {
 
 
             public final static int BREAKFAST = 1;
@@ -49,14 +54,14 @@ public class PeckApp extends Application implements Singleton{
             public final static int NIGHT_MEAL = 4;
         }
 
-        public static class Preferences {
+        public final static class Preferences {
             public final static String USER_PREFS = "user preferences";
             public final static String USER_ID = "persistent user id";
 
         }
 
 
-        public static class Database {
+        public final static class Database {
 
             public static final String DATABASE_NAME = "peck.db";
             public final static int RETRY = 20;
@@ -64,14 +69,14 @@ public class PeckApp extends Application implements Singleton{
             public final static int QUEUE_TIMEOUT = 1000;
         }
 
-        public static class Location {
+        public final static class Location {
 
             public final static int INTERVAL = 300;
             public final static int RETRY = 33;
 
         }
 
-        public static class Graphics {
+        public final static class Graphics {
 
             public final static int FILLER = R.drawable.ic_peck;
             public final static int CACHE_SIZE = 5*1024*1024; //5MB cache maximum

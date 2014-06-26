@@ -97,7 +97,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
         //todo: this is temporary, just to get things working for now
 
-        FeedAdapter<User> feedAdapter = new FeedAdapter<User>(R.id.hlv_users);
+        FeedAdapter<User> feedAdapter = new FeedAdapter<User>(R.layout.hlvitem_user);
         feedAdapter.setSource(UserManager.getManager());
         ((AdapterView<ListAdapter>)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
 
