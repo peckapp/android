@@ -17,7 +17,7 @@ public abstract class DataSpec<T extends DBOperable> implements Factory<T> {
     public static final String COLUMN_UPDATED = "updated_at";
     private static final String DELIM = ", ";
 
-    final HashMap<String, String> COLUMNS = new HashMap<String, String>();
+    protected final HashMap<String, String> COLUMNS = new HashMap<String, String>();
 
     {
         COLUMNS.put(COLUMN_LOC_ID, "integer primary key autoincrement");
@@ -26,7 +26,7 @@ public abstract class DataSpec<T extends DBOperable> implements Factory<T> {
         COLUMNS.put(COLUMN_UPDATED, "integer");
     }
 
-    DataSpec()
+    protected DataSpec()
     {
         if (!(this instanceof Singleton)) throw new ClassCastException("DataSourceHelpers *must* be singletons");
 

@@ -57,8 +57,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         DatabaseManager.closeDB();
     }
 
-
-
     public T generate() { return dbSpec.generate(); }
 
     public void create(T t, Callback<T> callback) {
@@ -258,6 +256,15 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     t.toContentValues(),
                     DataSpec.COLUMN_LOC_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
+        }
+    }
+
+    private class relationshipQuery extends dbOp {
+
+
+        @Override
+        void run() {
+
         }
     }
 
