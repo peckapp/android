@@ -13,10 +13,8 @@ import com.peck.android.fragments.tabs.ExploreFeed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.PeckFeed;
 import com.peck.android.fragments.tabs.ProfileTab;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.LocaleManager;
-import com.peck.android.models.Locale;
 
 import java.util.HashMap;
 
@@ -87,16 +85,10 @@ public class FeedActivity extends PeckActivity {
     protected void onResume() {
         super.onResume();
 
-        LocaleManager.getManager().getLocale(new Callback<Locale>() {
-            @Override
-            public void callBack(Locale obj) {
-                if (obj == null) {
-                    Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
-
+        if (LocaleManager.getManager().getLocale() == null) {
+            Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
+import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.Callback;
@@ -34,7 +35,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private final static Object retLock = new Object();
     private static DataSource<Locale> dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
 
-    private static final String LOCALE_ID = "locale local id";
+    private static final String LOCALE_ID = "locale id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
 
     public static LocaleManager getManager() {
@@ -48,6 +49,24 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         activity = act;
         getLocation();
         return manager;
+    }
+
+    @Override
+    public FeedManager<Locale> initialize(FeedAdapter<Locale> adapter, DataSource<Locale> dSource) {
+        super.initialize(adapter, dSource);
+
+        if (locale == null) {
+            int i = PeckApp.AppContext.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, -1);
+
+            if (i != -1) dataSource.get(i, new Callback<Locale>() {
+                @Override
+                public void callBack(Locale obj) {
+                    locale = obj;
+                }
+            });
+        }
+
+        return this;
     }
 
     public void onConnected(Bundle dataBundle) {
@@ -114,13 +133,8 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     }
 
-    public void getLocale(Callback<Locale> callback) {
-        if (locale != null) callback.callBack(locale);
-        else {
-            int i = PeckApp.AppContext.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, -1);
-            if (i == -1) callback.callBack(null);
-            else { dataSource.get(i, callback); }
-        }
+    public Locale getLocale() {
+        return locale;
     }
 
     public LocaleManager setLocale(Locale l) {
