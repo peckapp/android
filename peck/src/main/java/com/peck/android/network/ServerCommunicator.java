@@ -10,6 +10,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
@@ -27,8 +28,9 @@ import java.util.ArrayList;
  * Created by mammothbane on 6/26/2014.
  */
 public class ServerCommunicator implements Singleton {
-    static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-    static RequestQueue requestQueue = PeckApp.getRequestQueue();
+    private static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    private static RequestQueue requestQueue = PeckApp.getRequestQueue();
+    private static JsonParser parser = new JsonParser();
 
     private static ServerCommunicator serverCommunicator = new ServerCommunicator();
 
@@ -94,10 +96,7 @@ public class ServerCommunicator implements Singleton {
         try {
             while (jsonObject.keys().hasNext()) {
                 s = (String) jsonObject.keys().next();
-                gson.fromJson();
-
-                jsonObject.get(s);
-                JsonElement jsonElement = jsonObject;
+                JsonElement ret = parser.parse(jsonObject.get(s).toString());
 
             }
         } catch (JSONException e) { e.printStackTrace(); } //todo: give an error message about not being able to parse the json
