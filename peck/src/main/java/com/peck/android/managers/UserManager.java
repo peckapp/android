@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.models.Circle;
 import com.peck.android.models.User;
 
 import java.util.ArrayList;
@@ -17,12 +16,31 @@ public class UserManager extends Manager<User> implements Singleton {
     private static UserManager userManager = new UserManager();
     private static ArrayList<FeedAdapter<User>> adapters = new ArrayList<FeedAdapter<User>>();
 
-    private void associate(User user) {
+    private void associate(final User user) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                ArrayList<Circle> circles = CircleManager.getManager().getData();
-                for
+
+
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                //update everything
+            }
+        }.execute();
+    }
+
+    private void associateAll() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                for (User user : data)
+
+
+
                 return null;
             }
 
