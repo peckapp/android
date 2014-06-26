@@ -52,11 +52,6 @@ public class EventTest extends AndroidTestCase {
         if (e.getServerId() != testid) throw new Exception("get/set serverId not working");
     }
 
-    public void testColor() throws Exception {
-        e.setColor(testid);
-        if (e.getColor() != testid) throw new Exception("get/set color not working");
-    }
-
     public void testCreated() throws Exception {
         e.setCreated(testdt);
         if (e.getCreated() != testdt) throw new Exception("get/set created date not working");

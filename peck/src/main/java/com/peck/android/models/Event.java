@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
 import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.interfaces.DBOperable;
@@ -17,13 +19,50 @@ import java.util.Date;
  * Created by mammothbane on 5/28/2014.
  */
 public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
-    private int serverId = -1;
-    private int color = -1;
+
+    @Expose
+    @SerializedName("created_at")
     private Date created = new Date(-1);
+
+    @Expose
+    @SerializedName("updated_at")
     private Date updated = new Date(-1);
+
+    @Expose
+    @SerializedName("start_date")
+    private Date startTime = new Date(-1);
+
+    @Expose
+    @SerializedName("end_date")
+    private Date endTime = new Date(-1);
+
+    @Expose
     private String title = "";
+
+    @Expose
+    @SerializedName("event_description")
     private String text = "";
 
+    private int serverId = -1;
+
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public Event setStartTime(Date startTime) {
+        this.startTime = startTime;
+        return this;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public Event setEndTime(Date endTime) {
+        this.endTime = endTime;
+        return this;
+    }
 
     public String getText() {
         return text;
@@ -45,15 +84,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setServerId(int serverId) {
         this.serverId = serverId;
-        return this;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public Event setColor(int color) {
-        this.color = color;
         return this;
     }
 
@@ -101,15 +131,11 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }
 
-    public void setUpPost(View v) {
-
-    }
 
     @Override
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(EventDataSpec.COLUMN_SERVER_ID, getLocalId());
-        cv.put(EventDataSpec.COLUMN_COLOR, getColor());
         cv.put(EventDataSpec.COLUMN_TITLE, getTitle());
         cv.put(EventDataSpec.COLUMN_TEXT, getText());
 
@@ -123,7 +149,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     public Event fromCursor(Cursor cursor) {
         return this.setLocalId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_LOC_ID)))
                 .setServerId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_SERVER_ID)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_COLOR)))
                 .setTitle(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TITLE)))
                 .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_CREATED))))
                 .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_UPDATED))))

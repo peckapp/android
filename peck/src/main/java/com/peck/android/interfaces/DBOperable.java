@@ -3,26 +3,21 @@ package com.peck.android.interfaces;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DBOperable {
+public abstract class DBOperable implements Serializable {
 
     protected int localId = -1;
-    protected int serverId = -1;
     protected Date created = new Date(-1);
     protected Date updated = new Date(-1);
 
-    public int getServerId() {
-        return serverId;
-    }
+    public abstract int getServerId();
 
-    public DBOperable setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
+    public abstract DBOperable setServerId(int serverId);
 
     public Date getCreated() {
         return created;

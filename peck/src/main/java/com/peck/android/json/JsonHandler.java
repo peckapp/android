@@ -5,6 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,8 +34,10 @@ public class JsonHandler<T> {
         return gson.fromJson(jsonParser.parse(new FileReader(file)), type);
     }
 
-    public String put(T t) {
-        return gson.toJson(t, type);
+    public JSONObject put(T t) throws JSONException {
+        return new JSONObject(gson.toJson(t, type));
     }
+
+    public String toString() { return ""; }
 
 }
