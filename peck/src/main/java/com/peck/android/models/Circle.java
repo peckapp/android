@@ -17,17 +17,20 @@ import com.peck.android.managers.UserManager;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by mammothbane on 6/12/2014.
  */
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
-    private ArrayList<Integer> users = new ArrayList<Integer>();
-    private String title = "";
-    private boolean hidden;
+    private static final transient String USERS_SERIAL = "users";
+    private List users = new ArrayList();
 
-    public ArrayList<Integer> getUsers() {
+    private String title = "";
+
+    public List<Integer> getUsers() {
         return users;
     }
 
@@ -35,6 +38,13 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         this.users = users;
         return this;
     }
+
+    public HashMap<String, ArrayList<Integer>> getAllJoins() {
+        HashMap<String, ArrayList<Integer>> ret = new HashMap<String, ArrayList<Integer>>();
+        //ret.put(USERS_SERIAL, users);
+        return ret;
+    }
+
 
     public String getTitle() {
         return title;
@@ -63,14 +73,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public boolean isHidden() {
-        return hidden;
-    }
-
-    public Circle setHidden(boolean hidden) {
-        this.hidden = hidden;
-        return this;
-    }
 
     public int getServerId() {
         return serverId;

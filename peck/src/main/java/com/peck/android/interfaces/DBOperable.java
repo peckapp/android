@@ -9,7 +9,9 @@ import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.database.dataspec.EventDataSpec;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -85,9 +87,15 @@ public abstract class DBOperable implements Serializable {
         else return date.getTime();
     }
 
+    public HashMap<String, ArrayList<Integer>> getAllJoins() {
+        return new HashMap<String, ArrayList<Integer>>();
+    }
+
     public DBOperable associate() { //run to load from database
         return this;
     }
+
+
 
 
 }

@@ -10,13 +10,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
 import com.peck.android.interfaces.DBOperable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -38,17 +33,21 @@ public class DatabaseJsonConverter<T extends DBOperable> {
         ContentValues ret = new ContentValues();
 
         JsonObject object = (JsonObject)parser.parse(gson.toJson(t, t.getClass()));
-        for (Map.Entry<String, JsonElement> field : object.entrySet()) {
-            if (field.getValue().isJsonArray()) {
 
-            } else if (field.getValue().isJsonPrimitive()) {
+        for (Map.Entry<String, JsonElement> field : object.entrySet()) {
+            if (field.getValue().isJsonPrimitive()) {
                 JsonPrimitive primitive = field.getValue().getAsJsonPrimitive();
                 if (primitive.isString()) {
                     ret.put(field.getKey(), primitive.getAsString());
                 } else if (primitive.isNumber()) {
                     ret.put(field.getKey(), primitive.getAsInt());
                 }
-            }
+            } //we ignore lists here; they should be handled in getAllJoins
+        }
+
+        for (Map.Entry<String, ArrayList<Integer>> entry : t.getAllJoins().entrySet()) {
+            String s = parser.parse(gson.toJson(entry.getValue())).toString();
+            ret.put(entry.getKey(), s);
         }
 
         return ret;
@@ -68,38 +67,6 @@ public class DatabaseJsonConverter<T extends DBOperable> {
 
         return ret;
     }
-
-    static class IntegerArrayListAdapter extends TypeAdapter<ArrayList<Integer>> {
-        Gson gson = new Gson();
-        JsonParser parser = new JsonParser();
-
-        @Override
-        public void write(JsonWriter jsonWriter, ArrayList<Integer> ints) throws IOException {
-            if (ints == null) {
-                jsonWriter.beginArray().nullValue().endArray();
-                return;
-            }
-
-            JsonWriter objectWriter = jsonWriter.beginArray();
-            for (Integer t : ints) {
-                objectWriter.value(t);
-            }
-            jsonWriter.endArray();
-        }
-
-        @Override
-        public ArrayList<Integer> read(JsonReader jsonReader) throws IOException {
-            ArrayList<Integer> ret = new ArrayList<Integer>();
-            if (jsonReader.peek() != JsonToken.BEGIN_ARRAY) {
-                return new ArrayList<Integer>();
-            }
-
-            return ret;
-
-
-        }
-    }
-
 
 
 }

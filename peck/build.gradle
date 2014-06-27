@@ -11,6 +11,7 @@ apply plugin: 'android'
 apply plugin: 'crashlytics'
 
 repositories {
+    mavenCentral()
     maven { url 'http://download.crashlytics.com/maven' }
 }
 
@@ -35,9 +36,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:20.+'
     compile 'com.android.support:support-v4:20.+'
+    compile 'com.mcxiaoke.volley:library:+'
+    compile 'com.google.code.gson:gson:+'
 
 /*    compile "com.android.support:cardview-v7:+"
     compile "com.android.support:recyclerview-v7:+"
