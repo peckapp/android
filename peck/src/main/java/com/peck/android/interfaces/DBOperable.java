@@ -5,6 +5,8 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.database.dataspec.DataSpec;
+import com.peck.android.database.dataspec.EventDataSpec;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,6 +17,11 @@ import java.util.Date;
 public abstract class DBOperable implements Serializable {
 
     protected int localId = -1;
+
+    @Expose
+    @SerializedName("id")
+    protected int serverId = -1;
+
 
     @Expose
     @SerializedName("created_at")
@@ -55,9 +62,23 @@ public abstract class DBOperable implements Serializable {
         return this;
     }
 
-    public abstract ContentValues toContentValues();
+    public ContentValues toContentValues() {
+        ContentValues contentValues = new ContentValues();
 
-    public abstract DBOperable fromCursor(Cursor cursor);
+        contentValues.put(DataSpec.COLUMN_SERVER_ID, serverId);
+        contentValues.put(DataSpec.COLUMN_CREATED, dateToInt(created));
+        contentValues.put(DataSpec.COLUMN_UPDATED, dateToInt(updated));
+
+        return contentValues;
+    }
+
+    public DBOperable fromCursor(Cursor cursor) {
+        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_LOC_ID)))
+                .setServerId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_SERVER_ID)))
+                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_CREATED))))
+                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_UPDATED))));
+
+    }
 
     public static long dateToInt(Date date) {
         if (date == null) return -1;

@@ -39,28 +39,48 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     private String text = "";
 
     @Expose
-    @SerializedName("id")
-    private int serverId = -1;
+    @SerializedName("image_url")
+    private String imageUrl;
 
     @Expose
-    @SerializedName("")
-    private String profilePictureURL;
+    @SerializedName("event_url")
+    private String eventUrl;
 
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Event setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        return this;
+    }
+
+    public String getEventUrl() {
+        return eventUrl;
+    }
+
+    public Event setEventUrl(String eventUrl) {
+        this.eventUrl = eventUrl;
+        return this;
+    }
+
+    @NonNull
     public Date getStartTime() {
         return startTime;
     }
 
-    public Event setStartTime(Date startTime) {
+    public Event setStartTime(@NonNull Date startTime) {
         this.startTime = startTime;
         return this;
     }
 
+    @NonNull
     public Date getEndTime() {
         return endTime;
     }
 
-    public Event setEndTime(Date endTime) {
+    public Event setEndTime(@NonNull Date endTime) {
         this.endTime = endTime;
         return this;
     }
@@ -135,24 +155,26 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     @Override
     public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(EventDataSpec.COLUMN_SERVER_ID, getLocalId());
+        ContentValues cv = super.toContentValues();
         cv.put(EventDataSpec.COLUMN_TITLE, getTitle());
         cv.put(EventDataSpec.COLUMN_TEXT, getText());
 
-        cv.put(EventDataSpec.COLUMN_UPDATED, dateToInt(getUpdated()));
-        cv.put(EventDataSpec.COLUMN_CREATED, dateToInt(getCreated()));
+        cv.put(EventDataSpec.COLUMN_START_DATE, dateToInt(getStartTime()));
+        cv.put(EventDataSpec.COLUMN_END_DATE, dateToInt(getEndTime()));
+
+        cv.put(EventDataSpec.COLUMN_IMAGE_URL, imageUrl);
+        cv.put(EventDataSpec.COLUMN_EVENT_URL, eventUrl);
 
         return cv;
     }
 
     @Override
     public Event fromCursor(Cursor cursor) {
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_SERVER_ID)))
+        return ((Event)super.fromCursor(cursor))
                 .setTitle(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TITLE)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_UPDATED))))
-                .setText(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TEXT)));
+                .setText(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TEXT)))
+                .setStartTime(new Date(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_START_DATE))))
+                .setEndTime(new Date(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_END_DATE))))
+                .setImageUrl(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_IMAGE_URL)));
     }
 }
