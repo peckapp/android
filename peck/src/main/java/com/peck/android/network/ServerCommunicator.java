@@ -22,7 +22,6 @@ import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
-import com.peck.android.network.NetworkSpec.NetworkSpec;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -100,7 +99,7 @@ public class ServerCommunicator implements Singleton {
     private static <T> ArrayList<T> parseJson(JsonElement obj, NetworkSpec<T> spec) {
         ArrayList<T> ret = new ArrayList<T>();
         if (obj.isJsonObject()) {
-            if (wrapsJsonArray((JsonObject)obj)) {
+            if (wrapsJsonElement((JsonObject) obj)) {
                 ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), spec));
             } else ret.add((T) gson.fromJson(obj, spec.getType()));
         } else if (obj.isJsonArray()) {
@@ -111,8 +110,8 @@ public class ServerCommunicator implements Singleton {
         return ret;
     }
 
-    private static boolean wrapsJsonArray(JsonObject object) {
-        return (object.entrySet().iterator().next().getValue().isJsonArray() && object.entrySet().size() == 1);
+    private static boolean wrapsJsonElement(JsonObject object) {
+        return (object.entrySet().size() == 1);
     }
 
 

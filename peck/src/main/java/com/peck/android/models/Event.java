@@ -2,6 +2,7 @@ package com.peck.android.models;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,18 +21,12 @@ import java.util.Date;
  */
 public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
-    @Expose
-    @SerializedName("created_at")
-    private Date created = new Date(-1);
-
-    @Expose
-    @SerializedName("updated_at")
-    private Date updated = new Date(-1);
-
+    @NonNull
     @Expose
     @SerializedName("start_date")
     private Date startTime = new Date(-1);
 
+    @NonNull
     @Expose
     @SerializedName("end_date")
     private Date endTime = new Date(-1);
@@ -45,7 +40,11 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     @Expose
     @SerializedName("id")
-    private int serverId;
+    private int serverId = -1;
+
+    @Expose
+    @SerializedName("")
+    private String profilePictureURL;
 
 
     public Date getStartTime() {

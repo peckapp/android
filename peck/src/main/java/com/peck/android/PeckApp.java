@@ -73,7 +73,13 @@ public class PeckApp extends Application implements Singleton{
         public final static class Network {
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
+            public final static String CIRCLES = "circles/";
+            public final static String MEAL = "";
+
+
+
             public final static String API_TEST_KEY = "";
+
 
             public final static String INSTITUTION = "institution_id";
 
