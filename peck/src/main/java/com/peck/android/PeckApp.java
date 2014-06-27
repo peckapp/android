@@ -71,7 +71,7 @@ public class PeckApp extends Application implements Singleton{
 
         JsonConverter<Event> eventConverter = new JsonConverter<Event>();
 
-        ContentValues cv = eventConverter.tToContentValues(event);
+        ContentValues cv = eventConverter.toContentValues(event);
 
         Circle circle = new Circle();
         circle.getUsers().add(5);
@@ -80,10 +80,15 @@ public class PeckApp extends Application implements Singleton{
         Log.d("", "");
 
         JsonConverter<Circle> cDJC = new JsonConverter<Circle>();
-        ContentValues contentValues = cDJC.tToContentValues(circle);
+        ContentValues contentValues = cDJC.toContentValues(circle);
 
         DataSource<Circle> dataSource = new DataSource<Circle>(CirclesDataSpec.getInstance());
-
+        dataSource.create(circle, new Callback<Circle>() {
+            @Override
+            public void callBack(Circle obj) {
+                Circle test = obj;
+            }
+        });
 
 
         Log.d("peckapp", "");

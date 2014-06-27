@@ -18,6 +18,13 @@ import java.util.HashMap;
  */
 public abstract class DBOperable implements Serializable {
 
+    public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
+
+    static {
+        tableIds.put(c)
+    }
+
+
     protected int localId = -1;
 
     @Expose

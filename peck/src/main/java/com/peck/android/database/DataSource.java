@@ -11,6 +11,7 @@ import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
+import com.peck.android.json.JsonConverter;
 
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -151,7 +152,8 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            ContentValues contentValues = t.toContentValues();
+            JsonConverter<T> jsonConverter = new JsonConverter<T>();
+            ContentValues contentValues = jsonConverter.toContentValues(t);
 
             long insertId;
             Cursor cursor;
@@ -167,7 +169,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                         DataSpec.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
-                T newT = (T) generate().fromCursor(cursor);
+                T newT = jsonConverter.fromCursor(cursor);
                 cursor.close();
                 callback.callBack(newT);
 

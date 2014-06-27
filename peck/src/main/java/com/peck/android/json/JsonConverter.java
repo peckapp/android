@@ -24,7 +24,7 @@ public class JsonConverter<T extends DBOperable> {
     private static JsonParser parser = new JsonParser();
 
     @NonNull
-    public ContentValues tToContentValues(T t) throws JsonParseException {
+    public ContentValues toContentValues(T t) throws JsonParseException {
         ContentValues ret = new ContentValues();
 
         JsonObject object = (JsonObject)parser.parse(gson.toJson(t, t.getClass()));
