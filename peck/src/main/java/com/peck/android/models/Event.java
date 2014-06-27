@@ -43,7 +43,9 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     @SerializedName("event_description")
     private String text = "";
 
-    private int serverId = -1;
+    @Expose
+    @SerializedName("id")
+    private int serverId;
 
 
     public Date getStartTime() {

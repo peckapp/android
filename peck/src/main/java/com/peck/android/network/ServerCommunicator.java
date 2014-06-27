@@ -9,7 +9,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
@@ -22,13 +27,17 @@ import com.peck.android.network.NetworkSpec.NetworkSpec;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by mammothbane on 6/26/2014.
  */
 public class ServerCommunicator implements Singleton {
-    private static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    private static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().registerTypeAdapter(Date.class, new JsonDateDeserializer()).create();
     private static RequestQueue requestQueue = PeckApp.getRequestQueue();
     private static JsonParser parser = new JsonParser();
 
@@ -59,28 +68,25 @@ public class ServerCommunicator implements Singleton {
     public static <T> void getObject(int serverId, NetworkSpec<T> spec, final Callback<T> callback) {
         String url = PeckApp.Constants.Network.API_STRING + spec.getApiExtension() + serverId;
 
-        requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
+        get(spec, new Callback<ArrayList<T>>() {
             @Override
-            public void onResponse(JSONObject object) {
-
+            public void callBack(ArrayList<T> obj) {
+                callback.callBack(obj.get(0));
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-
-            }
-        }));
+        }, url);
 
     }
 
     public static <T> void getAll(final NetworkSpec<T> spec, final Callback<ArrayList<T>> callback) {
         String url = PeckApp.Constants.Network.API_STRING + spec.getApiExtension();
+        get(spec, callback, url);
+    }
 
+    private static <T> void get(final NetworkSpec<T> spec, final Callback<ArrayList<T>> callback, final String url) {
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject object) {
-
-                JSONObject jsonObject = new JSONObject();
+                callback.callBack(parseJson(parser.parse(object.toString()), spec));
             }
         }, new Response.ErrorListener() {
             @Override
@@ -88,18 +94,25 @@ public class ServerCommunicator implements Singleton {
 
             }
         }));
-
     }
 
-    private static void parseJson(JSONObject jsonObject) {
-        String s;
-        try {
-            while (jsonObject.keys().hasNext()) {
-                s = (String) jsonObject.keys().next();
-                JsonElement ret = parser.parse(jsonObject.get(s).toString());
 
+    private static <T> ArrayList<T> parseJson(JsonElement obj, NetworkSpec<T> spec) {
+        ArrayList<T> ret = new ArrayList<T>();
+        if (obj.isJsonObject()) {
+            if (wrapsJsonArray((JsonObject)obj)) {
+                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), spec));
+            } else ret.add((T) gson.fromJson(obj, spec.getType()));
+        } else if (obj.isJsonArray()) {
+            for (JsonElement arrayElement : (JsonArray)obj) {
+                ret.addAll(parseJson(arrayElement, spec));
             }
-        } catch (JSONException e) { e.printStackTrace(); } //todo: give an error message about not being able to parse the json
+        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
+        return ret;
+    }
+
+    private static boolean wrapsJsonArray(JsonObject object) {
+        return (object.entrySet().iterator().next().getValue().isJsonArray() && object.entrySet().size() == 1);
     }
 
 
@@ -126,6 +139,21 @@ public class ServerCommunicator implements Singleton {
 
         } catch (JSONException e) { e.printStackTrace(); }
 
+
+    }
+
+    private static class JsonDateDeserializer implements JsonDeserializer<Date> {
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss.SSS'Z'");
+
+        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            Date ret = new Date(-1);
+            try {
+                ret = simpleDateFormat.parse(json.getAsJsonPrimitive().getAsString());
+            } catch (ParseException e) {
+                Log.e("Json date deserializer", "parse exception: " + e.toString());
+            }
+            return ret;
+        }
 
     }
 

@@ -2,6 +2,7 @@ package com.peck.android;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -52,7 +53,14 @@ public class PeckApp extends Application implements Singleton{
         ServerCommunicator.getAll(new EventSpec(), new Callback<ArrayList<Event>>() {
             @Override
             public void callBack(ArrayList<Event> obj) {
+                Log.d("peckapp", obj.toString());
+            }
+        });
 
+        ServerCommunicator.getObject(3, new EventSpec(), new Callback<Event>() {
+            @Override
+            public void callBack(Event obj) {
+                Log.d("peckapp", obj.toString());
             }
         });
 
