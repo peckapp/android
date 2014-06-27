@@ -1,6 +1,7 @@
 package com.peck.android;
 
 import android.app.Application;
+import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 
@@ -8,7 +9,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.json.DatabaseJsonConverter;
 import com.peck.android.managers.PeckSessionManager;
+import com.peck.android.models.Circle;
 import com.peck.android.models.Event;
 import com.peck.android.network.NetworkSpec.EventSpec;
 import com.peck.android.network.ServerCommunicator;
@@ -64,7 +67,19 @@ public class PeckApp extends Application implements Singleton{
             }
         });
 
+        DatabaseJsonConverter<Event> eventConverter = new DatabaseJsonConverter<Event>(new Event());
 
+        ContentValues cv = eventConverter.tToContentValues(event);
+
+        Circle circle = new Circle();
+        circle.getUsers().add(5);
+        circle.getUsers().add(3);
+
+        DatabaseJsonConverter<Circle> cDJC = new DatabaseJsonConverter<Circle>(new Circle());
+
+        ContentValues contentValues = cDJC.tToContentValues(circle);
+
+        Log.d("peckapp", "");
     }
 
 

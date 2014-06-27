@@ -23,18 +23,15 @@ import java.util.Date;
  */
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
-    private ArrayList<User> users = new ArrayList<User>();
+    private ArrayList<Integer> users = new ArrayList<Integer>();
     private String title = "";
-    private Date created = new Date(-1);
-    private Date updated = new Date(-1);
     private boolean hidden;
-    private int serverId = -1;
 
-    public ArrayList<User> getUsers() {
+    public ArrayList<Integer> getUsers() {
         return users;
     }
 
-    public Circle setUsers(ArrayList<User> users) {
+    public Circle setUsers(ArrayList<Integer> users) {
         this.users = users;
         return this;
     }
@@ -81,11 +78,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Circle setServerId(int serverId) {
         this.serverId = serverId;
-        return this;
-    }
-
-    public Circle strip() {
-        users = new ArrayList<User>();
         return this;
     }
 
