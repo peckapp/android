@@ -9,7 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.json.DatabaseJsonConverter;
+import com.peck.android.json.JsonConverter;
 import com.peck.android.managers.PeckSessionManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Event;
@@ -67,7 +67,7 @@ public class PeckApp extends Application implements Singleton{
             }
         });
 
-        DatabaseJsonConverter<Event> eventConverter = new DatabaseJsonConverter<Event>(new Event());
+        JsonConverter<Event> eventConverter = new JsonConverter<Event>(new Event());
 
         ContentValues cv = eventConverter.tToContentValues(event);
 
@@ -77,7 +77,7 @@ public class PeckApp extends Application implements Singleton{
 
         Log.d("", "");
 
-        DatabaseJsonConverter<Circle> cDJC = new DatabaseJsonConverter<Circle>(new Circle());
+        JsonConverter<Circle> cDJC = new JsonConverter<Circle>(new Circle());
 
         ContentValues contentValues = cDJC.tToContentValues(circle);
 

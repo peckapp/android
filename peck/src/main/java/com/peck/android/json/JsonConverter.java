@@ -17,12 +17,12 @@ import java.util.Map;
 /**
  * Created by mammothbane on 6/20/2014.
  */
-public class DatabaseJsonConverter<T extends DBOperable> {
+public class JsonConverter<T extends DBOperable> {
     private static Gson gson = new Gson();
     private static JsonParser parser = new JsonParser();
     private T t;
 
-    public DatabaseJsonConverter(T t) {
+    public JsonConverter(T t) {
         this.t = t;
     }
 
@@ -53,9 +53,11 @@ public class DatabaseJsonConverter<T extends DBOperable> {
         T ret;
         JsonObject object = new JsonObject();
         String colName;
-        int colType;
         for (int i = 0; i < cursor.getColumnCount(); i++) {
-            colType = cursor.getType(i);
+            int colType = cursor.getType(i);
+            switch (colType) {
+
+            }
 
         }
         ret = (T)gson.fromJson(object, t.getClass());
