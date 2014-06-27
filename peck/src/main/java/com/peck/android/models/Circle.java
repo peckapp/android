@@ -18,19 +18,17 @@ import com.peck.android.managers.UserManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by mammothbane on 6/12/2014.
  */
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
-    private static final transient String USERS_SERIAL = "users";
-    private List users = new ArrayList();
+    private ArrayList<Integer> users = new ArrayList<Integer>();
 
     private String title = "";
 
-    public List<Integer> getUsers() {
+    public ArrayList<Integer> getUsers() {
         return users;
     }
 

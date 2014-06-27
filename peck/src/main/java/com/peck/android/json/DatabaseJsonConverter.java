@@ -9,10 +9,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.peck.android.interfaces.DBOperable;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -35,19 +33,16 @@ public class DatabaseJsonConverter<T extends DBOperable> {
         JsonObject object = (JsonObject)parser.parse(gson.toJson(t, t.getClass()));
 
         for (Map.Entry<String, JsonElement> field : object.entrySet()) {
-            if (field.getValue().isJsonPrimitive()) {
-                JsonPrimitive primitive = field.getValue().getAsJsonPrimitive();
-                if (primitive.isString()) {
-                    ret.put(field.getKey(), primitive.getAsString());
-                } else if (primitive.isNumber()) {
-                    ret.put(field.getKey(), primitive.getAsInt());
+            JsonElement element = field.getValue();
+            if (element.isJsonPrimitive()) {
+                if (element.getAsJsonPrimitive().isString()) {
+                    ret.put(field.getKey(), element.getAsString());
+                } else if (element.getAsJsonPrimitive().isNumber()) {
+                    ret.put(field.getKey(), element.getAsInt());
                 }
-            } //we ignore lists here; they should be handled in getAllJoins
-        }
-
-        for (Map.Entry<String, ArrayList<Integer>> entry : t.getAllJoins().entrySet()) {
-            String s = parser.parse(gson.toJson(entry.getValue())).toString();
-            ret.put(entry.getKey(), s);
+            } else if (element.isJsonArray()) {
+                ret.put(field.getKey(), element.getAsJsonArray().toString());
+            }
         }
 
         return ret;
