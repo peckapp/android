@@ -1,4 +1,4 @@
-package com.peck.android.interfaces;
+package com.peck.android.models;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

@@ -21,10 +21,17 @@ import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
+ *
+ * the base app, created when the app starts.
+ *
  */
 public class PeckApp extends Application implements Singleton{
 
     Circle ret;
+
+    public static Context getContext() {
+        return AppContext.mContext;
+    }
 
     public static class AppContext {
         private static Context mContext;
@@ -40,9 +47,6 @@ public class PeckApp extends Application implements Singleton{
             return appContext;
         }
 
-        public static Context getContext() {
-            return mContext;
-        }
     }
 
     public void onCreate() {
@@ -167,7 +171,7 @@ public class PeckApp extends Application implements Singleton{
     private static RequestQueue requestQueue;
 
     public static RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(AppContext.getContext());
+        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext());
         return requestQueue;
     }
 

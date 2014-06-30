@@ -4,7 +4,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 

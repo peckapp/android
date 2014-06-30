@@ -10,14 +10,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
-import com.peck.android.interfaces.DBOperable;
+import com.peck.android.models.DBOperable;
 
 import java.util.Map;
 
 
 /**
  * Created by mammothbane on 6/20/2014.
+ *
+ * this class prepares model objects for insertion into the database
+ * and restores them from database query cursors.
+ *
  */
+
+
 public class JsonConverter<T extends DBOperable> {
     private static Gson gson = new Gson();
     private static JsonParser parser = new JsonParser();

@@ -55,7 +55,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         super.initialize(adapter, dSource);
 
         if (locale == null) {
-            int i = PeckApp.AppContext.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, -1);
+            int i = PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(LOCALE_ID, -1);
 
             if (i != -1) dataSource.get(i, new Callback<Locale>() {
                 @Override

@@ -24,7 +24,7 @@ public class ImageCacher implements Singleton {
     private static final Bitmap imageNotAvailable;
     private static final String TAG = "ImageCacher";
     private static final String CACHE_NAME = "img_cache";
-    private static final File CACHE_DIR = new File(PeckApp.AppContext.getContext().getCacheDir(), CACHE_NAME);
+    private static final File CACHE_DIR = new File(PeckApp.getContext().getCacheDir(), CACHE_NAME);
     private static Bitmap userImage;
 
     private static LruCache<Integer, Bitmap> cache = new LruCache<Integer, Bitmap>(PeckApp.Constants.Graphics.CACHE_SIZE) {
@@ -39,7 +39,7 @@ public class ImageCacher implements Singleton {
     private ImageCacher() { }
 
     static {
-        imageNotAvailable = BitmapFactory.decodeResource(PeckApp.AppContext.getContext().getResources(),
+        imageNotAvailable = BitmapFactory.decodeResource(PeckApp.getContext().getResources(),
                 PeckApp.Constants.Graphics.FILLER);
         CACHE_DIR.mkdir();
         cache.put(0, imageNotAvailable);

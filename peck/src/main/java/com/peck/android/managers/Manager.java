@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 

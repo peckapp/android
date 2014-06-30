@@ -9,9 +9,9 @@ import android.util.Log;
 
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
 import com.peck.android.json.JsonConverter;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;

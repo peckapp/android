@@ -5,8 +5,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.models.Circle;
+import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
 import com.peck.android.models.Locale;
@@ -69,7 +69,7 @@ public class DatabaseManager {
     }
 
     private DatabaseManager() {
-        openHelper = new SQLiteOpenHelper(PeckApp.AppContext.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
+        openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
                 for (DBOperable i : dbOperables) sqLiteDatabase.execSQL(i.getDatabaseCreate());

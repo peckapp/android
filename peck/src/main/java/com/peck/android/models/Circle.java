@@ -8,7 +8,6 @@ import android.widget.TextView;
 import com.google.gson.annotations.Expose;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.UserManager;

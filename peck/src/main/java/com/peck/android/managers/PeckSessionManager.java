@@ -44,7 +44,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     static {
         dataSource = new DataSource<User>(new User());
-        context = PeckApp.AppContext.getContext();
+        context = PeckApp.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }
 

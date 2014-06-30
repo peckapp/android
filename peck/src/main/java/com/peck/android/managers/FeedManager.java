@@ -3,9 +3,9 @@ package com.peck.android.managers;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 
