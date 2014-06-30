@@ -3,6 +3,11 @@ package com.peck.android.interfaces;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.database.dataspec.DataSpec;
@@ -12,6 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -25,7 +31,31 @@ public abstract class DBOperable implements Serializable {
     }
 
     public String getDatabaseCreate() {
-        return
+        String dbCreate = "create table " + getTableName() + " (";
+        Gson gson = new Gson();
+
+        JsonObject jsonObject = (JsonObject)new JsonParser().parse(gson.toJson(this, getClass()));
+
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet() ) {
+            dbCreate += (entry.getKey() + " ");
+            if (entry.getValue().isJsonPrimitive()) {
+                JsonPrimitive primitive = (JsonPrimitive)entry.getValue();
+                if (primitive.isString()) {
+
+                } else if (primitive.isNumber()) {
+                    if (primitive.getAsDouble() == (double)primitive.getAsInt()) {
+
+                    } else {
+
+                    }
+                }
+
+            }
+            dbCreate + map.get(string);
+            entry += + DELIM);
+        }
+
+        dbCreate = dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
     }
 
     protected int localId = -1;

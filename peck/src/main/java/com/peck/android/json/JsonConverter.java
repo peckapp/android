@@ -64,7 +64,7 @@ public class JsonConverter<T extends DBOperable> {
                     object.addProperty(colName, cursor.getDouble(i));
                     break;
                 default:
-                    //todo: throw an exception that the column couldn't be added?
+                    //todo: throw an exception that the column couldn't be added
                     break;
             }
 
