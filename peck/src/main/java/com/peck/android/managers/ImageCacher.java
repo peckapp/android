@@ -31,7 +31,8 @@ public class ImageCacher implements Singleton {
 
         @Override
         protected int sizeOf(Integer key, Bitmap value) {
-            return value.getByteCount();
+            if (!value.equals(imageNotAvailable)) return value.getByteCount();
+            else return 0;
         }
 
     };
@@ -71,12 +72,12 @@ public class ImageCacher implements Singleton {
         else {
             Bitmap ret = cache.get(userId);
             if (ret == null) {
+                cache.put(userId, imageNotAvailable);
                 PeckSessionManager.getImage(userId, new Callback<Bitmap>() {
                     @Override
                     public void callBack(Bitmap obj) {
-                        if (obj == null) obj = imageNotAvailable;
-                        cache.put(userId, obj);
-                        callback.callBack(obj);
+                        if (obj != null) { cache.put(userId, obj); }
+                        callback.callBack(cache.get(userId));
                     }
                 });
             } else {

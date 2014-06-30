@@ -7,12 +7,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.makeramen.RoundedImageView;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
-import com.peck.android.views.RoundedImageView;
 
 import java.util.ArrayList;
 import java.util.Calendar;

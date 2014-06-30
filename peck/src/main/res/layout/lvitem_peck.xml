@@ -8,11 +8,11 @@
 
     <LinearLayout style="@style/iv_wrapper">
 
-        <com.peck.android.views.RoundedImageView
+        <com.makeramen.RoundedImageView
+            style="@style/riv_default"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_peck"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 
