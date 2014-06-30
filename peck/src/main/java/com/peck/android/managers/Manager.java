@@ -47,7 +47,7 @@ public abstract class Manager<T extends DBOperable> {
         //TEST
 
         T t;
-        for (int i = 1; i < 21; i++) {
+        for (int i = 1; i < 11; i++) {
             try {
                 t = dSource.generate();
                 t.setServerId(i);
@@ -56,7 +56,7 @@ public abstract class Manager<T extends DBOperable> {
                     }
                 });
             } catch (Exception e) {
-                Log.e(tag(), "all dboperables must have public, nullary constructors");
+                Log.e(tag(), "all dboperables must have public, nullary constructors\n" + e.toString());
             }
         }
 
