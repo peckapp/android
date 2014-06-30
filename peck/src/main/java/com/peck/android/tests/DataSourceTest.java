@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.peck.android.database.DataSource;
 import com.peck.android.database.DatabaseManager;
-import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.models.Event;
 
 import java.util.Date;
@@ -20,7 +19,6 @@ public class DataSourceTest extends AndroidTestCase {
     private final static String TAG = "DataSourceTest";
 
     private DataSource<Event> dSource;
-    private EventDataSpec dbHelper;
 
     @Override
     protected void setUp() throws Exception {
@@ -37,12 +35,10 @@ public class DataSourceTest extends AndroidTestCase {
     @Override
     protected void tearDown() throws Exception {
         dSource = null;
-        dbHelper = null;
     }
 
     private void assertPre() throws AssertionError {
         assertNotNull(dSource);
-        assertNotNull(dbHelper);
     }
 
     //fixme

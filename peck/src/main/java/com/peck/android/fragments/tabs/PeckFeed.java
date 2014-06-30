@@ -5,8 +5,8 @@ import android.os.Bundle;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.PeckDataSpec;
 import com.peck.android.fragments.Feed;
+import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
 import com.peck.android.models.Peck;
@@ -25,7 +25,7 @@ public class PeckFeed extends FeedTab<Peck> {
     @Override
     public Feed<Peck> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Peck>(PeckDataSpec.getInstance());
+            dataSource = new DataSource<Peck>(new Peck());
         }
 
         if (feedAdapter == null) {
@@ -50,8 +50,4 @@ public class PeckFeed extends FeedTab<Peck> {
         return PeckManager.class;
     }
 
-    @Override
-    public int getTabTag() {
-        return R.string.tb_pecks;
-    }
 }

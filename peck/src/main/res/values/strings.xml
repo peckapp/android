@@ -13,8 +13,9 @@
     <string name="bt_cancel">Cancel</string>
     <string name="bt_create_acct">Create</string>
     <string name="bt_acct_suggest">Need an account?</string>
+    <string name="bt_event">Event</string>
     <string name="name_activity_feed_root">FeedRoot</string>
-    <string name="tb_events">Events</string>
+    <string name="tb_home">Home</string>
     <string name="tb_newsfeed">News Feed</string>
     <string name="tb_diningfeed">Dining</string>
     <string name="tb_profile">Profile</string>
@@ -28,7 +29,6 @@
     <string name="tb_pecks">Pecks</string>
     <string name="newPost">New Post</string>
 
-    <string name="bt_event">Event</string>
     <string name="bt_message">Message</string>
     <string name="bt_photo">Photo</string>
     <string name="bt_share">select shares</string>

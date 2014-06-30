@@ -13,12 +13,12 @@ import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -43,8 +43,8 @@ public class PeckSessionManager extends Manager implements Singleton {
 
 
     static {
-        dataSource = new DataSource<User>(UserDataSpec.getInstance());
-        context = PeckApp.AppContext.getContext();
+        dataSource = new DataSource<User>(new User());
+        context = PeckApp.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }
 
@@ -62,39 +62,41 @@ public class PeckSessionManager extends Manager implements Singleton {
         FacebookSessionManager.init();
 
         //test: remove before production
-        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME); //TEST: remove before production
+        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
         SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         edit.clear();
         edit.commit();
-        Log.i(TAG, "deleted database, cleared user prefs shared preferences");
+        Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
-        UserManager.getManager().initialize(dataSource, new Callback() {
+        UserManager.getManager().initialize(dataSource, new Callback<ArrayList<User>>() {
             @Override
-            public void callBack(Object obj) {
+            public void callBack(ArrayList<User> obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
 
-                user = UserManager.getManager().getById(user.getLocalId());
+                user = UserManager.getManager().getByLocalId(user.getLocalId()); //todo: change to serverid
 
                 if (user == null) {
-                    UserManager.getManager().add( new User(), new Callback<User>() {
+                    user = new User();
+                    UserManager.getManager().add( user, new Callback<User>() {
                         @Override
                         public void callBack(User obj) {
-                            user = obj;
+                            user.setLocalId(obj.getLocalId());
                         }
                     });
                 }
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override
                     public void callBack(Boolean obj) {
-                        ImageCacher.init(user.getServerId());
+                        if (obj) {
+                            ImageCacher.init(user.getServerId());
+                            Log.i(TAG, "initialized with user " + user.getServerId());
+                        } else {
+                            //todo: give the user an alert dialog, prompting them to log in
 
-                        Log.i(TAG, "initialized with user " + user.getServerId());
+                        }
                     }
                 });
-
-                //todo: contact loginmanager, try to use cached credentials to authenticate with peck servers
-
 
             }
 
@@ -132,7 +134,7 @@ public class PeckSessionManager extends Manager implements Singleton {
         String URL = "";
 
         if ((facebookMode) && (sourcePref == SourcePref.FACEBOOK)) {
-            URL = "https://graph.facebook.com/" + UserManager.getManager().getById(userId).getFbId() +
+            URL = "https://graph.facebook.com/" + UserManager.getManager().getByLocalId(userId).getFbId() +
                     "/picture?width=" + dimens + "&height=" + dimens;
 
         } else if (peckAuth && sourcePref == SourcePref.PECK) {

@@ -3,9 +3,9 @@ package com.peck.android.managers;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 
@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayout> extends Manager<T> {
 
-    //every FeedManager **must** implement a static version of getManager/be a singleton
+    //every FeedManager must be a singleton
 
     protected FeedAdapter<T> adapter;
 
@@ -25,32 +25,25 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
     public FeedManager<T> initialize(final FeedAdapter<T> adapter, DataSource<T> dSource) {
-        super.initialize(dSource, new Callback() {
-            @Override
-            public void callBack(Object obj) {
-            }
-        });
         this.adapter = adapter;
         adapter.setSource(FeedManager.this);
 
-        T t;
-        for (int i = 1; i < 21; i++) {
-            t = dSource.generate();
-            add(t, new Callback<T>() {
-                public void callBack(T obj) {
-                }
-            });
-        }
+        super.initialize(dSource, new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+            }
+        });
+
         return this;
 
         //testing
 
     }
 
-    public ArrayList<T> loadFromDatabase(DataSource<T> dataSource) {
-        return super.loadFromDatabase(dataSource, new Callback() {
+    public void loadFromDatabase(DataSource<T> dataSource) {
+        super.loadFromDatabase(dataSource, new Callback<ArrayList<T>>() {
             @Override
-            public void callBack(Object obj) {
+            public void callBack(ArrayList<T> obj) {
                 adapter.notifyDataSetChanged();
             }
         });

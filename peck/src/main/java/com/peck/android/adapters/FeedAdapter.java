@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.peck.android.PeckApp;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.Manager;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 
@@ -44,7 +44,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         if (view == null) {
-            LayoutInflater inflater = (LayoutInflater) PeckApp.AppContext.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) PeckApp.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(resourceId, null);
         }
 

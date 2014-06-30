@@ -2,18 +2,18 @@ package com.peck.android.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
-import com.peck.android.database.dataspec.DataSpec;
+import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
+import com.peck.android.json.JsonConverter;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -21,9 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
-    private DataSpec<T> dbSpec;
+    private T item;
     private static final String TAG = "DataSource";
-
+    private JsonConverter<T> jsonConverter = new JsonConverter<T>();
+    private String[] columns;
 
     private opThread workingThread;
 
@@ -44,8 +45,18 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     };
 
-    public DataSource(DataSpec<T> dbSpec) {
-        this.dbSpec = dbSpec;
+    public T generate() {
+        try {
+        return (T) item.getClass().newInstance();
+        } catch (Exception e) {
+            Log.e(item.getClass().getSimpleName(),
+                    "all dboperables must have public, nullary constructors\n" + e.toString());
+            return null;
+        }
+    }
+
+    public DataSource(T item) {
+        this.item = item;
     }
 
     public void open() {
@@ -56,16 +67,8 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         DatabaseManager.closeDB();
     }
 
-
-
-    public T generate() { return dbSpec.generate(); }
-
     public void create(T t, Callback<T> callback) {
         queue.add(new create(t, callback));
-    }
-
-    public void createMult(Collection<T> ts, Callback<Collection<T>> callback) {
-        queue.add(new createMult(ts, callback));
     }
 
     public void update(T t) {
@@ -77,7 +80,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     }
 
-    public void getAll(Callback<HashMap<Integer, T>> callback) {
+    public void getAll(Callback<ArrayList<T>> callback) {
         queue.add(new getAll(callback));
     }
 
@@ -85,22 +88,25 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
-
+    private String[] getColumns() {
+        if (columns == null) columns = item.getColumns();
+        return columns;
+    }
 
     private class opThread extends Thread {
         @Override
         public void run() {
             open();
-            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "running");
+            Log.i(TAG + ": "  + item.getClass().getSimpleName(), "running");
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
                 } catch (InterruptedException e) {
-                    Log.e(TAG + ": "  + generate().getClass().getSimpleName(), e.toString());
+                    Log.e(TAG + ": "  + item.getClass().getSimpleName(), e.toString());
                 }
             }
             close();
-            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "dying");
+            Log.i(TAG + ": " + item.getClass().getSimpleName(), "dying");
         }
     }
 
@@ -118,27 +124,28 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), dbSpec.getColLocId() + " = " + id, null, null, null, null);
+            Cursor cursor = database.query(item.getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
+                    + " = " + id, null, null, null, null);
             cursor.moveToFirst();
-            callback.callBack((T) generate().fromCursor(cursor));
+            callback.callBack(jsonConverter.fromCursor(cursor, (Class<T>)item.getClass()));
         }
     }
 
     private class getAll extends dbOp {
-        private Callback<HashMap<Integer, T>> callback;
+        private Callback<ArrayList<T>> callback;
 
-        private getAll(Callback<HashMap<Integer, T>> callback) {
+        private getAll(Callback<ArrayList<T>> callback) {
             this.callback = callback;
         }
 
         public void run() {
-            HashMap<Integer, T> ret = new HashMap<Integer, T>();
-            Cursor cursor = database.query(dbSpec.getTableName(),
-                    dbSpec.getColumns(), null, null, null, null, null);
+            ArrayList<T> ret = new ArrayList<T>();
+            Cursor cursor = database.query(item.getTableName(),
+                    item.getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                T obj = (T) generate().fromCursor(cursor);
-                ret.put(obj.getLocalId(), obj);
+                T obj = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
+                ret.add(obj);
                 cursor.moveToNext();
             }
             // Make sure to close the cursor
@@ -158,69 +165,34 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            ContentValues contentValues = t.toContentValues();
+            JsonConverter<T> jsonConverter = new JsonConverter<T>();
+            ContentValues contentValues = jsonConverter.toContentValues(t);
 
             long insertId;
             Cursor cursor;
 
-            insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+            try {
 
-            if (insertId == -1) throw new SQLiteException("Row could not be inserted into the database");
-
-            cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                    dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
-
-            cursor.moveToFirst();
-
-            T newT = (T) generate().fromCursor(cursor);
-            cursor.close();
-
-            callback.callBack(newT);
-        }
-    }
-
-    private class createMult extends dbOp {
-        Collection<T> ts;
-        Callback<Collection<T>> callback;
-
-        private createMult(Collection<T> ts, Callback<Collection<T>> callback) {
-            this.ts = ts;
-            this.callback = callback;
-        }
-
-        public void run() {
-            long insertId;
-            Cursor cursor;
-
-            Collection<T> ret = new ArrayList<T>();
-
-            for (T t : ts) {
-
-                ContentValues contentValues = t.toContentValues();
-
-                Log.d(TAG, "cv: " + ((contentValues == null) ? "null" : "not null"));
-                Log.d(TAG, "database: " + ((database == null) ? "null" : "not null"));
-
-                insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+                insertId = database.insert(item.getTableName(), null, contentValues);
 
                 if (insertId == -1)
                     throw new SQLiteException("Row could not be inserted into the database");
 
-                cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                        dbSpec.getColLocId() + " = " + insertId, null, null, null, null);
-
+                cursor = database.query(item.getTableName(), item.getColumns(),
+                        PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
-                ret.add((T)generate().fromCursor(cursor));
+                T newT = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
                 cursor.close();
+                callback.callBack(newT);
+
+            } catch (SQLiteConstraintException e) {
+                Log.e(TAG, "item broke a constraint: " + e.toString());
+                callback.callBack(null);
             }
 
-            callback.callBack(ret);
         }
-
-
     }
-
 
     private class delete extends dbOp {
 
@@ -233,7 +205,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            database.delete(dbSpec.getTableName(), dbSpec.getColLocId()
+            database.delete(item.getTableName(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null);
         }
     }
@@ -246,13 +218,12 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            database.update(dbSpec.getTableName(),
-                    t.toContentValues(),
-                    dbSpec.getColLocId() + " = ?",
+            database.update(item.getTableName(),
+                    jsonConverter.toContentValues(t),
+                    PeckApp.Constants.Database.LOCAL_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
         }
     }
-
 
 
 }

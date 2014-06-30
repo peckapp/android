@@ -11,13 +11,14 @@ apply plugin: 'android'
 apply plugin: 'crashlytics'
 
 repositories {
+    mavenCentral()
     maven { url 'http://download.crashlytics.com/maven' }
 }
 
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    buildToolsVersion '20'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
@@ -35,9 +36,16 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:19.1.0'
-    compile 'com.android.support:support-v4:19.1.0'
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:20.+'
+    compile 'com.android.support:support-v4:20.+'
+    compile 'com.mcxiaoke.volley:library:+'
+    compile 'com.google.code.gson:gson:+'
+
+/*    compile "com.android.support:cardview-v7:+"
+    compile "com.android.support:recyclerview-v7:+"
+    compile "com.android.support:palette-v7:+"  */
+
     compile 'com.google.android.gms:play-services:4.4.52'
     compile project(':facebook')
     compile project(':pullToRefreshListView')

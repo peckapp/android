@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
+import com.peck.android.fragments.BaseTab;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionManager;
@@ -72,11 +73,6 @@ public class ProfileTab extends BaseTab {
         super.onSaveInstanceState(outState);
         lifecycleHelper.onSaveInstanceState(outState);
     }
-
-    public int getTabTag() {
-        return tabId;
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

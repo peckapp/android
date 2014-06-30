@@ -5,8 +5,8 @@ import android.os.Bundle;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.fragments.Feed;
+import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
 import com.peck.android.models.Circle;
@@ -28,14 +28,10 @@ public class CirclesFeed extends FeedTab<Circle> {
         super.onCreate(savedInstanceState);
     }
 
-    public int getTabTag() {
-        return tagId;
-    }
-
     @Override
     public Feed<Circle> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Circle>(CirclesDataSpec.getInstance());
+            dataSource = new DataSource<Circle>(new Circle());
         }
 
         if (feedAdapter == null) {
@@ -59,4 +55,7 @@ public class CirclesFeed extends FeedTab<Circle> {
     public Class<? extends Singleton> getManagerClass() {
         return CircleManager.class;
     }
+
+
+
 }

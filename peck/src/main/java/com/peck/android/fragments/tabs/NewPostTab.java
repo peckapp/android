@@ -6,10 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
-import com.peck.android.activities.FeedActivity;
+import com.peck.android.fragments.BaseTab;
 import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.PostManager;
+import com.peck.android.listeners.FragmentSwitcherListener;
 
 import java.util.HashMap;
 
@@ -38,7 +38,7 @@ public class NewPostTab extends BaseTab {
             b.putInt(SimpleFragment.RESOURCE, buttonIds.get(i));
             frag = new SimpleFragment();
             frag.setArguments(b);
-            v.findViewById(i).setOnClickListener(new FeedActivity.FragmentSwitcherListener(frag, "btn " + i, getActivity(), R.id.post_content));
+            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), frag, "btn " + i, R.id.post_content));
         }
 
         v.findViewById(R.id.bt_event).performClick();
@@ -49,12 +49,8 @@ public class NewPostTab extends BaseTab {
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
-        return PostManager.class;
+        return null;
     }
 
-    @Override
-    public int getTabTag() {
-        return R.string.tb_newpost;
-    }
 
 }

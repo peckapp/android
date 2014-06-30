@@ -10,7 +10,6 @@ import android.widget.ListView;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
@@ -44,7 +43,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     @Override
     public Feed<Locale> setUpFeed() {
         if (dataSource == null) {
-            dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
+            dataSource = new DataSource<Locale>(new Locale());
         }
 
         if (feedAdapter == null) {
@@ -69,8 +68,4 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         return LocaleManager.class;
     }
 
-    @Override
-    public int getTabTag() {
-        return 0;
-    }
 }

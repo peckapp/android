@@ -1,26 +1,25 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <Button
-        android:layout_width="0px"
-        android:layout_height="0px"
-        android:visibility="gone"
-        android:id="@+id/bt_null"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/bar_height"
         android:background="@color/main_purple"
         android:orientation="horizontal"
-        android:id="@+id/ll_moving">
+        android:id="@+id/ll_buttonbar"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp">
 
 
         <Button
             android:id="@+id/bt_peck"
-            android:text="[pecks]"
+            android:text="pecks"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_height="match_parent"
             android:layout_width="0px"
@@ -29,7 +28,7 @@
 
         <Button
             android:id="@+id/bt_newsfeed"
-            android:text="[news feed]"
+            android:text="explore"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -38,7 +37,7 @@
 
         <Button
             android:id="@+id/bt_add"
-            android:text="[+]"
+            android:text="+"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -47,7 +46,7 @@
 
         <Button
             android:id="@+id/bt_circles"
-            android:text="[circles]"
+            android:text="circles"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -55,7 +54,7 @@
             android:textColor="@color/primary_text_dark_focused" />
         <Button
             android:id="@+id/bt_profile"
-            android:text="[profile]"
+            android:text="profile"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -65,13 +64,23 @@
 
     </LinearLayout>
 
+    <fragment android:name="com.peck.android.fragments.tabs.HomeFeed"
+        android:id="@+id/frag_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
+        android:layout_below="@+id/ll_buttonbar"
+        tools:layout="@layout/tab_homefeed" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/ll_feed_content">
+        android:id="@+id/ll_feed_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
+        android:layout_below="@+id/ll_buttonbar" />
 
 
-        </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

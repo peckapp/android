@@ -1,29 +1,85 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
-import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.models.postItems.Post;
 
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
-    private int serverId = -1;
-    private int color = -1;
-    private Date created = new Date(-1);
-    private Date updated = new Date(-1);
+public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
+
+    @NonNull
+    @Expose
+    @SerializedName("start_date")
+    private Date startTime = new Date(-1);
+
+    @NonNull
+    @Expose
+    @SerializedName("end_date")
+    private Date endTime = new Date(-1);
+
+    @Expose
     private String title = "";
+
+    @Expose
+    @SerializedName("event_description")
     private String text = "";
 
+    @Expose
+    @SerializedName("image_url")
+    private String imageUrl;
+
+    @Expose
+    @SerializedName("event_url")
+    private String eventUrl;
+
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Event setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        return this;
+    }
+
+    public String getEventUrl() {
+        return eventUrl;
+    }
+
+    public Event setEventUrl(String eventUrl) {
+        this.eventUrl = eventUrl;
+        return this;
+    }
+
+    @NonNull
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public Event setStartTime(@NonNull Date startTime) {
+        this.startTime = startTime;
+        return this;
+    }
+
+    @NonNull
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public Event setEndTime(@NonNull Date endTime) {
+        this.endTime = endTime;
+        return this;
+    }
 
     public String getText() {
         return text;
@@ -45,15 +101,6 @@ public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
 
     public Event setServerId(int serverId) {
         this.serverId = serverId;
-        return this;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public Event setColor(int color) {
-        this.color = color;
         return this;
     }
 
@@ -101,32 +148,4 @@ public class Event extends Post<String> implements HasFeedLayout, SelfSetup {
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }
 
-    public void setUpPost(View v) {
-
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(EventDataSpec.COLUMN_SERVER_ID, getLocalId());
-        cv.put(EventDataSpec.COLUMN_COLOR, getColor());
-        cv.put(EventDataSpec.COLUMN_TITLE, getTitle());
-        cv.put(EventDataSpec.COLUMN_TEXT, getText());
-
-        cv.put(EventDataSpec.COLUMN_UPDATED, dateToInt(getUpdated()));
-        cv.put(EventDataSpec.COLUMN_CREATED, dateToInt(getCreated()));
-
-        return cv;
-    }
-
-    @Override
-    public Event fromCursor(Cursor cursor) {
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_SERVER_ID)))
-                .setColor(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_COLOR)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TITLE)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(EventDataSpec.COLUMN_UPDATED))))
-                .setText(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TEXT)));
-    }
 }

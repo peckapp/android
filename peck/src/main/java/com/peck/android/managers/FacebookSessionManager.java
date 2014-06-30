@@ -37,7 +37,7 @@ public class FacebookSessionManager extends Manager implements Singleton {
     private static FacebookSessionManager manager = new FacebookSessionManager();
 
     static {
-        context = PeckApp.AppContext.getContext();
+        context = PeckApp.getContext();
     }
 
     private FacebookSessionManager() {

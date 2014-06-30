@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.models.DBOperable;
 
 import java.util.ArrayList;
 
@@ -28,14 +28,37 @@ public abstract class Manager<T extends DBOperable> {
         }
     }
 
-    public Manager<T> initialize(DataSource<T> dSource, Callback callback) {
+    public Manager<T> initialize(DataSource<T> dSource, final Callback<ArrayList<T>> callback) {
 
         this.dSource = dSource;
 
-        data = loadFromDatabase(dSource, callback);
+        loadFromDatabase(dSource,
+                new Callback<ArrayList<T>>() {
+                    @Override
+                    public void callBack(ArrayList<T> obj) {
+                        callback.callBack(obj);
+                    }
+                });
 
         downloadFromServer();
         //TODO: server communication and sync happens here
+
+
+        //TEST
+
+        T t;
+        for (int i = 1; i < 11; i++) {
+            try {
+                t = dSource.generate();
+                t.setServerId(i);
+                add(t, new Callback<T>() {
+                    public void callBack(T obj) {
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(tag(), "all dboperables must have public, nullary constructors\n" + e.toString());
+            }
+        }
 
         return this;
     }
@@ -44,31 +67,14 @@ public abstract class Manager<T extends DBOperable> {
         return null; //TODO: implement
     }
 
-    public ArrayList<T> loadFromDatabase(final DataSource<T> dataSource, final Callback callback) {
-        /*//META: what else do we want to do here? obviously don't want to loadFromDatabase *everything*
-        //META: sharedpreferences for subscriptions to different things? going to want a filter somewhere
-        final ArrayList<V> items = new ArrayList<V>();
-        new AsyncTask<Void, Void, ArrayList<V>>() {
+    public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {
+        dataSource.getAll(new Callback<ArrayList<T>>() {
             @Override
-            protected ArrayList<V> doInBackground(Void... voids) {
-                try {
-                    dataSource.open();
-                    dataSource.getAll(items);
-                } catch (SQLException e) { e.printStackTrace(); }
-                finally {
-                    dataSource.close();
-                }
-                return items;
+            public void callBack(ArrayList<T> obj) {
+                callback.callBack(obj);
             }
+        });
 
-            @Override
-            protected void onPostExecute(ArrayList<V> items) {
-                callback.callBack(null);
-            }
-        }.execute();
-        return items; //TODO: doesn't work because the method's async. */
-        callback.callBack(null);
-        return new ArrayList<T>();
     }
 
 
@@ -80,12 +86,21 @@ public abstract class Manager<T extends DBOperable> {
         return data;
     }
 
-    public T getById(int id) {
+    public T getByLocalId(int id) {
         //TODO: need to account for current data set not containing wanted item -- throw db req
 
         if (data.size() == 0) return null;
 
-        return data.get(id);
+        for (T i: data) {
+            if (i.getLocalId() == id) return i;
+        }
+
+        return null;
+    }
+
+    public T getByServerId(int id) {
+
+        return null;
     }
 
     public void add(final T item, final Callback<T> callback) {

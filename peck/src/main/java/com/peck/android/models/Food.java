@@ -1,10 +1,8 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
@@ -14,9 +12,10 @@ import com.peck.android.interfaces.SelfSetup;
 public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
     private int serverId = -1;
     private int parentId = -1;
+
+    @NonNull
     private String title = "";
     private String text = "";
-    private int color = -1;
     private int type = -1; //vegetable, meat, starch, etc.
 
 
@@ -52,15 +51,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public int getColor() {
-        return color;
-    }
-
-    public Food setColor(int color) {
-        this.color = color;
-        return this;
-    }
-
     public int getMealId() {
         return parentId;
     }
@@ -87,16 +77,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public void setUp(View v) {
 
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        return null;
-    }
-
-    @Override
-    public Food fromCursor(Cursor cursor) {
-        return null;
     }
 
 }

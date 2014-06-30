@@ -5,14 +5,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
-import com.peck.android.database.dataspec.CirclesDataSpec;
-import com.peck.android.database.dataspec.DataSpec;
-import com.peck.android.database.dataspec.EventDataSpec;
-import com.peck.android.database.dataspec.FoodDataSpec;
-import com.peck.android.database.dataspec.LocaleDataSpec;
-import com.peck.android.database.dataspec.MealDataSpec;
-import com.peck.android.database.dataspec.PeckDataSpec;
-import com.peck.android.database.dataspec.UserDataSpec;
+import com.peck.android.models.Circle;
+import com.peck.android.models.DBOperable;
+import com.peck.android.models.Event;
+import com.peck.android.models.Food;
+import com.peck.android.models.Locale;
+import com.peck.android.models.Meal;
+import com.peck.android.models.Peck;
+import com.peck.android.models.User;
 
 import java.util.ArrayList;
 
@@ -26,16 +26,16 @@ public class DatabaseManager {
     private static SQLiteOpenHelper openHelper;
     private static int openCount = 0;
 
-    private static ArrayList<DataSpec> dbSpecs = new ArrayList<DataSpec>();
+    private static ArrayList<DBOperable> dbOperables = new ArrayList<DBOperable>();
 
     static {
-        dbSpecs.add(EventDataSpec.getInstance());
-        dbSpecs.add(FoodDataSpec.getInstance());
-        dbSpecs.add(MealDataSpec.getInstance());
-        dbSpecs.add(LocaleDataSpec.getInstance());
-        dbSpecs.add(PeckDataSpec.getInstance());
-        dbSpecs.add(CirclesDataSpec.getInstance());
-        dbSpecs.add(UserDataSpec.getInstance());
+        dbOperables.add(new Event());
+        dbOperables.add(new Food());
+        dbOperables.add(new Meal());
+        dbOperables.add(new Locale());
+        dbOperables.add(new Peck());
+        dbOperables.add(new Circle());
+        dbOperables.add(new User());
     }
 
     public static String getDbName() {
@@ -69,19 +69,17 @@ public class DatabaseManager {
     }
 
     private DatabaseManager() {
-        openHelper = new SQLiteOpenHelper(PeckApp.AppContext.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
+        openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
-                for (DataSpec i : dbSpecs) {
-                    sqLiteDatabase.execSQL(i.getDatabaseCreate());
-                }
+                for (DBOperable i : dbOperables) sqLiteDatabase.execSQL(i.getDatabaseCreate());
             }
 
             @Override
             public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
                 Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
 
-                for (DataSpec i : dbSpecs) {
+                for (DBOperable i : dbOperables) {
                     sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ i.getTableName());
                 }
             }

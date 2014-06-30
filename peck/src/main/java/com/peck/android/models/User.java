@@ -1,18 +1,14 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.meetme.android.horizontallistview.HorizontalListView;
 import com.peck.android.R;
-import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
@@ -102,41 +98,10 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         ImageCacher.get(localId, callback);
     }
 
-    public User strip() {
-        circles = new ArrayList<Circle>();
-        return this;
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(UserDataSpec.COLUMN_SERVER_ID, getLocalId());
-        cv.put(UserDataSpec.COLUMN_NAME, getName());
-        cv.put(UserDataSpec.COLUMN_BIO, getBio());
-
-        cv.put(UserDataSpec.COLUMN_UPDATED, dateToInt(getUpdated()));
-        cv.put(UserDataSpec.COLUMN_CREATED, dateToInt(getCreated()));
-        cv.put(UserDataSpec.COLUMN_FACEBOOK_ID, getFbId());
-
-        return cv;
-    }
 
     public User setLocalId(int id) {
         this.localId = id;
         return this;
-    }
-    
-    @Override
-    public User fromCursor(Cursor cursor) {
-        cursor.moveToFirst();
-
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_SERVER_ID)))
-                .setBio(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_BIO)))
-                .setName(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_NAME)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_UPDATED))))
-                .setFbId(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_FACEBOOK_ID)));
     }
 
     @Override
@@ -149,12 +114,24 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         //test
         //profilePicture = BitmapFactory.decodeResource(v.getResources(), R.drawable.ic_launcher);
 
-        Log.d("user model", "setting up " + ((v instanceof HorizontalListView) ? "hlv" :
-                (v instanceof LinearLayout) ? "linear layout" : "unknown"));
+        Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
+                (v instanceof LinearLayout) ? "profile." : "unknown view."));
 
-        if (v instanceof HorizontalListView) {
-            //if this is a list item
-            //((RoundedImageView)v.findViewById(R.id.riv_user)).setImageBitmap(profilePicture);
+        if (v instanceof RelativeLayout) { //todo: fix this, this is a stupid way to make this work
+            final RoundedImageView roundedImageView = (RoundedImageView)v.findViewById(R.id.riv_user);
+            roundedImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("User " + getLocalId(), "I was clicked");
+                    //todo: open the user's profile page
+                }
+            });
+            getProfilePicture(new Callback<Bitmap>() {
+                @Override
+                public void callBack(Bitmap obj) {
+                    roundedImageView.setImageBitmap(obj);
+                }
+            });
         } else if (v instanceof LinearLayout) {
             //if this is a profile page
             v.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
