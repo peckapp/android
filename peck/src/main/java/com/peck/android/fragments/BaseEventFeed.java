@@ -2,7 +2,6 @@ package com.peck.android.fragments;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.models.Event;
 
 /**
@@ -14,11 +13,11 @@ public abstract class BaseEventFeed extends FeedTab<Event> {
     public BaseEventFeed setUpFeed() {
 
         if (dataSource == null) {
-            dataSource = new DataSource<Event>(EventDataSpec.getInstance());
+            dataSource = new DataSource<Event>(new Event());
         }
 
         if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Event>(dataSource.generate().getResourceId());
+            feedAdapter = new FeedAdapter<Event>(new Event().getResourceId());
         }
 
         return this;

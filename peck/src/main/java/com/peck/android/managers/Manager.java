@@ -45,14 +45,19 @@ public abstract class Manager<T extends DBOperable> {
 
 
         //TEST
+
         T t;
         for (int i = 1; i < 21; i++) {
-            t = dSource.generate();
-            t.setServerId(i);
-            add(t, new Callback<T>() {
-                public void callBack(T obj) {
-                }
-            });
+            try {
+                t = dSource.generate();
+                t.setServerId(i);
+                add(t, new Callback<T>() {
+                    public void callBack(T obj) {
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(tag(), "all dboperables must have public, nullary constructors");
+            }
         }
 
         return this;

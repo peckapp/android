@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
-import com.peck.android.database.dataspec.DataSpec;
+import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.Factory;
@@ -21,9 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
-    private DataSpec<T> dbSpec;
+    private T item;
     private static final String TAG = "DataSource";
-
+    private JsonConverter<T> jsonConverter = new JsonConverter<T>();
+    private String[] columns;
 
     private opThread workingThread;
 
@@ -44,8 +45,18 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     };
 
-    public DataSource(DataSpec<T> dbSpec) {
-        this.dbSpec = dbSpec;
+    public T generate() {
+        try {
+        return (T) item.getClass().newInstance();
+        } catch (Exception e) {
+            Log.e(item.getClass().getSimpleName(),
+                    "all dboperables must have public, nullary constructors\n" + e.toString());
+            return null;
+        }
+    }
+
+    public DataSource(T item) {
+        this.item = item;
     }
 
     public void open() {
@@ -55,8 +66,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     public void close() {
         DatabaseManager.closeDB();
     }
-
-    public T generate() { return dbSpec.generate(); }
 
     public void create(T t, Callback<T> callback) {
         queue.add(new create(t, callback));
@@ -79,22 +88,25 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
-
+    private String[] getColumns() {
+        if (columns == null) columns = item.getColumns();
+        return columns;
+    }
 
     private class opThread extends Thread {
         @Override
         public void run() {
             open();
-            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "running");
+            Log.i(TAG + ": "  + item.getClass().getSimpleName(), "running");
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
                 } catch (InterruptedException e) {
-                    Log.e(TAG + ": "  + generate().getClass().getSimpleName(), e.toString());
+                    Log.e(TAG + ": "  + item.getClass().getSimpleName(), e.toString());
                 }
             }
             close();
-            Log.i(TAG + ": "  + generate().getClass().getSimpleName(), "dying");
+            Log.i(TAG + ": " + item.getClass().getSimpleName(), "dying");
         }
     }
 
@@ -112,9 +124,10 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            Cursor cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(), DataSpec.COLUMN_LOC_ID + " = " + id, null, null, null, null);
+            Cursor cursor = database.query(item.getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
+                    + " = " + id, null, null, null, null);
             cursor.moveToFirst();
-            callback.callBack((T) generate().fromCursor(cursor));
+            callback.callBack(jsonConverter.fromCursor(cursor, (Class<T>)item.getClass()));
         }
     }
 
@@ -127,11 +140,11 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             ArrayList<T> ret = new ArrayList<T>();
-            Cursor cursor = database.query(dbSpec.getTableName(),
-                    dbSpec.getColumns(), null, null, null, null, null);
+            Cursor cursor = database.query(item.getTableName(),
+                    item.getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                T obj = (T) generate().fromCursor(cursor);
+                T obj = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
                 ret.add(obj);
                 cursor.moveToNext();
             }
@@ -160,16 +173,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
             try {
 
-                insertId = database.insert(dbSpec.getTableName(), null, contentValues);
+                insertId = database.insert(item.getTableName(), null, contentValues);
 
                 if (insertId == -1)
                     throw new SQLiteException("Row could not be inserted into the database");
 
-                cursor = database.query(dbSpec.getTableName(), dbSpec.getColumns(),
-                        DataSpec.COLUMN_LOC_ID + " = " + insertId, null, null, null, null);
+                cursor = database.query(item.getTableName(), item.getColumns(),
+                        PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
-                T newT = jsonConverter.fromCursor(cursor);
+                T newT = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
                 cursor.close();
                 callback.callBack(newT);
 
@@ -192,7 +205,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            database.delete(dbSpec.getTableName(), DataSpec.COLUMN_LOC_ID
+            database.delete(item.getTableName(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null);
         }
     }
@@ -205,9 +218,9 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            database.update(dbSpec.getTableName(),
-                    t.toContentValues(),
-                    DataSpec.COLUMN_LOC_ID + " = ?",
+            database.update(item.getTableName(),
+                    jsonConverter.toContentValues(t),
+                    PeckApp.Constants.Database.LOCAL_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
         }
     }

@@ -1,7 +1,5 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
@@ -10,7 +8,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.database.dataspec.UserDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -102,41 +99,10 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         ImageCacher.get(localId, callback);
     }
 
-    public User strip() {
-        circles = new ArrayList<Circle>();
-        return this;
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(UserDataSpec.COLUMN_SERVER_ID, getLocalId());
-        cv.put(UserDataSpec.COLUMN_NAME, getName());
-        cv.put(UserDataSpec.COLUMN_BIO, getBio());
-
-        cv.put(UserDataSpec.COLUMN_UPDATED, dateToInt(getUpdated()));
-        cv.put(UserDataSpec.COLUMN_CREATED, dateToInt(getCreated()));
-        cv.put(UserDataSpec.COLUMN_FACEBOOK_ID, getFbId());
-
-        return cv;
-    }
 
     public User setLocalId(int id) {
         this.localId = id;
         return this;
-    }
-    
-    @Override
-    public User fromCursor(Cursor cursor) {
-        cursor.moveToFirst();
-
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(UserDataSpec.COLUMN_SERVER_ID)))
-                .setBio(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_BIO)))
-                .setName(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_NAME)))
-                .setCreated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_CREATED))))
-                .setUpdated(new Date(cursor.getLong(cursor.getColumnIndex(UserDataSpec.COLUMN_UPDATED))))
-                .setFbId(cursor.getString(cursor.getColumnIndex(UserDataSpec.COLUMN_FACEBOOK_ID)));
     }
 
     @Override

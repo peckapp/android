@@ -1,7 +1,5 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
@@ -9,7 +7,6 @@ import android.widget.TextView;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
-import com.peck.android.database.dataspec.EventDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -153,28 +150,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     }
 
 
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues cv = super.toContentValues();
-        cv.put(EventDataSpec.COLUMN_TITLE, getTitle());
-        cv.put(EventDataSpec.COLUMN_TEXT, getText());
 
-        cv.put(EventDataSpec.COLUMN_START_DATE, dateToInt(getStartTime()));
-        cv.put(EventDataSpec.COLUMN_END_DATE, dateToInt(getEndTime()));
 
-        cv.put(EventDataSpec.COLUMN_IMAGE_URL, imageUrl);
-        cv.put(EventDataSpec.COLUMN_EVENT_URL, eventUrl);
-
-        return cv;
-    }
-
-    @Override
-    public Event fromCursor(Cursor cursor) {
-        return ((Event)super.fromCursor(cursor))
-                .setTitle(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TITLE)))
-                .setText(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_TEXT)))
-                .setStartTime(new Date(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_START_DATE))))
-                .setEndTime(new Date(cursor.getInt(cursor.getColumnIndex(EventDataSpec.COLUMN_END_DATE))))
-                .setImageUrl(cursor.getString(cursor.getColumnIndex(EventDataSpec.COLUMN_IMAGE_URL)));
-    }
 }

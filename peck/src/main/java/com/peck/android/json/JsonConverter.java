@@ -9,10 +9,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
+import com.peck.android.PeckApp;
 import com.peck.android.interfaces.DBOperable;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 
@@ -22,6 +21,7 @@ import java.util.Map;
 public class JsonConverter<T extends DBOperable> {
     private static Gson gson = new Gson();
     private static JsonParser parser = new JsonParser();
+    private static final String ARRAY_MARKER = "#jsonarray#";
 
     @NonNull
     public ContentValues toContentValues(T t) throws JsonParseException {
@@ -39,15 +39,17 @@ public class JsonConverter<T extends DBOperable> {
                     else ret.put(field.getKey(), element.getAsInt());
                 }
             } else if (element.isJsonArray()) {
-                ret.put(field.getKey(), element.getAsJsonArray().toString());
+                ret.put(field.getKey(), ARRAY_MARKER + element.getAsJsonArray().toString());
             }
         }
+
+        if (ret.containsKey(PeckApp.Constants.Database.LOCAL_ID)) ret.remove(PeckApp.Constants.Database.LOCAL_ID);
 
         return ret;
     }
 
     @NonNull
-    public T fromCursor(Cursor cursor) {
+    public T fromCursor(Cursor cursor, Class<T> tClass) {
         T ret;
         JsonObject object = new JsonObject();
         for (int i = 0; i < cursor.getColumnCount(); i++) {
@@ -55,7 +57,9 @@ public class JsonConverter<T extends DBOperable> {
             String colName = cursor.getColumnName(i);
             switch (colType) {
                 case Cursor.FIELD_TYPE_STRING:
-                    object.addProperty(colName, cursor.getString(i));
+                    String s = cursor.getString(i);
+                    if (s.contains(ARRAY_MARKER)) object.add(colName, parser.parse(s));
+                    else object.addProperty(colName, s);
                     break;
                 case Cursor.FIELD_TYPE_INTEGER:
                     object.addProperty(colName, cursor.getInt(i));
@@ -69,11 +73,10 @@ public class JsonConverter<T extends DBOperable> {
             }
 
         }
-        Type type = new TypeToken<T>(){}.getType();
-        ret = gson.fromJson(object, type);
+
+        ret = gson.fromJson(object, tClass);
 
         return ret;
     }
-
 
 }

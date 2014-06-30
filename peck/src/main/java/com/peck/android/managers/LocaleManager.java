@@ -15,7 +15,6 @@ import com.peck.android.PeckApp;
 import com.peck.android.activities.LocaleActivity;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
@@ -33,7 +32,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     private static LocationClient client;
     private static Locale locale;
     private final static Object retLock = new Object();
-    private static DataSource<Locale> dataSource = new DataSource<Locale>(LocaleDataSpec.getInstance());
+    private static DataSource<Locale> dataSource = new DataSource<Locale>(new Locale());
 
     private static final String LOCALE_ID = "locale id";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;

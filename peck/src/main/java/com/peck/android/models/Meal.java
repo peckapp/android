@@ -1,12 +1,9 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.database.dataspec.MealDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -131,28 +128,4 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(MealDataSpec.COLUMN_SERVER_ID, getServerId());
-        cv.put(MealDataSpec.COLUMN_MEAL_TYPE, getType());
-        cv.put(MealDataSpec.COLUMN_TITLE, getTitle());
-        cv.put(MealDataSpec.COLUMN_TIME, getMealtime().getTime());
-        cv.put(MealDataSpec.COLUMN_UPDATED, getUpdated().getTime());
-        cv.put(MealDataSpec.COLUMN_LOCATION_ID, getLocation());
-
-        return cv;
-
-    }
-
-    @Override
-    public Meal fromCursor(Cursor cursor) {
-        return this.setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
-                .setType(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_MEAL_TYPE)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_SERVER_ID)))
-                .setMealtime(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_TIME))))
-                .setUpdated(new Date(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_UPDATED))))
-                .setLocalId(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_LOC_ID)))
-                .setLocation(cursor.getInt(cursor.getColumnIndex(MealDataSpec.COLUMN_LOCATION_ID)))
-                .setTitle(cursor.getString(cursor.getColumnIndex(MealDataSpec.COLUMN_TITLE)));
-    }
 }

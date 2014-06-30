@@ -1,7 +1,5 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.view.View;
 
 import com.peck.android.interfaces.DBOperable;
@@ -87,16 +85,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
     @Override
     public void setUp(View v) {
 
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        return null;
-    }
-
-    @Override
-    public Food fromCursor(Cursor cursor) {
-        return null;
     }
 
 }

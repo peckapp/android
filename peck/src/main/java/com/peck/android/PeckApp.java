@@ -8,7 +8,6 @@ import android.util.Log;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.database.DataSource;
-import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.json.JsonConverter;
@@ -25,6 +24,8 @@ import java.util.Date;
  * Created by mammothbane on 5/28/2014.
  */
 public class PeckApp extends Application implements Singleton{
+
+    Circle ret;
 
     public static class AppContext {
         private static Context mContext;
@@ -84,16 +85,14 @@ public class PeckApp extends Application implements Singleton{
         JsonConverter<Circle> cDJC = new JsonConverter<Circle>();
         ContentValues contentValues = cDJC.toContentValues(circle);
 
-        DataSource<Circle> dataSource = new DataSource<Circle>(CirclesDataSpec.getInstance());
+        DataSource<Circle> dataSource = new DataSource<Circle>(new Circle());
         dataSource.create(circle, new Callback<Circle>() {
             @Override
             public void callBack(Circle obj) {
-                Circle test = obj;
+                ret = obj;
             }
         });
 
-
-        Log.d("peckapp", "");
     }
 
 
@@ -136,6 +135,10 @@ public class PeckApp extends Application implements Singleton{
             public final static int RETRY = 20;
             public final static int UI_TIMEOUT = 50;
             public final static int QUEUE_TIMEOUT = 1000;
+
+            public final static String LOCAL_ID = "localId";
+
+
         }
 
         public final static class Location {

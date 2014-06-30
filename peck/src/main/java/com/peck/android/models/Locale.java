@@ -1,13 +1,10 @@
 package com.peck.android.models;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.location.Location;
 import android.view.View;
 import android.widget.TextView;
 
 import com.peck.android.R;
-import com.peck.android.database.dataspec.LocaleDataSpec;
 import com.peck.android.interfaces.DBOperable;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -64,28 +61,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     public Locale setLocalId(int id) {
         this.localId = id;
         return this;
-    }
-
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(LocaleDataSpec.COLUMN_SERVER_ID, getServerId());
-        cv.put(LocaleDataSpec.COLUMN_NAME, getName());
-        cv.put(LocaleDataSpec.COLUMN_LAT, getLocation().getLatitude());
-        cv.put(LocaleDataSpec.COLUMN_LONG, getLocation().getLongitude());
-        return cv;
-    }
-
-    @Override
-    public Locale fromCursor(Cursor cursor) {
-        Location t = new Location("database");
-        t.setLatitude(cursor.getDouble(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LAT)));
-        t.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LONG)));
-
-        return this.setLocalId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_LOC_ID)))
-                .setServerId(cursor.getInt(cursor.getColumnIndex(LocaleDataSpec.COLUMN_SERVER_ID)))
-                .setName(cursor.getString(cursor.getColumnIndex(LocaleDataSpec.COLUMN_NAME)))
-                .setLocation(t);
     }
 
     public String toString() {
