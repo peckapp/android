@@ -77,4 +77,5 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     public int getResourceId() {
         return resId;
     }
+
 }

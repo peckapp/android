@@ -14,7 +14,6 @@ import com.peck.android.json.JsonConverter;
 import com.peck.android.managers.PeckSessionManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Event;
-import com.peck.android.network.NetworkSpec.EventSpec;
 import com.peck.android.network.ServerCommunicator;
 
 import java.util.ArrayList;
@@ -56,14 +55,14 @@ public class PeckApp extends Application implements Singleton{
         event.setStartTime(new Date(System.currentTimeMillis()));
         event.setEndTime(new Date(System.currentTimeMillis() + 30000));
 
-        ServerCommunicator.getAll(new EventSpec(), new Callback<ArrayList<Event>>() {
+        ServerCommunicator.getAll(Event.class, new Callback<ArrayList<Event>>() {
             @Override
             public void callBack(ArrayList<Event> obj) {
                 Log.d("peckapp", obj.toString());
             }
         });
 
-        ServerCommunicator.getObject(3, new EventSpec(), new Callback<Event>() {
+        ServerCommunicator.getObject(3, Event.class, new Callback<Event>() {
             @Override
             public void callBack(Event obj) {
                 Log.d("peckapp", obj.toString());
@@ -102,8 +101,13 @@ public class PeckApp extends Application implements Singleton{
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
             public final static String CIRCLES = "circles/";
-            public final static String MEAL = "";
 
+            //todo: get these:
+            public final static String MEAL = null;
+            public final static String FOOD = null;
+            public final static String LOCALES = null;
+            public final static String PECK = null;
+            public final static String USERS = null;
 
 
             public final static String API_TEST_KEY = "";

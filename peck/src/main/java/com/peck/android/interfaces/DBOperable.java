@@ -117,5 +117,4 @@ public abstract class DBOperable implements Serializable {
         else return date.getTime();
     }
 
-
 }

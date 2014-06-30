@@ -149,7 +149,4 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }
 
-
-
-
 }
