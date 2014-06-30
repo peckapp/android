@@ -20,10 +20,13 @@ public abstract class DBOperable implements Serializable {
 
     public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
 
-    static {
-        tableIds.put(c)
+    public String getTableName() {
+        return "tbl_" + getClass().getSimpleName();
     }
 
+    public String getDatabaseCreate() {
+        return
+    }
 
     protected int localId = -1;
 
