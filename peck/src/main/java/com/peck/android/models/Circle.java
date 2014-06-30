@@ -82,7 +82,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setUp(View v) {
+    public void setUp(final View v) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
 

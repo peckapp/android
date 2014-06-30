@@ -7,7 +7,8 @@ buildscript {
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
-apply plugin: 'android'
+
+apply plugin: 'com.android.application'
 apply plugin: 'crashlytics'
 
 repositories {
@@ -41,6 +42,7 @@ dependencies {
     compile 'com.android.support:support-v4:20.+'
     compile 'com.mcxiaoke.volley:library:+'
     compile 'com.google.code.gson:gson:+'
+    compile 'it.sephiroth.android.library.horizontallistview:library:+'
 
 /*    compile "com.android.support:cardview-v7:+"
     compile "com.android.support:recyclerview-v7:+"
