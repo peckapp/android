@@ -81,9 +81,14 @@ public abstract class DBOperable implements Serializable {
     @SerializedName("updated_at")
     protected Date updated = new Date(-1);
 
-    public abstract int getServerId();
+    public int getServerId() {
+        return serverId;
+    }
 
-    public abstract DBOperable setServerId(int serverId);
+    public DBOperable setServerId(int serverId) {
+        this.serverId = serverId;
+        return this;
+    }
 
     public Date getCreated() {
         return created;
