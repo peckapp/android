@@ -71,6 +71,7 @@ public class ImageCacher implements Singleton {
         if (userId == PeckSessionManager.getUser().getServerId() && userImage != null) callback.callBack(userImage);
         else {
             Bitmap ret = cache.get(userId);
+
             if (ret == null) {
                 cache.put(userId, imageNotAvailable);
                 PeckSessionManager.getImage(userId, new Callback<Bitmap>() {

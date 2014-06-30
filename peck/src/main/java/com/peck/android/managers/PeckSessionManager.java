@@ -133,15 +133,7 @@ public class PeckSessionManager extends Manager implements Singleton {
     protected static void getImage(final int userId, int dimens, final Callback<Bitmap> callback) {
         String URL = "";
 
-        if ((facebookMode) && (sourcePref == SourcePref.FACEBOOK)) {
-            URL = "https://graph.facebook.com/" + UserManager.getManager().getByLocalId(userId).getFbId() +
-                    "/picture?width=" + dimens + "&height=" + dimens;
-
-        } else if (peckAuth && sourcePref == SourcePref.PECK) {
-            URL = "https://herpderp.com";
-        } else {
-            URL = "https://derpherp.com";
-        }
+        UserManager.getManager().getByLocalId(userId).getProfileUrl();
 
         PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
             @Override
