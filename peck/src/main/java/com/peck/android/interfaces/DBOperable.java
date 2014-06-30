@@ -7,14 +7,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.database.dataspec.DataSpec;
 import com.peck.android.database.dataspec.EventDataSpec;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +22,7 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable {
 
+    private static final transient String DELIM = ", ";
     public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
 
     public String getTableName() {
@@ -36,27 +35,25 @@ public abstract class DBOperable implements Serializable {
 
         JsonObject jsonObject = (JsonObject)new JsonParser().parse(gson.toJson(this, getClass()));
 
-        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet() ) {
-            dbCreate += (entry.getKey() + " ");
-            if (entry.getValue().isJsonPrimitive()) {
-                JsonPrimitive primitive = (JsonPrimitive)entry.getValue();
-                if (primitive.isString()) {
+        for (Map.Entry<String, JsonElement> field : jsonObject.entrySet()) {
+            dbCreate += field.getKey() + " ";
 
-                } else if (primitive.isNumber()) {
-                    if (primitive.getAsDouble() == (double)primitive.getAsInt()) {
-
-                    } else {
-
-                    }
+            JsonElement element = field.getValue();
+            if (element.isJsonPrimitive()) {
+                if (element.getAsJsonPrimitive().isString()) {
+                    dbCreate += "text";
+                } else if (element.getAsJsonPrimitive().isNumber()) {
+                    if (element.getAsDouble() != ((double)element.getAsInt())) dbCreate += "double";
+                    else dbCreate += "integer";
                 }
-
+            } else {
+                dbCreate += "text"; //if we don't know what it is, we're saving it as text
             }
-            dbCreate + map.get(string);
-            entry += + DELIM);
+            dbCreate += DELIM;
         }
-
-        dbCreate = dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
+        return dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
     }
+
 
     protected int localId = -1;
 
@@ -126,16 +123,6 @@ public abstract class DBOperable implements Serializable {
         if (date == null) return -1;
         else return date.getTime();
     }
-
-    public HashMap<String, ArrayList<Integer>> getAllJoins() {
-        return new HashMap<String, ArrayList<Integer>>();
-    }
-
-    public DBOperable associate() { //run to load from database
-        return this;
-    }
-
-
 
 
 }

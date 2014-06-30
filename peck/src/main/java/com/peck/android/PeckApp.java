@@ -79,6 +79,8 @@ public class PeckApp extends Application implements Singleton{
 
         Log.d("", "");
 
+        String s = circle.getDatabaseCreate();
+
         JsonConverter<Circle> cDJC = new JsonConverter<Circle>();
         ContentValues contentValues = cDJC.toContentValues(circle);
 

@@ -5,15 +5,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
+import com.peck.android.database.dataspec.CirclesDataSpec;
 import com.peck.android.database.dataspec.DataSpec;
-import com.peck.android.interfaces.DBOperable;
-import com.peck.android.models.Circle;
-import com.peck.android.models.Event;
-import com.peck.android.models.Food;
-import com.peck.android.models.Locale;
-import com.peck.android.models.Meal;
-import com.peck.android.models.Peck;
-import com.peck.android.models.User;
+import com.peck.android.database.dataspec.EventDataSpec;
+import com.peck.android.database.dataspec.FoodDataSpec;
+import com.peck.android.database.dataspec.LocaleDataSpec;
+import com.peck.android.database.dataspec.MealDataSpec;
+import com.peck.android.database.dataspec.PeckDataSpec;
+import com.peck.android.database.dataspec.UserDataSpec;
 
 import java.util.ArrayList;
 
@@ -27,16 +26,16 @@ public class DatabaseManager {
     private static SQLiteOpenHelper openHelper;
     private static int openCount = 0;
 
-    private static ArrayList<DBOperable> dbSpecs = new ArrayList<DBOperable>();
+    private static ArrayList<DataSpec> dbSpecs = new ArrayList<DataSpec>();
 
     static {
-        dbSpecs.add(new Event());
-        dbSpecs.add(new Food());
-        dbSpecs.add(new Meal());
-        dbSpecs.add(new Locale());
-        dbSpecs.add(new Peck());
-        dbSpecs.add(new Circle());
-        dbSpecs.add(new User());
+        dbSpecs.add(EventDataSpec.getInstance());
+        dbSpecs.add(FoodDataSpec.getInstance());
+        dbSpecs.add(MealDataSpec.getInstance());
+        dbSpecs.add(LocaleDataSpec.getInstance());
+        dbSpecs.add(PeckDataSpec.getInstance());
+        dbSpecs.add(CirclesDataSpec.getInstance());
+        dbSpecs.add(UserDataSpec.getInstance());
     }
 
     public static String getDbName() {
