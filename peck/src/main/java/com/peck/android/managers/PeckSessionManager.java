@@ -4,11 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
@@ -92,7 +88,7 @@ public class PeckSessionManager extends Manager implements Singleton {
                     @Override
                     public void callBack(Boolean obj) {
                         if (obj) {
-                            ImageCacher.init(user.getServerId());
+                            ImageCacher.init(user);
                             Log.i(TAG, "initialized with user " + user.getServerId());
                         } else {
                             //todo: give the user an alert dialog, prompting them to log in
@@ -128,31 +124,6 @@ public class PeckSessionManager extends Manager implements Singleton {
         sourcePref = pref;
     }
 
-
-    protected static void getImage(int userId, Callback<Bitmap> callback) {
-        getImage(userId, profileDimens, callback);
-    }
-
-    protected static void getImage(final int userId, int dimens, final Callback<Bitmap> callback) {
-        String URL = "";
-
-        UserManager.getManager().getByLocalId(userId).getProfileUrl();
-
-        PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap bitmap) {
-                callback.callBack(bitmap);
-            }
-        }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(context, "Network error. Couldn't get image for " + userId, Toast.LENGTH_LONG).show();
-                callback.callBack(null);
-            }
-        }));
-
-
-    }
 
     private static Bitmap scale(int size, Bitmap bmp) {
         if (size == profileDimens) return bmp;

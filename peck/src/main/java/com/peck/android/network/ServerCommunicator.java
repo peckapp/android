@@ -1,11 +1,14 @@
 package com.peck.android.network;
 
+import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,6 +23,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
+import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
@@ -174,6 +178,25 @@ public class ServerCommunicator implements Singleton {
         } catch (JSONException e) { e.printStackTrace(); }
 
 
+    }
+
+    public static void getImage(final String URL, int dimens, final Callback<Bitmap> callback) {
+        PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                callback.callBack(bitmap);
+            }
+        }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(PeckApp.getContext(), "Network error. Couldn't get image from " + URL, Toast.LENGTH_LONG).show();
+                callback.callBack(null);
+            }
+        }));
+    }
+
+    public static void getImage(final String URL, Callback<Bitmap> callback) {
+        getImage(URL, (int)PeckApp.getContext().getResources().getDimension(R.dimen.prof_picture_bound), callback);
     }
 
     private static class JsonDateDeserializer implements JsonDeserializer<Date> {

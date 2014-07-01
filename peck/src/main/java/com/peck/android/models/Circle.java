@@ -4,9 +4,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.HasWebImage;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.UserManager;
 
@@ -19,13 +21,28 @@ import it.sephiroth.android.library.widget.HListView;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasWebImage {
 
-    @Expose
     private ArrayList<Integer> users = new ArrayList<Integer>();
 
     @Expose
+    @SerializedName("circle_name")
     private String title = "";
+
+    @Expose
+    @SerializedName("image_link")
+    private String imageUrl;
+
+
+    @Override
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Circle setImageUrl(String Url) {
+        this.imageUrl = Url;
+        return this;
+    }
 
     public ArrayList<Integer> getUsers() {
         return users;
@@ -52,27 +69,14 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public Date getCreated() {
-        return created;
-    }
-
     public Circle setCreated(Date created) {
         this.created = created;
         return this;
     }
 
-    public Date getUpdated() {
-        return updated;
-    }
-
     public Circle setUpdated(Date updated) {
         this.updated = updated;
         return this;
-    }
-
-
-    public int getServerId() {
-        return serverId;
     }
 
     public Circle setServerId(int serverId) {
