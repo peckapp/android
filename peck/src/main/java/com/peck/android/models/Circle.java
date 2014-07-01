@@ -39,7 +39,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setImageUrl(String Url) {
         this.imageUrl = Url;
-        updated();
         return this;
     }
 
@@ -49,7 +48,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setUsers(ArrayList<Integer> users) {
         this.users = users;
-        updated();
         return this;
     }
 
@@ -60,7 +58,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setTitle(String title) {
         this.title = title;
-        updated();
         return this;
     }
 

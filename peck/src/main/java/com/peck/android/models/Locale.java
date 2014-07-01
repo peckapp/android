@@ -77,15 +77,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public int getServerId() {
-        return serverId;
-    }
-
-    public Locale setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
-
     public String getName() {
         return name;
     }
@@ -93,16 +84,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     public Locale setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public Locale setLocalId(int id) {
-        this.localId = id;
-        return this;
-    }
-
-    public String toString() {
-        String ret = (name == null) ? "" : name;
-        return ret + " @ [" + getLocation().getLatitude() + ", " + getLocation().getLongitude() + "]";
     }
 
     @Override

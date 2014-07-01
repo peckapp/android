@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.makeramen.RoundedImageView;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
@@ -24,12 +25,13 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
 
     @Expose
     @NonNull
-    private String name = "";
+    private String name;
 
     @Expose
     private String fbId = "";
 
     @Expose
+    @SerializedName("blurb")
     private String bio = "";
 
     @Expose
@@ -42,16 +44,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
 
     public User setFbId(String fbId) {
         this.fbId = fbId;
-        return this;
-    }
-
-    @Override
-    public int getServerId() {
-        return serverId;
-    }
-
-    public User setServerId(int serverId) {
-        this.serverId = serverId;
         return this;
     }
 
@@ -84,12 +76,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
 
     public void getProfilePicture(Callback<Bitmap> callback) {
         ImageCacher.get(this, callback);
-    }
-
-
-    public User setLocalId(int id) {
-        this.localId = id;
-        return this;
     }
 
     @Override

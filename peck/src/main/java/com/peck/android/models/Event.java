@@ -49,7 +49,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-        updated();
         return this;
     }
 
@@ -59,7 +58,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setEventUrl(String eventUrl) {
         this.eventUrl = eventUrl;
-        updated();
         return this;
     }
 
@@ -70,7 +68,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setStartTime(@NonNull Date startTime) {
         this.startTime = startTime;
-        updated();
         return this;
     }
 
@@ -81,7 +78,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setEndTime(@NonNull Date endTime) {
         this.endTime = endTime;
-        updated();
         return this;
     }
 
@@ -91,7 +87,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setText(String text) {
         this.text = text;
-        updated();
         return this;
     }
 
@@ -101,7 +96,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     public Event setTitle(String title) {
         this.title = title;
-        updated();
         return this;
     }
 

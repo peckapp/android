@@ -22,7 +22,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setType(int type) {
         this.type = type;
-        updated();
         return this;
     }
 
@@ -32,7 +31,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setText(String text) {
         this.text = text;
-        updated();
         return this;
     }
 
@@ -42,7 +40,6 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setTitle(String title) {
         this.title = title;
-        updated();
         return this;
     }
 

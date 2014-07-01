@@ -30,7 +30,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setMealtime(Date mealtime) {
         this.mealtime = mealtime;
-        updated();
         return this;
     }
 
@@ -40,7 +39,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setTitle(String title) {
         this.title = title;
-        updated();
         return this;
     }
 
@@ -50,7 +48,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setLocation(int location) {
         this.location = location;
-        updated();
         return this;
     }
 
@@ -60,7 +57,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setCourses(ArrayList<Food> courses) {
         this.courses = courses;
-        updated();
         return this;
     }
 
