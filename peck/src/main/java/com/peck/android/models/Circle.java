@@ -1,8 +1,6 @@
 package com.peck.android.models;
 
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
@@ -15,6 +13,8 @@ import com.peck.android.managers.UserManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+
+import it.sephiroth.android.library.widget.HListView;
 
 /**
  * Created by mammothbane on 6/12/2014.
@@ -82,7 +82,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setUp(View v) {
+    public void setUp(final View v) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
 
@@ -90,9 +90,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout {
 
         FeedAdapter<User> feedAdapter = new FeedAdapter<User>(R.layout.hlvitem_user);
         feedAdapter.setSource(UserManager.getManager());
-        ((AdapterView<ListAdapter>)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
-
-
+        ((HListView)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
     }
 
     public Circle setLocalid(int localid) {

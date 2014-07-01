@@ -1,53 +1,39 @@
 package com.peck.android.models;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.annotations.Expose;
+import com.makeramen.RoundedImageView;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
-import com.peck.android.views.RoundedImageView;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
 public class User extends DBOperable implements HasFeedLayout, SelfSetup {
 
+    @Expose
+    @NonNull
     private String name = "";
+
+    @Expose
     private String fbId = "";
-    private int serverId = -1;
+
+    @Expose
     private String bio = "";
-    private ArrayList<Circle> circles = new ArrayList<Circle>();
-    private Date created = new Date(Calendar.getInstance().getTimeInMillis());
-    private Date updated = new Date(Calendar.getInstance().getTimeInMillis());
 
-    public Date getCreated() {
-        return created;
-    }
+    @Expose
+    private String profileUrl = "";
 
-    public User setCreated(Date created) {
-        this.created = created;
-        return this;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public User setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
 
     public String getFbId() {
         return fbId;
@@ -58,6 +44,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
+    @Override
     public int getServerId() {
         return serverId;
     }
@@ -76,12 +63,12 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public ArrayList<Circle> getCircles() {
-        return circles;
+    public String getProfileUrl() {
+        return profileUrl;
     }
 
-    public User setCircles(ArrayList<Circle> circles) {
-        this.circles = circles;
+    public User setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
         return this;
     }
 
@@ -111,8 +98,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
 
     @Override
     public void setUp(final View v) {
-        //test
-        //profilePicture = BitmapFactory.decodeResource(v.getResources(), R.drawable.ic_launcher);
 
         Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));

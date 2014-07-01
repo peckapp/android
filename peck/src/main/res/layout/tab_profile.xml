@@ -28,12 +28,14 @@
                 android:layout_alignLeft="@+id/riv_user"
                 android:visibility="invisible"/>
 
-            <com.peck.android.views.RoundedImageView
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:id="@+id/riv_user"
-            android:src="@drawable/ic_launcher"
-            android:alpha="@dimen/alpha_unauth" />
+            <com.makeramen.RoundedImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                app:oval="true"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:id="@+id/riv_user"
+                style="@style/riv_default"
+                android:alpha="@dimen/alpha_unauth" />
 
         </RelativeLayout>
 
