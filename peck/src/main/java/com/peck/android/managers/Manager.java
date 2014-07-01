@@ -192,22 +192,21 @@ public abstract class Manager<T extends DBOperable> {
      * this method should get called iff the object is already in the list.
      * primarily for user-sourced updates.
      *
-     * @param item the item to update, definitely with localid
+     * @param item the item to update, definitely has localid
      */
     public void update(final T item) {
-        if (data.contains(item) && data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
+        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item, and if it hasn't been updated more recently than the argument
             data.remove(item);
             data.add(item);
-            ServerCommunicator.postObject(item, getParameterizedClass());
-            if (item.getServerId() != null) {
-                dSource.update(item);
-            } else ServerCommunicator.getObject(item.getServerId(), getParameterizedClass(), new Callback<T>() {
-                    @Override
-                    public void callBack(T obj) {
-                        item.setServerId(obj.getServerId());
-                        dSource.update(item);
-                    }
-                });
+            if (item.getServerId() != null) dSource.update(item);
+            else ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
+                @Override
+                public void callBack(T obj) {
+                    item.setServerId(obj.getServerId());
+                    item.updated();
+                    dSource.update(item);
+                }
+            });
         } else Log.w(tag(), item.toString() + "isn't in the dataset.");
     }
 

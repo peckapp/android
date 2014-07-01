@@ -153,9 +153,7 @@ public class ServerCommunicator implements Singleton {
         return (object.entrySet().size() == 1);
     }
 
-
-
-    public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
+    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
         try {
 
             JSONObject item = toJson(post, tClass);
@@ -163,7 +161,7 @@ public class ServerCommunicator implements Singleton {
             requestQueue.add(new JsonObjectRequest(Request.Method.POST, PeckApp.Constants.Network.API_STRING + PeckApp.Constants.Network.EVENTS, item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
-                    //todo: update post object with returned object server id
+                    callback.callBack(gson.fromJson(object.toString(), tClass));
                     Log.d(getClass().getSimpleName(), object.toString());
                 }
 
@@ -178,6 +176,11 @@ public class ServerCommunicator implements Singleton {
         } catch (JSONException e) { e.printStackTrace(); }
 
 
+
+    }
+
+    public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
+        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
     }
 
     public static void getImage(final String URL, int dimens, final Callback<Bitmap> callback) {
