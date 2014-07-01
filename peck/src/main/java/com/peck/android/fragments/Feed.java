@@ -1,6 +1,7 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +10,20 @@ import android.widget.ListAdapter;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.FeedManager;
 import com.peck.android.models.DBOperable;
 
+import java.util.ArrayList;
+
 /**
  * Created by mammothbane on 6/9/2014.
+ *
+ * class to handle feed fragments
+ *
  */
 public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab implements HasManager {
 
@@ -25,8 +32,24 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     protected FeedAdapter<T> feedAdapter;
+
     protected DataSource<T> dataSource;
+
     protected FeedManager<T> feedManager;
+
+    @Nullable
+    protected Callback<ArrayList<T>> callback = new Callback<ArrayList<T>>() {
+        @Override
+        public void callBack(ArrayList<T> obj) {
+
+        }
+    };
+
+    public Feed() {}
+
+    public Feed(Callback<ArrayList<T>> callback) {
+        this.callback = callback;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,26 +62,15 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     }
 
-    void getSuper(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
 
     public void onStart() {
         super.onStart();
 
     }
 
-    /**
-     * call abstract getManagerClass(), returns subclass's manager.
-     * pass manager class to Modelmanager's static method,
-     * which uses reflection to invoke the manager's singleton get method.
-     * set modelManager to the singleton instance of the modelmanager we want.
-     */
-
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(feedAdapter, dataSource);
+        feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(this, dataSource, callback);
     }
 
     @Override
@@ -78,7 +90,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     public void onResume() {
         super.onResume();
-        feedAdapter.removeCompleted();
+        feedAdapter.notifyDataSetChanged();
     }
 
     public FeedAdapter<T> getAdapter() { return feedAdapter; }

@@ -27,7 +27,6 @@ public class LocaleActivity extends PeckActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LocaleManager.setActivity(this);
         setContentView(R.layout.activity_locale);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -41,21 +40,6 @@ public class LocaleActivity extends PeckActivity {
 
         findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
 
-        //load all locales into localemanager
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                LocaleManager.getManager().populate();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                notifyMe();
-            }
-        }.execute();
-
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
 
         if (!(servicesConnected() && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
@@ -67,27 +51,7 @@ public class LocaleActivity extends PeckActivity {
             //todo: search bar?
 
         } else {
-
-            //locate the user
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected void onPreExecute() {
-                    TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-                    tv.setVisibility(View.VISIBLE);
-                    tv.setText(R.string.pb_loc);
-                }
-
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    LocaleManager.getLocation();
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    notifyMe();
-                }
-            }.execute();
+            LocaleManager.getLocation();
         }
 
     }

@@ -51,6 +51,8 @@ public class PeckApp extends Application implements Singleton{
         public final static int NULL = -10037; //prime, but we todo: probably want to scrub user input of this
 
         public final static class Network {
+            public final static String SV_ID_NAME = "id";
+
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
             public final static String CIRCLES = "circles/";

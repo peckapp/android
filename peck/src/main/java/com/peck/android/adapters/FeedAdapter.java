@@ -58,11 +58,6 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
     }
 
 
-    public FeedAdapter<T> removeCompleted() {
-        //TODO: implement
-        return this;
-    }
-
     public FeedAdapter<T> setSource(Manager<T> manager) {
         this.manager = manager;
         return this;

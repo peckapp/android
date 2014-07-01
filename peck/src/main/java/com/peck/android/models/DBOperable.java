@@ -3,12 +3,14 @@ package com.peck.android.models;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.PeckApp;
+import com.peck.android.database.DBType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public abstract class DBOperable implements Serializable {
     protected Integer localId = null;
 
     @Expose
-    @SerializedName("id")
+    @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
     protected Integer serverId = null;
 
 
@@ -42,6 +44,7 @@ public abstract class DBOperable implements Serializable {
     @Expose
     @NonNull
     @SerializedName("updated_at")
+    @DBType
     protected Date updated;
 
     private static final transient String DELIM = ", ";
@@ -53,7 +56,7 @@ public abstract class DBOperable implements Serializable {
 
     public String getDatabaseCreate() {
         String dbCreate = "create table " + getTableName() + " (";
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().serializeNulls().create();
 
         JsonObject jsonObject = (JsonObject)new JsonParser().parse(gson.toJson(this, getClass()));
 
@@ -65,18 +68,23 @@ public abstract class DBOperable implements Serializable {
                 if (element.getAsJsonPrimitive().isString()) {
                     dbCreate += "text";
                 } else if (element.getAsJsonPrimitive().isNumber()) {
-                    if (element.getAsDouble() != ((double)element.getAsInt())) dbCreate += "double";
-                    else dbCreate += ("integer" + ((field.getKey().equals(PeckApp.Constants.Database.LOCAL_ID))
-                            ? " primary key autoincrement" : ""));
+                    if (element.getAsDouble() != ((double) element.getAsInt()))
+                        dbCreate += "double";
+                    else
+                        dbCreate += ("integer" + ((field.getKey().equals(PeckApp.Constants.Database.LOCAL_ID))
+                                ? " primary key autoincrement" : ""));
                 }
+            } else if (element.isJsonObject()) {
+                //if element.getAsJsonObject()
             } else {
                 dbCreate += "text"; //if we don't know what it is, we're saving it as text
             }
             dbCreate += DELIM;
         }
 
-        //todo: add/enforce serverid unique constraint
-        return dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
+        dbCreate += "constraint unq unique " + PeckApp.Constants.Network.SV_ID_NAME + ");";
+
+        return dbCreate;
     }
 
     public String[] getColumns() {

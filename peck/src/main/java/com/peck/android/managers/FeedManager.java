@@ -1,7 +1,10 @@
 package com.peck.android.managers;
 
+import android.support.annotation.NonNull;
+
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
+import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -16,7 +19,11 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     //every FeedManager must be a singleton
 
+    @NonNull
     protected FeedAdapter<T> adapter;
+
+    @NonNull
+    protected Feed<T> feed;
 
     public final static String tag = "FeedManager";
 
@@ -24,15 +31,12 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public FeedManager<T> initialize(final FeedAdapter<T> adapter, DataSource<T> dSource) {
-        this.adapter = adapter;
+    public FeedManager<T> initialize(final Feed<T> feed, DataSource<T> dSource, Callback<ArrayList<T>> callback) {
+        this.feed = feed;
+        this.adapter = feed.getAdapter();
         adapter.setSource(FeedManager.this);
 
-        super.initialize(dSource, new Callback<ArrayList<T>>() {
-            @Override
-            public void callBack(ArrayList<T> obj) {
-            }
-        });
+        super.initialize(dSource, callback);
 
         return this;
 
@@ -40,14 +44,21 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public void loadFromDatabase(DataSource<T> dataSource) {
+    @Override
+    public void loadFromDatabase(DataSource<T> dataSource, Callback<ArrayList<T>> callback) {
         super.loadFromDatabase(dataSource, new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                adapter.notifyDataSetChanged();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
+
 
 
     public void addNetwork(T item, final Callback<T> callback) {
@@ -55,11 +66,25 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
             @Override
             public void callBack(T obj) {
                 callback.callBack(obj);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
-        adapter.notifyDataSetChanged();
-
     }
 
+
+    /**
+     * convenience method to run code in the ui thread
+     *
+     * @param runnable a runnable to execute in the ui thread
+     */
+
+    public void runOnUiThread(Runnable runnable) {
+        feed.getActivity().runOnUiThread(runnable);
+    }
 
 }
