@@ -6,6 +6,7 @@ import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.DBOperable;
+import com.peck.android.network.ServerCommunicator;
 
 import java.util.ArrayList;
 
@@ -64,7 +65,7 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public ArrayList<T> downloadFromServer() {
-        return null; //TODO: implement
+        return ServerCommunicator.getAll();
     }
 
     public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {

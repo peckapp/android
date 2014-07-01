@@ -46,6 +46,7 @@ dependencies {
     compile 'fr.avianey:facebook-android-api:+@aar'
     compile 'com.makeramen:roundedimageview:+'
     compile 'com.github.jeremiemartinez:refreshlistview:+'
+    compile 'net.jodah:typetools:+'
 
 /*    compile "com.android.support:cardview-v7:+"
     compile "com.android.support:recyclerview-v7:+"
