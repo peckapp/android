@@ -1,6 +1,7 @@
 package com.peck.android.models;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +14,7 @@ import com.peck.android.PeckApp;
 import com.peck.android.database.DBType;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,10 +30,12 @@ public abstract class DBOperable implements Serializable {
         updated = new Date(System.currentTimeMillis());
     }
 
+    @DBType("integer primary key autoincrement")
     @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
     protected Integer localId = null;
 
     @Expose
+    @DBType("integer")
     @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
     protected Integer serverId = null;
 
@@ -39,12 +43,13 @@ public abstract class DBOperable implements Serializable {
     @Expose
     @NonNull
     @SerializedName("created_at")
+    @DBType("integer")
     protected Date created;
 
     @Expose
     @NonNull
     @SerializedName("updated_at")
-    @DBType
+    @DBType("integer")
     protected Date updated;
 
     private static final transient String DELIM = ", ";
@@ -74,22 +79,38 @@ public abstract class DBOperable implements Serializable {
                         dbCreate += ("integer" + ((field.getKey().equals(PeckApp.Constants.Database.LOCAL_ID))
                                 ? " primary key autoincrement" : ""));
                 }
-            } else if (element.isJsonObject()) {
-                //if element.getAsJsonObject()
+            } else if (element.isJsonNull()) {
+                String actualFieldName = "";
+                for (Field objField : getClass().getFields()) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
+                    SerializedName annotation = objField.getAnnotation(SerializedName.class);
+                    if (objField.getName().equals(field.getKey())) { actualFieldName = field.getKey(); break; }
+                    else if (annotation != null && annotation.value() != null) { actualFieldName = annotation.value(); break; }
+                }
+
+                try {
+                    DBType dbType = getClass().getField(actualFieldName).getAnnotation(DBType.class);
+                    if (dbType == null) dbCreate += "text";
+                    else dbCreate += dbType.value();
+                } catch (NoSuchFieldException e) {
+                    Log.e(getClass().getSimpleName(), "Couldn't get field " + actualFieldName);
+                    dbCreate += "text";
+                }
+
+
             } else {
                 dbCreate += "text"; //if we don't know what it is, we're saving it as text
             }
             dbCreate += DELIM;
         }
 
-        dbCreate += "constraint unq unique " + PeckApp.Constants.Network.SV_ID_NAME + ");";
+        dbCreate += "unique (" + PeckApp.Constants.Network.SV_ID_NAME + "));";
 
         return dbCreate;
     }
 
     public String[] getColumns() {
         ArrayList<String> columns = new ArrayList<String>();
-        for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new Gson().toJson(this, getClass()))).entrySet()) {
+        for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new GsonBuilder().serializeNulls().create().toJson(this, getClass()))).entrySet()) {
             columns.add(entry.getKey());
         }
 

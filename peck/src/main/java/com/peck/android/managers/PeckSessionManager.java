@@ -77,7 +77,7 @@ public class PeckSessionManager extends Manager implements Singleton {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
 
-                user = UserManager.getManager().getByLocalId(user.getLocalId()); //todo: change to serverid
+                user = UserManager.getManager().getByLocalId(user.getLocalId());
 
                 if (user == null) {
                     user = new User();
@@ -115,7 +115,7 @@ public class PeckSessionManager extends Manager implements Singleton {
             @Override
             public void callBack(GraphUser obj) {
                 user.setFbId(obj.getId());
-                if (!peckAuth && loggedIn) user.setName(obj.getName());
+                if (!peckAuth && loggedIn) user.setFullName(obj.getName());
             }
         });
     }

@@ -25,9 +25,20 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
 
     @Expose
     @NonNull
-    private String name;
+    @SerializedName("first_name")
+    private String firstName;
 
     @Expose
+    @NonNull
+    @SerializedName("last_name")
+    private String lastName;
+
+    @Expose
+    @SerializedName("username")
+    private String username;
+
+    @Expose
+    @SerializedName("facebook_link")
     private String fbId = "";
 
     @Expose
@@ -65,13 +76,45 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
         return this;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 
-    public User setName(String name) {
-        this.name = name;
-        return this;
+    public void setFullName(String string) {
+        String[] temp = string.split(" ");
+        //todo: support for names with multiple spaces?
+        firstName = temp[0];
+        lastName = temp[1];
+    }
+
+    @NonNull
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(@NonNull String firstName) {
+        this.firstName = firstName;
+    }
+
+    @NonNull
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(@NonNull String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
     }
 
     public void getProfilePicture(Callback<Bitmap> callback) {
@@ -115,10 +158,8 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWeb
                     v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
                 }
             });
-            if (name != null && !name.equals("")) {
-                ((TextView) v.findViewById(R.id.tv_realname)).setText(getName());
+                ((TextView) v.findViewById(R.id.tv_realname)).setText(getFullName());
                 v.findViewById(R.id.tv_realname).setAlpha(1f);
-            }
         }
 
 

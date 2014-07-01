@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 
 public class JsonConverter<T extends DBOperable> {
-    private static Gson gson = new Gson();
+    private static Gson gson = new GsonBuilder().serializeNulls().create();
     private static JsonParser parser = new JsonParser();
     private static final String ARRAY_MARKER = "#jsonarray#";
 
@@ -64,7 +65,7 @@ public class JsonConverter<T extends DBOperable> {
             switch (colType) {
                 case Cursor.FIELD_TYPE_STRING:
                     String s = cursor.getString(i);
-                    if (s.contains(ARRAY_MARKER)) object.add(colName, parser.parse(s));
+                    if (s.contains(ARRAY_MARKER)) object.add(colName, parser.parse(s.replace(ARRAY_MARKER, "")));
                     else object.addProperty(colName, s);
                     break;
                 case Cursor.FIELD_TYPE_INTEGER:

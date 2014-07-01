@@ -1,5 +1,6 @@
 package com.peck.android.managers;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.peck.android.database.DataSource;
@@ -114,10 +115,9 @@ public abstract class Manager<T extends DBOperable> {
         return data;
     }
 
-    public T getByLocalId(int id) {
-        //TODO: need to account for current data set not containing wanted item -- throw db req
-
-        for (T i: data) {
+    @Nullable
+    public T getByLocalId(Integer id) {
+       for (T i: data) {
             if (i.getLocalId() == id) return i;
         }
 

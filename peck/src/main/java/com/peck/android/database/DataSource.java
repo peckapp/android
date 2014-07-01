@@ -164,6 +164,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.callback = callback;
         }
 
+        @SuppressWarnings("unchecked")
         public void run() {
             JsonConverter<T> jsonConverter = new JsonConverter<T>();
             ContentValues contentValues = jsonConverter.toContentValues(t);
