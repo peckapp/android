@@ -46,8 +46,8 @@ public abstract class Manager<T extends DBOperable> {
 
         //TEST
 
-        T t;
-        for (int i = 1; i < 11; i++) {
+       /* T t;
+        for (int i = 1; i < 10; i++) {
             try {
                 t = dSource.generate();
                 t.setServerId(i);
@@ -58,7 +58,7 @@ public abstract class Manager<T extends DBOperable> {
             } catch (Exception e) {
                 Log.e(tag(), "all dboperables must have public, nullary constructors\n" + e.toString());
             }
-        }
+        }*/
 
         return this;
     }
@@ -89,8 +89,6 @@ public abstract class Manager<T extends DBOperable> {
     public T getByLocalId(int id) {
         //TODO: need to account for current data set not containing wanted item -- throw db req
 
-        if (data.size() == 0) return null;
-
         for (T i: data) {
             if (i.getLocalId() == id) return i;
         }
@@ -99,6 +97,11 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public T getByServerId(int id) {
+        //TODO: throw db request
+
+        for (T i : data) {
+            if (i.getServerId() == id) return i;
+        }
 
         return null;
     }

@@ -21,6 +21,22 @@ public abstract class DBOperable implements Serializable {
 
     public DBOperable() {}
 
+    @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
+    protected int localId = -1;
+
+    @Expose
+    @SerializedName("id")
+    protected int serverId = -1;
+
+
+    @Expose
+    @SerializedName("created_at")
+    protected Date created = new Date(-1);
+
+    @Expose
+    @SerializedName("updated_at")
+    protected Date updated = new Date(-1);
+
     private static final transient String DELIM = ", ";
     public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
 
@@ -51,6 +67,8 @@ public abstract class DBOperable implements Serializable {
             }
             dbCreate += DELIM;
         }
+
+        //todo: add/enforce serverid unique constraint
         return dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
     }
 
@@ -64,22 +82,6 @@ public abstract class DBOperable implements Serializable {
 
         return columns.toArray(ret);
     }
-
-    @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
-    protected int localId = -1;
-
-    @Expose
-    @SerializedName("id")
-    protected int serverId = -1;
-
-
-    @Expose
-    @SerializedName("created_at")
-    protected Date created = new Date(-1);
-
-    @Expose
-    @SerializedName("updated_at")
-    protected Date updated = new Date(-1);
 
     public int getServerId() {
         return serverId;

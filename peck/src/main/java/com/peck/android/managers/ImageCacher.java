@@ -17,6 +17,9 @@ import java.util.Map;
 
 /**
  * Created by mammothbane on 6/20/2014.
+ *
+ * custom cache for all images in the app
+ *
  */
 public class ImageCacher implements Singleton {
     private static ImageCacher cacher = new ImageCacher();

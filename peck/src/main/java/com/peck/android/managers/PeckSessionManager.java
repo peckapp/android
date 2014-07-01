@@ -22,6 +22,9 @@ import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/19/2014.
+ *
+ * handles the user's persistent session
+ *
  */
 public class PeckSessionManager extends Manager implements Singleton {
     //manages user state, pulling from facebook if connected
@@ -65,7 +68,7 @@ public class PeckSessionManager extends Manager implements Singleton {
         context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
         SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         edit.clear();
-        edit.commit();
+        edit.apply();
         Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
         UserManager.getManager().initialize(dataSource, new Callback<ArrayList<User>>() {

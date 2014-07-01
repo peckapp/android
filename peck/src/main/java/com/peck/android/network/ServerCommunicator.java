@@ -13,6 +13,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -87,7 +88,10 @@ public class ServerCommunicator implements Singleton {
 
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
             if (entry.getValue().isJsonPrimitive() && ((JsonPrimitive)entry.getValue()).isNumber() &&
-                    Integer.parseInt((entry.getValue()).toString()) == Network.NULL) object.remove(entry.getKey());
+                    Integer.parseInt((entry.getValue()).toString()) == Network.NULL) {
+                object.remove(entry.getKey());
+                object.add(entry.getKey(), JsonNull.INSTANCE);
+            }
         }
 
         //todo: scrub/escape -9999 from text input so we don't get any issues
