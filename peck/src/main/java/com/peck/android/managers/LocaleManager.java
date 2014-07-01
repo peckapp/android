@@ -172,7 +172,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             lo.setLongitude((double) i * 9);
             lo.setLatitude((double) i * 6);
             l = new Locale().setServerId(i).setLocation(lo).setName(Integer.toString(i));
-            add(l, new Callback<Locale>() {
+            addNetwork(l, new Callback<Locale>() {
                 @Override
                 public void callBack(Locale obj) {
 
@@ -185,7 +185,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         lo.setLatitude(42.702);
         Log.d(tag, lo.toString());
         l = new Locale().setServerId(50).setLocation(lo).setName("my loc");
-        add(l, new Callback<Locale>() {
+        addNetwork(l, new Callback<Locale>() {
             @Override
             public void callBack(Locale obj) {
 

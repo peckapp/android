@@ -10,9 +10,6 @@ import com.peck.android.interfaces.SelfSetup;
  * Created by mammothbane on 6/10/2014.
  */
 public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId = -1;
-    private int parentId = -1;
-
     @NonNull
     private String title = "";
     private String text = "";
@@ -25,20 +22,7 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setType(int type) {
         this.type = type;
-        return this;
-    }
-
-    public Food setLocalId(int id) {
-        localId = id;
-        return this;
-    }
-
-    public int getServerId() {
-        return serverId;
-    }
-
-    public Food setServerId(int serverId) {
-        this.serverId = serverId;
+        updated();
         return this;
     }
 
@@ -48,15 +32,7 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setText(String text) {
         this.text = text;
-        return this;
-    }
-
-    public int getMealId() {
-        return parentId;
-    }
-
-    public Food setMealId(int meal) {
-        this.parentId = meal;
+        updated();
         return this;
     }
 
@@ -66,6 +42,7 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Food setTitle(String title) {
         this.title = title;
+        updated();
         return this;
     }
 

@@ -15,6 +15,7 @@ import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by mammothbane on 6/19/2014.
@@ -34,6 +35,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     private static User user = new User();
     private static DataSource<User> dataSource;
+    private static Date sessionStart;
 
     private static boolean facebookMode = false;
     private static boolean peckAuth = false;
@@ -58,6 +60,8 @@ public class PeckSessionManager extends Manager implements Singleton {
     public static void init() {
         Log.i(TAG, "initializing");
 
+        sessionStart = new Date(System.currentTimeMillis());
+
         FacebookSessionManager.init();
 
         //test: remove before production
@@ -77,7 +81,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
                 if (user == null) {
                     user = new User();
-                    UserManager.getManager().add( user, new Callback<User>() {
+                    UserManager.getManager().addNetwork(user, new Callback<User>() {
                         @Override
                         public void callBack(User obj) {
                             user.setLocalId(obj.getLocalId());
@@ -118,6 +122,10 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     public static User getUser() {
         return user;
+    }
+
+    public static Date getSessionStart() {
+        return sessionStart;
     }
 
     public static void setSourcePref(SourcePref pref) {

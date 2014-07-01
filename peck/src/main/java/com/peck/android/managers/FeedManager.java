@@ -50,8 +50,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
-    public void add(T item, final Callback<T> callback) {
-        super.add(item, new Callback<T>() {
+    public void addNetwork(T item, final Callback<T> callback) {
+        super.addNetwork(item, new Callback<T>() {
             @Override
             public void callBack(T obj) {
                 callback.callBack(obj);

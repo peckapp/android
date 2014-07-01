@@ -1,5 +1,7 @@
 package com.peck.android.models;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,23 +21,28 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable {
 
-    public DBOperable() {}
+    public DBOperable() {
+        created = new Date(System.currentTimeMillis());
+        updated = new Date(System.currentTimeMillis());
+    }
 
     @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
-    protected int localId = -1;
+    protected Integer localId = null;
 
     @Expose
     @SerializedName("id")
-    protected int serverId = -1;
+    protected Integer serverId = null;
 
 
     @Expose
+    @NonNull
     @SerializedName("created_at")
-    protected Date created = new Date(-1);
+    protected Date created;
 
     @Expose
+    @NonNull
     @SerializedName("updated_at")
-    protected Date updated = new Date(-1);
+    protected Date updated;
 
     private static final transient String DELIM = ", ";
     public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
@@ -83,12 +90,13 @@ public abstract class DBOperable implements Serializable {
         return columns.toArray(ret);
     }
 
-    public int getServerId() {
+    public Integer getServerId() {
         return serverId;
     }
 
     public DBOperable setServerId(int serverId) {
         this.serverId = serverId;
+        updated();
         return this;
     }
 
@@ -98,6 +106,7 @@ public abstract class DBOperable implements Serializable {
 
     public DBOperable setCreated(Date created) {
         this.created = created;
+        updated();
         return this;
     }
 
@@ -105,17 +114,23 @@ public abstract class DBOperable implements Serializable {
         return updated;
     }
 
+    public DBOperable updated() {
+        updated = new Date(System.currentTimeMillis());
+        return this;
+    }
+
     public DBOperable setUpdated(Date updated) {
         this.updated = updated;
         return this;
     }
 
-    public int getLocalId() {
+    public Integer getLocalId() {
         return localId;
     }
 
     public DBOperable setLocalId(int id) {
         localId = id;
+        updated();
         return this;
     }
 
@@ -124,11 +139,33 @@ public abstract class DBOperable implements Serializable {
         else return date.getTime();
     }
 
+    /**
+     *
+     * check to see if two dboperables are equal
+     *
+     *
+     * @param o object to compare
+     * @return true if their local and server ids are the same or null
+     */
+
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof DBOperable)) return false;
+        /* horrible, redundant boolean logic, but it's hopefully at least readable */
 
-        return (getLocalId() == ((DBOperable) o).getLocalId() && getServerId() == ((DBOperable) o).getServerId());
+        if (o == null || !(o instanceof DBOperable) || (getLocalId() == null && getServerId() == null) ||
+                (((DBOperable) o).getLocalId() == null && ((DBOperable) o).getServerId() == null)) return false; //if both fields are null on either object, return false.
+
+        if (getLocalId() == null && ((DBOperable) o).getServerId() == null || getServerId() == null && ((DBOperable) o).getLocalId() == null)
+            return false; //if alternating fields are null, return false.
+
+        if (getLocalId() == null) {
+            //we must have two nonnull serverids
+            return serverId.equals(((DBOperable) o).getServerId());
+        } else {
+            //we must have two nonnull localids
+            return localId.equals(((DBOperable) o).getLocalId());
+        }
+
     }
 
     @Override

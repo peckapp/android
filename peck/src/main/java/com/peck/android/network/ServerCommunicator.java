@@ -92,7 +92,7 @@ public class ServerCommunicator implements Singleton {
 
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
             if (entry.getValue().isJsonPrimitive() && ((JsonPrimitive)entry.getValue()).isNumber() &&
-                    Integer.parseInt((entry.getValue()).toString()) == Network.NULL) {
+                    Integer.parseInt((entry.getValue()).toString()) == PeckApp.Constants.NULL) {
                 object.remove(entry.getKey());
                 object.add(entry.getKey(), JsonNull.INSTANCE);
             }

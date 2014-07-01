@@ -13,8 +13,6 @@ import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.UserManager;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
 import it.sephiroth.android.library.widget.HListView;
 
@@ -41,6 +39,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setImageUrl(String Url) {
         this.imageUrl = Url;
+        updated();
         return this;
     }
 
@@ -50,13 +49,8 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setUsers(ArrayList<Integer> users) {
         this.users = users;
+        updated();
         return this;
-    }
-
-    public HashMap<String, ArrayList<Integer>> getAllJoins() {
-        HashMap<String, ArrayList<Integer>> ret = new HashMap<String, ArrayList<Integer>>();
-        //ret.put(USERS_SERIAL, users);
-        return ret;
     }
 
 
@@ -66,21 +60,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
     public Circle setTitle(String title) {
         this.title = title;
-        return this;
-    }
-
-    public Circle setCreated(Date created) {
-        this.created = created;
-        return this;
-    }
-
-    public Circle setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
-
-    public Circle setServerId(int serverId) {
-        this.serverId = serverId;
+        updated();
         return this;
     }
 
@@ -97,10 +77,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
         ((HListView)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
     }
 
-    public Circle setLocalid(int localid) {
-        localId = localid;
-        return this;
-    }
 
     @Override
     public int getResourceId() {

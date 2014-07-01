@@ -14,7 +14,11 @@ import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/12/2014.
+ *
+ * handles arraylists of models, syncs with the server and the database
+ *
  */
+
 public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
@@ -25,7 +29,7 @@ public abstract class Manager<T extends DBOperable> {
 
     public static Manager getManager(Class<? extends Singleton> clss) {
         try {
-            return (Manager)clss.getMethod("getManager", null).invoke(null, null); }
+            return (Manager)clss.getMethod("getManager", null).invoke(null, null);}
         catch (Exception e) {
             Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
             e.printStackTrace();
@@ -41,11 +45,19 @@ public abstract class Manager<T extends DBOperable> {
                 new Callback<ArrayList<T>>() {
                     @Override
                     public void callBack(ArrayList<T> obj) {
-                        callback.callBack(obj);
+
+                        downloadFromServer(new Callback<ArrayList<T>>() {
+                            @Override
+                            public void callBack(ArrayList<T> obj) {
+
+
+                                callback.callBack(obj);
+                            }
+                        });
                     }
                 });
 
-        downloadFromServer();
+
         //TODO: server communication and sync happens here
 
 
@@ -56,7 +68,7 @@ public abstract class Manager<T extends DBOperable> {
             try {
                 t = dSource.generate();
                 t.setServerId(i);
-                add(t, new Callback<T>() {
+                addNetwork(t, new Callback<T>() {
                     public void callBack(T obj) {
                     }
                 });
@@ -68,16 +80,6 @@ public abstract class Manager<T extends DBOperable> {
         return this;
     }
 
-    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
-        ServerCommunicator.getAll((Class<T>)TypeResolver.resolveRawArgument(Manager.class, getClass()), new Callback<ArrayList<T>>() {
-            @Override
-            public void callBack(ArrayList<T> obj) {
-                for (T i : obj) update(i);
-                callback.callBack(obj);
-            }
-        });
-    }
-
     public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {
         dataSource.getAll(new Callback<ArrayList<T>>() {
             @Override
@@ -86,6 +88,21 @@ public abstract class Manager<T extends DBOperable> {
             }
         });
 
+    }
+
+    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
+        ServerCommunicator.getAll(getParameterizedClass(), new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(final ArrayList<T> objs) {
+                for (T i : objs) addNetwork(i, new Callback<T>() {
+                    @Override
+                    public void callBack(T obj) {
+
+                    }
+                });
+                callback.callBack(objs);
+            }
+        });
     }
 
 
@@ -117,28 +134,81 @@ public abstract class Manager<T extends DBOperable> {
         return null;
     }
 
-    public void add(final T item, final Callback<T> callback) {
-        //todo: check to see if we already have an item with this localid
+    /**
+     *
+     * add a new item to the dataset, the database, and the server
+     *
+     * @param item the new item
+     */
+
+    public void add(final T item) {
         data.add(item);
         dSource.create(item, new Callback<T>() {
             @Override
             public void callBack(T obj) {
                 item.setLocalId(obj.getLocalId());
-                callback.callBack(obj);
             }
         });
     }
 
-    public void update(T item) {
-        //todo: ensure item has valid id
-        for (T i : data) {
-            if (i.getLocalId() == (item.getLocalId())) {
-                item = i;
-                dSource.update(i);
-            }
+
+
+    /**
+     *
+     * add an item from the network
+     * called only for updates from the server
+     *
+     * @param item the new item
+     * @param callback a callback for when the update is finished
+     */
+    public void addNetwork(final T item, final Callback<T> callback) {
+        if (data.contains(item)) update(item);
+        else {
+            data.add(item);
+            dSource.create(item, new Callback<T>() {
+                @Override
+                public void callBack(T obj) {
+                    item.setLocalId(obj.getLocalId());
+                    callback.callBack(obj);
+                }
+            });
         }
     }
 
+    /**
+     *
+     * @return the class of the model that this manager handles.
+     */
 
+    public Class<T> getParameterizedClass() {
+        return (Class<T>)TypeResolver.resolveRawArgument(Manager.class, getClass());
+    }
+
+
+    /**
+     *
+     * updates the dataset with item.
+     *
+     * this method should get called iff the object is already in the list.
+     * primarily for user-sourced updates.
+     *
+     * @param item the item to update, definitely with localid
+     */
+    public void update(final T item) {
+        if (data.contains(item) && data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
+            data.remove(item);
+            data.add(item);
+            ServerCommunicator.postObject(item, getParameterizedClass());
+            if (item.getServerId() != null) {
+                dSource.update(item);
+            } else ServerCommunicator.getObject(item.getServerId(), getParameterizedClass(), new Callback<T>() {
+                    @Override
+                    public void callBack(T obj) {
+                        item.setServerId(obj.getServerId());
+                        dSource.update(item);
+                    }
+                });
+        } else Log.w(tag(), item.toString() + "isn't in the dataset.");
+    }
 
 }

@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.PeckApp.Constants.Network;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -39,15 +39,15 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Expose
     @SerializedName("range")
-    private double range = (double)Network.NULL;
+    private double range = (double) PeckApp.Constants.NULL;
 
     @Expose
     @SerializedName("gps_longitude")
-    private double longitude = (double)Network.NULL;
+    private double longitude = (double) PeckApp.Constants.NULL;
 
     @Expose
     @SerializedName("gps_latitude")
-    private double latitutde = (double)Network.NULL;
+    private double latitutde = (double) PeckApp.Constants.NULL;
 
     private Location location;
     private transient double dist; //don't add to database

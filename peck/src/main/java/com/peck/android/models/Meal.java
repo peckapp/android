@@ -14,60 +14,15 @@ import java.util.Date;
  * Created by mammothbane on 6/10/2014.
  */
 public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId = -1;
 
-    private int color = -1;
-    private int type = -1;
 
     private Date mealtime = new Date(-1);
-    private Date updated = new Date(-1);
 
     private String title = "";
     private int location = -1;
 
 
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public Meal setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public Meal setType(int type) {
-        this.type = type;
-        return this;
-    }
-
-    public Meal setColor(int color) {
-        this.color = color;
-        return this;
-    }
-
     private ArrayList<Food> courses;
-
-    public Meal setLocalId(int id) {
-        this.localId = id;
-        return this;
-    }
-
-    public int getServerId() {
-        return serverId;
-    }
-
-    public Meal setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
 
     public Date getMealtime() {
         return mealtime;
@@ -75,6 +30,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setMealtime(Date mealtime) {
         this.mealtime = mealtime;
+        updated();
         return this;
     }
 
@@ -84,6 +40,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setTitle(String title) {
         this.title = title;
+        updated();
         return this;
     }
 
@@ -93,6 +50,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setLocation(int location) {
         this.location = location;
+        updated();
         return this;
     }
 
@@ -102,6 +60,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     public Meal setCourses(ArrayList<Food> courses) {
         this.courses = courses;
+        updated();
         return this;
     }
 
@@ -117,10 +76,5 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
 
     }
 
-    public Meal link(Food food) {
-        courses.add(food);
-        food.setMealId(getLocalId());
-        return this;
-    }
 
 }
