@@ -8,6 +8,8 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.DBOperable;
 import com.peck.android.network.ServerCommunicator;
 
+import net.jodah.typetools.TypeResolver;
+
 import java.util.ArrayList;
 
 /**
@@ -16,6 +18,8 @@ import java.util.ArrayList;
 public abstract class Manager<T extends DBOperable> {
 
     public static String tag = "Manager";
+
+    //todo: maybe we want this to be a heap based on localid
     protected ArrayList<T> data = new ArrayList<T>();
     protected DataSource<T> dSource;
 
@@ -64,8 +68,14 @@ public abstract class Manager<T extends DBOperable> {
         return this;
     }
 
-    public ArrayList<T> downloadFromServer() {
-        return ServerCommunicator.getAll();
+    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
+        ServerCommunicator.getAll((Class<T>)TypeResolver.resolveRawArgument(Manager.class, getClass()), new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+                for (T i : obj) update(i);
+                callback.callBack(obj);
+            }
+        });
     }
 
     public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {

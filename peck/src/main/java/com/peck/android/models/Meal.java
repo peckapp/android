@@ -105,10 +105,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public int hashCode() {
-        return (int)(mealtime.getTime()*13+location*17+getServerId()*307-getLocalId());
-    }
-
     @Override
     public int getResourceId() { //TODO: implement, create layout
         return R.layout.lvitem_meal;

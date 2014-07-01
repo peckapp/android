@@ -131,10 +131,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public int hashCode() {
-        return (int)(created.getTime()*13+updated.getTime()*17+getServerId()*307-getLocalId());
-    }
-
     @Override
     public int getResourceId() { //TODO: implement, create layout
         return R.layout.lvitem_event;

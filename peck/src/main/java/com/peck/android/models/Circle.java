@@ -107,4 +107,5 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
         return R.layout.lvitem_circle;
     }
 
+
 }

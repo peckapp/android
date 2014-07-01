@@ -124,4 +124,21 @@ public abstract class DBOperable implements Serializable {
         else return date.getTime();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DBOperable)) return false;
+
+        return (getLocalId() == ((DBOperable) o).getLocalId() && getServerId() == ((DBOperable) o).getServerId());
+    }
+
+    @Override
+    public int hashCode() {
+        return 31*getLocalId() + 57*getServerId();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id: " + getLocalId() + " | sv_id: " + getServerId() + "]";
+    }
+
 }
