@@ -53,14 +53,14 @@ public class PeckApp extends Application implements Singleton{
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
             public final static String CIRCLES = "circles/";
+            public final static String USERS = "users/";
+            public final static String LOCALES = "institutions/";
+
 
             //todo: get these:
             public final static String MEAL = null;
             public final static String FOOD = null;
-            public final static String LOCALES = null;
             public final static String PECK = null;
-            public final static String USERS = null;
-
 
             public final static String API_TEST_KEY = "";
 
