@@ -23,7 +23,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
     private T item;
     private static final String TAG = "DataSource";
-    private JsonConverter<T> jsonConverter = new JsonConverter<T>();
     private String[] columns;
 
     private opThread workingThread;
@@ -127,7 +126,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             Cursor cursor = database.query(item.getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null, null, null, null);
             cursor.moveToFirst();
-            callback.callBack(jsonConverter.fromCursor(cursor, (Class<T>)item.getClass()));
+            callback.callBack(JsonConverter.fromCursor(cursor, (Class<T>)item.getClass()));
         }
     }
 
@@ -144,7 +143,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     item.getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                T obj = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
+                T obj = JsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
                 ret.add(obj);
                 cursor.moveToNext();
             }
@@ -166,8 +165,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         @SuppressWarnings("unchecked")
         public void run() {
-            JsonConverter<T> jsonConverter = new JsonConverter<T>();
-            ContentValues contentValues = jsonConverter.toContentValues(t);
+            ContentValues contentValues = JsonConverter.toContentValues(t);
 
             long insertId;
             Cursor cursor;
@@ -183,7 +181,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                         PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
-                T newT = jsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
+                T newT = JsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
                 cursor.close();
                 callback.callBack(newT);
 
@@ -220,7 +218,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             database.update(item.getTableName(),
-                    jsonConverter.toContentValues(t),
+                    JsonConverter.toContentValues(t),
                     PeckApp.Constants.Database.LOCAL_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});
         }

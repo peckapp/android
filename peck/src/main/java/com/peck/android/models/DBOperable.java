@@ -1,9 +1,7 @@
 package com.peck.android.models;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,10 +12,8 @@ import com.peck.android.PeckApp;
 import com.peck.android.database.DBType;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,80 +28,28 @@ public abstract class DBOperable implements Serializable {
 
     @DBType("integer primary key autoincrement")
     @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
-    protected Integer localId = null;
+    public Integer localId = null;
 
     @Expose
     @DBType("integer")
     @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
-    protected Integer serverId = null;
+    public Integer serverId = null;
 
 
     @Expose
     @NonNull
     @SerializedName("created_at")
     @DBType("integer")
-    protected Date created;
+    public Date created;
 
     @Expose
     @NonNull
     @SerializedName("updated_at")
     @DBType("integer")
-    protected Date updated;
-
-    private static final transient String DELIM = ", ";
-    public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
+    public Date updated;
 
     public String getTableName() {
         return "tbl_" + getClass().getSimpleName();
-    }
-
-    public String getDatabaseCreate() {
-        String dbCreate = "create table " + getTableName() + " (";
-        Gson gson = new GsonBuilder().serializeNulls().create();
-
-        JsonObject jsonObject = (JsonObject)new JsonParser().parse(gson.toJson(this, getClass()));
-
-        for (Map.Entry<String, JsonElement> field : jsonObject.entrySet()) {
-            dbCreate += field.getKey() + " ";
-
-            JsonElement element = field.getValue();
-            if (element.isJsonPrimitive()) {
-                if (element.getAsJsonPrimitive().isString()) {
-                    dbCreate += "text";
-                } else if (element.getAsJsonPrimitive().isNumber()) {
-                    if (element.getAsDouble() != ((double) element.getAsInt()))
-                        dbCreate += "double";
-                    else
-                        dbCreate += ("integer" + ((field.getKey().equals(PeckApp.Constants.Database.LOCAL_ID))
-                                ? " primary key autoincrement" : ""));
-                }
-            } else if (element.isJsonNull()) {
-                String actualFieldName = "";
-                for (Field objField : getClass().getFields()) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
-                    SerializedName annotation = objField.getAnnotation(SerializedName.class);
-                    if (objField.getName().equals(field.getKey())) { actualFieldName = field.getKey(); break; }
-                    else if (annotation != null && annotation.value() != null) { actualFieldName = annotation.value(); break; }
-                }
-
-                try {
-                    DBType dbType = getClass().getField(actualFieldName).getAnnotation(DBType.class);
-                    if (dbType == null) dbCreate += "text";
-                    else dbCreate += dbType.value();
-                } catch (NoSuchFieldException e) {
-                    Log.e(getClass().getSimpleName(), "Couldn't get field " + actualFieldName);
-                    dbCreate += "text";
-                }
-
-
-            } else {
-                dbCreate += "text"; //if we don't know what it is, we're saving it as text
-            }
-            dbCreate += DELIM;
-        }
-
-        dbCreate += "unique (" + PeckApp.Constants.Network.SV_ID_NAME + "));";
-
-        return dbCreate;
     }
 
     public String[] getColumns() {
