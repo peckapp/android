@@ -8,6 +8,8 @@ import com.peck.android.models.Peck;
  */
 public class PeckManager extends FeedManager<Peck> implements Singleton {
 
+    //todo: override everything
+
     private static PeckManager manager = new PeckManager();
 
     private PeckManager() {

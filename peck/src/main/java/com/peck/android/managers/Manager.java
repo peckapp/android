@@ -75,7 +75,7 @@ public abstract class Manager<T extends DBOperable> {
         ServerCommunicator.getAll(getParameterizedClass(), new Callback<ArrayList<T>>() {
             @Override
             public void callBack(final ArrayList<T> objs) {
-                for (T i : objs) addNetwork(i);
+                for (T i : objs) addFromNetwork(i);
                 callback.callBack(objs);
             }
         });
@@ -115,16 +115,18 @@ public abstract class Manager<T extends DBOperable> {
      *
      * add a new item to the dataset, the database, and the server
      *
-     * @param item the new item
      */
 
-    public void add(final T item) {
-        data.add(item);
-        dSource.create(item, new Callback<T>() {
+    public void addNew() {
+        dSource.create(dSource.generate(), new Callback<T>() {
             @Override
             public void callBack(T obj) {
-                item.setLocalId(obj.getLocalId());
-                ServerCommunicator.postObject(item, getParameterizedClass());
+                ServerCommunicator.postObject(obj, getParameterizedClass(), new Callback<T>() {
+                    @Override
+                    public void callBack(T obj) {
+                        data.add(obj);
+                    }
+                });
             }
         });
     }
@@ -133,12 +135,12 @@ public abstract class Manager<T extends DBOperable> {
 
     /**
      *
-     * add an item from the network
+     * add an item from the network; picks up
      * called only for updates from the server
      *
      * @param item the new item
      */
-    public void addNetwork(final T item) {
+    public void addFromNetwork(final T item) {
         if (data.contains(item)) update(item);
         else {
             dSource.create(item, new Callback<T>() {
@@ -164,18 +166,15 @@ public abstract class Manager<T extends DBOperable> {
 
     /**
      *
-     * updates the dataset with item.
-     *
-     * this method should get called iff the object is already in the list.
-     * primarily for user-sourced updates.
+     * updates the server and the database with item. this method should not be used to update the manager's data. use add instead.
      *
      * @param item the item to update, definitely has localid
      */
     public void update(final T item) {
-        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+        if (!data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
             data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it
             data.add(item);
-            ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
+            ServerCommunicator.patchObject(item, getParameterizedClass(), new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
                     item.setServerId(obj.getServerId());

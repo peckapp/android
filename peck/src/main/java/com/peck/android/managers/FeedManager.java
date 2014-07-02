@@ -36,7 +36,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         super.loadFromDatabase(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                activeFeed.notifyDatasetChanged();
+                if (activeFeed != null) activeFeed.notifyDatasetChanged();
                 callback.callBack(obj);
             }
         });
@@ -44,20 +44,20 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
 
     @Override
-    public void add(T item) {
-        super.add(item);
-        activeFeed.notifyDatasetChanged();
+    public void addNew() {
+        super.addNew();
+        if (activeFeed != null) activeFeed.notifyDatasetChanged();
     }
 
     @Override
-    public void addNetwork(T item) {
-        super.addNetwork(item);
-        activeFeed.notifyDatasetChanged();
+    public void addFromNetwork(T item) {
+        super.addFromNetwork(item);
+        if (activeFeed != null) activeFeed.notifyDatasetChanged();
     }
 
     @Override
     public void update(T item) {
         super.update(item);
-        activeFeed.notifyDatasetChanged();
+        if (activeFeed != null) activeFeed.notifyDatasetChanged();
     }
 }

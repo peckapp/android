@@ -78,7 +78,7 @@ public class PeckSessionHandler implements Singleton {
 
                 if (user == null) {
                     user = new User();
-                    UserManager.getManager().add(user);
+                    UserManager.getManager().getData().add(user); //this is a temporary user. we're not going to send them to the server until they set up.
                 }
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override

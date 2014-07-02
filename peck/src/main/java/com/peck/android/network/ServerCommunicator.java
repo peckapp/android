@@ -106,11 +106,11 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final String url) {
-        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET for " + url);
+        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET to " + url);
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject object) {
-                Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "received response for " + url);
+                Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "received response from " + url);
                 callback.callBack(parseJson(parser.parse(object.toString()), tClass));
             }
         }, new Response.ErrorListener() {
@@ -140,11 +140,15 @@ public class ServerCommunicator implements Singleton {
         return (object.entrySet().size() == 1);
     }
 
+    public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
+        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
+    }
+
     public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
         sendObject(Request.Method.POST, post, tClass, callback);
     }
 
-    public static <T extends DBOperable> void putObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
+    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
         sendObject(Request.Method.PATCH, patch, tClass, callback);
     }
 
@@ -171,11 +175,6 @@ public class ServerCommunicator implements Singleton {
 
         } catch (JSONException e) { e.printStackTrace(); }
 
-    }
-
-
-    public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
-        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
     }
 
     public static void getImage(final String URL, int dimens, final Callback<Bitmap> callback) {
