@@ -136,11 +136,11 @@ public abstract class Manager<T extends DBOperable> {
     public void addNetwork(final T item) {
         if (data.contains(item)) update(item);
         else {
-            data.add(item);
             dSource.create(item, new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
                     item.setLocalId(obj.getLocalId());
+                    data.add(item);
                 }
             });
         }
@@ -167,11 +167,10 @@ public abstract class Manager<T extends DBOperable> {
      * @param item the item to update, definitely has localid
      */
     public void update(final T item) {
-        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item, and it hasn't been updated more recently than the argument
-            data.remove(item);
+        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+            data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it
             data.add(item);
-            if (item.getServerId() != null) dSource.update(item);
-            else ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
+            ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
                     item.setServerId(obj.getServerId());

@@ -1,7 +1,6 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,14 +36,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     protected FeedManager<T> feedManager;
     protected ArrayList<T> data = new ArrayList<T>();
 
-    @Nullable
-    protected Callback<ArrayList<T>> callback = new Callback<ArrayList<T>>() {
-        @Override
-        public void callBack(ArrayList<T> obj) {
-
-        }
-    };
-
     public Feed() {}
 
     @Override
@@ -62,7 +53,12 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        feedManager = (FeedManager<T>)(FeedManager.getManager(getManagerClass())).initialize(callback);
+        feedManager = (FeedManager<T>)(FeedManager.getManager(getManagerClass())).initialize(new Callback<ArrayList>() {
+            @Override
+            public void callBack(ArrayList obj) {
+                notifyDatasetChanged();
+            }
+        });
         feedManager.setActiveFeed(this);
     }
 

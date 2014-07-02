@@ -39,6 +39,6 @@
 
     <string name="bt_peck_logout">Logout</string>
     <string name="bt_retry">Retry</string>
-    <string name="tv_retry">Please connect to the internet and try again.</string>
+    <string name="tv_retry">Couldn\'t download localization data.</string>
 
 </resources>

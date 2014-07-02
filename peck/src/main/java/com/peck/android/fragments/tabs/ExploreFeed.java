@@ -1,6 +1,5 @@
 package com.peck.android.fragments.tabs;
 
-
 import com.peck.android.R;
 import com.peck.android.fragments.FeedTab;
 import com.peck.android.managers.EventManager;

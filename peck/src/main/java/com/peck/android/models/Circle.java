@@ -21,7 +21,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     @Expose
     @SerializedName("circle_name")
-    private String title = "";
+    private String title;
 
     @Expose
     @SerializedName("image_link")

@@ -43,10 +43,21 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
 
+    @Override
+    public void add(T item) {
+        super.add(item);
+        activeFeed.notifyDatasetChanged();
+    }
 
-    public void addNetwork(T item, final Callback<T> callback) {
+    @Override
+    public void addNetwork(T item) {
         super.addNetwork(item);
         activeFeed.notifyDatasetChanged();
     }
 
+    @Override
+    public void update(T item) {
+        super.update(item);
+        activeFeed.notifyDatasetChanged();
+    }
 }

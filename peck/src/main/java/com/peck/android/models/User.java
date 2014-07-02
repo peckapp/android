@@ -87,7 +87,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         lastName = temp[1];
     }
 
-    @NonNull
     public String getFirstName() {
         return firstName;
     }
@@ -96,7 +95,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         this.firstName = firstName;
     }
 
-    @NonNull
     public String getLastName() {
         return lastName;
     }

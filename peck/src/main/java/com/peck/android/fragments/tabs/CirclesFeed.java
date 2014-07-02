@@ -6,6 +6,7 @@ import com.peck.android.R;
 import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
+import com.peck.android.managers.Manager;
 import com.peck.android.models.Circle;
 
 /**
@@ -36,8 +37,8 @@ public class CirclesFeed extends FeedTab<Circle> {
     }
 
     @Override
-    public Class<? extends Singleton> getManagerClass() {
-        return CircleManager.class;
+    public <S extends Manager & Singleton> Class<S> getManagerClass() {
+        return (Class<S>) CircleManager.class;
     }
 
 

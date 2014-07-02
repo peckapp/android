@@ -79,11 +79,13 @@ public class ServerCommunicator implements Singleton {
             locale = new Locale();
             locale.setServerId(50);
         }
-
-        JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass);
+        JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass); //take our object and JSONize it
         object.addProperty(PeckApp.Constants.Network.INSTITUTION, LocaleManager.getManager().getLocale().getServerId());
 
-        return new JSONObject(object.toString());
+        JsonObject ret = new JsonObject(); //wrap it in another object
+        ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object); //subtract 2 for the trailing slash and the s
+
+        return new JSONObject(ret.toString());
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
@@ -104,9 +106,11 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final String url) {
+        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET for " + url);
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject object) {
+                Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "received response for " + url);
                 callback.callBack(parseJson(parser.parse(object.toString()), tClass));
             }
         }, new Response.ErrorListener() {
@@ -141,6 +145,7 @@ public class ServerCommunicator implements Singleton {
 
             JSONObject item = toJson(post, tClass);
 
+            Log.d(ServerCommunicator.class.getSimpleName() + ": " + post.getClass().getSimpleName(), "posting item " + item);
             requestQueue.add(new JsonObjectRequest(Request.Method.POST, PeckApp.Constants.Network.API_STRING + PeckApp.Constants.Network.EVENTS, item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
@@ -182,7 +187,7 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static void getImage(final String URL, Callback<Bitmap> callback) {
-        getImage(URL, (int)PeckApp.getContext().getResources().getDimension(R.dimen.prof_picture_bound), callback);
+        getImage(URL, (int) PeckApp.getContext().getResources().getDimension(R.dimen.prof_picture_bound), callback);
     }
 
     private static class JsonDateDeserializer implements JsonDeserializer<Date> {
