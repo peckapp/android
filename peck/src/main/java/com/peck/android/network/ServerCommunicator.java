@@ -77,10 +77,10 @@ public class ServerCommunicator implements Singleton {
 
             //TEST:
             locale = new Locale();
-            locale.setServerId(50);
+            locale.setServerId(1);
         }
         JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass); //take our object and JSONize it
-        object.addProperty(PeckApp.Constants.Network.INSTITUTION, LocaleManager.getManager().getLocale().getServerId());
+        object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
 
         JsonObject ret = new JsonObject(); //wrap it in another object
         ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object); //subtract 2 for the trailing slash and the s
@@ -141,16 +141,24 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
+        sendObject(Request.Method.POST, post, tClass, callback);
+    }
+
+    public static <T extends DBOperable> void putObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
+        sendObject(Request.Method.PATCH, patch, tClass, callback);
+    }
+
+    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
         try {
 
             JSONObject item = toJson(post, tClass);
 
-            Log.d(ServerCommunicator.class.getSimpleName() + ": " + post.getClass().getSimpleName(), "posting item " + item);
-            requestQueue.add(new JsonObjectRequest(Request.Method.POST, PeckApp.Constants.Network.API_STRING + PeckApp.Constants.Network.EVENTS, item, new Response.Listener<JSONObject>() {
+            Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
+            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
                     callback.callBack(gson.fromJson(object.toString(), tClass));
-                    Log.d(getClass().getSimpleName(), object.toString());
+                    Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "response with item " + object.toString());
                 }
 
             }, new Response.ErrorListener() {
@@ -163,9 +171,8 @@ public class ServerCommunicator implements Singleton {
 
         } catch (JSONException e) { e.printStackTrace(); }
 
-
-
     }
+
 
     public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
         postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });

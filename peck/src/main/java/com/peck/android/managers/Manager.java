@@ -1,5 +1,6 @@
 package com.peck.android.managers;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -42,7 +43,8 @@ public abstract class Manager<T extends DBOperable> {
 
         loadFromDatabase(new Callback<ArrayList<T>>() {
                     @Override
-                    public void callBack(ArrayList<T> obj) { downloadFromServer(new Callback<ArrayList<T>>() {
+                    public void callBack(ArrayList<T> obj) {
+                        downloadFromServer(new Callback<ArrayList<T>>() {
                             @Override
                             public void callBack(ArrayList<T> obj) { callback.callBack(obj); }
                         }); }});
@@ -79,11 +81,12 @@ public abstract class Manager<T extends DBOperable> {
         });
     }
 
-
+    @NonNull
     public String tag() {
         return getClass().getName();
     }
 
+    @NonNull
     public ArrayList<T> getData() {
         return data;
     }
@@ -97,11 +100,12 @@ public abstract class Manager<T extends DBOperable> {
         return null;
     }
 
+    @Nullable
     public T getByServerId(Integer id) {
         //TODO: throw db request
 
         for (T i : data) {
-            if (i.getServerId().equals(id)) return i;
+            if (i.getServerId() != null && i.getServerId().equals(id)) return i;
         }
 
         return null;
@@ -120,6 +124,7 @@ public abstract class Manager<T extends DBOperable> {
             @Override
             public void callBack(T obj) {
                 item.setLocalId(obj.getLocalId());
+                ServerCommunicator.postObject(item, getParameterizedClass());
             }
         });
     }

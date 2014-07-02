@@ -48,8 +48,6 @@ public class PeckApp extends Application implements Singleton{
 
     public static class Constants {
 
-        public final static int NULL = -10037; //prime, but we todo: probably want to scrub user input of this
-
         public final static class Network {
             public final static String SV_ID_NAME = "id";
 
