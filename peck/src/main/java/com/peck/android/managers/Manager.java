@@ -91,7 +91,7 @@ public abstract class Manager<T extends DBOperable> {
     @Nullable
     public T getByLocalId(Integer id) {
        for (T i : data) {
-            if (i.getLocalId().equals(id)) return i;
+            if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
         }
 
         return null;
@@ -152,7 +152,7 @@ public abstract class Manager<T extends DBOperable> {
      */
 
     public Class<T> getParameterizedClass() {
-            Class<T> clss = (Class<T>) TypeResolver.resolveGenericType(Manager.class, getClass());
+            Class<T> clss = (Class<T>) TypeResolver.resolveRawArgument(Manager.class, getClass());
             return clss;
     }
 

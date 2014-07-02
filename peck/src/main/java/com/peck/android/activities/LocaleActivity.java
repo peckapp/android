@@ -15,13 +15,15 @@ import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
 import com.peck.android.managers.LocaleManager;
 
+import java.util.Collections;
+
 
 public class LocaleActivity extends PeckActivity {
     private boolean loaded = false;
     private boolean locationServices = true;
     private static final String TAG = "LocaleActivity";
     private static final String fragmentTag = "locale selection feed";
-
+    private LocaleSelectionFeed localeSelectionFeed = new LocaleSelectionFeed();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,7 @@ public class LocaleActivity extends PeckActivity {
         setContentView(R.layout.activity_locale);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.rl_loc_select, new LocaleSelectionFeed(), fragmentTag);
+        ft.add(R.id.rl_loc_select, localeSelectionFeed, fragmentTag);
         ft.commit();
 
     }
@@ -53,7 +55,7 @@ public class LocaleActivity extends PeckActivity {
             //todo: search bar?
 
         } else {
-            LocaleManager.getLocation();
+            LocaleManager.locate();
             notifyMe();
         }
 
@@ -68,7 +70,7 @@ public class LocaleActivity extends PeckActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LocaleManager.getLocation();
+        LocaleManager.locate();
     }
 
     @Override
@@ -104,15 +106,20 @@ public class LocaleActivity extends PeckActivity {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... voids) {
-                    LocaleManager.getManager().calcDistances();
+                    while (LocaleManager.getManager().getData().size() == 0) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) { Log.e(TAG, "waiting was interrupted"); }
+                    }
+                    Collections.sort(LocaleManager.getManager().getData());
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
+                    localeSelectionFeed.notifyDatasetChanged();
                     tv.setVisibility(View.GONE);
                     findViewById(R.id.rl_locale).setVisibility(View.GONE);
-
                     findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
                 }
             }.execute(); //this only gets called if we know where the user is *and* have the location list loaded

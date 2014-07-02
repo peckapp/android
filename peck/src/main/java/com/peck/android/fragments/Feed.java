@@ -35,7 +35,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
     FeedAdapter<T> feedAdapter = new FeedAdapter<T>(new DataSource<T>((Class<T>) TypeResolver.resolveRawArgument(Feed.class, getClass())).generate().getResourceId(), this);
     protected FeedManager<T> feedManager;
-    protected ArrayList<T> data;
+    protected ArrayList<T> data = new ArrayList<T>();
 
     @Nullable
     protected Callback<ArrayList<T>> callback = new Callback<ArrayList<T>>() {
@@ -91,13 +91,19 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     }
 
     public void notifyDatasetChanged() {
-        //todo: update data list based on sorting preferences
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //todo: update data list based on sorting preferences
 
-        //test:
-        data = feedManager.getData();
+                //test:
+                data = new ArrayList<T>(feedManager.getData());
 
 
-        feedAdapter.notifyDataSetChanged();
+                feedAdapter.notifyDataSetChanged();
+
+            }
+        });
     }
 
     public abstract int getListViewRes();

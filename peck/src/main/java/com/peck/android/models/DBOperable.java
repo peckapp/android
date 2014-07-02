@@ -1,6 +1,7 @@
 package com.peck.android.models;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -26,11 +27,13 @@ public abstract class DBOperable implements Serializable {
         updated = new Date(System.currentTimeMillis());
     }
 
+    @Nullable
     @DBType("integer primary key autoincrement")
     @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
     public Integer localId = null;
 
     @Expose
+    @Nullable
     @DBType("integer")
     @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
     public Integer serverId = null;
@@ -63,11 +66,12 @@ public abstract class DBOperable implements Serializable {
         return columns.toArray(ret);
     }
 
+    @Nullable
     public Integer getServerId() {
         return serverId;
     }
 
-    public DBOperable setServerId(int serverId) {
+    public DBOperable setServerId(@NonNull Integer serverId) {
         this.serverId = serverId;
         updated();
         return this;
@@ -83,6 +87,7 @@ public abstract class DBOperable implements Serializable {
         return this;
     }
 
+    @NonNull
     public Date getUpdated() {
         return updated;
     }
@@ -97,17 +102,18 @@ public abstract class DBOperable implements Serializable {
         return this;
     }
 
+    @Nullable
     public Integer getLocalId() {
         return localId;
     }
 
-    public DBOperable setLocalId(int id) {
+    public DBOperable setLocalId(@NonNull Integer id) {
         localId = id;
         updated();
         return this;
     }
 
-    public static long dateToInt(Date date) {
+    public static long dateToInt(@Nullable Date date) {
         if (date == null) return -1;
         else return date.getTime();
     }
@@ -122,7 +128,7 @@ public abstract class DBOperable implements Serializable {
      */
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         /* horrible, redundant boolean logic, but it's hopefully at least readable */
 
         if (o == null || !(o instanceof DBOperable) || (getLocalId() == null && getServerId() == null) ||
@@ -141,10 +147,7 @@ public abstract class DBOperable implements Serializable {
 
     }
 
-    @Override
-    public int hashCode() {
-        return 31*getLocalId() + 57*getServerId();
-    }
+    //todo: override hashcode properly
 
     @Override
     public String toString() {

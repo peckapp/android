@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -41,7 +40,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     public Manager<Locale> initialize(Callback<ArrayList<Locale>> callback) {
         super.initialize(callback);
         client = new LocationClient(PeckApp.getContext(), manager, manager);
-        getLocation();
+        locate();
         return this;
     }
 
@@ -129,38 +128,17 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
         return manager;
     }
 
-    public static LocaleManager getLocation() {
+    public static LocaleManager locate() {
         if (!client.isConnected() || client.isConnecting()) {
             client.connect();
         }
-
-
         return manager;
     }
 
-    public void calcDistances() {
-        if (data.size() > 0) {
-            Locale ret = data.get(0);
-            for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
-                if (location == null) {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Log.d(tag, "[" + i + "] waiting for location, still null");
-                } else {
-                    for (Locale l : data) {
-                        if (l.calcDist(location).getDist() < ret.getDist()) {
-                            ret = l;
-                        }
-                    }
-
-                    break;
-                }
-            }
-            Log.d(tag, "closest: " + ret.toString());
-        } else Log.e(tag(), "locale list is empty");
+    @Nullable
+    public static Location getLocation() {
+        return location;
     }
+
 }
 
