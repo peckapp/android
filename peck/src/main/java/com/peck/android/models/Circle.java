@@ -6,20 +6,16 @@ import android.widget.TextView;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
-import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.HasWebImage;
+import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.UserManager;
 
 import java.util.ArrayList;
-
-import it.sephiroth.android.library.widget.HListView;
 
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasWebImage {
+public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage {
 
     private ArrayList<Integer> users = new ArrayList<Integer>();
 
@@ -67,11 +63,9 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasW
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
 
-        //todo: this is temporary, just to get things working for now
+        //todo: add a fragment
 
-        FeedAdapter<User> feedAdapter = new FeedAdapter<User>(R.layout.hlvitem_user);
-        feedAdapter.setSource(UserManager.getManager());
-        ((HListView)v.findViewById(R.id.hlv_users)).setAdapter(feedAdapter);
+
     }
 
 

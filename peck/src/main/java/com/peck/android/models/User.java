@@ -14,14 +14,14 @@ import com.makeramen.RoundedImageView;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.HasWebImage;
+import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasWebImage {
+public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasImage {
 
     @Expose
     @NonNull

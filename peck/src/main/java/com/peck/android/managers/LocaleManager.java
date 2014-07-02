@@ -14,7 +14,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
-import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.Locale;
@@ -39,8 +38,8 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     @Override
-    public FeedManager<Locale> initialize(Feed<Locale> feed, Callback<ArrayList<Locale>> callback) {
-        super.initialize(feed, callback);
+    public Manager<Locale> initialize(Callback<ArrayList<Locale>> callback) {
+        super.initialize(callback);
         client = new LocationClient(PeckApp.getContext(), manager, manager);
         getLocation();
         return this;
@@ -65,7 +64,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     public void onDisconnected() {
         // Display the connection status
         //location = client.getLastLocation();
-        Toast.makeText(feed.getActivity(), "Disconnected from location services. Please re-connect.",
+        Toast.makeText(activeFeed.getActivity(), "Disconnected from location services. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -85,7 +84,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(
-                        feed.getActivity(),
+                        activeFeed.getActivity(),
                         RESOLUTION_REQUEST_FAILURE);
                 /*
                  * Thrown if Google Play services canceled the original

@@ -8,7 +8,7 @@ import android.util.LruCache;
 
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.HasWebImage;
+import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.User;
@@ -73,8 +73,8 @@ public class ImageCacher implements Singleton {
 
     public static ImageCacher getCacher() { return cacher; }
 
-    public static <T extends DBOperable & HasWebImage> void get(final T item, final Callback<Bitmap> callback) {
-        if (toToken(item).equals(toToken(PeckSessionManager.getUser())) && userImage != null) callback.callBack(userImage);
+    public static <T extends DBOperable & HasImage> void get(final T item, final Callback<Bitmap> callback) {
+        if (toToken(item).equals(toToken(PeckSessionHandler.getUser())) && userImage != null) callback.callBack(userImage);
         else {
             Bitmap ret = cache.get(toToken(item));
 
@@ -95,7 +95,7 @@ public class ImageCacher implements Singleton {
         }
     }
 
-    public static <T extends DBOperable & HasWebImage> void forceUpdate(T t, Callback<Bitmap> callback) {
+    public static <T extends DBOperable & HasImage> void forceUpdate(T t, Callback<Bitmap> callback) {
         cache.remove(toToken(t));
         get(t, callback);
     }
@@ -116,9 +116,9 @@ public class ImageCacher implements Singleton {
             }
         }
 
-        if (PeckSessionManager.getUser() != null && PeckSessionManager.getUser().getServerId() >= 0) {
+        if (PeckSessionHandler.getUser() != null && PeckSessionHandler.getUser().getServerId() >= 0) {
             try {
-                out = new FileOutputStream(new File(CACHE_DIR, Integer.toString(PeckSessionManager.getUser().getServerId())));
+                out = new FileOutputStream(new File(CACHE_DIR, Integer.toString(PeckSessionHandler.getUser().getServerId())));
                 userImage.compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, out);
             } catch (Exception e) {
                 Log.e(TAG, "couldn't write app user's image to disk\n" + e.toString());
@@ -137,7 +137,7 @@ public class ImageCacher implements Singleton {
         }
     }
 
-    private static <T extends DBOperable & HasWebImage> String toToken(T t) {
+    private static <T extends DBOperable & HasImage> String toToken(T t) {
         return t.getClass().getSimpleName() + "[" + t.getLocalId() + "]";
     }
 

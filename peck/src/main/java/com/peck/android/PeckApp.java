@@ -6,7 +6,7 @@ import android.content.Context;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.PeckSessionManager;
+import com.peck.android.managers.PeckSessionHandler;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -40,7 +40,7 @@ public class PeckApp extends Application implements Singleton{
     public void onCreate() {
 
         AppContext.init(this);
-        PeckSessionManager.init();
+        PeckSessionHandler.init();
 
 
     }

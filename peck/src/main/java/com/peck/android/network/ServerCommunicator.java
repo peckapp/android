@@ -16,11 +16,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
 import com.peck.android.R;
@@ -45,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by mammothbane on 6/26/2014.
@@ -85,16 +82,6 @@ public class ServerCommunicator implements Singleton {
 
         JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass);
         object.addProperty(PeckApp.Constants.Network.INSTITUTION, LocaleManager.getManager().getLocale().getServerId());
-
-        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
-            if (entry.getValue().isJsonPrimitive() && ((JsonPrimitive)entry.getValue()).isNumber() &&
-                    Integer.parseInt((entry.getValue()).toString()) == PeckApp.Constants.NULL) {
-                object.remove(entry.getKey());
-                object.add(entry.getKey(), JsonNull.INSTANCE);
-            }
-        }
-
-        //todo: scrub/escape -9999 from text input so we don't get any issues
 
         return new JSONObject(object.toString());
     }

@@ -152,7 +152,8 @@ public abstract class Manager<T extends DBOperable> {
      */
 
     public Class<T> getParameterizedClass() {
-        return (Class<T>)TypeResolver.resolveRawArgument(Manager.class, getClass());
+            Class<T> clss = (Class<T>) TypeResolver.resolveGenericType(Manager.class, getClass());
+            return clss;
     }
 
 

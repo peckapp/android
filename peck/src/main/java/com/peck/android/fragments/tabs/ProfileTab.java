@@ -12,8 +12,8 @@ import com.peck.android.R;
 import com.peck.android.fragments.BaseTab;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.FacebookSessionManager;
-import com.peck.android.managers.PeckSessionManager;
+import com.peck.android.managers.FacebookSessionHandler;
+import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.views.PeckAuthButton;
 
 /**
@@ -30,10 +30,10 @@ public class ProfileTab extends BaseTab {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionManager.SessionStatusCallback(new Callback() {
+        lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionHandler.SessionStatusCallback(new Callback() {
             @Override
             public void callBack(Object obj) {
-                PeckSessionManager.getUser().setUp(getActivity().findViewById(R.id.ll_profile));
+                PeckSessionHandler.getUser().setUp(getActivity().findViewById(R.id.ll_profile));
             }
         }));
 
@@ -84,7 +84,7 @@ public class ProfileTab extends BaseTab {
         PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
-        PeckSessionManager.getUser().setUp(view.findViewById(R.id.ll_profile));
+        PeckSessionHandler.getUser().setUp(view.findViewById(R.id.ll_profile));
 
         return view;
     }

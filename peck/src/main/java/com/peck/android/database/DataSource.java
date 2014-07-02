@@ -46,7 +46,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     public T generate() {
         try {
-        return (T) tClass.newInstance();
+        return tClass.newInstance();
         } catch (Exception e) {
             Log.e(tClass.getSimpleName(),
                     "all dboperables must have public, nullary constructors\n" + e.toString());

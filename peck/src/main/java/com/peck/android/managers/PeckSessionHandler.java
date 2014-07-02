@@ -22,13 +22,13 @@ import java.util.Date;
  * handles the user's persistent session
  *
  */
-public class PeckSessionManager extends Manager implements Singleton {
+public class PeckSessionHandler implements Singleton {
     //manages user state, pulling from facebook if connected
 
     private final static String PROFILE_FILENAME = "proPicCache";
     private final static String TAG = "UserSessionManager";
 
-    private static PeckSessionManager manager = new PeckSessionManager();
+    private static PeckSessionHandler manager = new PeckSessionHandler();
     private static int profileDimens;
     private static Context context;
 
@@ -48,9 +48,9 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     public enum SourcePref { FACEBOOK, PECK }
 
-    private PeckSessionManager() {}
+    private PeckSessionHandler() {}
 
-    public static PeckSessionManager getManager() {
+    public static PeckSessionHandler getManager() {
         return manager;
     }
 
@@ -59,7 +59,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
         sessionStart = new Date(System.currentTimeMillis());
 
-        FacebookSessionManager.init();
+        FacebookSessionHandler.init();
 
         //test: remove before production
         context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
@@ -103,7 +103,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     public static void notifyFbStateChanged(final boolean loggedIn) {
         facebookMode = loggedIn;
-        FacebookSessionManager.getGraphUser(new Callback<GraphUser>() {
+        FacebookSessionHandler.getGraphUser(new Callback<GraphUser>() {
             @Override
             public void callBack(GraphUser obj) {
                 user.setFbId(obj.getId());
