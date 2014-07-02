@@ -73,10 +73,6 @@ public class ServerCommunicator implements Singleton {
 
     private ServerCommunicator() { }
 
-    private static ServerCommunicator getCommunicator() {
-        return serverCommunicator;
-    }
-
     public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
         Locale locale = LocaleManager.getManager().getLocale();
         if (locale == null) {

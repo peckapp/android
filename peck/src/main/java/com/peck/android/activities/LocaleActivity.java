@@ -50,7 +50,6 @@ public class LocaleActivity extends PeckActivity {
             //todo: catch errors from google play services
             locationServices = false;
             notifyMe();
-            //todo: re-search when location services come up?
             //todo: search bar?
 
         } else {

@@ -26,13 +26,13 @@ public abstract class Manager<T extends DBOperable> {
 
     //todo: maybe we want this to be a heap based on localid
     protected ArrayList<T> data = new ArrayList<T>();
-    protected DataSource<T> dSource;
+    protected DataSource<T> dSource = new DataSource<T>(getParameterizedClass());
 
-    public static Manager getManager(Class<? extends Singleton> clss) {
+    public static <S extends Manager & Singleton> Manager getManager(Class<S> clss) {
         try {
             return (Manager)clss.getMethod("getManager", null).invoke(null, null);}
         catch (Exception e) {
-            Log.e(tag, "every implemented manager must be a singleton with a getManager() method");
+            Log.e(tag, "every implemented manager must be a singleton with a static getManager() method");
             e.printStackTrace();
             return null;
         }

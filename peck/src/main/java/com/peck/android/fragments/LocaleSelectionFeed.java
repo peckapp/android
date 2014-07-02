@@ -8,7 +8,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.peck.android.R;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
@@ -27,7 +26,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        LocaleManager.getManager().setLocale(feedAdapter.getItem(i));
+                        LocaleManager.getManager().setLocale(feedManager.getAdapter().getItem(i));
                         getActivity().finish();
                     }
                 });
@@ -51,8 +50,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     }
 
     @Override
-    public Class<? extends Singleton> getManagerClass() {
+    public Class<LocaleManager> getManagerClass() {
         return LocaleManager.class;
     }
-
 }

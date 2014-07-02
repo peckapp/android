@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasManager;
@@ -30,10 +28,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     protected String tag() {
         return ((Object)this).getClass().getName();
     }
-
-    protected FeedAdapter<T> feedAdapter;
-
-    protected DataSource<T> dataSource;
 
     protected FeedManager<T> feedManager;
 
@@ -76,16 +70,14 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     public Feed<T> associateAdapter(AdapterView<ListAdapter> v) {
-        v.setAdapter(feedAdapter);
+        v.setAdapter(feedManager.getAdapter());
         return this;
     }
 
     public void onResume() {
         super.onResume();
-        feedAdapter.notifyDataSetChanged();
+        feedManager.getAdapter().notifyDataSetChanged();
     }
-
-    public FeedAdapter<T> getAdapter() { return feedAdapter; }
 
     public abstract int getListViewRes();
     public abstract int getLayoutRes();

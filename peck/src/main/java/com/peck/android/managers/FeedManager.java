@@ -18,8 +18,11 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     //every FeedManager must be a singleton
 
-    @NonNull
     protected FeedAdapter<T> adapter = new FeedAdapter<T>(dSource.generate().getResourceId());
+
+    {
+        adapter.setSource(this);
+    }
 
     @NonNull
     protected Feed<T> feed;
@@ -32,16 +35,17 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     public FeedManager<T> initialize(final Feed<T> feed, Callback<ArrayList<T>> callback) {
         this.feed = feed;
-        this.adapter = feed.getAdapter();
-        adapter.setSource(FeedManager.this);
 
         super.initialize(callback);
 
         return this;
-
-        //testing
-
     }
+
+    public FeedAdapter<T> getAdapter() {
+        return adapter;
+    }
+
+
 
     @Override
     public void loadFromDatabase(Callback<ArrayList<T>> callback) {
