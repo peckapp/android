@@ -53,4 +53,29 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/rl_network_error"
+        android:visibility="gone">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_retry"
+            android:id="@+id/bt_retry"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tv_retry"
+            android:id="@+id/tv_2"
+            android:layout_above="@+id/bt_retry"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
 </RelativeLayout>

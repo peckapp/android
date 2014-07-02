@@ -53,6 +53,9 @@ public class PeckApp extends Application implements Singleton{
         public final static class Network {
             public final static String SV_ID_NAME = "id";
 
+            public final static int RETRY_INTERVAL = 200;
+            public final static int TIMEOUT = 6000;
+
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
             public final static String CIRCLES = "circles/";
@@ -91,9 +94,6 @@ public class PeckApp extends Application implements Singleton{
         public final static class Database {
 
             public static final String DATABASE_NAME = "peck.db";
-            public final static int RETRY = 20;
-            public final static int UI_TIMEOUT = 50;
-            public final static int QUEUE_TIMEOUT = 1000;
 
             public final static String LOCAL_ID = "localId";
 
