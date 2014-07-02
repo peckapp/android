@@ -3,7 +3,6 @@ package com.peck.android.managers;
 import android.support.annotation.NonNull;
 
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -20,7 +19,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     //every FeedManager must be a singleton
 
     @NonNull
-    protected FeedAdapter<T> adapter;
+    protected FeedAdapter<T> adapter = new FeedAdapter<T>(dSource.generate().getResourceId());
 
     @NonNull
     protected Feed<T> feed;
@@ -31,12 +30,12 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public FeedManager<T> initialize(final Feed<T> feed, DataSource<T> dSource, Callback<ArrayList<T>> callback) {
+    public FeedManager<T> initialize(final Feed<T> feed, Callback<ArrayList<T>> callback) {
         this.feed = feed;
         this.adapter = feed.getAdapter();
         adapter.setSource(FeedManager.this);
 
-        super.initialize(dSource, callback);
+        super.initialize(callback);
 
         return this;
 
@@ -45,8 +44,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
     @Override
-    public void loadFromDatabase(DataSource<T> dataSource, Callback<ArrayList<T>> callback) {
-        super.loadFromDatabase(dataSource, new Callback<ArrayList<T>>() {
+    public void loadFromDatabase(Callback<ArrayList<T>> callback) {
+        super.loadFromDatabase(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
                 runOnUiThread(new Runnable() {
@@ -62,18 +61,12 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
 
     public void addNetwork(T item, final Callback<T> callback) {
-        super.addNetwork(item, new Callback<T>() {
+        super.addNetwork(item);
+        runOnUiThread(new Runnable() {
             @Override
-            public void callBack(T obj) {
-                callback.callBack(obj);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        });
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }});
     }
 
 

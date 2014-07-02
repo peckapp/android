@@ -38,53 +38,31 @@ public abstract class Manager<T extends DBOperable> {
         }
     }
 
-    public Manager<T> initialize(DataSource<T> dSource, final Callback<ArrayList<T>> callback) {
+    public Manager<T> initialize(final Callback<ArrayList<T>> callback) {
 
-        this.dSource = dSource;
-
-        loadFromDatabase(dSource,
-                new Callback<ArrayList<T>>() {
+        loadFromDatabase(new Callback<ArrayList<T>>() {
                     @Override
-                    public void callBack(ArrayList<T> obj) {
-
-                        downloadFromServer(new Callback<ArrayList<T>>() {
+                    public void callBack(ArrayList<T> obj) { downloadFromServer(new Callback<ArrayList<T>>() {
                             @Override
-                            public void callBack(ArrayList<T> obj) {
-
-
-                                callback.callBack(obj);
-                            }
-                        });
-                    }
-                });
-
-
-        //TODO: server communication and sync happens here
-
-
-        //TEST
-
-       /* T t;
-        for (int i = 1; i < 10; i++) {
-            try {
-                t = dSource.generate();
-                t.setServerId(i);
-                addNetwork(t, new Callback<T>() {
-                    public void callBack(T obj) {
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(tag(), "all dboperables must have public, nullary constructors\n" + e.toString());
-            }
-        }*/
+                            public void callBack(ArrayList<T> obj) { callback.callBack(obj); }
+                        }); }});
 
         return this;
     }
 
-    public void loadFromDatabase(final DataSource<T> dataSource, final Callback<ArrayList<T>> callback) {
-        dataSource.getAll(new Callback<ArrayList<T>>() {
+
+    /**
+     *
+     * load all items from the database.
+     * clears data.
+     *
+     * @param callback a callback to execute once done loading
+     */
+    public void loadFromDatabase(final Callback<ArrayList<T>> callback) {
+        dSource.getAll(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
+                data = obj;
                 callback.callBack(obj);
             }
         });
@@ -95,12 +73,7 @@ public abstract class Manager<T extends DBOperable> {
         ServerCommunicator.getAll(getParameterizedClass(), new Callback<ArrayList<T>>() {
             @Override
             public void callBack(final ArrayList<T> objs) {
-                for (T i : objs) addNetwork(i, new Callback<T>() {
-                    @Override
-                    public void callBack(T obj) {
-
-                    }
-                });
+                for (T i : objs) addNetwork(i);
                 callback.callBack(objs);
             }
         });
@@ -117,18 +90,18 @@ public abstract class Manager<T extends DBOperable> {
 
     @Nullable
     public T getByLocalId(Integer id) {
-       for (T i: data) {
-            if (i.getLocalId() == id) return i;
+       for (T i : data) {
+            if (i.getLocalId().equals(id)) return i;
         }
 
         return null;
     }
 
-    public T getByServerId(int id) {
+    public T getByServerId(Integer id) {
         //TODO: throw db request
 
         for (T i : data) {
-            if (i.getServerId() == id) return i;
+            if (i.getServerId().equals(id)) return i;
         }
 
         return null;
@@ -159,9 +132,8 @@ public abstract class Manager<T extends DBOperable> {
      * called only for updates from the server
      *
      * @param item the new item
-     * @param callback a callback for when the update is finished
      */
-    public void addNetwork(final T item, final Callback<T> callback) {
+    public void addNetwork(final T item) {
         if (data.contains(item)) update(item);
         else {
             data.add(item);
@@ -169,7 +141,6 @@ public abstract class Manager<T extends DBOperable> {
                 @Override
                 public void callBack(T obj) {
                     item.setLocalId(obj.getLocalId());
-                    callback.callBack(obj);
                 }
             });
         }
@@ -195,7 +166,7 @@ public abstract class Manager<T extends DBOperable> {
      * @param item the item to update, definitely has localid
      */
     public void update(final T item) {
-        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item, and if it hasn't been updated more recently than the argument
+        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item, and it hasn't been updated more recently than the argument
             data.remove(item);
             data.add(item);
             if (item.getServerId() != null) dSource.update(item);
@@ -207,7 +178,7 @@ public abstract class Manager<T extends DBOperable> {
                     dSource.update(item);
                 }
             });
-        } else Log.w(tag(), item.toString() + "isn't in the dataset.");
+        } else Log.w(tag(), item.toString() + " isn't in the dataset, so it couldn't be updated");
     }
 
 }

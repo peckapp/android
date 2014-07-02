@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
-    private T item;
+    private Class<T> tClass;
     private static final String TAG = "DataSource";
     private String[] columns;
 
@@ -46,16 +46,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     public T generate() {
         try {
-        return (T) item.getClass().newInstance();
+        return (T) tClass.newInstance();
         } catch (Exception e) {
-            Log.e(item.getClass().getSimpleName(),
+            Log.e(tClass.getSimpleName(),
                     "all dboperables must have public, nullary constructors\n" + e.toString());
             return null;
         }
     }
 
-    public DataSource(T item) {
-        this.item = item;
+    public DataSource(Class<T> tClass) {
+        this.tClass = tClass;
     }
 
     public void open() {
@@ -88,7 +88,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     }
 
     private String[] getColumns() {
-        if (columns == null) columns = item.getColumns();
+        if (columns == null) columns = generate().getColumns();
         return columns;
     }
 
@@ -96,16 +96,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         @Override
         public void run() {
             open();
-            Log.i(TAG + ": "  + item.getClass().getSimpleName(), "running");
+            Log.i(TAG + ": "  + tClass.getSimpleName(), "running");
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
                 } catch (InterruptedException e) {
-                    Log.e(TAG + ": "  + item.getClass().getSimpleName(), e.toString());
+                    Log.e(TAG + ": "  + tClass.getSimpleName(), e.toString());
                 }
             }
             close();
-            Log.i(TAG + ": " + item.getClass().getSimpleName(), "dying");
+            Log.i(TAG + ": " + tClass.getSimpleName(), "dying");
         }
     }
 
@@ -123,10 +123,10 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            Cursor cursor = database.query(item.getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
+            Cursor cursor = database.query(generate().getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null, null, null, null);
             cursor.moveToFirst();
-            callback.callBack(JsonConverter.fromCursor(cursor, (Class<T>)item.getClass()));
+            callback.callBack(JsonConverter.fromCursor(cursor, tClass));
         }
     }
 
@@ -139,11 +139,11 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             ArrayList<T> ret = new ArrayList<T>();
-            Cursor cursor = database.query(item.getTableName(),
-                    item.getColumns(), null, null, null, null, null);
+            Cursor cursor = database.query(generate().getTableName(),
+                    generate().getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                T obj = JsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
+                T obj = JsonConverter.fromCursor(cursor, tClass);
                 ret.add(obj);
                 cursor.moveToNext();
             }
@@ -172,16 +172,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
             try {
 
-                insertId = database.insert(item.getTableName(), null, contentValues);
+                insertId = database.insert(generate().getTableName(), null, contentValues);
 
                 if (insertId == -1)
                     throw new SQLiteException("Row could not be inserted into the database");
 
-                cursor = database.query(item.getTableName(), item.getColumns(),
+                cursor = database.query(generate().getTableName(), generate().getColumns(),
                         PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
-                T newT = JsonConverter.fromCursor(cursor, (Class<T>)item.getClass());
+                T newT = JsonConverter.fromCursor(cursor, tClass);
                 cursor.close();
                 callback.callBack(newT);
 
@@ -204,7 +204,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            database.delete(item.getTableName(), PeckApp.Constants.Database.LOCAL_ID
+            database.delete(generate().getTableName(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null);
         }
     }
@@ -217,7 +217,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            database.update(item.getTableName(),
+            database.update(generate().getTableName(),
                     JsonConverter.toContentValues(t),
                     PeckApp.Constants.Database.LOCAL_ID + " = ?",
                     new String[]{String.valueOf(t.getLocalId())});

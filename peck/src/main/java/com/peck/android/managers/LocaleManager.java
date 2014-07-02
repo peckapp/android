@@ -5,6 +5,8 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,7 +14,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
-import com.peck.android.database.DataSource;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
@@ -38,8 +39,8 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     @Override
-    public FeedManager<Locale> initialize(Feed<Locale> feed, DataSource<Locale> dSource, Callback<ArrayList<Locale>> callback) {
-        super.initialize(feed, dSource, callback);
+    public FeedManager<Locale> initialize(Feed<Locale> feed, Callback<ArrayList<Locale>> callback) {
+        super.initialize(feed, callback);
         client = new LocationClient(PeckApp.getContext(), manager, manager);
         getLocation();
         return this;
@@ -109,11 +110,12 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
 
     }
 
+    @Nullable
     public Locale getLocale() {
         return locale;
     }
 
-    public LocaleManager setLocale(Locale l) {
+    public LocaleManager setLocale(@NonNull Locale l) {
         locale = l;
         SharedPreferences.Editor spEdit = PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         spEdit.putInt(LOCALE_ID, l.getLocalId());
@@ -138,27 +140,28 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     }
 
     public void calcDistances() {
-        Locale ret = data.get(0);
-        for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
-            if (location == null) {
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Log.d(tag, "[" + i + "] waiting for location, still null");
-            } else {
-                for (Locale l : data) {
-                    if (l.calcDist(location).getDist() < ret.getDist()) {
-                        ret = l;
+        if (data.size() > 0) {
+            Locale ret = data.get(0);
+            for (int i = 0; i < PeckApp.Constants.Location.RETRY; i++) {
+                if (location == null) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                    Log.d(tag, "[" + i + "] waiting for location, still null");
+                } else {
+                    for (Locale l : data) {
+                        if (l.calcDist(location).getDist() < ret.getDist()) {
+                            ret = l;
+                        }
+                    }
+
+                    break;
                 }
-
-                break;
             }
-        }
-        Log.d(tag, "closest: " + ret.toString());
-
+            Log.d(tag, "closest: " + ret.toString());
+        } else Log.e(tag(), "locale list is empty");
     }
 }
 

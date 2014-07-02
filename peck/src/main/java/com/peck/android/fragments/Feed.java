@@ -47,18 +47,10 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     public Feed() {}
 
-    public Feed(Callback<ArrayList<T>> callback) {
-        this.callback = callback;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        setUpFeed();
         congfigureManager();
         super.onCreate(savedInstanceState);
-
-
-        //TODO: loading bar
 
     }
 
@@ -70,7 +62,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     @SuppressWarnings("unchecked")
     protected void congfigureManager() {
-        feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(this, dataSource, callback);
+        feedManager = ((FeedManager<T>) FeedManager.getManager(getManagerClass())).initialize(this, callback);
     }
 
     @Override
@@ -95,7 +87,6 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     public FeedAdapter<T> getAdapter() { return feedAdapter; }
 
-    public abstract Feed<T> setUpFeed(); //set adapter and datasource
     public abstract int getListViewRes();
     public abstract int getLayoutRes();
 

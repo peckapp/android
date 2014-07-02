@@ -8,7 +8,6 @@ import android.util.Log;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
@@ -34,7 +33,6 @@ public class PeckSessionManager extends Manager implements Singleton {
     private static Context context;
 
     private static User user = new User();
-    private static DataSource<User> dataSource;
     private static Date sessionStart;
 
     private static boolean facebookMode = false;
@@ -44,7 +42,6 @@ public class PeckSessionManager extends Manager implements Singleton {
 
 
     static {
-        dataSource = new DataSource<User>(new User());
         context = PeckApp.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }
@@ -71,7 +68,7 @@ public class PeckSessionManager extends Manager implements Singleton {
         edit.apply();
         Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
-        UserManager.getManager().initialize(dataSource, new Callback<ArrayList<User>>() {
+        UserManager.getManager().initialize(new Callback<ArrayList<User>>() {
             @Override
             public void callBack(ArrayList<User> obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
@@ -81,12 +78,7 @@ public class PeckSessionManager extends Manager implements Singleton {
 
                 if (user == null) {
                     user = new User();
-                    UserManager.getManager().addNetwork(user, new Callback<User>() {
-                        @Override
-                        public void callBack(User obj) {
-                            user.setLocalId(obj.getLocalId());
-                        }
-                    });
+                    UserManager.getManager().add(user);
                 }
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override

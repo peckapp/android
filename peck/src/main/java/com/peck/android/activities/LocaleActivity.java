@@ -32,6 +32,7 @@ public class LocaleActivity extends PeckActivity {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.rl_loc_select, new LocaleSelectionFeed(), fragmentTag);
         ft.commit();
+
     }
 
     @Override
@@ -41,6 +42,8 @@ public class LocaleActivity extends PeckActivity {
         findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
 
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
+
+
 
         if (!(servicesConnected() && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)))) { //if we can't locate the user
@@ -52,6 +55,7 @@ public class LocaleActivity extends PeckActivity {
 
         } else {
             LocaleManager.getLocation();
+            notifyMe();
         }
 
     }
@@ -93,34 +97,30 @@ public class LocaleActivity extends PeckActivity {
     }
 
     private void notifyMe() {
-        if (loaded) {
-            final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-            tv.setVisibility(View.VISIBLE);
-            tv.setText(R.string.pb_loc);
+        final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+        tv.setVisibility(View.VISIBLE);
+        tv.setText(R.string.pb_loc);
 
-            if (locationServices) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        LocaleManager.getManager().calcDistances();
-                        return null;
-                    }
+        if (locationServices) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    LocaleManager.getManager().calcDistances();
+                    return null;
+                }
 
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        tv.setVisibility(View.GONE);
-                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    tv.setVisibility(View.GONE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
 
-                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-                    }
-                }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
-            } else {
-                findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
-                findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-            }
+                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                }
+            }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
         } else {
-            loaded = true;
+            findViewById(R.id.rl_locale).setVisibility(View.GONE);
+            Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
+            findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
         }
     }
 
