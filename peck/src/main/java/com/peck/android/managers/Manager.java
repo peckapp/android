@@ -26,7 +26,7 @@ public abstract class Manager<T extends DBOperable> {
     public static String tag = "Manager";
 
     //todo: maybe we want this to be a heap based on localid
-    protected ArrayList<T> data = new ArrayList<T>();
+    protected final ArrayList<T> data = new ArrayList<T>();
     protected DataSource<T> dSource = new DataSource<T>(getParameterizedClass());
 
     public static <S extends Manager & Singleton> Manager getManager(Class<S> clss) {
@@ -64,7 +64,7 @@ public abstract class Manager<T extends DBOperable> {
         dSource.getAll(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                data = obj;
+                data.addAll(obj);
                 callback.callBack(obj);
             }
         });
@@ -120,11 +120,12 @@ public abstract class Manager<T extends DBOperable> {
     public void addNew() {
         dSource.create(dSource.generate(), new Callback<T>() {
             @Override
-            public void callBack(T obj) {
-                ServerCommunicator.postObject(obj, getParameterizedClass(), new Callback<T>() {
+            public void callBack(final T dbObj) {
+                data.add(dbObj);
+                ServerCommunicator.postObject(dbObj, getParameterizedClass(), new Callback<T>() {
                     @Override
                     public void callBack(T obj) {
-                        data.add(obj);
+                        addFromNetwork(obj);
                     }
                 });
             }
@@ -141,8 +142,18 @@ public abstract class Manager<T extends DBOperable> {
      * @param item the new item
      */
     public void addFromNetwork(final T item) {
-        if (data.contains(item)) update(item);
-        else {
+        dSource.update(item, new Callback<T>() {
+            @Override
+            public void callBack(T obj) {
+
+            }
+        });
+        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+            synchronized (data) {
+                data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
+                data.add(item);
+            }
+        } else {
             dSource.create(item, new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
@@ -170,10 +181,9 @@ public abstract class Manager<T extends DBOperable> {
      *
      * @param item the item to update, definitely has localid
      */
-    public void update(final T item) {
-        if (!data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
-            data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it
-            data.add(item);
+    public void updateFromUser(final T item) {
+
+        if (data.contains(item)) {
             ServerCommunicator.patchObject(item, getParameterizedClass(), new Callback<T>() {
                 @Override
                 public void callBack(T obj) {

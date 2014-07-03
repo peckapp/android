@@ -1,10 +1,11 @@
 package com.peck.android.database;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
@@ -21,9 +22,16 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class DataSource<T extends DBOperable> implements Factory<T> {
     private SQLiteDatabase database;
+
+    @NonNull
     private Class<T> tClass;
     private static final String TAG = "DataSource";
+
+    @Nullable
     private String[] columns;
+
+    @Nullable
+    private String tableName;
 
     private opThread workingThread;
 
@@ -46,13 +54,14 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     public T generate() {
         try {
-        return tClass.newInstance();
+            return tClass.newInstance();
         } catch (Exception e) {
             Log.e(tClass.getSimpleName(),
                     "all dboperables must have public, nullary constructors\n" + e.toString());
             return null;
         }
     }
+
 
     public DataSource(Class<T> tClass) {
         this.tClass = tClass;
@@ -73,10 +82,10 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
     public void update(T t) {
         queue.add(new update(t));
     }
+    public void update(T t, Callback<Integer> callback) { queue.add(new update(t, callback)); }
 
     public void delete(T T) {
         queue.add(new delete(T));
-
     }
 
     public void getAll(Callback<ArrayList<T>> callback) {
@@ -87,9 +96,15 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
+
     private String[] getColumns() {
         if (columns == null) columns = generate().getColumns();
         return columns;
+    }
+
+    private String getTableName() {
+        if (tableName == null) tableName = generate().getTableName();
+        return tableName;
     }
 
     private class opThread extends Thread {
@@ -123,7 +138,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            Cursor cursor = database.query(generate().getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
+            Cursor cursor = database.query(getTableName(), getColumns(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null, null, null, null);
             cursor.moveToFirst();
             callback.callBack(JsonConverter.fromCursor(cursor, tClass));
@@ -139,8 +154,8 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
         public void run() {
             ArrayList<T> ret = new ArrayList<T>();
-            Cursor cursor = database.query(generate().getTableName(),
-                    generate().getColumns(), null, null, null, null, null);
+            Cursor cursor = database.query(getTableName(),
+                    getColumns(), null, null, null, null, null);
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 T obj = JsonConverter.fromCursor(cursor, tClass);
@@ -163,21 +178,17 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
             this.callback = callback;
         }
 
-        @SuppressWarnings("unchecked")
-        public void run() {
-            ContentValues contentValues = JsonConverter.toContentValues(t);
+        private void runCreate() {
 
             long insertId;
             Cursor cursor;
-
             try {
-
-                insertId = database.insert(generate().getTableName(), null, contentValues);
+                insertId = database.insert(getTableName(), null, JsonConverter.toContentValues(t));
 
                 if (insertId == -1)
                     throw new SQLiteException("Row could not be inserted into the database");
 
-                cursor = database.query(generate().getTableName(), generate().getColumns(),
+                cursor = database.query(getTableName(), getColumns(),
                         PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
                 cursor.moveToFirst();
 
@@ -189,6 +200,23 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                 Log.e(TAG, "item broke a constraint: " + e.toString());
                 callback.callBack(null);
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        public void run() {
+            if (t.getServerId() != null) {
+                switch (database.query(getTableName(), getColumns(), PeckApp.Constants.Network.SV_ID_NAME + " = " + t.getServerId(), null, null, null, null).getCount()) {
+                    case 1: update(t, callback);
+                        break;
+                    case 0: runCreate();
+                        break;
+                    case -1: runCreate();
+                        break;
+                    default: throw new SQLiteConstraintException("More than one " + t.getClass().getSimpleName() + " with the same serverId already exists in the database.");
+                }
+
+            } else runCreate();
+
 
         }
     }
@@ -204,23 +232,44 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         public void run() {
             long id = t.getLocalId();
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
-            database.delete(generate().getTableName(), PeckApp.Constants.Database.LOCAL_ID
+            database.delete(getTableName(), PeckApp.Constants.Database.LOCAL_ID
                     + " = " + id, null);
         }
     }
 
     private class update extends dbOp {
         T t;
+        Callback<Integer> callback;
 
         private update(T t) {
+            this(t, new Callback<Integer>() {
+                @Override
+                public void callBack(Integer obj) {
+
+                }
+            });
+        }
+        private update(T t, Callback<Integer> callback) {
             this.t = t;
+            this.callback = callback;
         }
 
         public void run() {
-            database.update(generate().getTableName(),
-                    JsonConverter.toContentValues(t),
-                    PeckApp.Constants.Database.LOCAL_ID + " = ?",
-                    new String[]{String.valueOf(t.getLocalId())});
+            assert (t.getLocalId() != null || t.getServerId() != null) : "serverId and localId can't both be null to update";
+
+            String whereClause;
+            String whereArg;
+            if (t.getLocalId() == null) { //special case where getLocalId can be null
+                whereClause = PeckApp.Constants.Network.SV_ID_NAME;
+                whereArg = t.getServerId().toString();
+            } else {
+                whereClause = PeckApp.Constants.Database.LOCAL_ID;
+                whereArg = t.getLocalId().toString();
+            }
+            callback.callBack(
+                    database.update(getTableName(), JsonConverter.toContentValues(t),
+                            whereClause + " = ?", new String[]{whereArg})
+            );
         }
     }
 

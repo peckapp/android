@@ -59,7 +59,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
                 notifyDatasetChanged();
             }
         });
-        feedManager.setActiveFeed(this);
+        feedManager.addFeed(this);
     }
 
     @Override

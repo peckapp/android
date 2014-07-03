@@ -40,7 +40,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return getItem(i).getLocalId();
     }
 
     @Override

@@ -40,9 +40,6 @@ public class JsonConverter {
 
     public static String getDatabaseCreate(DBOperable dbOperable) {
         String dbCreate = "create table " + dbOperable.getTableName() + " (";
-        JsonObject jsonObject = (JsonObject)new GsonBuilder().serializeNulls().create().toJsonTree(dbOperable, dbOperable.getClass());
-
-        //for (String s : jsonObject.entrySet())
 
         for (Field objField : getAllFields(dbOperable.getClass())) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
             SerializedName annotation = objField.getAnnotation(SerializedName.class);

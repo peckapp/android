@@ -18,7 +18,7 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     //every FeedManager must be a singleton
 
     @NonNull
-    protected Feed<T> activeFeed;
+    protected ArrayList<Feed<T>> activeFeeds = new ArrayList<Feed<T>>();
 
     public final static String tag = "FeedManager";
 
@@ -26,8 +26,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public void setActiveFeed(Feed<T> activeFeed) {
-        this.activeFeed = activeFeed;
+    public void addFeed(Feed<T> activeFeed) {
+        activeFeeds.add(activeFeed);
     }
 
 
@@ -36,8 +36,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
         super.loadFromDatabase(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                if (activeFeed != null) activeFeed.notifyDatasetChanged();
                 callback.callBack(obj);
+                notifyDatasetChanged();
             }
         });
     }
@@ -46,18 +46,25 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     @Override
     public void addNew() {
         super.addNew();
-        if (activeFeed != null) activeFeed.notifyDatasetChanged();
+        notifyDatasetChanged();
     }
 
     @Override
     public void addFromNetwork(T item) {
         super.addFromNetwork(item);
-        if (activeFeed != null) activeFeed.notifyDatasetChanged();
+        notifyDatasetChanged();
     }
 
     @Override
-    public void update(T item) {
-        super.update(item);
-        if (activeFeed != null) activeFeed.notifyDatasetChanged();
+    public void updateFromUser(T item) {
+        super.updateFromUser(item);
+        notifyDatasetChanged();
     }
+
+    private void notifyDatasetChanged() {
+        for (Feed<T> feed : activeFeeds) {
+            feed.notifyDatasetChanged();
+        }
+    }
+
 }

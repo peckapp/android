@@ -63,7 +63,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
     public void onDisconnected() {
         // Display the connection status
         //location = client.getLastLocation();
-        Toast.makeText(activeFeed.getActivity(), "Disconnected from location services. Please re-connect.",
+        Toast.makeText(activeFeeds.getActivity(), "Disconnected from location services. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -83,7 +83,7 @@ public class LocaleManager extends FeedManager<Locale> implements Singleton, Goo
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(
-                        activeFeed.getActivity(),
+                        activeFeeds.getActivity(),
                         RESOLUTION_REQUEST_FAILURE);
                 /*
                  * Thrown if Google Play services canceled the original

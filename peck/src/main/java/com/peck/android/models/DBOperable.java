@@ -27,7 +27,6 @@ public abstract class DBOperable implements Serializable {
         updated = new Date(System.currentTimeMillis());
     }
 
-    @Nullable
     @DBType("integer primary key autoincrement")
     @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
     public Integer localId = null;
@@ -102,7 +101,7 @@ public abstract class DBOperable implements Serializable {
         return this;
     }
 
-    @Nullable
+    @NonNull
     public Integer getLocalId() {
         return localId;
     }
@@ -129,21 +128,8 @@ public abstract class DBOperable implements Serializable {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        /* horrible, redundant boolean logic, but it's hopefully at least readable */
-
-        if (o == null || !(o instanceof DBOperable) || (getLocalId() == null && getServerId() == null) ||
-                (((DBOperable) o).getLocalId() == null && ((DBOperable) o).getServerId() == null)) return false; //if both fields are null on either object, return false.
-
-        if (getLocalId() == null && ((DBOperable) o).getServerId() == null || getServerId() == null && ((DBOperable) o).getLocalId() == null)
-            return false; //if alternating fields are null, return false.
-
-        if (getLocalId() == null) {
-            //we must have two nonnull serverids
-            return serverId.equals(((DBOperable) o).getServerId());
-        } else {
-            //we must have two nonnull localids
-            return localId.equals(((DBOperable) o).getLocalId());
-        }
+        if (o == null || !getClass().equals(o.getClass())) return false;
+        return localId.equals(((DBOperable) o).getLocalId());
 
     }
 
