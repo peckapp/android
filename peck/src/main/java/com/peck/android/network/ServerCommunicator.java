@@ -57,8 +57,8 @@ public class ServerCommunicator implements Singleton {
     private static final HashMap<Class<? extends DBOperable>, String> apiMap =
             new HashMap<Class<? extends DBOperable>, String>();
 
-    private static final HashMap<Class<? extends DBOperable>, HashMap<String, JsonDeserializer<? extends JoinGroup>>> joinMap =
-            new HashMap<Class<? extends DBOperable>, HashMap<String, JsonDeserializer<? extends JoinGroup>>>();
+    private static final HashMap<Class<? extends DBOperable>, HashMap<Class<? extends DBOperable>, String>> joinMap =
+            new HashMap<Class<? extends DBOperable>, HashMap<Class<? extends DBOperable>, String>>();
 
     static {
         apiMap.put(Event.class, Network.EVENTS);
@@ -69,17 +69,14 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
 
-        HashMap<String, JsonDeserializer<? extends JoinGroup>> eventMap = new HashMap<String, JsonDeserializer<? extends JoinGroup>>();
+        HashMap<Class<? extends DBOperable>, String> eventMap = new HashMap<Class<? extends DBOperable>, String>();
+        eventMap.put(User.class, Network.EVENT_ATTENDEES);
 
-        eventMap.put(Network.EVENT_ATTENDEES, new JsonDeserializer<JoinGroup>() {
-            @Override
-            public JoinGroup deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return null;
-            }
-        });
-
+        HashMap<Class<? extends DBOperable>, String> cirleMap = new HashMap<Class<? extends DBOperable>, String>();
+        eventMap.put(User.class, Network.CIRCLE_MEMBERS);
 
         joinMap.put(Event.class, eventMap);
+        joinMap.put(Circle.class, cirleMap);
     }
 
 
@@ -169,10 +166,12 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
-        if (tClass.isAssignableFrom(Joined.class)) {
+        if (joinMap.containsKey(tClass)) {
+            assert (post instanceof Joined);
+            for (JoinGroup joinGroup : ((Joined) post).getJoinGroups()) {
 
 
-
+            }
         }
 
 

@@ -2,8 +2,6 @@ package com.peck.android.models;
 
 import android.support.annotation.NonNull;
 
-import com.peck.android.interfaces.Joined;
-
 import java.util.ArrayList;
 
 /**
@@ -14,7 +12,7 @@ import java.util.ArrayList;
  * the hosting model should hold the joins.
  *
  */
-public class JoinGroup<T extends DBOperable, S extends DBOperable & Joined> {
+public class JoinGroup<T extends DBOperable> {
 
     @NonNull
     private S from;
@@ -36,6 +34,10 @@ public class JoinGroup<T extends DBOperable, S extends DBOperable & Joined> {
         for (Join<T> join : joins) {
             if (join.getTo() == t) joins.remove(join);
         }
+    }
+
+    public ArrayList<Join<T>> getJoins() {
+        return joins;
     }
 
 

@@ -24,7 +24,7 @@ import it.sephiroth.android.library.widget.HListView;
 public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage, Joined {
 
     @NonNull
-    private JoinGroup<User, Event> users = new JoinGroup<User, Event>(this);
+    private JoinGroup<User, Circle> users = new JoinGroup<User, Circle>(this);
 
 
     @Expose
@@ -37,8 +37,8 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     @Override
     @SuppressWarnings("unchecked")
-    public ArrayList<JoinGroup<? extends DBOperable, Event>> getJoinGroups() {
-        ArrayList<JoinGroup<? extends DBOperable, Event>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable, Event>>();
+    public ArrayList<JoinGroup<? extends DBOperable, Circle>> getJoinGroups() {
+        ArrayList<JoinGroup<? extends DBOperable, Circle>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable, Circle>>();
         joinGroups.add(users);
         return joinGroups;
     }
