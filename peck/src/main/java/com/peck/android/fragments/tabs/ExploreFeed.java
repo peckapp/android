@@ -26,6 +26,7 @@ public class ExploreFeed extends FeedTab<Event> {
         return lvId;
     }
 
+    @SuppressWarnings("unchecked")
     public Class<EventManager> getManagerClass() {
         return EventManager.class;
     }
