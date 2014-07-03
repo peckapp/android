@@ -48,12 +48,12 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup, Joine
     private String eventUrl;
 
     @NonNull
-    private JoinGroup<User, Event> users = new JoinGroup<User, Event>(this);
+    private JoinGroup<User> users = new JoinGroup<User>();
 
     @Override
     @SuppressWarnings("unchecked")
-    public ArrayList<JoinGroup<? extends DBOperable, Event>> getJoinGroups() {
-        ArrayList<JoinGroup<? extends DBOperable, Event>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable, Event>>();
+    public ArrayList<JoinGroup<? extends DBOperable>> getJoinGroups() {
+        ArrayList<JoinGroup<? extends DBOperable>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable>>();
         joinGroups.add(users);
         return joinGroups;
     }

@@ -19,6 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
 import com.peck.android.R;
@@ -167,10 +168,29 @@ public class ServerCommunicator implements Singleton {
 
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
         if (joinMap.containsKey(tClass)) {
-            assert (post instanceof Joined);
-            for (JoinGroup joinGroup : ((Joined) post).getJoinGroups()) {
+            if (BuildConfig.DEBUG && !(post instanceof Joined)) throw new RuntimeException(post.getClass().getSimpleName() + " must implement joined.");
+            try {
+                for (JoinGroup joinGroup : ((Joined) post).getJoinGroups()) {
+                    if (BuildConfig.DEBUG && !joinMap.get(tClass).containsKey(joinGroup.getParameterizedClass())) throw new RuntimeException("Your JoinGroup was not " +
+                            "parameterized with the right type");
 
+                    for (JoinGroup.Join join : (ArrayList<JoinGroup.Join>)joinGroup.getJoins()) {
+                        requestQueue.add(new JsonObjectRequest(method, Network.API_STRING + joinMap.get(tClass).get(joinGroup.getParameterizedClass()),
+                                toJson(join, JoinGroup.Join.class), new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
 
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                            }
+                        }));
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 

@@ -2,6 +2,8 @@ package com.peck.android.models;
 
 import android.support.annotation.NonNull;
 
+import net.jodah.typetools.TypeResolver;
+
 import java.util.ArrayList;
 
 /**
@@ -14,12 +16,6 @@ import java.util.ArrayList;
  */
 public class JoinGroup<T extends DBOperable> {
 
-    @NonNull
-    private S from;
-
-    public JoinGroup(S s) {
-        from = s;
-    }
 
     private ArrayList<Join<T>> joins = new ArrayList<Join<T>>();
 
@@ -38,6 +34,10 @@ public class JoinGroup<T extends DBOperable> {
 
     public ArrayList<Join<T>> getJoins() {
         return joins;
+    }
+
+    public Class<T> getParameterizedClass() {
+        return (Class<T>)TypeResolver.resolveRawArgument(JoinGroup.class, getClass());
     }
 
 
