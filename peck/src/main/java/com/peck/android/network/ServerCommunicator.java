@@ -25,12 +25,12 @@ import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.JoinHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
+import com.peck.android.models.JoinGroup;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Meal;
 import com.peck.android.models.Peck;
@@ -39,7 +39,6 @@ import com.peck.android.models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,8 +57,8 @@ public class ServerCommunicator implements Singleton {
     private static final HashMap<Class<? extends DBOperable>, String> apiMap =
             new HashMap<Class<? extends DBOperable>, String>();
 
-    private static final HashMap<Field, String> joinMap =
-            new HashMap<Field, String>();
+    private static final HashMap<Class<? extends DBOperable>, HashMap<String, JsonDeserializer<? extends JoinGroup>>> joinMap =
+            new HashMap<Class<? extends DBOperable>, HashMap<String, JsonDeserializer<? extends JoinGroup>>>();
 
     static {
         apiMap.put(Event.class, Network.EVENTS);
@@ -70,6 +69,17 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
 
+        HashMap<String, JsonDeserializer<? extends JoinGroup>> eventMap = new HashMap<String, JsonDeserializer<? extends JoinGroup>>();
+
+        eventMap.put(Network.EVENT_ATTENDEES, new JsonDeserializer<JoinGroup>() {
+            @Override
+            public JoinGroup deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                return null;
+            }
+        });
+
+
+        joinMap.put(Event.class, eventMap);
     }
 
 
@@ -160,7 +170,9 @@ public class ServerCommunicator implements Singleton {
 
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
         if (tClass.isAssignableFrom(Joined.class)) {
-            JoinHandler.
+
+
+
         }
 
 

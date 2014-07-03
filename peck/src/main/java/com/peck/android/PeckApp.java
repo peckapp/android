@@ -77,6 +77,7 @@ public class PeckApp extends Application implements Singleton{
              * Join table strings
              */
             public final static String CIRCLE_MEMBERS = "circle_members/";
+            public final static String EVENT_ATTENDEES = "event_attendees/";
 
 
 
