@@ -1,6 +1,7 @@
 package com.peck.android.models;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
@@ -10,6 +11,7 @@ import com.peck.android.R;
 import com.peck.android.fragments.HLVUserFeed;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasImage;
+import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.SelfSetup;
 
 import java.util.ArrayList;
@@ -19,9 +21,11 @@ import it.sephiroth.android.library.widget.HListView;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage {
+public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage, Joined {
 
-    private ArrayList<Integer> users = new ArrayList<Integer>();
+    @NonNull
+    private JoinGroup<User, Event> users = new JoinGroup<User, Event>(this);
+
 
     @Expose
     @SerializedName("circle_name")
@@ -31,6 +35,14 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
     @SerializedName("image_link")
     private String imageUrl;
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public ArrayList<JoinGroup<? extends DBOperable, Event>> getJoinGroups() {
+        ArrayList<JoinGroup<? extends DBOperable, Event>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable, Event>>();
+        joinGroups.add(users);
+        return joinGroups;
+    }
+
 
     @Override
     public String getImageUrl() {
@@ -39,15 +51,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     public Circle setImageUrl(String Url) {
         this.imageUrl = Url;
-        return this;
-    }
-
-    public ArrayList<Integer> getUsers() {
-        return users;
-    }
-
-    public Circle setUsers(ArrayList<Integer> users) {
-        this.users = users;
         return this;
     }
 

@@ -23,7 +23,9 @@ import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
+import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.managers.JoinHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
@@ -37,6 +39,7 @@ import com.peck.android.models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,17 +55,20 @@ public class ServerCommunicator implements Singleton {
     private static RequestQueue requestQueue = PeckApp.getRequestQueue();
     private static JsonParser parser = new JsonParser();
 
-    private static final HashMap<Class<? extends DBOperable>, String[]> apiMap =
-            new HashMap<Class<? extends DBOperable>, String[]>();
+    private static final HashMap<Class<? extends DBOperable>, String> apiMap =
+            new HashMap<Class<? extends DBOperable>, String>();
+
+    private static final HashMap<Field, String> joinMap =
+            new HashMap<Field, String>();
 
     static {
-        apiMap.put(Event.class, new String[] {Network.EVENTS});
-        apiMap.put(Circle.class, new String[] {Network.CIRCLES});
-        apiMap.put(Locale.class, new String[] {Network.LOCALES});
-        apiMap.put(Meal.class, new String[] {Network.MEAL});
-        apiMap.put(Food.class, new String[] {Network.FOOD});
-        apiMap.put(Peck.class, new String[] {Network.PECK});
-        apiMap.put(User.class, new String[] {Network.USERS});
+        apiMap.put(Event.class, Network.EVENTS);
+        apiMap.put(Circle.class, Network.CIRCLES);
+        apiMap.put(Locale.class, Network.LOCALES);
+        apiMap.put(Meal.class, Network.MEAL);
+        apiMap.put(Food.class, Network.FOOD);
+        apiMap.put(Peck.class, Network.PECK);
+        apiMap.put(User.class, Network.USERS);
 
     }
 
@@ -78,17 +84,18 @@ public class ServerCommunicator implements Singleton {
             locale = new Locale();
             locale.setServerId(1);
         }
+
         JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass); //take our object and JSONize it
         object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
 
         JsonObject ret = new JsonObject(); //wrap it in another object
-        ret.add(apiMap.get(tClass)[0].substring(0, apiMap.get(tClass)[0].length() - 2), object); //subtract 2 for the trailing slash and the s
+        ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object); //subtract 2 for the trailing slash and the s
 
         return new JSONObject(ret.toString());
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
-        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass)[0] + serverId;
+        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass) + serverId;
 
         get(tClass, new Callback<ArrayList<T>>() {
             @Override
@@ -100,7 +107,7 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
-        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass)[0];
+        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass);
         get(tClass, callback, url);
     }
 
@@ -118,10 +125,6 @@ public class ServerCommunicator implements Singleton {
 
             }
         }));
-    }
-
-    public static <T extends DBOperable> ArrayList<Integer> getJoins(Class<T> tClass) {
-
     }
 
 
@@ -156,12 +159,17 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
+        if (tClass.isAssignableFrom(Joined.class)) {
+            JoinHandler.
+        }
+
+
         try {
 
             JSONObject item = toJson(post, tClass);
 
             Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
-            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass)[0], item, new Response.Listener<JSONObject>() {
+            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
                     callback.callBack(gson.fromJson(object.toString(), tClass));

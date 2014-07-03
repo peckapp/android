@@ -2,6 +2,7 @@ package com.peck.android.models;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
@@ -9,14 +10,16 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
 import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.SelfSetup;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
+public class Event extends DBOperable implements HasFeedLayout, SelfSetup, Joined {
 
     @NonNull
     @Expose
@@ -29,6 +32,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     private Date endTime = new Date(-1);
 
     @Expose
+    @SerializedName("title")
     private String title = "";
 
     @Expose
@@ -43,7 +47,18 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     @SerializedName("event_url")
     private String eventUrl;
 
+    @NonNull
+    private JoinGroup<User, Event> users = new JoinGroup<User, Event>(this);
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public ArrayList<JoinGroup<? extends DBOperable, Event>> getJoinGroups() {
+        ArrayList<JoinGroup<? extends DBOperable, Event>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable, Event>>();
+        joinGroups.add(users);
+        return joinGroups;
+    }
+
+    @Nullable
     public String getImageUrl() {
         return imageUrl;
     }
@@ -53,6 +68,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
+    @Nullable
     public String getEventUrl() {
         return eventUrl;
     }
