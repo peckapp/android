@@ -32,6 +32,17 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
 
     @Override
+    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
+        super.downloadFromServer(new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+                callback.callBack(obj);
+                notifyDatasetChanged();
+            }
+        });
+    }
+
+    @Override
     public void loadFromDatabase(final Callback<ArrayList<T>> callback) {
         super.loadFromDatabase(new Callback<ArrayList<T>>() {
             @Override
@@ -44,8 +55,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
 
     @Override
-    public void addNew() {
-        super.addNew();
+    public void addNew(T item) {
+        super.addNew(item);
         notifyDatasetChanged();
     }
 
@@ -62,9 +73,14 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
     }
 
     private void notifyDatasetChanged() {
-        for (Feed<T> feed : activeFeeds) {
-            feed.notifyDatasetChanged();
-        }
+        dSource.post(new Callback() {
+            @Override
+            public void callBack(Object obj) {
+                for (Feed<T> feed : activeFeeds) {
+                    feed.notifyDatasetChanged();
+                }
+            }
+        });
     }
 
 }

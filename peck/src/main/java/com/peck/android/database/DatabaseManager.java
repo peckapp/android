@@ -66,7 +66,7 @@ public class DatabaseManager {
         if (openCount == 0) {
             database.close();
         }
-        Log.i("DatabaseManager", "[" + openCount + "] closing db socket");
+        Log.d("DatabaseManager", "[" + openCount + "] closing db socket");
     }
 
     private DatabaseManager() {

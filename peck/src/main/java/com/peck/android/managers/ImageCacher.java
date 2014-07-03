@@ -26,8 +26,6 @@ import java.util.Map;
  *
  */
 public class ImageCacher implements Singleton {
-    private static ImageCacher cacher = new ImageCacher();
-
     private static final Bitmap imageNotAvailable;
     private static final String TAG = "ImageCacher";
     private static final String CACHE_NAME = "img_cache";
@@ -70,8 +68,6 @@ public class ImageCacher implements Singleton {
             }
         }.execute();
     }
-
-    public static ImageCacher getCacher() { return cacher; }
 
     public static <T extends DBOperable & HasImage> void get(final T item, final Callback<Bitmap> callback) {
         if (toToken(item).equals(toToken(PeckSessionHandler.getUser())) && userImage != null) callback.callBack(userImage);

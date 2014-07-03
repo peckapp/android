@@ -42,12 +42,12 @@ public abstract class Manager<T extends DBOperable> {
     public Manager<T> initialize(final Callback<ArrayList<T>> callback) {
 
         loadFromDatabase(new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+                downloadFromServer(new Callback<ArrayList<T>>() {
                     @Override
-                    public void callBack(ArrayList<T> obj) {
-                        downloadFromServer(new Callback<ArrayList<T>>() {
-                            @Override
-                            public void callBack(ArrayList<T> obj) { callback.callBack(obj); }
-                        }); }});
+                    public void callBack(ArrayList<T> obj) { callback.callBack(obj); }
+                }); }});
 
         return this;
     }
@@ -93,7 +93,7 @@ public abstract class Manager<T extends DBOperable> {
 
     @Nullable
     public T getByLocalId(Integer id) {
-       for (T i : data) {
+        for (T i : data) {
             if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
         }
 
@@ -102,12 +102,9 @@ public abstract class Manager<T extends DBOperable> {
 
     @Nullable
     public T getByServerId(Integer id) {
-        //TODO: throw db request
-
         for (T i : data) {
             if (i.getServerId() != null && i.getServerId().equals(id)) return i;
         }
-
         return null;
     }
 
@@ -115,17 +112,18 @@ public abstract class Manager<T extends DBOperable> {
      *
      * add a new item to the dataset, the database, and the server
      *
+     * @param item
      */
 
-    public void addNew() {
-        dSource.create(dSource.generate(), new Callback<T>() {
+    public void addNew(final T item) {
+        dSource.create(item, new Callback<Integer>() {
             @Override
-            public void callBack(final T dbObj) {
-                data.add(dbObj);
-                ServerCommunicator.postObject(dbObj, getParameterizedClass(), new Callback<T>() {
+            public void callBack(final Integer dbObj) {
+                data.add((T)item.setLocalId(dbObj));
+                ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
                     @Override
                     public void callBack(T obj) {
-                        addFromNetwork(obj);
+                        dSource.update(obj);
                     }
                 });
             }
@@ -142,22 +140,23 @@ public abstract class Manager<T extends DBOperable> {
      * @param item the new item
      */
     public void addFromNetwork(final T item) {
-        dSource.update(item, new Callback<T>() {
-            @Override
-            public void callBack(T obj) {
-
-            }
-        });
-        if (data.contains(item) && !data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
-            synchronized (data) {
-                data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
-                data.add(item);
-            }
-        } else {
-            dSource.create(item, new Callback<T>() {
+        if (getByServerId(item.getServerId()) != null && !getByServerId(item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+            dSource.create(item, new Callback<Integer>() {
                 @Override
-                public void callBack(T obj) {
-                    item.setLocalId(obj.getLocalId());
+                public void callBack(Integer obj) {
+                    item.setLocalId(obj);
+                    synchronized (data) {
+                        data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
+                        data.add(item);
+                    }
+                }
+            });
+
+        } else {
+            dSource.create(item, new Callback<Integer>() {
+                @Override
+                public void callBack(Integer id) {
+                    item.setLocalId(id);
                     data.add(item);
                 }
             });
@@ -170,8 +169,8 @@ public abstract class Manager<T extends DBOperable> {
      */
 
     public Class<T> getParameterizedClass() {
-            Class<T> clss = (Class<T>) TypeResolver.resolveRawArgument(Manager.class, getClass());
-            return clss;
+        Class<T> clss = (Class<T>) TypeResolver.resolveRawArgument(Manager.class, getClass());
+        return clss;
     }
 
 

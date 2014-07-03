@@ -75,7 +75,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         DatabaseManager.closeDB();
     }
 
-    public void create(T t, Callback<T> callback) {
+    public void create(T t, Callback<Integer> callback) {
         queue.add(new create(t, callback));
     }
 
@@ -96,6 +96,15 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
+    /**
+     * call to execute after a database operation. not guaranteed to execute before other ops.
+     * @param callback gets called once the queue reaches this item
+     */
+
+    public void post(Callback callback) {
+        queue.add(new post(callback));
+    }
+
 
     private String[] getColumns() {
         if (columns == null) columns = generate().getColumns();
@@ -111,7 +120,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         @Override
         public void run() {
             open();
-            Log.i(TAG + ": "  + tClass.getSimpleName(), "running");
+            Log.v(TAG + ": "  + tClass.getSimpleName(), "running");
             while (!queue.isEmpty()) {
                 try {
                     queue.take().run();
@@ -120,13 +129,34 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                 }
             }
             close();
-            Log.i(TAG + ": " + tClass.getSimpleName(), "dying");
+            Log.v(TAG + ": " + tClass.getSimpleName(), "dying");
         }
     }
 
     private abstract class dbOp {
         abstract void run();
     }
+
+    private class post extends dbOp {
+        private Callback callback;
+
+        private post(Callback callback) {
+            this.callback = callback;
+        }
+
+        //todo: set priority higher here
+        @SuppressWarnings("unchecked")
+        @Override
+        void run() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    callback.callBack(null);
+                }
+            }).start();
+        }
+    }
+
 
     private class get extends dbOp {
         private int id;
@@ -171,30 +201,23 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
 
     private class create extends dbOp {
         T t;
-        Callback<T> callback;
+        Callback<Integer> callback;
 
-        private create(T t, Callback<T> callback) {
+        private create(T t, Callback<Integer> callback) {
             this.t = t;
             this.callback = callback;
         }
 
         private void runCreate() {
 
-            long insertId;
-            Cursor cursor;
+            int insertId;
             try {
-                insertId = database.insert(getTableName(), null, JsonConverter.toContentValues(t));
+                insertId = (int)database.insert(getTableName(), null, JsonConverter.toContentValues(t));
 
                 if (insertId == -1)
                     throw new SQLiteException("Row could not be inserted into the database");
 
-                cursor = database.query(getTableName(), getColumns(),
-                        PeckApp.Constants.Database.LOCAL_ID + " = " + insertId, null, null, null, null);
-                cursor.moveToFirst();
-
-                T newT = JsonConverter.fromCursor(cursor, tClass);
-                cursor.close();
-                callback.callBack(newT);
+                callback.callBack(insertId);
 
             } catch (SQLiteConstraintException e) {
                 Log.e(TAG, "item broke a constraint: " + e.toString());
