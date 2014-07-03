@@ -1,5 +1,6 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -89,7 +90,7 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout, Comp
     }
 
     @Override
-    public void setUp(@NonNull View v) {
+    public void setUp(@NonNull View v, Activity activity) {
         ((TextView)v.findViewById(R.id.tv_locale_name)).setText(toString());
     }
 

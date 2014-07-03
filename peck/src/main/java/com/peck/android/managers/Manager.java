@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 public abstract class Manager<T extends DBOperable> {
 
+    private boolean initialized = false;
     public static String tag = "Manager";
 
     //todo: maybe we want this to be a heap based on localid
@@ -40,15 +41,19 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     public Manager<T> initialize(final Callback<ArrayList<T>> callback) {
-
-        loadFromDatabase(new Callback<ArrayList<T>>() {
-            @Override
-            public void callBack(ArrayList<T> obj) {
-                downloadFromServer(new Callback<ArrayList<T>>() {
-                    @Override
-                    public void callBack(ArrayList<T> obj) { callback.callBack(obj); }
-                }); }});
-
+        if (!initialized) {
+            loadFromDatabase(new Callback<ArrayList<T>>() {
+                @Override
+                public void callBack(ArrayList<T> obj) {
+                    downloadFromServer(new Callback<ArrayList<T>>() {
+                        @Override
+                        public void callBack(ArrayList<T> obj) {
+                            callback.callBack(obj);
+                        }
+                    });
+                }
+            });
+        } initialized = true;
         return this;
     }
 

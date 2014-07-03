@@ -6,10 +6,17 @@ import com.peck.android.managers.Manager;
 import com.peck.android.managers.UserManager;
 import com.peck.android.models.User;
 
+import it.sephiroth.android.library.widget.HListView;
+
 /**
  * Created by mammothbane on 7/3/2014.
  */
 public class HLVUserFeed extends Feed<User> {
+
+    public void setUp(HListView hlv) {
+        hlv.setAdapter(feedAdapter);
+        congfigureManager();
+    }
 
     @Override
     public int getListViewRes() {

@@ -52,7 +52,7 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         }
 
         T res = getItem(i);
-        res.setUp(view);
+        res.setUp(view, feed.getActivity());
         return view;
     }
 

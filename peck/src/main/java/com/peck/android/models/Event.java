@@ -1,5 +1,6 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
@@ -107,7 +108,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
 
     @Override
-    public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
+    public void setUp(View v, Activity activity) { //TODO: set up a layout that's passed in with the correct information
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }

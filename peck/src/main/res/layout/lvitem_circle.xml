@@ -1,63 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="@dimen/circle_item_height"
     android:minHeight="@dimen/circle_item_height"
     android:baselineAligned="false">
 
-        <LinearLayout style="@style/iv_wrapper">
+    <LinearLayout style="@style/iv_wrapper">
 
-            <com.makeramen.RoundedImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                app:oval="true"
-                style="@style/riv_default"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                />
+        <com.makeramen.RoundedImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            app:oval="true"
+            style="@style/riv_default"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
 
-        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="5"
+        android:orientation="vertical"
+        android:id="@android:id/content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:id="@+id/tv_title"
+            android:layout_marginTop="@dimen/feed_vert_margin"
+            android:layout_marginLeft="@dimen/feed_horz_margin"
+            android:layout_marginRight="@dimen/feed_horz_margin"/>
 
         <LinearLayout
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
             android:orientation="vertical"
-            android:id="@android:id/content">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0px"
-                android:layout_weight="1"
-                android:id="@+id/tv_title"
-                android:layout_marginTop="@dimen/feed_vert_margin"
-                android:layout_marginLeft="@dimen/feed_horz_margin"
-                android:layout_marginRight="@dimen/feed_horz_margin"/>
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="2"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="@dimen/feed_vert_margin"
+            android:layout_marginLeft="@dimen/feed_horz_margin"
+            android:layout_marginRight="@dimen/feed_horz_margin"
+            android:id="@+id/ll_userfeed">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0px"
-                android:layout_weight="2"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="@dimen/feed_vert_margin"
-                android:layout_marginLeft="@dimen/feed_horz_margin"
-                android:layout_marginRight="@dimen/feed_horz_margin"
-                android:id="@+id/ll_userfeed"
-                >
-
-                <fragment class="com.peck.android.fragments.HLVUserFeed"
-                    android:id="@+id/frag_users"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
-
-
-
-            </LinearLayout>
-
+                <it.sephiroth.android.library.widget.HListView
+                    android:id="@+id/hlv_users"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    />
 
         </LinearLayout>
+
+    </LinearLayout>
 
 
 </LinearLayout>

@@ -33,7 +33,7 @@ public class ProfileTab extends BaseTab {
         lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionHandler.SessionStatusCallback(new Callback() {
             @Override
             public void callBack(Object obj) {
-                PeckSessionHandler.getUser().setUp(getActivity().findViewById(R.id.ll_profile));
+                PeckSessionHandler.getUser().setUp(getActivity().findViewById(R.id.ll_profile), null);
             }
         }));
 
@@ -84,7 +84,7 @@ public class ProfileTab extends BaseTab {
         PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
-        PeckSessionHandler.getUser().setUp(view.findViewById(R.id.ll_profile));
+        PeckSessionHandler.getUser().setUp(view.findViewById(R.id.ll_profile), null);
 
         return view;
     }

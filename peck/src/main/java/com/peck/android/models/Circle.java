@@ -1,7 +1,6 @@
 package com.peck.android.models;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
+import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,6 +13,8 @@ import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.SelfSetup;
 
 import java.util.ArrayList;
+
+import it.sephiroth.android.library.widget.HListView;
 
 /**
  * Created by mammothbane on 6/12/2014.
@@ -62,18 +63,11 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setUp(final View v) {
+    public void setUp(final View v, Activity activity) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
-        v.findViewById(R.id.frag_users);
-
-        FragmentTransaction transaction = ((FragmentActivity)v.getContext()).getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.ll_userfeed, new HLVUserFeed());
-        transaction.commit();
-        ((FragmentActivity)v.getContext()).getSupportFragmentManager().executePendingTransactions();
-        //todo: add a fragment
-
-
+        HLVUserFeed userFeed = new HLVUserFeed();
+        userFeed.setUp((HListView)v.findViewById(R.id.hlv_users));
     }
 
 

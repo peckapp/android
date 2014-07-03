@@ -1,5 +1,6 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.View;
 
@@ -49,7 +50,7 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     @Override
-    public void setUp(View v) {
+    public void setUp(View v, Activity activity) {
 
     }
 

@@ -1,7 +1,9 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -49,6 +51,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
     private String profileUrl = "";
 
 
+    @Nullable
     public String getFbId() {
         return fbId;
     }
@@ -58,6 +61,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         return this;
     }
 
+    @Nullable
     public String getBio() {
         return bio;
     }
@@ -67,6 +71,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         return this;
     }
 
+    @Nullable
     public String getImageUrl() {
         return profileUrl;
     }
@@ -125,7 +130,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
     }
 
     @Override
-    public void setUp(final View v) {
+    public void setUp(final View v, Activity activity) {
 
         Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));
