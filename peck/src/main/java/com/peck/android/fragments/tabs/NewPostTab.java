@@ -30,7 +30,6 @@ public class NewPostTab extends BaseTab {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.tab_newpost, container, false);
 
-
         for (int i : buttonIds.keySet()) {
             v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), buttonIds.get(i), "btn " + i, R.id.post_content));
         }
@@ -41,12 +40,6 @@ public class NewPostTab extends BaseTab {
     }
 
     //todo: animate text field into visible area
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     @Override
     public Class<? extends Singleton> getManagerClass() {

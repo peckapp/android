@@ -25,7 +25,7 @@ public class PhotoPostTab extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.pst_photo, container);
+        View view = inflater.inflate(R.layout.pst_photo, container, false);
         view.findViewById(R.id.bt_photo_select).setOnClickListener(new ImageGetterListener(this));
         return view;
     }
