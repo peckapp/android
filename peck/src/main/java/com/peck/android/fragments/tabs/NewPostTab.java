@@ -22,7 +22,7 @@ public class NewPostTab extends BaseTab {
 
     static {
         buttonIds.put(R.id.bt_event, R.layout.pst_event);
-        buttonIds.put(R.id.bt_message, R.layout.pst_message);
+        buttonIds.put(R.id.bt_announce, R.layout.pst_announcement);
         buttonIds.put(R.id.bt_photo, R.layout.pst_photo);
     }
 

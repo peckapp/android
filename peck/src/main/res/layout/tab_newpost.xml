@@ -31,8 +31,8 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="@dimen/bt_post_height"
-            android:text="@string/bt_message"
-            android:id="@+id/bt_message"
+            android:text="@string/bt_announcement"
+            android:id="@+id/bt_announce"
             android:layout_weight="1"
             style="?android:attr/buttonBarButtonStyle" />
 
@@ -49,8 +49,18 @@
         android:layout_marginTop="20dp"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/post_content"/>
+        android:layout_height="0px"
+        android:id="@+id/post_content"
+        android:layout_weight="1" />
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/bt_post"
+        android:id="@+id/bt_post"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp" />
 
 
 </LinearLayout>
