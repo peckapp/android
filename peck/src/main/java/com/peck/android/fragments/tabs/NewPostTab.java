@@ -46,6 +46,8 @@ public class NewPostTab extends BaseTab {
         return v;
     }
 
+    //todo: animation of text field - it needs to be visible when the user's editing it
+
 
     @Override
     public Class<? extends Singleton> getManagerClass() {
