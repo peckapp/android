@@ -28,8 +28,7 @@ public class NewPostTab extends BaseTab {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.tab_newpost, container, false);
-        return v;
+        return inflater.inflate(R.layout.tab_newpost, container, false);
     }
 
     @Override
@@ -41,13 +40,12 @@ public class NewPostTab extends BaseTab {
         }
 
         getView().findViewById(R.id.bt_event).performClick();
-
-
     }
 
     //todo: animate text field into visible area
 
     @Override
+    @SuppressWarnings("unchecked")
     public Class<? extends Singleton> getManagerClass() {
         return null;
     }
