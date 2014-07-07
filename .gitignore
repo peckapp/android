@@ -39,3 +39,6 @@ proguard/
 
 #Log Files
 *.log
+
+#crashlytics files
+crashlytics-build.properties
