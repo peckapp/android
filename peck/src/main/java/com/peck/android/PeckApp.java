@@ -66,21 +66,11 @@ public class PeckApp extends Application implements Singleton{
             public final static String CIRCLES = "circles/";
             public final static String USERS = "users/";
             public final static String LOCALES = "institutions/";
+            public final static String PECK = "push_notifications/";
 
             //todo: get these:
             public final static String MEAL = null;
             public final static String FOOD = null;
-            public final static String PECK = null;
-
-
-            /**
-             * Join table strings
-             */
-            public final static String CIRCLE_MEMBERS = "circle_members/";
-            public final static String EVENT_ATTENDEES = "event_attendees/";
-
-
-
 
 
             public final static String API_TEST_KEY = "";

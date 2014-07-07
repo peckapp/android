@@ -19,19 +19,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
-import com.peck.android.models.JoinGroup;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Meal;
 import com.peck.android.models.Peck;
@@ -58,8 +55,6 @@ public class ServerCommunicator implements Singleton {
     private static final HashMap<Class<? extends DBOperable>, String> apiMap =
             new HashMap<Class<? extends DBOperable>, String>();
 
-    private static final HashMap<Class<? extends DBOperable>, HashMap<Class<? extends DBOperable>, String>> joinMap =
-            new HashMap<Class<? extends DBOperable>, HashMap<Class<? extends DBOperable>, String>>();
 
     static {
         apiMap.put(Event.class, Network.EVENTS);
@@ -70,20 +65,12 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
 
-        HashMap<Class<? extends DBOperable>, String> eventMap = new HashMap<Class<? extends DBOperable>, String>();
-        eventMap.put(User.class, Network.EVENT_ATTENDEES);
-
-        HashMap<Class<? extends DBOperable>, String> cirleMap = new HashMap<Class<? extends DBOperable>, String>();
-        eventMap.put(User.class, Network.CIRCLE_MEMBERS);
-
-        joinMap.put(Event.class, eventMap);
-        joinMap.put(Circle.class, cirleMap);
     }
 
 
     private ServerCommunicator() { }
 
-    public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass, String objectName) throws JSONException {
+    public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
         Locale locale = LocaleManager.getManager().getLocale();
         if (locale == null) {
                 /* todo: throw an error dialog to the user/put them in locale selection */
@@ -97,7 +84,7 @@ public class ServerCommunicator implements Singleton {
         object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
 
         JsonObject ret = new JsonObject(); //wrap it in another object
-        ret.add(objectName, object);
+        ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object);
 
         return new JSONObject(ret.toString());
     }
@@ -149,26 +136,6 @@ public class ServerCommunicator implements Singleton {
         }));
     }
 
-    private static <T extends DBOperable> void getJoins(final Class<T> tClass, final String url, final Callback<ArrayList<JoinGroup.Join>> joins) {
-        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending join GET to " + url);
-        requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }));
-
-    }
-
-
-
-
-
     private static boolean wrapsJsonElement(JsonObject object) {
         return (object.entrySet().size() == 1);
     }
@@ -186,39 +153,9 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
-        if (joinMap.containsKey(tClass)) {
-            if (BuildConfig.DEBUG && !(post instanceof Joined)) throw new RuntimeException(post.getClass().getSimpleName() + " must implement joined.");
-            try {
-                for (JoinGroup joinGroup : ((Joined) post).getJoinGroups()) {
-                    if (BuildConfig.DEBUG && !joinMap.get(tClass).containsKey(joinGroup.getParameterizedClass())) throw new RuntimeException("Your JoinGroup was not " +
-                            "parameterized with an acceptable type");
-
-                    for (JoinGroup.Join join : (ArrayList<JoinGroup.Join>)joinGroup.getJoins()) {
-
-                        requestQueue.add(new JsonObjectRequest(method, Network.API_STRING + joinMap.get(tClass).get(joinGroup.getParameterizedClass()),
-                                toJson(join, JoinGroup.Join.class, joinMap.get(tClass).get(joinGroup.getParameterizedClass()).substring(0, joinMap.get(tClass).get(joinGroup.getParameterizedClass()).length() - 2)),
-                                new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d("test", "test");
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.e("test", "test");
-                            }
-                        }));
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-
         try {
 
-            JSONObject item = toJson(post, tClass, apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2)); //fixme: subtract 2 for the trailing slash and the s
+            JSONObject item = toJson(post, tClass); //fixme: subtract 2 for the trailing slash and the s
 
             Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
             requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {

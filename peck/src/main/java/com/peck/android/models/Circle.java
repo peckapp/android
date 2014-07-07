@@ -11,7 +11,6 @@ import com.peck.android.R;
 import com.peck.android.fragments.HLVUserFeed;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasImage;
-import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.SelfSetup;
 
 import java.util.ArrayList;
@@ -21,10 +20,12 @@ import it.sephiroth.android.library.widget.HListView;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage, Joined {
+public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasImage {
 
+    @Expose
     @NonNull
-    private JoinGroup<User> users = new JoinGroup<User>();
+    @SerializedName("user_ids")
+    private ArrayList<Integer> userIds = new ArrayList<Integer>();
 
 
     @Expose
@@ -34,15 +35,6 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
     @Expose
     @SerializedName("image_link")
     private String imageUrl;
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public ArrayList<JoinGroup<? extends DBOperable>> getJoinGroups() {
-        ArrayList<JoinGroup<? extends DBOperable>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable>>();
-        joinGroups.add(users);
-        return joinGroups;
-    }
-
 
     @Override
     public String getImageUrl() {

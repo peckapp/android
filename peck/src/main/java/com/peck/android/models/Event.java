@@ -10,7 +10,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
 import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.Joined;
 import com.peck.android.interfaces.SelfSetup;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.Date;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends DBOperable implements HasFeedLayout, SelfSetup, Joined {
+public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
     @NonNull
     @Expose
@@ -48,15 +47,9 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup, Joine
     private String eventUrl;
 
     @NonNull
-    private JoinGroup<User> users = new JoinGroup<User>();
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public ArrayList<JoinGroup<? extends DBOperable>> getJoinGroups() {
-        ArrayList<JoinGroup<? extends DBOperable>> joinGroups = new ArrayList<JoinGroup<? extends DBOperable>>();
-        joinGroups.add(users);
-        return joinGroups;
-    }
+    @Expose
+    @SerializedName("user_ids")
+    private ArrayList<Integer> users = new ArrayList<Integer>();
 
     @Nullable
     public String getImageUrl() {
