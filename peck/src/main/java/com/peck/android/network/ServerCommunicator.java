@@ -83,7 +83,7 @@ public class ServerCommunicator implements Singleton {
 
     private ServerCommunicator() { }
 
-    public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
+    public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass, String objectName) throws JSONException {
         Locale locale = LocaleManager.getManager().getLocale();
         if (locale == null) {
                 /* todo: throw an error dialog to the user/put them in locale selection */
@@ -97,9 +97,23 @@ public class ServerCommunicator implements Singleton {
         object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
 
         JsonObject ret = new JsonObject(); //wrap it in another object
-        ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object); //subtract 2 for the trailing slash and the s
+        ret.add(objectName, object);
 
         return new JSONObject(ret.toString());
+    }
+
+    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
+        ArrayList<T> ret = new ArrayList<T>();
+        if (obj.isJsonObject()) {
+            if (wrapsJsonElement((JsonObject) obj)) {
+                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
+            } else ret.add(gson.fromJson(obj, tClass));
+        } else if (obj.isJsonArray()) {
+            for (JsonElement arrayElement : (JsonArray)obj) {
+                ret.addAll(parseJson(arrayElement, tClass));
+            }
+        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
+        return ret;
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
@@ -135,20 +149,25 @@ public class ServerCommunicator implements Singleton {
         }));
     }
 
+    private static <T extends DBOperable> void getJoins(final Class<T> tClass, final String url, final Callback<ArrayList<JoinGroup.Join>> joins) {
+        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending join GET to " + url);
+        requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
 
-    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
-        ArrayList<T> ret = new ArrayList<T>();
-        if (obj.isJsonObject()) {
-            if (wrapsJsonElement((JsonObject) obj)) {
-                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
-            } else ret.add(gson.fromJson(obj, tClass));
-        } else if (obj.isJsonArray()) {
-            for (JsonElement arrayElement : (JsonArray)obj) {
-                ret.addAll(parseJson(arrayElement, tClass));
             }
-        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
-        return ret;
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }));
+
     }
+
+
+
+
 
     private static boolean wrapsJsonElement(JsonObject object) {
         return (object.entrySet().size() == 1);
@@ -172,19 +191,21 @@ public class ServerCommunicator implements Singleton {
             try {
                 for (JoinGroup joinGroup : ((Joined) post).getJoinGroups()) {
                     if (BuildConfig.DEBUG && !joinMap.get(tClass).containsKey(joinGroup.getParameterizedClass())) throw new RuntimeException("Your JoinGroup was not " +
-                            "parameterized with the right type");
+                            "parameterized with an acceptable type");
 
                     for (JoinGroup.Join join : (ArrayList<JoinGroup.Join>)joinGroup.getJoins()) {
+
                         requestQueue.add(new JsonObjectRequest(method, Network.API_STRING + joinMap.get(tClass).get(joinGroup.getParameterizedClass()),
-                                toJson(join, JoinGroup.Join.class), new Response.Listener<JSONObject>() {
+                                toJson(join, JoinGroup.Join.class, joinMap.get(tClass).get(joinGroup.getParameterizedClass()).substring(0, joinMap.get(tClass).get(joinGroup.getParameterizedClass()).length() - 2)),
+                                new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-
+                                Log.d("test", "test");
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-
+                                Log.e("test", "test");
                             }
                         }));
                     }
@@ -197,7 +218,7 @@ public class ServerCommunicator implements Singleton {
 
         try {
 
-            JSONObject item = toJson(post, tClass);
+            JSONObject item = toJson(post, tClass, apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2)); //fixme: subtract 2 for the trailing slash and the s
 
             Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
             requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
@@ -237,6 +258,8 @@ public class ServerCommunicator implements Singleton {
     public static void getImage(final String URL, Callback<Bitmap> callback) {
         getImage(URL, (int) PeckApp.getContext().getResources().getDimension(R.dimen.prof_picture_bound), callback);
     }
+
+
 
     private static class JsonDateDeserializer implements JsonDeserializer<Date> {
         private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss.SSS'Z'");
