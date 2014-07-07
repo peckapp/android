@@ -16,7 +16,8 @@ public class EventPostTab extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.pst_event, container, false);
+        View view = inflater.inflate(R.layout.pst_event, container, false);
+        return view;
     }
 
 }

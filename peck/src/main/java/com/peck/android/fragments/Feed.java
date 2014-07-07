@@ -36,18 +36,10 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     protected FeedManager<T> feedManager;
     protected ArrayList<T> data = new ArrayList<T>();
 
-    public Feed() {}
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         congfigureManager();
         super.onCreate(savedInstanceState);
-
-    }
-
-
-    public void onStart() {
-        super.onStart();
 
     }
 
