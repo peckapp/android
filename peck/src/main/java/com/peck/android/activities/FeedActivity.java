@@ -2,9 +2,10 @@ package com.peck.android.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,6 +29,9 @@ public class FeedActivity extends PeckActivity {
 
     private final static HashMap<Integer, BaseTab> buttons = new HashMap<Integer, BaseTab>(); //don't use a sparsearray, we need the keyset
 
+    @Nullable
+    private Button lastPressed;
+
     static {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_peck, new PeckFeed());
@@ -49,13 +53,11 @@ public class FeedActivity extends PeckActivity {
             FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
                 @Override
                 public void onClick(View view) {
-                    Fragment temp = getSupportFragmentManager().findFragmentById(R.id.ll_feed_content);
-                    if (temp != null && temp.equals(buttons.get(i))) {
-                        detachCurrentFragment();
-                    } else {
-                        super.onClick(view);
-                    }
-
+                    super.onClick(view);
+                    getSupportFragmentManager().executePendingTransactions();
+                    if (lastPressed != null && lastPressed.equals(view)) toggleVisibility();
+                    else findViewById(R.id.ll_feed_content).setVisibility(View.VISIBLE);
+                    lastPressed = (Button)view;
                 }
             };
             fragmentSwitcherListener.setAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -101,14 +103,12 @@ public class FeedActivity extends PeckActivity {
 
     @Override
     public void onBackPressed() {
-        detachCurrentFragment();
+        findViewById(R.id.ll_feed_content).setVisibility(View.GONE);
     }
 
-    private void detachCurrentFragment() {
-        Fragment temp = getSupportFragmentManager().findFragmentById(R.id.ll_feed_content);
-        if (temp != null) {
-            getSupportFragmentManager().beginTransaction().detach(temp).commit();
-        }
+    private void toggleVisibility() {
+        View view = findViewById(R.id.ll_feed_content);
+        view.setVisibility((view.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
     }
 
 
