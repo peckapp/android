@@ -4,37 +4,36 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by mammothbane on 6/19/2014.
+ *
+ * handles the user's persistent session
+ *
  */
-public class PeckSessionManager extends Manager implements Singleton {
+public class PeckSessionHandler implements Singleton {
     //manages user state, pulling from facebook if connected
 
     private final static String PROFILE_FILENAME = "proPicCache";
     private final static String TAG = "UserSessionManager";
 
-    private static PeckSessionManager manager = new PeckSessionManager();
+    private static PeckSessionHandler manager = new PeckSessionHandler();
     private static int profileDimens;
     private static Context context;
 
     private static User user = new User();
-    private static DataSource<User> dataSource;
+    private static Date sessionStart;
 
     private static boolean facebookMode = false;
     private static boolean peckAuth = false;
@@ -43,53 +42,49 @@ public class PeckSessionManager extends Manager implements Singleton {
 
 
     static {
-        dataSource = new DataSource<User>(new User());
         context = PeckApp.getContext();
         profileDimens = context.getResources().getDimensionPixelSize(R.dimen.prof_picture_bound);
     }
 
     public enum SourcePref { FACEBOOK, PECK }
 
-    private PeckSessionManager() {}
+    private PeckSessionHandler() {}
 
-    public static PeckSessionManager getManager() {
+    public static PeckSessionHandler getManager() {
         return manager;
     }
 
     public static void init() {
         Log.i(TAG, "initializing");
 
-        FacebookSessionManager.init();
+        sessionStart = new Date(System.currentTimeMillis());
+
+        FacebookSessionHandler.init();
 
         //test: remove before production
         context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
         SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
         edit.clear();
-        edit.commit();
+        edit.apply();
         Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
 
-        UserManager.getManager().initialize(dataSource, new Callback<ArrayList<User>>() {
+        UserManager.getManager().initialize(new Callback<ArrayList<User>>() {
             @Override
             public void callBack(ArrayList<User> obj) {
                 user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
                 //load saved user id from sharedpreferences
 
-                user = UserManager.getManager().getByLocalId(user.getLocalId()); //todo: change to serverid
+                user = UserManager.getManager().getByLocalId(user.getLocalId());
 
                 if (user == null) {
                     user = new User();
-                    UserManager.getManager().add( user, new Callback<User>() {
-                        @Override
-                        public void callBack(User obj) {
-                            user.setLocalId(obj.getLocalId());
-                        }
-                    });
+                    UserManager.getManager().getData().add(user); //this is a temporary user. we're not going to send them to the server until they set up.
                 }
                 else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
                     @Override
                     public void callBack(Boolean obj) {
                         if (obj) {
-                            ImageCacher.init(user.getServerId());
+                            ImageCacher.init(user);
                             Log.i(TAG, "initialized with user " + user.getServerId());
                         } else {
                             //todo: give the user an alert dialog, prompting them to log in
@@ -108,11 +103,11 @@ public class PeckSessionManager extends Manager implements Singleton {
 
     public static void notifyFbStateChanged(final boolean loggedIn) {
         facebookMode = loggedIn;
-        FacebookSessionManager.getGraphUser(new Callback<GraphUser>() {
+        FacebookSessionHandler.getGraphUser(new Callback<GraphUser>() {
             @Override
             public void callBack(GraphUser obj) {
                 user.setFbId(obj.getId());
-                if (!peckAuth && loggedIn) user.setName(obj.getName());
+                if (!peckAuth && loggedIn) user.setFullName(obj.getName());
             }
         });
     }
@@ -121,35 +116,14 @@ public class PeckSessionManager extends Manager implements Singleton {
         return user;
     }
 
+    public static Date getSessionStart() {
+        return sessionStart;
+    }
+
     public static void setSourcePref(SourcePref pref) {
         sourcePref = pref;
     }
 
-
-    protected static void getImage(int userId, Callback<Bitmap> callback) {
-        getImage(userId, profileDimens, callback);
-    }
-
-    protected static void getImage(final int userId, int dimens, final Callback<Bitmap> callback) {
-        String URL = "";
-
-        UserManager.getManager().getByLocalId(userId).getProfileUrl();
-
-        PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap bitmap) {
-                callback.callBack(bitmap);
-            }
-        }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(context, "Network error. Couldn't get image for " + userId, Toast.LENGTH_LONG).show();
-                callback.callBack(null);
-            }
-        }));
-
-
-    }
 
     private static Bitmap scale(int size, Bitmap bmp) {
         if (size == profileDimens) return bmp;

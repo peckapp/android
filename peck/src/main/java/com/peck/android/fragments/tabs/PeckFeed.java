@@ -3,9 +3,6 @@ package com.peck.android.fragments.tabs;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
-import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckManager;
@@ -20,19 +17,6 @@ public class PeckFeed extends FeedTab<Peck> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-    }
-
-    @Override
-    public Feed<Peck> setUpFeed() {
-        if (dataSource == null) {
-            dataSource = new DataSource<Peck>(new Peck());
-        }
-
-        if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Peck>(dataSource.generate().getResourceId());
-        }
-
-        return this;
     }
 
     @Override

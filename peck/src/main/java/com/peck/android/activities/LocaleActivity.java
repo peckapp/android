@@ -7,13 +7,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.fragments.LocaleSelectionFeed;
 import com.peck.android.managers.LocaleManager;
+
+import java.util.Collections;
 
 
 public class LocaleActivity extends PeckActivity {
@@ -21,40 +23,30 @@ public class LocaleActivity extends PeckActivity {
     private boolean locationServices = true;
     private static final String TAG = "LocaleActivity";
     private static final String fragmentTag = "locale selection feed";
-
+    private LocaleSelectionFeed localeSelectionFeed = new LocaleSelectionFeed();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LocaleManager.setActivity(this);
         setContentView(R.layout.activity_locale);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.rl_loc_select, new LocaleSelectionFeed(), fragmentTag);
+        ft.add(R.id.rl_loc_select, localeSelectionFeed, fragmentTag);
         ft.commit();
+
+        findViewById(R.id.bt_retry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadLocales();
+            }
+        });
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
-
-        //load all locales into localemanager
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                LocaleManager.getManager().populate();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                notifyMe();
-            }
-        }.execute();
 
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
 
@@ -62,35 +54,52 @@ public class LocaleActivity extends PeckActivity {
                 lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)))) { //if we can't locate the user
             //todo: catch errors from google play services
             locationServices = false;
-            notifyMe();
-            //todo: re-search when location services come up?
             //todo: search bar?
 
         } else {
-
-            //locate the user
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected void onPreExecute() {
-                    TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-                    tv.setVisibility(View.VISIBLE);
-                    tv.setText(R.string.pb_loc);
-                }
-
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    LocaleManager.getLocation();
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    notifyMe();
-                }
-            }.execute();
+            LocaleManager.locate();
         }
 
+        loadLocales();
+
     }
+
+    private void loadLocales() {
+        final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+        tv.setVisibility(View.VISIBLE);
+        tv.setText(R.string.pb_loc);
+        findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
+        findViewById(R.id.rl_network_error).setVisibility(View.GONE);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                long startTime = System.currentTimeMillis();
+                while (LocaleManager.getManager().getData().size() == 0 && (System.currentTimeMillis() - startTime) < PeckApp.Constants.Network.TIMEOUT) {
+                    try {
+                        Thread.sleep(PeckApp.Constants.Network.RETRY_INTERVAL);
+                    } catch (InterruptedException e) { Log.e(TAG, "waiting was interrupted"); }
+                }
+                if (locationServices) Collections.sort(LocaleManager.getManager().getData());
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (LocaleManager.getManager().getData().size() == 0) {
+                    findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
+                } else {
+                    //if (!locationServices) Toast.makeText(LocaleActivity.this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
+                    localeSelectionFeed.notifyDatasetChanged();
+                    tv.setVisibility(View.GONE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                }
+            }
+        }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
+    }
+
 
     @Override
     protected void onStop() {
@@ -101,7 +110,7 @@ public class LocaleActivity extends PeckActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LocaleManager.getLocation();
+        LocaleManager.locate();
     }
 
     @Override
@@ -125,38 +134,6 @@ public class LocaleActivity extends PeckActivity {
         } else {
 
             return false;
-        }
-    }
-
-    private void notifyMe() {
-        if (loaded) {
-            final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-            tv.setVisibility(View.VISIBLE);
-            tv.setText(R.string.pb_loc);
-
-            if (locationServices) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        LocaleManager.getManager().calcDistances();
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        tv.setVisibility(View.GONE);
-                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
-
-                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-                    }
-                }.execute(); //this only gets called if we know where the user is *and* have the location list loaded
-            } else {
-                findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                Toast.makeText(this, "Can't find you, please pick your location.", Toast.LENGTH_SHORT).show();
-                findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-            }
-        } else {
-            loaded = true;
         }
     }
 

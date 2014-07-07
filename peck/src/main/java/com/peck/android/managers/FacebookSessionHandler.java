@@ -16,7 +16,7 @@ import com.peck.android.interfaces.Singleton;
 /**
  * Created by mammothbane on 6/19/2014.
  */
-public class FacebookSessionManager extends Manager implements Singleton {
+public class FacebookSessionHandler implements Singleton {
 
     private final static String TAG = "FacebookSessionManager";
 
@@ -34,16 +34,16 @@ public class FacebookSessionManager extends Manager implements Singleton {
         }
     };
 
-    private static FacebookSessionManager manager = new FacebookSessionManager();
+    private static FacebookSessionHandler manager = new FacebookSessionHandler();
 
     static {
         context = PeckApp.getContext();
     }
 
-    private FacebookSessionManager() {
+    private FacebookSessionHandler() {
     }
 
-    public FacebookSessionManager getManager() {
+    public FacebookSessionHandler getManager() {
         return manager;
     }
 
@@ -58,7 +58,7 @@ public class FacebookSessionManager extends Manager implements Singleton {
                     @Override
                     public void onCompleted(final GraphUser user, Response response) {
                         callback.callBack(user);
-                        FacebookSessionManager.user = user;
+                        FacebookSessionHandler.user = user;
                     }
                 }
         ).executeAsync();
@@ -80,15 +80,15 @@ public class FacebookSessionManager extends Manager implements Singleton {
         private void onSessionStateChange(Session session, SessionState state, Exception exception) {
             if (state.isOpened()) {
                 Log.i(((Object) this).getClass().getName(), "Logged in...");
-                FacebookSessionManager.session = session;
+                FacebookSessionHandler.session = session;
 
-                PeckSessionManager.notifyFbStateChanged(true);
+                PeckSessionHandler.notifyFbStateChanged(true);
 
             } else if (state.isClosed()) {
                 Log.i(((Object)this).getClass().getName(), "Logged out...");
-                FacebookSessionManager.session = null;
+                FacebookSessionHandler.session = null;
 
-                PeckSessionManager.notifyFbStateChanged(false);
+                PeckSessionHandler.notifyFbStateChanged(false);
 
             }
 

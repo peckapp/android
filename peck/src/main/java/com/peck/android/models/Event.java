@@ -1,6 +1,8 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
@@ -10,6 +12,7 @@ import com.peck.android.R;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -28,6 +31,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     private Date endTime = new Date(-1);
 
     @Expose
+    @SerializedName("title")
     private String title = "";
 
     @Expose
@@ -42,7 +46,12 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     @SerializedName("event_url")
     private String eventUrl;
 
+    @NonNull
+    @Expose
+    @SerializedName("user_ids")
+    private ArrayList<Integer> users = new ArrayList<Integer>();
 
+    @Nullable
     public String getImageUrl() {
         return imageUrl;
     }
@@ -52,6 +61,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
+    @Nullable
     public String getEventUrl() {
         return eventUrl;
     }
@@ -90,38 +100,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public Event setLocalId(int id) {
-        this.localId = id;
-        return this;
-    }
-
-    public int getServerId() {
-        return serverId;
-    }
-
-    public Event setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public Event setCreated(Date created) {
-        this.created = created;
-        return this;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public Event setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -129,10 +107,6 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
     public Event setTitle(String title) {
         this.title = title;
         return this;
-    }
-
-    public int hashCode() {
-        return (int)(created.getTime()*13+updated.getTime()*17+getServerId()*307-getLocalId());
     }
 
     @Override
@@ -143,7 +117,7 @@ public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
 
 
     @Override
-    public void setUp(View v) { //TODO: set up a layout that's passed in with the correct information
+    public void setUp(View v, Activity activity) { //TODO: set up a layout that's passed in with the correct information
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
     }

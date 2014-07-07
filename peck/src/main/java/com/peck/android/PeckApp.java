@@ -1,23 +1,16 @@
 package com.peck.android;
 
 import android.app.Application;
-import android.content.ContentValues;
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
-import com.peck.android.database.DataSource;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.json.JsonConverter;
-import com.peck.android.managers.PeckSessionManager;
-import com.peck.android.models.Circle;
-import com.peck.android.models.Event;
-import com.peck.android.network.ServerCommunicator;
+import com.peck.android.managers.PeckSessionHandler;
 
-import java.util.ArrayList;
-import java.util.Date;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -27,7 +20,6 @@ import java.util.Date;
  */
 public class PeckApp extends Application implements Singleton{
 
-    Circle ret;
 
     public static Context getContext() {
         return AppContext.mContext;
@@ -52,49 +44,8 @@ public class PeckApp extends Application implements Singleton{
     public void onCreate() {
 
         AppContext.init(this);
-        PeckSessionManager.init();
+        PeckSessionHandler.init();
 
-        Event event = new Event();
-        event.setTitle("test event - np");
-        event.setStartTime(new Date(System.currentTimeMillis()));
-        event.setEndTime(new Date(System.currentTimeMillis() + 30000));
-
-        ServerCommunicator.getAll(Event.class, new Callback<ArrayList<Event>>() {
-            @Override
-            public void callBack(ArrayList<Event> obj) {
-                Log.d("peckapp", obj.toString());
-            }
-        });
-
-        ServerCommunicator.getObject(3, Event.class, new Callback<Event>() {
-            @Override
-            public void callBack(Event obj) {
-                Log.d("peckapp", obj.toString());
-            }
-        });
-
-        JsonConverter<Event> eventConverter = new JsonConverter<Event>();
-
-        ContentValues cv = eventConverter.toContentValues(event);
-
-        Circle circle = new Circle();
-        circle.getUsers().add(5);
-        circle.getUsers().add(3);
-
-        Log.d("", "");
-
-        String s = circle.getDatabaseCreate();
-
-        JsonConverter<Circle> cDJC = new JsonConverter<Circle>();
-        ContentValues contentValues = cDJC.toContentValues(circle);
-
-        DataSource<Circle> dataSource = new DataSource<Circle>(new Circle());
-        dataSource.create(circle, new Callback<Circle>() {
-            @Override
-            public void callBack(Circle obj) {
-                ret = obj;
-            }
-        });
 
     }
 
@@ -102,16 +53,24 @@ public class PeckApp extends Application implements Singleton{
     public static class Constants {
 
         public final static class Network {
+            public final static String SV_ID_NAME = "id";
+
+            public final static int RETRY_INTERVAL = 200;
+            public final static int TIMEOUT = 6000;
+
+            /**
+             * API strings
+             */
             public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
             public final static String EVENTS = "simple_events/";
             public final static String CIRCLES = "circles/";
+            public final static String USERS = "users/";
+            public final static String LOCALES = "institutions/";
+            public final static String PECK = "push_notifications/";
 
             //todo: get these:
             public final static String MEAL = null;
             public final static String FOOD = null;
-            public final static String LOCALES = null;
-            public final static String PECK = null;
-            public final static String USERS = null;
 
 
             public final static String API_TEST_KEY = "";
@@ -140,9 +99,6 @@ public class PeckApp extends Application implements Singleton{
         public final static class Database {
 
             public static final String DATABASE_NAME = "peck.db";
-            public final static int RETRY = 20;
-            public final static int UI_TIMEOUT = 50;
-            public final static int QUEUE_TIMEOUT = 1000;
 
             public final static String LOCAL_ID = "localId";
 
@@ -171,8 +127,8 @@ public class PeckApp extends Application implements Singleton{
     private static RequestQueue requestQueue;
 
     public static RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext());
+        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext(),
+                new HttpClientStack(HttpClients.custom().setConnectionManager(new PoolingHttpClientConnectionManager()).build()));
         return requestQueue;
     }
-
 }

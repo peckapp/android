@@ -1,7 +1,9 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -9,32 +11,47 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.makeramen.RoundedImageView;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
+import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.ImageCacher;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class User extends DBOperable implements HasFeedLayout, SelfSetup {
+public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasImage {
 
     @Expose
     @NonNull
-    private String name = "";
+    @SerializedName("first_name")
+    private String firstName;
 
     @Expose
+    @NonNull
+    @SerializedName("last_name")
+    private String lastName;
+
+    @Expose
+    @SerializedName("username")
+    private String username;
+
+    @Expose
+    @SerializedName("facebook_link")
     private String fbId = "";
 
     @Expose
+    @SerializedName("blurb")
     private String bio = "";
 
     @Expose
     private String profileUrl = "";
 
 
+    @Nullable
     public String getFbId() {
         return fbId;
     }
@@ -44,16 +61,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    @Override
-    public int getServerId() {
-        return serverId;
-    }
-
-    public User setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
-
+    @Nullable
     public String getBio() {
         return bio;
     }
@@ -63,7 +71,8 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public String getProfileUrl() {
+    @Nullable
+    public String getImageUrl() {
         return profileUrl;
     }
 
@@ -72,23 +81,47 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
         return this;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 
-    public User setName(String name) {
-        this.name = name;
-        return this;
+    public void setFullName(String string) {
+        String[] temp = string.split(" ");
+        //todo: support for names with multiple spaces?
+        firstName = temp[0];
+        lastName = temp[1];
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(@NonNull String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(@NonNull String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
     }
 
     public void getProfilePicture(Callback<Bitmap> callback) {
-        ImageCacher.get(localId, callback);
-    }
-
-
-    public User setLocalId(int id) {
-        this.localId = id;
-        return this;
+        ImageCacher.get(this, callback);
     }
 
     @Override
@@ -97,7 +130,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
     }
 
     @Override
-    public void setUp(final View v) {
+    public void setUp(final View v, Activity activity) {
 
         Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));
@@ -128,10 +161,8 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup {
                     v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
                 }
             });
-            if (name != null && !name.equals("")) {
-                ((TextView) v.findViewById(R.id.tv_realname)).setText(getName());
+                ((TextView) v.findViewById(R.id.tv_realname)).setText(getFullName());
                 v.findViewById(R.id.tv_realname).setAlpha(1f);
-            }
         }
 
 

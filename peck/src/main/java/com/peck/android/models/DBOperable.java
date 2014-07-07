@@ -1,17 +1,20 @@
 package com.peck.android.models;
 
-import com.google.gson.Gson;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.PeckApp;
+import com.peck.android.database.DBType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -19,44 +22,41 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable {
 
-    public DBOperable() {}
+    public DBOperable() {
+        created = new Date(System.currentTimeMillis());
+        updated = new Date(System.currentTimeMillis());
+    }
 
-    private static final transient String DELIM = ", ";
-    public final static transient HashMap<Class, String> tableIds = new HashMap<Class, String>();
+    @DBType("integer primary key autoincrement")
+    @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
+    public Integer localId = null;
+
+    @Expose
+    @Nullable
+    @DBType("integer")
+    @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
+    public Integer serverId = null;
+
+
+    @Expose
+    @NonNull
+    @SerializedName("created_at")
+    @DBType("integer")
+    public Date created;
+
+    @Expose
+    @NonNull
+    @SerializedName("updated_at")
+    @DBType("integer")
+    public Date updated;
 
     public String getTableName() {
         return "tbl_" + getClass().getSimpleName();
     }
 
-    public String getDatabaseCreate() {
-        String dbCreate = "create table " + getTableName() + " (";
-        Gson gson = new Gson();
-
-        JsonObject jsonObject = (JsonObject)new JsonParser().parse(gson.toJson(this, getClass()));
-
-        for (Map.Entry<String, JsonElement> field : jsonObject.entrySet()) {
-            dbCreate += field.getKey() + " ";
-
-            JsonElement element = field.getValue();
-            if (element.isJsonPrimitive()) {
-                if (element.getAsJsonPrimitive().isString()) {
-                    dbCreate += "text";
-                } else if (element.getAsJsonPrimitive().isNumber()) {
-                    if (element.getAsDouble() != ((double)element.getAsInt())) dbCreate += "double";
-                    else dbCreate += ("integer" + ((field.getKey().equals(PeckApp.Constants.Database.LOCAL_ID))
-                            ? " primary key autoincrement" : ""));
-                }
-            } else {
-                dbCreate += "text"; //if we don't know what it is, we're saving it as text
-            }
-            dbCreate += DELIM;
-        }
-        return dbCreate.substring(0, (dbCreate.length() - DELIM.length())) + ");";
-    }
-
     public String[] getColumns() {
         ArrayList<String> columns = new ArrayList<String>();
-        for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new Gson().toJson(this, getClass()))).entrySet()) {
+        for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new GsonBuilder().serializeNulls().create().toJson(this, getClass()))).entrySet()) {
             columns.add(entry.getKey());
         }
 
@@ -65,25 +65,16 @@ public abstract class DBOperable implements Serializable {
         return columns.toArray(ret);
     }
 
-    @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
-    protected int localId = -1;
+    @Nullable
+    public Integer getServerId() {
+        return serverId;
+    }
 
-    @Expose
-    @SerializedName("id")
-    protected int serverId = -1;
-
-
-    @Expose
-    @SerializedName("created_at")
-    protected Date created = new Date(-1);
-
-    @Expose
-    @SerializedName("updated_at")
-    protected Date updated = new Date(-1);
-
-    public abstract int getServerId();
-
-    public abstract DBOperable setServerId(int serverId);
+    public DBOperable setServerId(@NonNull Integer serverId) {
+        this.serverId = serverId;
+        updated();
+        return this;
+    }
 
     public Date getCreated() {
         return created;
@@ -91,11 +82,18 @@ public abstract class DBOperable implements Serializable {
 
     public DBOperable setCreated(Date created) {
         this.created = created;
+        updated();
         return this;
     }
 
+    @NonNull
     public Date getUpdated() {
         return updated;
+    }
+
+    public DBOperable updated() {
+        updated = new Date(System.currentTimeMillis());
+        return this;
     }
 
     public DBOperable setUpdated(Date updated) {
@@ -103,18 +101,43 @@ public abstract class DBOperable implements Serializable {
         return this;
     }
 
-    public int getLocalId() {
+    @NonNull
+    public Integer getLocalId() {
         return localId;
     }
 
-    public DBOperable setLocalId(int id) {
+    public DBOperable setLocalId(@NonNull Integer id) {
         localId = id;
+        updated();
         return this;
     }
 
-    public static long dateToInt(Date date) {
+    public static long dateToInt(@Nullable Date date) {
         if (date == null) return -1;
         else return date.getTime();
+    }
+
+    /**
+     *
+     * check to see if two dboperables are equal
+     *
+     *
+     * @param o object to compare
+     * @return true if their local and server ids are the same or null
+     */
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (o == null || !getClass().equals(o.getClass())) return false;
+        return localId.equals(((DBOperable) o).getLocalId());
+
+    }
+
+    //todo: override hashcode properly
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id: " + getLocalId() + " | sv_id: " + getServerId() + "]";
     }
 
 }

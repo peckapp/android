@@ -18,5 +18,6 @@ public class CircleManager extends FeedManager<Circle> implements Singleton {
         return circleManager;
     }
 
+
 }
 

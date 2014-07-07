@@ -1,11 +1,14 @@
 package com.peck.android.network;
 
+import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,6 +21,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.PeckApp.Constants.Network;
+import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
@@ -48,10 +52,9 @@ public class ServerCommunicator implements Singleton {
     private static RequestQueue requestQueue = PeckApp.getRequestQueue();
     private static JsonParser parser = new JsonParser();
 
-    private static ServerCommunicator serverCommunicator = new ServerCommunicator();
-
     private static final HashMap<Class<? extends DBOperable>, String> apiMap =
             new HashMap<Class<? extends DBOperable>, String>();
+
 
     static {
         apiMap.put(Event.class, Network.EVENTS);
@@ -61,29 +64,43 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Food.class, Network.FOOD);
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
+
     }
 
 
     private ServerCommunicator() { }
 
-    private static ServerCommunicator getCommunicator() {
-        return serverCommunicator;
-    }
-
     public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
         Locale locale = LocaleManager.getManager().getLocale();
         if (locale == null) {
-
                 /* todo: throw an error dialog to the user/put them in locale selection */
 
             //TEST:
             locale = new Locale();
-            locale.setServerId(50);
+            locale.setServerId(1);
         }
 
-        JSONObject object = new JSONObject(gson.toJson(obj, tClass));
-        object.put(PeckApp.Constants.Network.INSTITUTION, LocaleManager.getManager().getLocale());
-        return object;
+        JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass); //take our object and JSONize it
+        object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
+
+        JsonObject ret = new JsonObject(); //wrap it in another object
+        ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object);
+
+        return new JSONObject(ret.toString());
+    }
+
+    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
+        ArrayList<T> ret = new ArrayList<T>();
+        if (obj.isJsonObject()) {
+            if (wrapsJsonElement((JsonObject) obj)) {
+                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
+            } else ret.add(gson.fromJson(obj, tClass));
+        } else if (obj.isJsonArray()) {
+            for (JsonElement arrayElement : (JsonArray)obj) {
+                ret.addAll(parseJson(arrayElement, tClass));
+            }
+        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
+        return ret;
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
@@ -104,9 +121,11 @@ public class ServerCommunicator implements Singleton {
     }
 
     private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final String url) {
+        Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET to " + url);
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject object) {
+                Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "received response from " + url);
                 callback.callBack(parseJson(parser.parse(object.toString()), tClass));
             }
         }, new Response.ErrorListener() {
@@ -117,37 +136,33 @@ public class ServerCommunicator implements Singleton {
         }));
     }
 
-
-    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
-        ArrayList<T> ret = new ArrayList<T>();
-        if (obj.isJsonObject()) {
-            if (wrapsJsonElement((JsonObject) obj)) {
-                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
-            } else ret.add(gson.fromJson(obj, tClass));
-        } else if (obj.isJsonArray()) {
-            for (JsonElement arrayElement : (JsonArray)obj) {
-                ret.addAll(parseJson(arrayElement, tClass));
-            }
-        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
-        return ret;
-    }
-
     private static boolean wrapsJsonElement(JsonObject object) {
         return (object.entrySet().size() == 1);
     }
 
-
-
     public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
+        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
+    }
+
+    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
+        sendObject(Request.Method.POST, post, tClass, callback);
+    }
+
+    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
+        sendObject(Request.Method.PATCH, patch, tClass, callback);
+    }
+
+    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
         try {
 
-            JSONObject item = toJson(post, tClass);
+            JSONObject item = toJson(post, tClass); //fixme: subtract 2 for the trailing slash and the s
 
-            requestQueue.add(new JsonObjectRequest(Request.Method.POST, PeckApp.Constants.Network.API_STRING + PeckApp.Constants.Network.EVENTS, item, new Response.Listener<JSONObject>() {
+            Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
+            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
-                    //todo: update post object with returned object server id
-                    Log.d(getClass().getSimpleName(), object.toString());
+                    callback.callBack(gson.fromJson(object.toString(), tClass));
+                    Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "response with item " + object.toString());
                 }
 
             }, new Response.ErrorListener() {
@@ -160,8 +175,28 @@ public class ServerCommunicator implements Singleton {
 
         } catch (JSONException e) { e.printStackTrace(); }
 
-
     }
+
+    public static void getImage(final String URL, int dimens, final Callback<Bitmap> callback) {
+        PeckApp.getRequestQueue().add(new ImageRequest(URL, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                callback.callBack(bitmap);
+            }
+        }, dimens, dimens, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(PeckApp.getContext(), "Network error. Couldn't get image from " + URL, Toast.LENGTH_LONG).show();
+                callback.callBack(null);
+            }
+        }));
+    }
+
+    public static void getImage(final String URL, Callback<Bitmap> callback) {
+        getImage(URL, (int) PeckApp.getContext().getResources().getDimension(R.dimen.prof_picture_bound), callback);
+    }
+
+
 
     private static class JsonDateDeserializer implements JsonDeserializer<Date> {
         private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss.SSS'Z'");

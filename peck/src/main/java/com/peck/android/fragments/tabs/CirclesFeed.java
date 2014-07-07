@@ -3,12 +3,10 @@ package com.peck.android.fragments.tabs;
 import android.os.Bundle;
 
 import com.peck.android.R;
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
-import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.FeedTab;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.CircleManager;
+import com.peck.android.managers.Manager;
 import com.peck.android.models.Circle;
 
 /**
@@ -29,19 +27,6 @@ public class CirclesFeed extends FeedTab<Circle> {
     }
 
     @Override
-    public Feed<Circle> setUpFeed() {
-        if (dataSource == null) {
-            dataSource = new DataSource<Circle>(new Circle());
-        }
-
-        if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Circle>(dataSource.generate().getResourceId());
-        }
-
-        return this;
-    }
-
-    @Override
     public int getListViewRes() {
         return lvId;
     }
@@ -52,8 +37,8 @@ public class CirclesFeed extends FeedTab<Circle> {
     }
 
     @Override
-    public Class<? extends Singleton> getManagerClass() {
-        return CircleManager.class;
+    public <S extends Manager & Singleton> Class<S> getManagerClass() {
+        return (Class<S>) CircleManager.class;
     }
 
 

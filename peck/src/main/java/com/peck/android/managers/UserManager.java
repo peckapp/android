@@ -6,7 +6,7 @@ import com.peck.android.models.User;
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class UserManager extends Manager<User> implements Singleton {
+public class UserManager extends FeedManager<User> implements Singleton {
 
     private static UserManager userManager = new UserManager();
 

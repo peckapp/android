@@ -8,9 +8,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.peck.android.R;
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
@@ -37,20 +34,9 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         return view;
     }
 
-
-
-
     @Override
-    public Feed<Locale> setUpFeed() {
-        if (dataSource == null) {
-            dataSource = new DataSource<Locale>(new Locale());
-        }
-
-        if (feedAdapter == null) {
-            feedAdapter = new FeedAdapter<Locale>(new Locale().getResourceId());
-        }
-
-        return this;
+    protected void congfigureManager() {
+        super.congfigureManager();
     }
 
     @Override
@@ -64,8 +50,7 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     }
 
     @Override
-    public Class<? extends Singleton> getManagerClass() {
+    public Class<LocaleManager> getManagerClass() {
         return LocaleManager.class;
     }
-
 }

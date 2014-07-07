@@ -1,7 +1,8 @@
 package com.peck.android.managers;
 
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DataSource;
+import android.support.annotation.NonNull;
+
+import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
@@ -16,7 +17,8 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     //every FeedManager must be a singleton
 
-    protected FeedAdapter<T> adapter;
+    @NonNull
+    protected ArrayList<Feed<T>> activeFeeds = new ArrayList<Feed<T>>();
 
     public final static String tag = "FeedManager";
 
@@ -24,42 +26,61 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public FeedManager<T> initialize(final FeedAdapter<T> adapter, DataSource<T> dSource) {
-        this.adapter = adapter;
-        adapter.setSource(FeedManager.this);
-
-        super.initialize(dSource, new Callback<ArrayList<T>>() {
-            @Override
-            public void callBack(ArrayList<T> obj) {
-            }
-        });
-
-        return this;
-
-        //testing
-
-    }
-
-    public void loadFromDatabase(DataSource<T> dataSource) {
-        super.loadFromDatabase(dataSource, new Callback<ArrayList<T>>() {
-            @Override
-            public void callBack(ArrayList<T> obj) {
-                adapter.notifyDataSetChanged();
-            }
-        });
+    public void addFeed(Feed<T> activeFeed) {
+        activeFeeds.add(activeFeed);
     }
 
 
-    public void add(T item, final Callback<T> callback) {
-        super.add(item, new Callback<T>() {
+    @Override
+    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
+        super.downloadFromServer(new Callback<ArrayList<T>>() {
             @Override
-            public void callBack(T obj) {
+            public void callBack(ArrayList<T> obj) {
                 callback.callBack(obj);
+                notifyDatasetChanged();
             }
         });
-        adapter.notifyDataSetChanged();
-
     }
 
+    @Override
+    public void loadFromDatabase(final Callback<ArrayList<T>> callback) {
+        super.loadFromDatabase(new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+                callback.callBack(obj);
+                notifyDatasetChanged();
+            }
+        });
+    }
+
+
+    @Override
+    public void addNew(T item) {
+        super.addNew(item);
+        notifyDatasetChanged();
+    }
+
+    @Override
+    public void addFromNetwork(T item) {
+        super.addFromNetwork(item);
+        notifyDatasetChanged();
+    }
+
+    @Override
+    public void updateFromUser(T item) {
+        super.updateFromUser(item);
+        notifyDatasetChanged();
+    }
+
+    private void notifyDatasetChanged() {
+        dSource.post(new Callback() {
+            @Override
+            public void callBack(Object obj) {
+                for (Feed<T> feed : activeFeeds) {
+                    feed.notifyDatasetChanged();
+                }
+            }
+        });
+    }
 
 }

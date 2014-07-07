@@ -1,5 +1,6 @@
 package com.peck.android.models;
 
+import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,60 +15,15 @@ import java.util.Date;
  * Created by mammothbane on 6/10/2014.
  */
 public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
-    private int serverId = -1;
 
-    private int color = -1;
-    private int type = -1;
 
     private Date mealtime = new Date(-1);
-    private Date updated = new Date(-1);
 
     private String title = "";
     private int location = -1;
 
 
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public Meal setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public Meal setType(int type) {
-        this.type = type;
-        return this;
-    }
-
-    public Meal setColor(int color) {
-        this.color = color;
-        return this;
-    }
-
     private ArrayList<Food> courses;
-
-    public Meal setLocalId(int id) {
-        this.localId = id;
-        return this;
-    }
-
-    public int getServerId() {
-        return serverId;
-    }
-
-    public Meal setServerId(int serverId) {
-        this.serverId = serverId;
-        return this;
-    }
 
     public Date getMealtime() {
         return mealtime;
@@ -105,26 +61,17 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    public int hashCode() {
-        return (int)(mealtime.getTime()*13+location*17+getServerId()*307-getLocalId());
-    }
-
     @Override
     public int getResourceId() { //TODO: implement, create layout
         return R.layout.lvitem_meal;
     }
 
     @Override
-    public void setUp(View v) {
+    public void setUp(View v, Activity activity) {
         ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
         ((TextView)v.findViewById(R.id.tv_location)).setText(Integer.toString(getLocation()));
 
     }
 
-    public Meal link(Food food) {
-        courses.add(food);
-        food.setMealId(getLocalId());
-        return this;
-    }
 
 }
