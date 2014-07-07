@@ -44,13 +44,14 @@
             android:layout_marginBottom="@dimen/feed_vert_margin"
             android:layout_marginLeft="@dimen/feed_horz_margin"
             android:layout_marginRight="@dimen/feed_horz_margin"
-            android:id="@+id/ll_userfeed">
+            android:id="@+id/ll_userfeed"
+            android:layout_gravity="center_vertical">
 
                 <it.sephiroth.android.library.widget.HListView
                     android:id="@+id/hlv_users"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    />
+                    android:layout_height="80dp"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center_vertical" />
 
         </LinearLayout>
 

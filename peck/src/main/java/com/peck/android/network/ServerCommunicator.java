@@ -25,6 +25,7 @@ import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
+import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
@@ -85,6 +86,7 @@ public class ServerCommunicator implements Singleton {
 
         JsonObject ret = new JsonObject(); //wrap it in another object
         ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object);
+        ret.add("auth", authBlock());
 
         return new JSONObject(ret.toString());
     }
@@ -101,6 +103,15 @@ public class ServerCommunicator implements Singleton {
             }
         } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
         return ret;
+    }
+
+    private static JsonObject authBlock() {
+        JsonObject auth = new JsonObject();
+        auth.addProperty("user_id", PeckSessionHandler.getUser().getServerId());
+        auth.addProperty("api_key", "");
+        auth.addProperty("auth_token", "");
+        auth.addProperty("", "");
+        return auth;
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {

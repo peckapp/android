@@ -29,10 +29,11 @@
     <string name="tb_pecks">Pecks</string>
     <string name="newPost">New Post</string>
 
-    <string name="bt_message">Message</string>
+    <string name="bt_announcement">Announcement</string>
     <string name="bt_photo">Photo</string>
     <string name="bt_share">select shares</string>
     <string name="bt_peck_login">Login To Peck</string>
+    <string name="bt_post">Post</string>
 
     <string name="ht_np_title">title</string>
     <string name="ht_yourname">Your Name</string>
@@ -40,5 +41,7 @@
     <string name="bt_peck_logout">Logout</string>
     <string name="bt_retry">Retry</string>
     <string name="tv_retry">Couldn\'t download localization data.</string>
+
+
 
 </resources>
