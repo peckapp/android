@@ -14,10 +14,10 @@ public class FragmentSwitcherListener implements View.OnClickListener {
     private String tag;
     private int containerId;
 
-    private int animIn = -1;
-    private int animOut = -1;
-    private int popIn = -1;
-    private int popOut = -1;
+    private Integer animIn;
+    private Integer animOut;
+    private Integer popIn;
+    private Integer popOut;
 
     public FragmentSwitcherListener(FragmentManager fm, Fragment f, String tag, int containerId) {
         this.fm = fm;
@@ -55,7 +55,7 @@ public class FragmentSwitcherListener implements View.OnClickListener {
             ft.attach(fm.findFragmentByTag(tag)); //otherwise attach it
         }
 
-        if (animIn > 0 && animOut > 0) { //if we have custom animations, set them
+        if (animIn != null && animOut != null) { //if we have custom animations, set them
             ft.setCustomAnimations(animIn, animOut);
         }
 
