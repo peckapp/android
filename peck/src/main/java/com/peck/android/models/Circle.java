@@ -46,6 +46,14 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
         return this;
     }
 
+    @NonNull
+    public ArrayList<Integer> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(@NonNull ArrayList<Integer> userIds) {
+        this.userIds = userIds;
+    }
 
     public String getTitle() {
         return title;
@@ -61,8 +69,9 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
     public void setUp(final View v, Activity activity) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
-        HLVUserFeed userFeed = new HLVUserFeed();
-        userFeed.setUp((HListView)v.findViewById(R.id.hlv_users));
+        final HLVUserFeed userFeed = new HLVUserFeed();
+        userFeed.setUp((HListView)v.findViewById(R.id.hlv_users), localId);
+
     }
 
 
