@@ -1,13 +1,13 @@
 package com.peck.android.fragments.tabs;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
 import com.peck.android.fragments.BaseTab;
-import com.peck.android.fragments.SimpleFragment;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.listeners.FragmentSwitcherListener;
 
@@ -18,27 +18,21 @@ import java.util.HashMap;
  */
 public class NewPostTab extends BaseTab {
 
-    private final static HashMap<Integer, Integer> buttonIds = new HashMap<Integer, Integer>(3); //don't use a sparsearray, we need the keys
+    private final static HashMap<Integer, Fragment> buttonIds = new HashMap<Integer, Fragment>(3); //don't use a sparsearray, we need the keys
 
     static {
-        buttonIds.put(R.id.bt_event, R.layout.pst_event);
-        buttonIds.put(R.id.bt_announce, R.layout.pst_announcement);
-        buttonIds.put(R.id.bt_photo, R.layout.pst_photo);
+        buttonIds.put(R.id.bt_event, new EventPostTab());
+        buttonIds.put(R.id.bt_announce, new AnnouncementPostTab());
+        buttonIds.put(R.id.bt_photo, new PhotoPostTab());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.tab_newpost, container, false);
 
-        Bundle b;
-        SimpleFragment frag;
 
         for (int i : buttonIds.keySet()) {
-            b = new Bundle();
-            b.putInt(SimpleFragment.RESOURCE, buttonIds.get(i));
-            frag = new SimpleFragment();
-            frag.setArguments(b);
-            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), frag, "btn " + i, R.id.post_content));
+            v.findViewById(i).setOnClickListener(new FragmentSwitcherListener(getActivity().getSupportFragmentManager(), buttonIds.get(i), "btn " + i, R.id.post_content));
         }
 
         v.findViewById(R.id.bt_event).performClick();
@@ -46,8 +40,13 @@ public class NewPostTab extends BaseTab {
         return v;
     }
 
-    //todo: animation of text field - it needs to be visible when the user's editing it
+    //todo: animate text field into visible area
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 
     @Override
     public Class<? extends Singleton> getManagerClass() {

@@ -24,7 +24,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     @Expose
     @NonNull
-    @SerializedName("user_ids")
+    @SerializedName("circle_members")
     private ArrayList<Integer> userIds = new ArrayList<Integer>();
 
 

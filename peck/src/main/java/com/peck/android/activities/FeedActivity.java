@@ -40,6 +40,22 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_newsfeed, new ExploreFeed());
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (resultCode) {
+            case RESULT_OK: {
+                break;
+            }
+            default: {
+                break;
+            }
+
+        }
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +70,7 @@ public class FeedActivity extends PeckActivity {
                 @Override
                 public void onClick(View view) {
                     super.onClick(view);
+
                     getSupportFragmentManager().executePendingTransactions();
                     if (lastPressed != null && lastPressed.equals(view)) toggleVisibility();
                     else findViewById(R.id.ll_feed_content).setVisibility(View.VISIBLE);

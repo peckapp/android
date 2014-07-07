@@ -13,7 +13,7 @@ import it.sephiroth.android.library.widget.HListView;
  */
 public class HLVUserFeed extends Feed<User> {
 
-    public void setUp(HListView hlv) {
+    public void setUp(HListView hlv, int circleId) {
         hlv.setAdapter(feedAdapter);
         congfigureManager();
     }
