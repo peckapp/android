@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -67,7 +66,7 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     @Override
-    public void setUp(View v, Activity activity) {
+    public void setUp(View v) {
         ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
         ((TextView)v.findViewById(R.id.tv_location)).setText(Integer.toString(getLocation()));
 

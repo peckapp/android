@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -130,7 +129,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
     }
 
     @Override
-    public void setUp(final View v, Activity activity) {
+    public void setUp(final View v) {
 
         Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));

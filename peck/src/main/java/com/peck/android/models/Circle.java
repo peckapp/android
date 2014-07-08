@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
@@ -66,7 +65,7 @@ public class Circle extends DBOperable implements SelfSetup, HasFeedLayout, HasI
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setUp(final View v, Activity activity) {
+    public void setUp(final View v) {
 
         ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
         final HLVUserFeed userFeed = new HLVUserFeed();

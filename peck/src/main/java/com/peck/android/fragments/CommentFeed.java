@@ -2,6 +2,7 @@ package com.peck.android.fragments;
 
 import com.peck.android.R;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.managers.CommentManager;
 import com.peck.android.managers.Manager;
 import com.peck.android.models.Comment;
 
@@ -22,6 +23,6 @@ public class CommentFeed extends Feed<Comment> {
 
     @Override
     public <S extends Manager & Singleton> Class<S> getManagerClass() {
-        return null;
+        return (Class<S>)CommentManager.class;
     }
 }
