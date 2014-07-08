@@ -51,7 +51,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
                 notifyDatasetChanged();
             }
         });
-        feedManager.addFeed(this);
+        feedManager.registerFeed(this);
     }
 
     @Override
@@ -92,6 +92,10 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
             }
         });
+    }
+
+    public void onDestroy() {
+        feedManager.deregisterFeed(this);
     }
 
     public abstract int getListViewRes();

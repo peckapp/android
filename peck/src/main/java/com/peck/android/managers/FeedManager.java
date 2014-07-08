@@ -26,10 +26,11 @@ public abstract class FeedManager<T extends DBOperable & SelfSetup & HasFeedLayo
 
     }
 
-    public void addFeed(Feed<T> activeFeed) {
+    public void registerFeed(Feed<T> activeFeed) {
         activeFeeds.add(activeFeed);
     }
 
+    public void deregisterFeed(Feed<T> activeFeed) { if (activeFeeds.contains(activeFeed)) activeFeeds.remove(activeFeed); }
 
     @Override
     public void downloadFromServer(final Callback<ArrayList<T>> callback) {

@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 
 import com.peck.android.R;
 import com.peck.android.fragments.BaseTab;
+import com.peck.android.fragments.posts.AnnouncementPost;
+import com.peck.android.fragments.posts.EventPost;
+import com.peck.android.fragments.posts.PhotoPost;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.listeners.FragmentSwitcherListener;
 
@@ -21,9 +24,9 @@ public class NewPostTab extends BaseTab {
     private final static HashMap<Integer, Fragment> buttonIds = new HashMap<Integer, Fragment>(3); //don't use a sparsearray, we need the keys
 
     static {
-        buttonIds.put(R.id.bt_event, new EventPostTab());
-        buttonIds.put(R.id.bt_announce, new AnnouncementPostTab());
-        buttonIds.put(R.id.bt_photo, new PhotoPostTab());
+        buttonIds.put(R.id.bt_event, new EventPost());
+        buttonIds.put(R.id.bt_announce, new AnnouncementPost());
+        buttonIds.put(R.id.bt_photo, new PhotoPost());
     }
 
     @Override

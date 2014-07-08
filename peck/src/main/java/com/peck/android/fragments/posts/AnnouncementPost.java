@@ -1,4 +1,4 @@
-package com.peck.android.fragments.tabs;
+package com.peck.android.fragments.posts;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,7 +12,7 @@ import com.peck.android.R;
 /**
  * Created by mammothbane on 7/7/2014.
  */
-public class AnnouncementPostTab extends Fragment {
+public class AnnouncementPost extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
