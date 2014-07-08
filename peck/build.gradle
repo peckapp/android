@@ -47,6 +47,8 @@ dependencies {
     compile 'com.makeramen:roundedimageview:+'
     compile 'net.jodah:typetools:+'
     compile 'org.apache.httpcomponents:httpclient-android:+'
+    compile 'com.googlecode.lambdaj:lambdaj:+'
+
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     
