@@ -32,7 +32,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     protected String tag() {
         return ((Object)this).getClass().getName();
     }
-    FeedAdapter<T> feedAdapter = new FeedAdapter<T>(new DataSource<T>((Class<T>) TypeResolver.resolveRawArgument(Feed.class, getClass())).generate().getResourceId(), this);
+    protected FeedAdapter<T> feedAdapter = new FeedAdapter<T>(new DataSource<T>((Class<T>) TypeResolver.resolveRawArgument(Feed.class, getClass())).generate().getResourceId(), this);
     protected FeedManager<T> feedManager;
     protected ArrayList<T> data = new ArrayList<T>();
 

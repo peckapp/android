@@ -7,26 +7,31 @@ import com.peck.android.managers.CommentManager;
 import com.peck.android.managers.Manager;
 import com.peck.android.models.Comment;
 
+import java.util.ArrayList;
+
+import static ch.lambdaj.Lambda.*;
+
 /**
  * Created by mammothbane on 7/8/2014.
  */
 public class CommentFeed extends Feed<Comment> {
     private CommentType type;
-    private int id;
+    private Integer parentId;
 
     @Override
     public void notifyDatasetChanged() {
         super.notifyDatasetChanged();
-        feedManager.getData()
+        if (type != null && parentId != null) {
+        data = new ArrayList<Comment>(select(feedManager.getData(), having(on(Comment.class).getParent().equals(parentId) && type == on(Comment.class).getType())));
+        }
     }
 
     public void setType(CommentType type) {
         this.type = type;
-        notifyDatasetChanged();
     }
 
     public void setParent(int id) {
-        this.id = id;
+        this.parentId = id;
     }
 
     @Override

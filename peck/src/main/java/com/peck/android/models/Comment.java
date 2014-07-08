@@ -21,7 +21,7 @@ public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Expose
     @SerializedName("comment_from")
-    private Integer attachedTo;
+    private Integer parent;
 
     @Expose
     @SerializedName("user_id")
@@ -35,6 +35,37 @@ public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
     @SerializedName("category")
     private CommentType type;
 
+    public Integer getParent() {
+        return parent;
+    }
+
+    public void setParent(Integer parent) {
+        this.parent = parent;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public CommentType getType() {
+        return type;
+    }
+
+    public void setType(CommentType type) {
+        this.type = type;
+    }
 
     @Override
     public void setUp(final View v) {

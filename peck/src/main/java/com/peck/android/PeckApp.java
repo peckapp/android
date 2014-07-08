@@ -67,6 +67,7 @@ public class PeckApp extends Application implements Singleton{
             public final static String USERS = "users/";
             public final static String LOCALES = "institutions/";
             public final static String PECK = "push_notifications/";
+            public final static String COMMENTS= "comments/";
 
             //todo: get these:
             public final static String MEAL = null;

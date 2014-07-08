@@ -27,6 +27,7 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
+import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
@@ -65,7 +66,7 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Food.class, Network.FOOD);
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
-
+        apiMap.put(Comment.class, Network.COMMENTS);
     }
 
 
