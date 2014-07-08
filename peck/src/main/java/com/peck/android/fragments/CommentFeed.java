@@ -7,9 +7,10 @@ import com.peck.android.managers.CommentManager;
 import com.peck.android.managers.Manager;
 import com.peck.android.models.Comment;
 
-import java.util.ArrayList;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 
-import static ch.lambdaj.Lambda.*;
+import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 7/8/2014.
@@ -22,7 +23,12 @@ public class CommentFeed extends Feed<Comment> {
     public void notifyDatasetChanged() {
         super.notifyDatasetChanged();
         if (type != null && parentId != null) {
-        data = new ArrayList<Comment>(select(feedManager.getData(), having(on(Comment.class).getParent().equals(parentId) && type == on(Comment.class).getType())));
+            data = new ArrayList<Comment>(CollectionUtils.select(feedManager.getData(), new Predicate<Comment>() {
+                @Override
+                public boolean evaluate(Comment object) {
+                    return type.equals(object.getType()) && parentId.equals(object.getParent());
+                }
+            }));
         }
     }
 
