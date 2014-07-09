@@ -11,8 +11,8 @@ import com.peck.android.models.Event;
 public class ExploreFeed extends FeedTab<Event> {
 
     private static final String tag = "NewsFeed";
-    private static final int resId = R.layout.tab_newsfeed;
-    private static final int lvId = R.id.lv_newsfeed;
+    private static final int resId = R.layout.tab_explore;
+    private static final int lvId = R.id.lv_explore;
 
     public int getLayoutRes() {
         return resId;

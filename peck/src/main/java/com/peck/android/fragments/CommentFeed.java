@@ -26,7 +26,7 @@ public class CommentFeed extends Feed<Comment> {
             data = new ArrayList<Comment>(CollectionUtils.select(feedManager.getData(), new Predicate<Comment>() {
                 @Override
                 public boolean evaluate(Comment object) {
-                    return type.equals(object.getType()) && parentId.equals(object.getParent());
+                    return type == object.getType() && parentId.equals(object.getParent());
                 }
             }));
         }

@@ -22,6 +22,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="70dp"
         android:id="@+id/rl_comments"
+        android:background="@color/white"
         android:visibility="gone" />
 
 </RelativeLayout>

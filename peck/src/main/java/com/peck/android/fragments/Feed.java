@@ -96,6 +96,7 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
 
     public void onDestroy() {
         feedManager.deregisterFeed(this);
+        super.onDestroy();
     }
 
     public abstract int getListViewRes();
