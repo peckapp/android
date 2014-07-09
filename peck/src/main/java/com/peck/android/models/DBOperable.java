@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DBOperable implements Serializable {
+public abstract class DBOperable implements Serializable, Comparable<DBOperable> {
 
     public DBOperable() {
         created = new Date(System.currentTimeMillis());
@@ -123,7 +123,7 @@ public abstract class DBOperable implements Serializable {
      *
      *
      * @param o object to compare
-     * @return true if their local and server ids are the same or null
+     * @return true if their local ids are the same
      */
 
     @Override
@@ -140,4 +140,8 @@ public abstract class DBOperable implements Serializable {
         return getClass().getSimpleName() + "[id: " + getLocalId() + " | sv_id: " + getServerId() + "]";
     }
 
+    @Override
+    public int compareTo(@NonNull DBOperable dbOperable) {
+        return (int)Math.signum(this.getCreated().getTime() - dbOperable.getCreated().getTime());
+    }
 }

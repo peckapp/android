@@ -44,12 +44,6 @@ public class HLVUserFeed extends Feed<User> {
     }
 
     @Override
-    public void notifyDatasetChanged() {
-        updateData();
-        super.notifyDatasetChanged();
-    }
-
-    @Override
     public int getListViewRes() {
         return R.id.hlv_users;
     }

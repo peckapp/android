@@ -73,7 +73,7 @@ public class ServerCommunicator implements Singleton {
     private ServerCommunicator() { }
 
     public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
-        Locale locale = LocaleManager.getManager().getLocale();
+        Locale locale = LocaleManager.getLocale();
         if (locale == null) {
                 /* todo: throw an error dialog to the user/put them in locale selection */
 
@@ -115,7 +115,7 @@ public class ServerCommunicator implements Singleton {
         return auth;
     }
 
-    public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
+    public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback, final Callback failure) {
         String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass) + serverId;
 
         get(tClass, new Callback<ArrayList<T>>() {
@@ -123,16 +123,16 @@ public class ServerCommunicator implements Singleton {
             public void callBack(ArrayList<T> obj) {
                 callback.callBack(obj.get(0));
             }
-        }, url);
+        }, failure, url);
 
     }
 
-    public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
+    public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure) {
         String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass);
-        get(tClass, callback, url);
+        get(tClass, callback, failure, url);
     }
 
-    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final String url) {
+    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure, final String url) {
         Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET to " + url);
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -143,7 +143,7 @@ public class ServerCommunicator implements Singleton {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-
+                failure.callBack(null);
             }
         }));
     }

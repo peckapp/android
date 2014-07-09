@@ -11,7 +11,7 @@ import com.peck.android.R;
 import com.peck.android.enums.CommentType;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.UserManager;
+import com.peck.android.managers.DataHandler;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -69,7 +69,7 @@ public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
 
     @Override
     public void setUp(final View v) {
-        User user = UserManager.getManager().getByServerId(userId);
+        User user = DataHandler.getByServerId(User.class, userId);
         if (user == null) {} //throw an exception/force an update
         else {
             ((TextView) v.findViewById(R.id.tv_text)).setText(text);

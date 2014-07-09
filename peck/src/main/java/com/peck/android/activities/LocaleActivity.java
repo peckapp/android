@@ -2,7 +2,6 @@ package com.peck.android.activities;
 
 import android.content.IntentSender;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -16,10 +15,11 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.fragments.LocaleSelectionFeed;
+import com.peck.android.fragments.Feed;
 import com.peck.android.managers.DataHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
+import com.squareup.otto.Subscribe;
 
 import java.util.Collections;
 
@@ -28,9 +28,9 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private boolean locationServices = true;
     private static final String TAG = "LocaleActivity";
     private static final String fragmentTag = "locale selection feed";
-    private LocaleSelectionFeed localeSelectionFeed = new LocaleSelectionFeed();
+    private Feed<Locale> localeSelectionFeed = new Feed<Locale>();
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
-    private static LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
+    private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,33 +81,23 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
         findViewById(R.id.rl_network_error).setVisibility(View.GONE);
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                long startTime = System.currentTimeMillis();
-                while (DataHandler.getData(Locale.class).size() == 0 && (System.currentTimeMillis() - startTime) < PeckApp.Constants.Network.TIMEOUT) {
-                    try {
-                        Thread.sleep(PeckApp.Constants.Network.RETRY_INTERVAL);
-                    } catch (InterruptedException e) { Log.e(TAG, "waiting was interrupted"); }
-                }
-                if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
-                return null;
-            }
+        DataHandler.register(Locale.class, this);
+        DataHandler.init(Locale.class);
+    }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                if (LocaleManager.getManager().getData().size() == 0) {
-                    findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
-                } else {
-                    localeSelectionFeed.notifyDatasetChanged();
-                    tv.setVisibility(View.GONE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-                }
-            }
-        }.execute();
+    @Subscribe
+    public void respondToLocaleLoad(DataHandler.InitComplete complete) {
+        if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE) {
+            findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
+            findViewById(R.id.rl_locale).setVisibility(View.GONE);
+            findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
+        } else {
+            if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
+            findViewById(R.id.tv_progress).setVisibility(View.GONE);
+            findViewById(R.id.rl_locale).setVisibility(View.GONE);
+            findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+        }
+        DataHandler.unregister(Locale.class, this);
     }
 
 

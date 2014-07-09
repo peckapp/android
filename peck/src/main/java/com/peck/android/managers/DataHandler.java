@@ -3,6 +3,7 @@ package com.peck.android.managers;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Pair;
 
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
@@ -25,10 +26,18 @@ public abstract class DataHandler {
     public static String tag = "Manager";
 
     //todo: maybe we want this to be a heap based on localid
-    protected static final HashMap<Class<? extends DBOperable>, ArrayList<? extends DBOperable>> data = new HashMap<Class<? extends DBOperable>, ArrayList<? extends DBOperable>>();
+    protected static final HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>> data = new HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>>();
     protected static final HashMap<Class<? extends DBOperable>, Bus> buses = new HashMap<Class<? extends DBOperable>, Bus>();
     protected static final HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>> dataSources = new HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>>();
 
+    public static class InitStart {} //when we start initializing
+    public static class InitComplete {} //when we're done initializing
+
+    public static class LoadStateWrapper { LoadState value = LoadState.NOT_LOADED;
+        public LoadState getValue() { return value; }
+    }
+
+    public enum LoadState { NOT_LOADED, DB_LOADED, LOAD_COMPLETE }
 
     @NonNull
     @SuppressWarnings("unchecked")
@@ -42,16 +51,52 @@ public abstract class DataHandler {
         return dataSource;
     }
 
+    /**
+     *
+     * for internal use only. returns a reference to the data held in the manager.
+     *
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+
     @NonNull
     @SuppressWarnings("unchecked")
-    private static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
-        ArrayList<T> ret;
+    private static <T extends DBOperable> ArrayList<T> getDataRef(Class<T> tClass) {
+        return (ArrayList<T>)getPair(tClass).first;
+    }
+
+    /**
+     *
+     * hands back a copy of the data currently contained in the datahandler, not a reference.
+     * to modify the data in the handler, use update/add/remove operations.
+     *
+     * @param tClass
+     * @param <T>
+     * @return a copy of the data contained in the manager
+     */
+
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
+        return new ArrayList<T>((ArrayList<T>)getPair(tClass).first);
+    }
+
+    @NonNull
+    public static <T extends DBOperable> LoadStateWrapper getLoadState(Class<T> tClass) {
+        return getPair(tClass).second;
+    }
+
+    @NonNull
+    @SuppressWarnings("unchecked")
+    private static <T extends DBOperable> Pair<ArrayList<? extends DBOperable>, LoadStateWrapper> getPair(Class<T> tClass) {
+        Pair<ArrayList<? extends DBOperable>, LoadStateWrapper> pair;
         synchronized (data) {
-            ret = (ArrayList<T>) data.get(tClass);
-            if (ret == null) ret = new ArrayList<T>();
-            data.put(tClass, ret);
+            pair = data.get(tClass);
+            if (pair == null || pair.first == null) pair = new Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>(new ArrayList<T>(), new LoadStateWrapper());
+            data.put(tClass, pair);
         }
-        return ret;
+        return pair;
     }
 
     @NonNull
@@ -66,32 +111,88 @@ public abstract class DataHandler {
         return bus;
     }
 
+    public static <T extends DBOperable> void init(final Class<T> tClass) {
+        getBus(tClass).post(new InitStart());
+
+        switch (getLoadState(tClass).value) {
+            case LOAD_COMPLETE:
+                getBus(tClass).post(new InitComplete());
+                break;
+            case DB_LOADED:
+                loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
+                    @Override
+                    public void callBack(ArrayList<T> obj) {
+                        getDataRef(tClass).addAll(obj);
+                        getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
+                        getBus(tClass).post(new InitComplete());
+                    }
+                });
+                break;
+            case NOT_LOADED:
+                loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
+                    @Override
+                    public void callBack(ArrayList<T> obj) {
+                        getDataRef(tClass).addAll(obj);
+                        getLoadState(tClass).value = LoadState.DB_LOADED;
+                        downloadFromServer(tClass, new Callback<ArrayList<T>>() {
+                            @Override
+                            public void callBack(ArrayList<T> obj) {
+                                for (T i : obj) addFromNetwork(tClass, i);
+                                getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
+                                getBus(tClass).post(new InitComplete());
+                            }
+                        }, new Callback() {
+                            @Override
+                            public void callBack(Object obj) {
+                                getBus(tClass).post(new InitComplete());
+                            }
+                        });
+                    }
+                });
+                break;
+        }
+
+
+
+
+    }
+
+
+
     /**
      *
-     * load all items from the database.
-     * clears data.
+     * hand back an arraylist of items loaded from the database.
+     * does not merge automatically
      *
-     * @param callback a callback to execute once done loading
+     * @param tClass the class of the objects to load
+     * @param callback a callback that receives the data list
      */
     public static <T extends DBOperable> void loadFromDatabase(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
         getDataSource(tClass).getAll(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                getData(tClass).addAll(obj);
                 callback.callBack(obj);
             }
         });
-
     }
 
-    public static <T extends DBOperable> void downloadFromServer(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
+    /**
+     *
+     * hands back an arraylist of items it downloaded from the server.
+     * does not merge automatically.
+     *
+     * @param tClass the class of the objects to load
+     * @param callback a callback that receives the data list
+     * @param <T> the type of the objects being loaded
+     */
+    public static <T extends DBOperable> void downloadFromServer(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure) {
         ServerCommunicator.getAll(tClass, new Callback<ArrayList<T>>() {
             @Override
             public void callBack(final ArrayList<T> objs) {
                 for (T i : objs) addFromNetwork(tClass, i);
                 callback.callBack(objs);
             }
-        });
+        }, failure);
     }
 
     @NonNull
@@ -102,7 +203,7 @@ public abstract class DataHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> T getByLocalId(Class<T> tClass, Integer id) {
-        for (T i : getData(tClass)) {
+        for (T i : getDataRef(tClass)) {
             if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
         }
 
@@ -112,7 +213,7 @@ public abstract class DataHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> T getByServerId(Class<T> tClass, Integer id) {
-        for (T i : getData(tClass)) {
+        for (T i : getDataRef(tClass)) {
             if (i.getServerId() != null && i.getServerId().equals(id)) return i;
         }
         return null;
@@ -129,7 +230,7 @@ public abstract class DataHandler {
         getDataSource(tClass).create(item, new Callback<Integer>() {
             @Override
             public void callBack(final Integer dbObj) {
-                getData(tClass).add((T) item.setLocalId(dbObj));
+                getDataRef(tClass).add((T) item.setLocalId(dbObj));
                 getBus(tClass).post(item);
                 ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                     @Override
@@ -142,8 +243,6 @@ public abstract class DataHandler {
         });
     }
 
-
-
     /**
      *
      * add an item from the network; picks up
@@ -155,9 +254,9 @@ public abstract class DataHandler {
         if (getByServerId(tClass, item.getServerId()) != null) {
             if (!getByServerId(tClass, item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
                 getDataSource(tClass).update(item);
-                synchronized (getData(tClass)) {
-                    getData(tClass).remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
-                    getData(tClass).add(item);
+                synchronized (getDataRef(tClass)) {
+                    getDataRef(tClass).remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
+                    getDataRef(tClass).add(item);
                     getBus(tClass).post(item);
                 }
             } else {
@@ -168,13 +267,12 @@ public abstract class DataHandler {
                 @Override
                 public void callBack(Integer obj) {
                     item.setLocalId(obj);
-                    getData(tClass).add(item);
+                    getDataRef(tClass).add(item);
                     getBus(tClass).post(item);
                 }
             });
         }
     }
-
 
     /**
      *
@@ -183,7 +281,7 @@ public abstract class DataHandler {
      * @param item the item to update, definitely has localid
      */
     public static <T extends DBOperable> void updateFromUser(final Class<T> tClass, final T item) {
-        if (getData(tClass).contains(item)) {
+        if (getDataRef(tClass).contains(item)) {
             ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
