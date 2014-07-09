@@ -20,7 +20,7 @@ import java.util.HashMap;
  *
  */
 
-public abstract class Manager {
+public abstract class DataHandler {
 
     public static String tag = "Manager";
 
@@ -32,7 +32,7 @@ public abstract class Manager {
 
     @NonNull
     @SuppressWarnings("unchecked")
-    public static <T extends DBOperable> DataSource<T> getDataSource(Class<T> tClass) {
+    private static <T extends DBOperable> DataSource<T> getDataSource(Class<T> tClass) {
         DataSource<T> dataSource;
         synchronized (dataSources) {
             dataSource = (DataSource<T>) dataSources.get(tClass);
@@ -44,7 +44,7 @@ public abstract class Manager {
 
     @NonNull
     @SuppressWarnings("unchecked")
-    public static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
+    private static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
         ArrayList<T> ret;
         synchronized (data) {
             ret = (ArrayList<T>) data.get(tClass);
@@ -56,7 +56,7 @@ public abstract class Manager {
 
     @NonNull
     @SuppressWarnings("unchecked")
-    public static <T extends DBOperable> Bus getBus(Class<T> tClass) {
+    private static <T extends DBOperable> Bus getBus(Class<T> tClass) {
         Bus bus;
         synchronized (buses) {
             bus = buses.get(tClass);
@@ -96,7 +96,7 @@ public abstract class Manager {
 
     @NonNull
     public static String tag() {
-        return Manager.class.getName();
+        return DataHandler.class.getName();
     }
 
     @Nullable

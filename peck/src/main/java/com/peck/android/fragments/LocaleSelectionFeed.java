@@ -35,11 +35,6 @@ public class LocaleSelectionFeed extends Feed<Locale> {
     }
 
     @Override
-    protected void congfigureManager() {
-        super.congfigureManager();
-    }
-
-    @Override
     public int getListViewRes() {
         return lvRes;
     }
@@ -49,8 +44,4 @@ public class LocaleSelectionFeed extends Feed<Locale> {
         return R.layout.frag_locale_select;
     }
 
-    @Override
-    public Class<LocaleManager> getManagerClass() {
-        return LocaleManager.class;
-    }
 }

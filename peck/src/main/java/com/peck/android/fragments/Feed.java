@@ -10,12 +10,12 @@ import android.widget.ListAdapter;
 
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.database.DataSource;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.HasManager;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.FeedManager;
+import com.peck.android.managers.DataHandler;
 import com.peck.android.models.DBOperable;
+import com.peck.android.policies.FiltrationPolicy;
+import com.squareup.otto.Subscribe;
 
 import net.jodah.typetools.TypeResolver;
 
@@ -28,31 +28,38 @@ import java.util.ArrayList;
  *
  */
 
-public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment implements HasManager {
+public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment {
+
+    public final static String LV_ID = "list view identifier";
+    public final static String LAYOUT_ID = "layout identifier";
 
     protected String tag() {
         return ((Object)this).getClass().getName();
     }
     protected FeedAdapter<T> feedAdapter = new FeedAdapter<T>(new DataSource<T>((Class<T>) TypeResolver.resolveRawArgument(Feed.class, getClass())).generate().getResourceId(), this);
-    protected FeedManager<T> feedManager;
     protected ArrayList<T> data = new ArrayList<T>();
+    private FiltrationPolicy<T> filtrationPolicy;
+    protected int listViewRes;
+    protected int layoutRes;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        congfigureManager();
+        //todo: ensure manager has data loaded
+
         super.onCreate(savedInstanceState);
+        DataHandler.register(getParameterizedClass(), this);
 
     }
 
-    @SuppressWarnings("unchecked")
-    protected void congfigureManager() {
-        feedManager = (FeedManager<T>)(FeedManager.getManager(getManagerClass())).initialize(new Callback<ArrayList>() {
-            @Override
-            public void callBack(ArrayList obj) {
-                notifyDatasetChanged();
-            }
-        });
-        feedManager.registerFeed(this);
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+
+        listViewRes = args.getInt(LV_ID, -1);
+        layoutRes = args.getInt(LAYOUT_ID, -1);
+
+        if (listViewRes == -1 || layoutRes == -1) throw new IllegalArgumentException("Feed must be instantiated with layout and list view identifiers.");
     }
 
     @Override
@@ -60,14 +67,8 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View r = inflater.inflate(getLayoutRes(), container, false);
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
-        associateAdapter(v);
-        return r;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Feed<T> associateAdapter(AdapterView<ListAdapter> v) {
         v.setAdapter(feedAdapter);
-        return this;
+        return r;
     }
 
     public void onResume() {
@@ -75,33 +76,38 @@ public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> ext
         feedAdapter.notifyDataSetChanged();
     }
 
+    /**
+     *
+     * made available for feedadapters.
+     *
+     * @return the arraylist of data this feed handles
+     */
     public ArrayList<T> getData() {
         return data;
     }
 
-    public void notifyDatasetChanged() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                //todo: update data list based on sorting preferences
-
-                //test:
-                data = new ArrayList<T>(feedManager.getData());
-
-
-                feedAdapter.notifyDataSetChanged();
-
-            }
-        });
+    @Subscribe
+    public void respondTo(T t) {
+        if (filtrationPolicy.test(t)) data.add(t);
     }
 
     public void onDestroy() {
-        feedManager.deregisterFeed(this);
+        DataHandler.unregister(getParameterizedClass(), this);
         super.onDestroy();
     }
 
-    public abstract int getListViewRes();
-    public abstract int getLayoutRes();
+    public int getListViewRes() {
+        return listViewRes;
+    }
+
+    public int getLayoutRes() {
+        return layoutRes;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<T> getParameterizedClass() {
+        return (Class<T>) TypeResolver.resolveRawArgument(Feed.class, getClass());
+    }
 
 }
 
