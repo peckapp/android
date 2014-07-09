@@ -2,6 +2,7 @@ package com.peck.android.fragments.tabs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +10,7 @@ import android.view.ViewGroup;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
-import com.peck.android.fragments.BaseTab;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.views.PeckAuthButton;
@@ -19,7 +18,7 @@ import com.peck.android.views.PeckAuthButton;
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class ProfileTab extends BaseTab {
+public class ProfileTab extends Fragment {
 
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.tab_profile;
@@ -90,8 +89,4 @@ public class ProfileTab extends BaseTab {
     }
 
 
-    @Override
-    public Class<? extends Singleton> getManagerClass() {
-        return null;
-    }
 }

@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,12 +11,12 @@ import android.widget.TextView;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.makeramen.RoundedImageView;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.HasImage;
 import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.ImageCacher;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by mammothbane on 6/18/2014.
@@ -119,10 +118,6 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         return profileUrl;
     }
 
-    public void getProfilePicture(Callback<Bitmap> callback) {
-        ImageCacher.get(this, callback);
-    }
-
     @Override
     public int getResourceId() {
         return R.layout.lvitem_user;
@@ -143,30 +138,27 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
                     //todo: open the user's profile page
                 }
             });
-            getProfilePicture(new Callback<Bitmap>() {
-                @Override
-                public void callBack(Bitmap obj) {
-                    roundedImageView.setImageBitmap(obj);
-                }
-            });
+
+            if (profileUrl.length() > 0)
+                Picasso.with(PeckApp.getContext())
+                        .load(profileUrl)
+                        .into(roundedImageView);
+
         } else if (v instanceof LinearLayout) {
             //if this is a profile page
             v.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
-            getProfilePicture(new Callback<Bitmap>() {
-                @Override
-                public void callBack(Bitmap obj) {
-                    ((RoundedImageView) v.findViewById(R.id.riv_user)).setImageBitmap(obj);
-                    //todo: check this: v.findViewById(R.id.riv_user).setAlpha(1f);
-                    v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
-                }
-            });
-                ((TextView) v.findViewById(R.id.tv_realname)).setText(getFullName());
-                v.findViewById(R.id.tv_realname).setAlpha(1f);
+
+            if (profileUrl.length() > 0)
+                Picasso.with(PeckApp.getContext())
+                    .load(profileUrl)
+                    .into(((RoundedImageView) v.findViewById(R.id.riv_user)));
+
+            //todo: check this: v.findViewById(R.id.riv_user).setAlpha(1f);
+            v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
+            ((TextView) v.findViewById(R.id.tv_realname)).setText(getFullName());
+            v.findViewById(R.id.tv_realname).setAlpha(1f);
         }
-
-
     }
-
 
 
 }

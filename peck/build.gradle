@@ -48,6 +48,7 @@ dependencies {
     compile 'net.jodah:typetools:+'
     compile 'org.apache.httpcomponents:httpclient-android:+'
     compile 'org.apache.commons:commons-collections4:+'
+    compile 'com.squareup.picasso:picasso:+'
 
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'

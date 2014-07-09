@@ -1,6 +1,7 @@
 package com.peck.android.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
  *
  */
 
-public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseTab implements HasManager {
+public abstract class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment implements HasManager {
 
     protected String tag() {
         return ((Object)this).getClass().getName();

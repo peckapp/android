@@ -51,7 +51,7 @@ public abstract class DBOperable implements Serializable {
     public Date updated;
 
     public String getTableName() {
-        return "tbl_" + getClass().getSimpleName();
+        return "tbl_" + getClass().getSimpleName().toLowerCase();
     }
 
     public String[] getColumns() {

@@ -1,18 +1,18 @@
 package com.peck.android.models;
 
-import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.makeramen.RoundedImageView;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.enums.CommentType;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.HasFeedLayout;
 import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.UserManager;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by mammothbane on 7/8/2014.
@@ -74,12 +74,10 @@ public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
         else {
             ((TextView) v.findViewById(R.id.tv_text)).setText(text);
             ((TextView) v.findViewById(R.id.tv_title)).setText(user.getFullName());
-            user.getProfilePicture(new Callback<Bitmap>() {
-                @Override
-                public void callBack(Bitmap obj) {
-                    ((RoundedImageView) v.findViewById(R.id.riv_user)).setImageBitmap(obj);
-                }
-            });
+            if (user.getProfileUrl().length() > 0)
+            Picasso.with(PeckApp.getContext()).
+                    load(user.getProfileUrl())
+                    .into(((RoundedImageView) v.findViewById(R.id.riv_user)));
         }
     }
 

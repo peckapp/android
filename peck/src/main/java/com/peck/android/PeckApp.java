@@ -2,6 +2,8 @@ package com.peck.android;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
@@ -46,7 +48,13 @@ public class PeckApp extends Application implements Singleton{
         AppContext.init(this);
         PeckSessionHandler.init();
 
-
+        if (BuildConfig.DEBUG) {
+            getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
+            SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
+            edit.clear();
+            edit.apply();
+            Log.d("PeckApp", "deleted database, cleared USER_PREFS SharedPreferences");
+        }
     }
 
 

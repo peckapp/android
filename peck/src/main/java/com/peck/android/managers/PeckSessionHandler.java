@@ -1,7 +1,6 @@
 package com.peck.android.managers;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -61,12 +60,7 @@ public class PeckSessionHandler implements Singleton {
 
         FacebookSessionHandler.init();
 
-        //test: remove before production
-        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
-        SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
-        edit.clear();
-        edit.apply();
-        Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
+
 
         UserManager.getManager().initialize(new Callback<ArrayList<User>>() {
             @Override
@@ -85,7 +79,6 @@ public class PeckSessionHandler implements Singleton {
                     @Override
                     public void callBack(Boolean obj) {
                         if (obj) {
-                            ImageCacher.init(user);
                             Log.i(TAG, "initialized with user " + user.getServerId());
                         } else {
                             //todo: give the user an alert dialog, prompting them to log in
