@@ -145,23 +145,21 @@ public abstract class Manager<T extends DBOperable> {
      * @param item the new item
      */
     public void addFromNetwork(final T item) {
-        if (getByServerId(item.getServerId()) != null && !getByServerId(item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+        if (getByServerId(item.getServerId()) != null) {
+            if (!getByServerId(item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+                dSource.update(item);
+                synchronized (data) {
+                    data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
+                    data.add(item);
+                }
+            } else {
+                ServerCommunicator.patchObject(item, getParameterizedClass(), new Callback.NullCb());
+            }
+        } else {
             dSource.create(item, new Callback<Integer>() {
                 @Override
                 public void callBack(Integer obj) {
                     item.setLocalId(obj);
-                    synchronized (data) {
-                        data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
-                        data.add(item);
-                    }
-                }
-            });
-
-        } else {
-            dSource.create(item, new Callback<Integer>() {
-                @Override
-                public void callBack(Integer id) {
-                    item.setLocalId(id);
                     data.add(item);
                 }
             });
