@@ -6,13 +6,12 @@ import android.util.Log;
 
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.DBOperable;
 import com.peck.android.network.ServerCommunicator;
-
-import net.jodah.typetools.TypeResolver;
+import com.squareup.otto.Bus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 6/12/2014.
@@ -21,42 +20,51 @@ import java.util.ArrayList;
  *
  */
 
-public abstract class Manager<T extends DBOperable> {
+public abstract class Manager {
 
-    private boolean initialized = false;
     public static String tag = "Manager";
 
     //todo: maybe we want this to be a heap based on localid
-    protected final ArrayList<T> data = new ArrayList<T>();
-    protected DataSource<T> dSource = new DataSource<T>(getParameterizedClass());
+    protected static final HashMap<Class<? extends DBOperable>, ArrayList<? extends DBOperable>> data = new HashMap<Class<? extends DBOperable>, ArrayList<? extends DBOperable>>();
+    protected static final HashMap<Class<? extends DBOperable>, Bus> buses = new HashMap<Class<? extends DBOperable>, Bus>();
+    protected static final HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>> dataSources = new HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>>();
 
-    public static <S extends Manager & Singleton> Manager getManager(Class<S> clss) {
-        try {
-            return (Manager)clss.getMethod("getManager", null).invoke(null, null);}
-        catch (Exception e) {
-            Log.e(tag, "every implemented manager must be a singleton with a static getManager() method");
-            e.printStackTrace();
-            return null;
+
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> DataSource<T> getDataSource(Class<T> tClass) {
+        DataSource<T> dataSource;
+        synchronized (dataSources) {
+            dataSource = (DataSource<T>) dataSources.get(tClass);
+            if (dataSource == null) dataSource = new DataSource<T>(tClass);
+            dataSources.put(tClass, dataSource);
         }
+        return dataSource;
     }
 
-    public Manager<T> initialize(final Callback<ArrayList<T>> callback) {
-        if (!initialized) {
-            loadFromDatabase(new Callback<ArrayList<T>>() {
-                @Override
-                public void callBack(ArrayList<T> obj) {
-                    downloadFromServer(new Callback<ArrayList<T>>() {
-                        @Override
-                        public void callBack(ArrayList<T> obj) {
-                            callback.callBack(obj);
-                        }
-                    });
-                }
-            });
-        } initialized = true;
-        return this;
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
+        ArrayList<T> ret;
+        synchronized (data) {
+            ret = (ArrayList<T>) data.get(tClass);
+            if (ret == null) ret = new ArrayList<T>();
+            data.put(tClass, ret);
+        }
+        return ret;
     }
 
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> Bus getBus(Class<T> tClass) {
+        Bus bus;
+        synchronized (buses) {
+            bus = buses.get(tClass);
+            if (bus == null) bus = new Bus();
+            buses.put(tClass, bus);
+        }
+        return bus;
+    }
 
     /**
      *
@@ -65,40 +73,36 @@ public abstract class Manager<T extends DBOperable> {
      *
      * @param callback a callback to execute once done loading
      */
-    public void loadFromDatabase(final Callback<ArrayList<T>> callback) {
-        dSource.getAll(new Callback<ArrayList<T>>() {
+    public static <T extends DBOperable> void loadFromDatabase(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
+        getDataSource(tClass).getAll(new Callback<ArrayList<T>>() {
             @Override
             public void callBack(ArrayList<T> obj) {
-                data.addAll(obj);
+                getData(tClass).addAll(obj);
                 callback.callBack(obj);
             }
         });
 
     }
 
-    public void downloadFromServer(final Callback<ArrayList<T>> callback) {
-        ServerCommunicator.getAll(getParameterizedClass(), new Callback<ArrayList<T>>() {
+    public static <T extends DBOperable> void downloadFromServer(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
+        ServerCommunicator.getAll(tClass, new Callback<ArrayList<T>>() {
             @Override
             public void callBack(final ArrayList<T> objs) {
-                for (T i : objs) addFromNetwork(i);
+                for (T i : objs) addFromNetwork(tClass, i);
                 callback.callBack(objs);
             }
         });
     }
 
     @NonNull
-    public String tag() {
-        return getClass().getName();
-    }
-
-    @NonNull
-    public ArrayList<T> getData() {
-        return data;
+    public static String tag() {
+        return Manager.class.getName();
     }
 
     @Nullable
-    public T getByLocalId(Integer id) {
-        for (T i : data) {
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> T getByLocalId(Class<T> tClass, Integer id) {
+        for (T i : getData(tClass)) {
             if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
         }
 
@@ -106,8 +110,9 @@ public abstract class Manager<T extends DBOperable> {
     }
 
     @Nullable
-    public T getByServerId(Integer id) {
-        for (T i : data) {
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> T getByServerId(Class<T> tClass, Integer id) {
+        for (T i : getData(tClass)) {
             if (i.getServerId() != null && i.getServerId().equals(id)) return i;
         }
         return null;
@@ -119,16 +124,18 @@ public abstract class Manager<T extends DBOperable> {
      *
      * @param item
      */
-
-    public void addNew(final T item) {
-        dSource.create(item, new Callback<Integer>() {
+    @SuppressWarnings("unchecked")
+    public static <T extends DBOperable> void addNew(final Class<T> tClass, final T item) {
+        getDataSource(tClass).create(item, new Callback<Integer>() {
             @Override
             public void callBack(final Integer dbObj) {
-                data.add((T)item.setLocalId(dbObj));
-                ServerCommunicator.postObject(item, getParameterizedClass(), new Callback<T>() {
+                getData(tClass).add((T) item.setLocalId(dbObj));
+                getBus(tClass).post(item);
+                ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                     @Override
                     public void callBack(T obj) {
-                        dSource.update(obj);
+                        item.setServerId(obj.getServerId());
+                        getDataSource(tClass).update(item);
                     }
                 });
             }
@@ -144,36 +151,28 @@ public abstract class Manager<T extends DBOperable> {
      *
      * @param item the new item
      */
-    public void addFromNetwork(final T item) {
-        if (getByServerId(item.getServerId()) != null) {
-            if (!getByServerId(item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
-                dSource.update(item);
-                synchronized (data) {
-                    data.remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
-                    data.add(item);
+    public static <T extends DBOperable> void addFromNetwork(final Class<T> tClass, final T item) {
+        if (getByServerId(tClass, item.getServerId()) != null) {
+            if (!getByServerId(tClass, item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
+                getDataSource(tClass).update(item);
+                synchronized (getData(tClass)) {
+                    getData(tClass).remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
+                    getData(tClass).add(item);
+                    getBus(tClass).post(item);
                 }
             } else {
-                ServerCommunicator.patchObject(item, getParameterizedClass(), new Callback.NullCb());
+                ServerCommunicator.patchObject(item, tClass, new Callback.NullCb());
             }
         } else {
-            dSource.create(item, new Callback<Integer>() {
+            getDataSource(tClass).create(item, new Callback<Integer>() {
                 @Override
                 public void callBack(Integer obj) {
                     item.setLocalId(obj);
-                    data.add(item);
+                    getData(tClass).add(item);
+                    getBus(tClass).post(item);
                 }
             });
         }
-    }
-
-    /**
-     *
-     * @return the class of the model that this manager handles.
-     */
-
-    public Class<T> getParameterizedClass() {
-        Class<T> clss = (Class<T>) TypeResolver.resolveRawArgument(Manager.class, getClass());
-        return clss;
     }
 
 
@@ -183,18 +182,27 @@ public abstract class Manager<T extends DBOperable> {
      *
      * @param item the item to update, definitely has localid
      */
-    public void updateFromUser(final T item) {
-
-        if (data.contains(item)) {
-            ServerCommunicator.patchObject(item, getParameterizedClass(), new Callback<T>() {
+    public static <T extends DBOperable> void updateFromUser(final Class<T> tClass, final T item) {
+        if (getData(tClass).contains(item)) {
+            ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
                 @Override
                 public void callBack(T obj) {
                     item.setServerId(obj.getServerId());
                     item.updated();
-                    dSource.update(item);
+                    getBus(tClass).post(item);
+                    getDataSource(tClass).update(item);
                 }
             });
         } else Log.w(tag(), item.toString() + " isn't in the dataset, so it couldn't be updated");
     }
+
+    public static <T extends DBOperable> void register(Class<T> tClass, Object subscriber) {
+        getBus(tClass).register(subscriber);
+    }
+
+    public static <T extends DBOperable> void unregister(Class<T> tClass, Object subscriber) {
+        getBus(tClass).unregister(subscriber);
+    }
+
 
 }
