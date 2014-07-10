@@ -205,8 +205,6 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         private void runCreate() {
-
-            synchronized (t) {
                 int insertId;
                 try {
                     insertId = (int) database.insert(getTableName(), null, JsonConverter.toContentValues(t));
@@ -220,17 +218,14 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
                     Log.e(TAG, "item broke a constraint: " + e.toString());
                     callback.callBack(null);
                 }
-            }
         }
 
         private void update(int localId) {
             if (BuildConfig.DEBUG && (t.getLocalId() == null && t.getServerId() == null)) throw new IllegalArgumentException("serverId and localId can't both be null on update");
 
-            synchronized (t) {
                 database.update(getTableName(), JsonConverter.toContentValues(t),
                         PeckApp.Constants.Database.LOCAL_ID + " = ?", new String[]{Integer.toString(localId)});
                 callback.callBack(localId);
-            }
         }
 
         @SuppressWarnings("unchecked")
@@ -248,6 +243,11 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
     }
 
+    /**
+     *
+     * deletion method safe with null and objects without localids.
+     *
+     */
     private class delete extends dbOp {
 
         private T t;
@@ -257,10 +257,18 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            long id = t.getLocalId();
+            if (t == null) return;
+            Long id = (long)t.getLocalId();
+            if (id == null && t.getServerId() != null) {
+                Cursor cursor = database.query(getTableName(), getColumns(), PeckApp.Constants.Network.SV_ID_NAME + " = " + t.getServerId(), null, null, null, null);
+                if (cursor.getCount() != 1) return;
+                cursor.moveToFirst();
+                id = (long)cursor.getInt(cursor.getColumnIndex(PeckApp.Constants.Network.SV_ID_NAME));
+            }
+
             Log.d(TAG, t.getClass() + " deleted with id: " + id);
             database.delete(getTableName(), PeckApp.Constants.Database.LOCAL_ID
-                    + " = " + id, null);
+                    + " = ?", new String[] {Long.toString(id)});
         }
     }
 

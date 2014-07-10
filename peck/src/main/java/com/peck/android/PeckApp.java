@@ -10,6 +10,7 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckSessionHandler;
+import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -49,6 +50,8 @@ public class PeckApp extends Application implements Singleton{
         PeckSessionHandler.init();
 
         if (BuildConfig.DEBUG) {
+            Picasso.with(getContext()).setIndicatorsEnabled(true);
+            Picasso.with(getContext()).setLoggingEnabled(true);
             getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
             SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
             edit.clear();
