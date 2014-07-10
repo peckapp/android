@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,13 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         Bundle bundle = new Bundle();
         bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Locale");
         localeSelectionFeed.setArguments(bundle);
+        localeSelectionFeed.setOnClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                LocaleManager.setLocale((Locale)adapterView.getItemAtPosition(i));
+                finish();
+            }
+        });
     }
 
     @Override

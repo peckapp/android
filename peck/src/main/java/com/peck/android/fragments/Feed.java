@@ -41,7 +41,8 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
     private Class<T> tClass;
     protected int listViewRes = R.id.lv_content;
     protected int layoutRes = R.layout.feed;
-    protected boolean listening;
+    private boolean listening;
+    private AdapterView.OnItemClickListener listener;
 
     @Override
     public void setArguments(Bundle args) {
@@ -63,14 +64,11 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    public void setOnClickListener(AdapterView.OnItemClickListener listener) {
+        this.listener = listener;
     }
-
 
     @Subscribe
     public void initComplete(DataHandler.InitComplete complete) {
@@ -98,6 +96,7 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
         View r = inflater.inflate(getLayoutRes(), container, false);
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
         v.setAdapter(feedAdapter);
+        v.setOnItemClickListener(listener);
         return r;
     }
 
