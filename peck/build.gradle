@@ -47,6 +47,10 @@ dependencies {
     compile 'com.makeramen:roundedimageview:+'
     compile 'net.jodah:typetools:+'
     compile 'org.apache.httpcomponents:httpclient-android:+'
+    compile 'org.apache.commons:commons-collections4:+'
+    compile 'com.squareup.picasso:picasso:+'
+    compile 'com.squareup:otto:+'
+
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     

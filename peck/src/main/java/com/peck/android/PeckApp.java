@@ -2,12 +2,15 @@ package com.peck.android;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckSessionHandler;
+import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -46,7 +49,15 @@ public class PeckApp extends Application implements Singleton{
         AppContext.init(this);
         PeckSessionHandler.init();
 
-
+        if (BuildConfig.DEBUG) {
+            Picasso.with(getContext()).setIndicatorsEnabled(true);
+            Picasso.with(getContext()).setLoggingEnabled(true);
+            getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
+            SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
+            edit.clear();
+            edit.apply();
+            Log.d("PeckApp", "deleted database, cleared USER_PREFS SharedPreferences");
+        }
     }
 
 
@@ -67,6 +78,7 @@ public class PeckApp extends Application implements Singleton{
             public final static String USERS = "users/";
             public final static String LOCALES = "institutions/";
             public final static String PECK = "push_notifications/";
+            public final static String COMMENTS= "comments/";
 
             //todo: get these:
             public final static String MEAL = null;

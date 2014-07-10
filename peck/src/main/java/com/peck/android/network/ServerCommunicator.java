@@ -27,6 +27,7 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
+import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
@@ -65,14 +66,14 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Food.class, Network.FOOD);
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
-
+        apiMap.put(Comment.class, Network.COMMENTS);
     }
 
 
     private ServerCommunicator() { }
 
     public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
-        Locale locale = LocaleManager.getManager().getLocale();
+        Locale locale = LocaleManager.getLocale();
         if (locale == null) {
                 /* todo: throw an error dialog to the user/put them in locale selection */
 
@@ -114,7 +115,7 @@ public class ServerCommunicator implements Singleton {
         return auth;
     }
 
-    public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback) {
+    public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback, final Callback failure) {
         String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass) + serverId;
 
         get(tClass, new Callback<ArrayList<T>>() {
@@ -122,16 +123,16 @@ public class ServerCommunicator implements Singleton {
             public void callBack(ArrayList<T> obj) {
                 callback.callBack(obj.get(0));
             }
-        }, url);
+        }, failure, url);
 
     }
 
-    public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback) {
+    public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure) {
         String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass);
-        get(tClass, callback, url);
+        get(tClass, callback, failure, url);
     }
 
-    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final String url) {
+    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure, final String url) {
         Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET to " + url);
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -142,7 +143,7 @@ public class ServerCommunicator implements Singleton {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-
+                failure.callBack(null);
             }
         }));
     }
@@ -152,18 +153,18 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
-        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
+        postObject(post, tClass, new Callback.NullCb(), new Callback.NullCb());
     }
 
-    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
-        sendObject(Request.Method.POST, post, tClass, callback);
+    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
+        sendObject(Request.Method.POST, post, tClass, callback, failure);
     }
 
-    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
-        sendObject(Request.Method.PATCH, patch, tClass, callback);
+    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
+        sendObject(Request.Method.PATCH, patch, tClass, callback, failure);
     }
 
-    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
+    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
         try {
 
             JSONObject item = toJson(post, tClass); //fixme: subtract 2 for the trailing slash and the s
@@ -179,6 +180,7 @@ public class ServerCommunicator implements Singleton {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
+                    failure.callBack(volleyError);
                     Log.e(getClass().getSimpleName(), volleyError.toString());
                 }
 

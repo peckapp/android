@@ -20,7 +20,17 @@ import java.util.Map;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DBOperable implements Serializable {
+public abstract class DBOperable implements Serializable, Comparable<DBOperable> {
+
+    private transient boolean pendingUpdates = false;
+
+    public void pending(boolean state) {
+        this.pendingUpdates = state;
+    }
+
+    public boolean isPending() {
+        return pendingUpdates;
+    }
 
     public DBOperable() {
         created = new Date(System.currentTimeMillis());
@@ -50,8 +60,9 @@ public abstract class DBOperable implements Serializable {
     @DBType("integer")
     public Date updated;
 
+
     public String getTableName() {
-        return "tbl_" + getClass().getSimpleName();
+        return "tbl_" + getClass().getSimpleName().toLowerCase();
     }
 
     public String[] getColumns() {
@@ -123,7 +134,7 @@ public abstract class DBOperable implements Serializable {
      *
      *
      * @param o object to compare
-     * @return true if their local and server ids are the same or null
+     * @return true if their local ids are the same
      */
 
     @Override
@@ -140,4 +151,8 @@ public abstract class DBOperable implements Serializable {
         return getClass().getSimpleName() + "[id: " + getLocalId() + " | sv_id: " + getServerId() + "]";
     }
 
+    @Override
+    public int compareTo(@NonNull DBOperable dbOperable) {
+        return (int)Math.signum(this.getCreated().getTime() - dbOperable.getCreated().getTime());
+    }
 }

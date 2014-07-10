@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,7 +16,7 @@ import com.peck.android.managers.LocaleManager;
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class Locale extends DBOperable implements SelfSetup, HasFeedLayout, Comparable<Locale> {
+public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
 
     private final static int resId = R.layout.lvitem_locale;
 
@@ -90,7 +89,7 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout, Comp
     }
 
     @Override
-    public void setUp(@NonNull View v, Activity activity) {
+    public void setUp(@NonNull View v) {
         ((TextView)v.findViewById(R.id.tv_locale_name)).setText(toString());
     }
 
@@ -99,17 +98,21 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout, Comp
         return resId;
     }
 
+
     @Override
-    public int compareTo(@NonNull Locale locale) {
-        Double myDist = getDist();
-        Double theirDist = locale.getDist();
+    public int compareTo(@NonNull DBOperable dbOperable) {
+        if (!(dbOperable instanceof Locale)) return super.compareTo(dbOperable);
+        else {
+            Double myDist = getDist();
+            Double theirDist = ((Locale) dbOperable).getDist();
 
-        if (myDist == null) {
-            if (theirDist == null) return 0;
-            else return -1;
-        } else if (theirDist == null) return 1;
+            if (myDist == null) {
+                if (theirDist == null) return 0;
+                else return -1;
+            } else if (theirDist == null) return 1;
 
-        return ((int)Math.signum(this.getDist() - locale.getDist()));
+            return ((int)Math.signum(this.getDist() - ((Locale) dbOperable).getDist()));
+        }
     }
 
     @Override

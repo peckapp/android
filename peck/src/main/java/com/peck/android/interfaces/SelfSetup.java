@@ -1,6 +1,5 @@
 package com.peck.android.interfaces;
 
-import android.app.Activity;
 import android.view.View;
 
 /**
@@ -9,5 +8,5 @@ import android.view.View;
  */
 
 public interface SelfSetup {
-    public void setUp(View v, Activity activity); //set up the view p
+    public void setUp(View v); //set up the view p
 }

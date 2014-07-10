@@ -7,6 +7,7 @@ import android.util.Log;
 import com.peck.android.PeckApp;
 import com.peck.android.json.JsonConverter;
 import com.peck.android.models.Circle;
+import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Food;
@@ -37,6 +38,7 @@ public class DatabaseManager {
         dbOperables.add(new Peck());
         dbOperables.add(new Circle());
         dbOperables.add(new User());
+        dbOperables.add(new Comment());
     }
 
     public static String getDbName() {

@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -50,7 +49,7 @@ public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
     }
 
     @Override
-    public void setUp(View v, Activity activity) {
+    public void setUp(View v) {
         ((TextView)v.findViewById(R.id.tv_text)).setText(text);
         ((TextView)v.findViewById(R.id.tv_title)).setText(title);
     }

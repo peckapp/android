@@ -3,6 +3,7 @@ package com.peck.android.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,14 +12,14 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.peck.android.R;
-import com.peck.android.fragments.BaseTab;
-import com.peck.android.fragments.tabs.CirclesFeed;
-import com.peck.android.fragments.tabs.ExploreFeed;
+import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
-import com.peck.android.fragments.tabs.PeckFeed;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.LocaleManager;
+import com.peck.android.models.Circle;
+import com.peck.android.models.Event;
+import com.peck.android.models.Peck;
 
 import java.util.HashMap;
 
@@ -27,23 +28,34 @@ public class FeedActivity extends PeckActivity {
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    private final static HashMap<Integer, BaseTab> buttons = new HashMap<Integer, BaseTab>(); //don't use a sparsearray, we need the keyset
+    private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
     @Nullable
     private Button lastPressed;
 
     static {
         buttons.put(R.id.bt_add, new NewPostTab());
-        buttons.put(R.id.bt_peck, new PeckFeed());
+        buttons.put(R.id.bt_peck, new Feed<Peck>());
         buttons.put(R.id.bt_profile, new ProfileTab());
-        buttons.put(R.id.bt_circles, new CirclesFeed());
-        buttons.put(R.id.bt_newsfeed, new ExploreFeed());
+        buttons.put(R.id.bt_circles, new Feed<Circle>());
+        buttons.put(R.id.bt_explore, new Feed<Event>());
+
+        Bundle bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Peck");
+        buttons.get(R.id.bt_peck).setArguments(bundle);
+
+        bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Circle");
+        buttons.get(R.id.bt_circles).setArguments(bundle);
+
+        bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Event");
+        buttons.get(R.id.bt_explore).setArguments(bundle);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         switch (resultCode) {
             case RESULT_OK: {
                 break;
@@ -51,9 +63,7 @@ public class FeedActivity extends PeckActivity {
             default: {
                 break;
             }
-
         }
-
     }
 
 
@@ -63,6 +73,13 @@ public class FeedActivity extends PeckActivity {
         Crashlytics.start(this);
 
         setContentView(R.layout.activity_feed_root);
+
+        Feed<Event> homeFeed = new Feed<Event>();
+        Bundle bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Event");
+        homeFeed.setArguments(bundle);
+
+        getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, homeFeed).commit();
 
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
@@ -94,8 +111,7 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-
-        if (LocaleManager.getManager().getLocale() == null) {
+        if (LocaleManager.getLocale() == null) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
         }
