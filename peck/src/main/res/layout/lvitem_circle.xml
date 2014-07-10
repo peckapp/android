@@ -49,7 +49,7 @@
 
                 <it.sephiroth.android.library.widget.HListView
                     android:id="@+id/hlv_users"
-                    android:layout_height="80dp"
+                    android:layout_height="100dp"
                     android:layout_width="match_parent"
                     android:layout_gravity="center_vertical" />
 

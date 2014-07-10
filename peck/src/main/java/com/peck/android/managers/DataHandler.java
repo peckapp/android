@@ -247,18 +247,21 @@ public abstract class DataHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> T getByLocalId(Class<T> tClass, Integer id) {
-        for (T i : getDataRef(tClass)) {
-            if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
+        synchronized (getDataRef(tClass)) {
+            for (T i : getDataRef(tClass)) {
+                if (!(i.getLocalId() == null) && i.getLocalId().equals(id)) return i;
+            }
         }
-
         return null;
     }
 
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> T getByServerId(Class<T> tClass, Integer id) {
-        for (T i : getDataRef(tClass)) {
-            if (i.getServerId() != null && i.getServerId().equals(id)) return i;
+        synchronized (getDataRef(tClass)) {
+            for (T i : getDataRef(tClass)) {
+                if (i.getServerId() != null && i.getServerId().equals(id)) return i;
+            }
         }
         return null;
     }
@@ -266,7 +269,7 @@ public abstract class DataHandler {
 
     /**
      *
-     * add or update the object passed in. propagates changes to the arraylists stored in this handler,
+     * add or update the object passed in. propagates changes to the data stored in this handler,
      * the database, and the server.
      *
      *
@@ -286,7 +289,8 @@ public abstract class DataHandler {
                 getDataSource(tClass).create(item, new Callback<Integer>() {
                     @Override
                     public void callBack(final Integer dbObj) {
-                        getDataRef(tClass).add((T) item.setLocalId(dbObj));
+                        item.setLocalId(dbObj);
+                        getDataRef(tClass).add(item);
                         getBus(tClass).post(item);
                         ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                             @Override
@@ -307,11 +311,12 @@ public abstract class DataHandler {
             } else {
                 getDataSource(tClass).create(item, new Callback<Integer>() {
                     @Override
-                    public void callBack(Integer obj) {
+                    public void callBack(@NonNull Integer obj) {
+                        item.setLocalId(obj);
                         if (getByServerId(tClass, item.getServerId()) == null || getByServerId(tClass, item.getServerId()).getUpdated().before(item.getUpdated())) {
                             synchronized (getDataRef(tClass)) {
                                 getDataRef(tClass).remove(item);
-                                getDataRef(tClass).add((T) item.setLocalId(obj));
+                                getDataRef(tClass).add(item);
                             }
                         }
                         if (serverUpdate) {
@@ -341,7 +346,7 @@ public abstract class DataHandler {
                     @Override
                     public void callBack(T obj) {
                         item.setServerId(obj.getServerId());
-                        getDataSource(tClass).update(item);
+                        getDataSource(tClass).create(item, new NullCb());
                         item.pending(false);
                     }
                 }, new Callback<VolleyError>() {
@@ -352,7 +357,7 @@ public abstract class DataHandler {
                 });
 
             } else { //item has both ids
-                getDataSource(tClass).update(item);
+                getDataSource(tClass).create(item, new Callback.NullCb());
                 if (serverUpdate) {
                     ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
                         @Override

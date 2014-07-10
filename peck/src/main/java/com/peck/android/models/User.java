@@ -129,7 +129,7 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
         Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
                 (v instanceof LinearLayout) ? "profile." : "unknown view."));
 
-        if (v instanceof RelativeLayout) { //todo: fix this, this is a stupid way to make this work
+        if (v instanceof RelativeLayout) { //fixme: this is a stupid way to make this work
             final RoundedImageView roundedImageView = (RoundedImageView)v.findViewById(R.id.riv_user);
             roundedImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -139,10 +139,14 @@ public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasIma
                 }
             });
 
+            //todo: set onLongClickListener
+
             if (profileUrl.length() > 0)
                 Picasso.with(PeckApp.getContext())
                         .load(profileUrl)
                         .into(roundedImageView);
+
+            if (getFullName() != null) ((TextView)v.findViewById(R.id.tv_name)).setText(getFullName());
 
         } else if (v instanceof LinearLayout) {
             //if this is a profile page

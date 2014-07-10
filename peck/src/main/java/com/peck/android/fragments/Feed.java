@@ -78,16 +78,17 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
 
             case DB_LOADED:
                 data = DataHandler.getData(getParameterizedClass());
+                feedAdapter.notifyDataSetChanged();
                 break;
             case LOAD_COMPLETE:
                 data = DataHandler.getData(getParameterizedClass());
+                feedAdapter.notifyDataSetChanged();
                 break;
             case NOT_LOADED:
                 //todo: throw an error
                 break;
         }
         listening = false;
-        feedAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -97,6 +98,7 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>)r.findViewById(getListViewRes());
         v.setAdapter(feedAdapter);
         v.setOnItemClickListener(listener);
+        feedAdapter.notifyDataSetChanged();
         return r;
     }
 
@@ -125,17 +127,20 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
     public void receive(T t) {
         if ((filtrationPolicy != null && filtrationPolicy.test(t)) || filtrationPolicy == null) {
             synchronized (dataLock) {
-                if (!data.contains(t)) data.add(t);
+                if (!data.contains(t)) {
+                    data.add(t);
+                    feedAdapter.notifyDataSetChanged();
+                }
                 else if (!data.get(data.indexOf(t)).getUpdated().before(t.getUpdated())) {
                     data.remove(t);
                     data.add(t);
+                    feedAdapter.notifyDataSetChanged();
                 } else {
                     DataHandler.put(tClass, data.get(data.indexOf(t)), false);
                 }
             }
         }
 
-        feedAdapter.notifyDataSetChanged();
     }
 
     public void onPause() {

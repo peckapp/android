@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Factory;
@@ -278,7 +279,7 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
 
         public void run() {
-            assert (t.getLocalId() != null || t.getServerId() != null) : "serverId and localId can't both be null to update";
+            if (BuildConfig.DEBUG && (t.getLocalId() == null && t.getServerId() == null)) throw new IllegalArgumentException("serverId and localId can't both be null on update");
 
             String whereClause;
             String whereArg;
