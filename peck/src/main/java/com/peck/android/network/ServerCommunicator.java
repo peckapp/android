@@ -153,18 +153,18 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void postObject(final T post, Class<T> tClass) {
-        postObject(post, tClass, new Callback<T>() {public void callBack(T obj) {} });
+        postObject(post, tClass, new Callback.NullCb(), new Callback.NullCb());
     }
 
-    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback) {
-        sendObject(Request.Method.POST, post, tClass, callback);
+    public static <T extends DBOperable> void postObject(final T post, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
+        sendObject(Request.Method.POST, post, tClass, callback, failure);
     }
 
-    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback) {
-        sendObject(Request.Method.PATCH, patch, tClass, callback);
+    public static <T extends DBOperable> void patchObject(final T patch, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
+        sendObject(Request.Method.PATCH, patch, tClass, callback, failure);
     }
 
-    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback) {
+    private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
         try {
 
             JSONObject item = toJson(post, tClass); //fixme: subtract 2 for the trailing slash and the s
@@ -180,6 +180,7 @@ public class ServerCommunicator implements Singleton {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
+                    failure.callBack(volleyError);
                     Log.e(getClass().getSimpleName(), volleyError.toString());
                 }
 

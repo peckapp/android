@@ -32,6 +32,12 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
+    {
+        Bundle bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Locale");
+        localeSelectionFeed.setArguments(bundle);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +72,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             locationServices = false;
             //todo: search bar?
 
-        } else {
-            LocaleManager.setLocation(client.getLastLocation());
         }
 
         loadLocales();
@@ -87,17 +91,22 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
     @Subscribe
     public void respondToLocaleLoad(DataHandler.InitComplete complete) {
-        if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE) {
-            findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
-            findViewById(R.id.rl_locale).setVisibility(View.GONE);
-            findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
-        } else {
-            if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
-            findViewById(R.id.tv_progress).setVisibility(View.GONE);
-            findViewById(R.id.rl_locale).setVisibility(View.GONE);
-            findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-        }
         DataHandler.unregister(Locale.class, this);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE) {
+                    findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
+                } else {
+                    if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
+                    findViewById(R.id.tv_progress).setVisibility(View.GONE);
+                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
 

@@ -56,4 +56,13 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
         return view;
     }
 
+    @Override
+    public void notifyDataSetChanged() {
+        feed.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                FeedAdapter.super.notifyDataSetChanged();
+            }
+        });
+    }
 }

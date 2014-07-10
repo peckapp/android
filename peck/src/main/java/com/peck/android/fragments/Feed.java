@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
+import com.peck.android.BuildConfig;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.interfaces.HasFeedLayout;
@@ -29,9 +30,11 @@ import java.util.ArrayList;
 
 public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Fragment {
 
+    public static final String CLASS_NAME = "class name";
     protected String tag() {
         return ((Object)this).getClass().getName();
     }
+    private final Object dataLock = new Object();
     protected FeedAdapter<T> feedAdapter;
     protected ArrayList<T> data = new ArrayList<T>();
     private FiltrationPolicy<T> filtrationPolicy;
@@ -40,41 +43,32 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
     protected int layoutRes = R.layout.feed;
     protected boolean listening;
 
-    {
-        /*try {
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        String str = args.getString(CLASS_NAME);
+        try {
+            if (BuildConfig.DEBUG && str == null) throw new RuntimeException("You MUST include a fully qualified class in the bundle.");
+            tClass = (Class<T>)Class.forName(str);
+            if (BuildConfig.DEBUG && !DBOperable.class.isAssignableFrom(tClass)) throw new ClassCastException("tClass was not assignable from " + str);
 
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("tClass wasn't assignable from " + str + ". Class name should be fully qualified, of the form 'com.peck.android.fragments.Feed'.");
+        }
 
-            feedAdapter = new FeedAdapter<T>(((T)((Class)TypeResolver.resolveGenericType(Feed.class, getClass())).newInstance()).getResourceId(), this);
-            feedAdapter = new FeedAdapter<T>(((T)TypeResolver.resolveRawArgument(Feed.class, getClass()).newInstance()).getResourceId(), this);
-        } catch (Exception e) {
-            throw new RuntimeException("couldn't instantiate an object");
-        }*/
-    }
-
-
-    public void setUp(Class<T> tClass) {
-        this.tClass = tClass;
         try {
             feedAdapter = new FeedAdapter<T>(tClass.newInstance().getResourceId(), this);
-        } catch (Exception e) {
-            throw new RuntimeException("couldn't instantiate an object");
+        } catch (java.lang.InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        //todo: ensure manager has data loaded
-        super.onCreate(savedInstanceState);
-        DataHandler.register(getParameterizedClass(), this);
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        listening = true;
-        DataHandler.init(getParameterizedClass());
-
     }
 
 
@@ -95,6 +89,7 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
                 break;
         }
         listening = false;
+        feedAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -108,6 +103,11 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
 
     public void onResume() {
         super.onResume();
+        DataHandler.register(getParameterizedClass(), this);
+
+        listening = true;
+        DataHandler.init(getParameterizedClass());
+
         feedAdapter.notifyDataSetChanged();
     }
 
@@ -123,13 +123,25 @@ public class Feed<T extends DBOperable & SelfSetup & HasFeedLayout> extends Frag
     }
 
     @Subscribe
-    public void respondTo(T t) {
-        if (filtrationPolicy.test(t)) data.add(t);
+    public void receive(T t) {
+        if ((filtrationPolicy != null && filtrationPolicy.test(t)) || filtrationPolicy == null) {
+            synchronized (dataLock) {
+                if (!data.contains(t)) data.add(t);
+                else if (!data.get(data.indexOf(t)).getUpdated().before(t.getUpdated())) {
+                    data.remove(t);
+                    data.add(t);
+                } else {
+                    DataHandler.put(tClass, data.get(data.indexOf(t)), false);
+                }
+            }
+        }
+
+        feedAdapter.notifyDataSetChanged();
     }
 
-    public void onDestroy() {
+    public void onPause() {
         DataHandler.unregister(getParameterizedClass(), this);
-        super.onDestroy();
+        super.onPause();
     }
 
     public int getListViewRes() {

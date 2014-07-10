@@ -22,6 +22,16 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable, Comparable<DBOperable> {
 
+    private transient boolean pendingUpdates = false;
+
+    public void pending(boolean state) {
+        this.pendingUpdates = state;
+    }
+
+    public boolean isPending() {
+        return pendingUpdates;
+    }
+
     public DBOperable() {
         created = new Date(System.currentTimeMillis());
         updated = new Date(System.currentTimeMillis());
@@ -49,6 +59,7 @@ public abstract class DBOperable implements Serializable, Comparable<DBOperable>
     @SerializedName("updated_at")
     @DBType("integer")
     public Date updated;
+
 
     public String getTableName() {
         return "tbl_" + getClass().getSimpleName().toLowerCase();

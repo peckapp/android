@@ -2,14 +2,15 @@ package com.peck.android.managers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.Pair;
 
+import com.android.volley.VolleyError;
 import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.models.DBOperable;
 import com.peck.android.network.ServerCommunicator;
 import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +30,8 @@ public abstract class DataHandler {
     protected static final HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>> data = new HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>>();
     protected static final HashMap<Class<? extends DBOperable>, Bus> buses = new HashMap<Class<? extends DBOperable>, Bus>();
     protected static final HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>> dataSources = new HashMap<Class<? extends DBOperable>, DataSource<? extends DBOperable>>();
+    protected static final HashMap<Class<? extends DBOperable>, Pair<ArrayList<Integer>, ArrayList<Integer>>> pending =
+            new HashMap<Class<? extends DBOperable>, Pair<ArrayList<Integer>, ArrayList<Integer>>>();
 
     public static class InitStart {} //when we start initializing
     public static class InitComplete {} //when we're done initializing
@@ -37,7 +40,7 @@ public abstract class DataHandler {
         public LoadState getValue() { return value; }
     }
 
-    public enum LoadState { NOT_LOADED, DB_LOADED, LOAD_COMPLETE }
+    public enum LoadState { NOT_LOADED, LOADING_NOW, DB_LOADED, LOAD_COMPLETE }
 
     @NonNull
     @SuppressWarnings("unchecked")
@@ -105,51 +108,88 @@ public abstract class DataHandler {
         Bus bus;
         synchronized (buses) {
             bus = buses.get(tClass);
-            if (bus == null) bus = new Bus();
+            if (bus == null) bus = new Bus(ThreadEnforcer.ANY);
             buses.put(tClass, bus);
         }
         return bus;
     }
 
-    public static <T extends DBOperable> void init(final Class<T> tClass) {
-        getBus(tClass).post(new InitStart());
+    @NonNull
+    private static <T extends DBOperable> Pair<ArrayList<Integer>, ArrayList<Integer>> getPending(Class<T> tClass) {
+        Pair<ArrayList<Integer>, ArrayList<Integer>> pair;
+        synchronized (pending) {
+            pair = pending.get(tClass);
+            if (pair == null) pair = new Pair<ArrayList<Integer>, ArrayList<Integer>>(new ArrayList<Integer>(), new ArrayList<Integer>());
+            pending.put(tClass, pair);
+        }
+        return pair;
+    }
 
-        switch (getLoadState(tClass).value) {
-            case LOAD_COMPLETE:
-                getBus(tClass).post(new InitComplete());
-                break;
-            case DB_LOADED:
-                loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
-                    @Override
-                    public void callBack(ArrayList<T> obj) {
-                        getDataRef(tClass).addAll(obj);
-                        getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
-                        getBus(tClass).post(new InitComplete());
-                    }
-                });
-                break;
-            case NOT_LOADED:
-                loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
-                    @Override
-                    public void callBack(ArrayList<T> obj) {
-                        getDataRef(tClass).addAll(obj);
-                        getLoadState(tClass).value = LoadState.DB_LOADED;
-                        downloadFromServer(tClass, new Callback<ArrayList<T>>() {
-                            @Override
-                            public void callBack(ArrayList<T> obj) {
-                                for (T i : obj) addFromNetwork(tClass, i);
-                                getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
-                                getBus(tClass).post(new InitComplete());
-                            }
-                        }, new Callback() {
-                            @Override
-                            public void callBack(Object obj) {
-                                getBus(tClass).post(new InitComplete());
-                            }
-                        });
-                    }
-                });
-                break;
+    @NonNull
+    public static <T extends DBOperable> ArrayList<Integer> getPendingServerIds(Class<T> tClass) {
+        return getPending(tClass).second;
+    }
+
+    @NonNull
+    public static <T extends DBOperable> ArrayList<Integer> getPendingLocalIds(Class<T> tClass) {
+        return getPending(tClass).first;
+    }
+
+
+    /**
+     *
+     * forgiving initializer method. anyone can call this, and it will broadcast initstart
+     * and initcomplete to the bus of tClass. updates tClass's persistent loadstate as it works.
+     *
+     * @param tClass the class being operated upon
+     */
+
+    public static <T extends DBOperable> void init(final Class<T> tClass) {
+        synchronized (getLoadState(tClass).value) {
+            switch (getLoadState(tClass).value) {
+                case LOADING_NOW:
+                    break;
+                case LOAD_COMPLETE:
+                    getBus(tClass).post(new InitStart());
+                    getBus(tClass).post(new InitComplete());
+                    break;
+                case DB_LOADED:
+                    getBus(tClass).post(new InitStart());
+                    getLoadState(tClass).value = LoadState.LOADING_NOW;
+                    loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
+                        @Override
+                        public void callBack(ArrayList<T> obj) {
+                            getDataRef(tClass).addAll(obj);
+                            getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
+                            getBus(tClass).post(new InitComplete());
+                        }
+                    });
+                    break;
+                case NOT_LOADED:
+                    getBus(tClass).post(new InitStart());
+                    getLoadState(tClass).value = LoadState.LOADING_NOW;
+                    loadFromDatabase(tClass, new Callback<ArrayList<T>>() {
+                        @Override
+                        public void callBack(ArrayList<T> obj) {
+                            getDataRef(tClass).addAll(obj);
+                            getLoadState(tClass).value = LoadState.DB_LOADED;
+                            downloadFromServer(tClass, new Callback<ArrayList<T>>() {
+                                @Override
+                                public void callBack(ArrayList<T> obj) {
+                                    for (T i : obj) put(tClass, i, false);
+                                    getLoadState(tClass).value = LoadState.LOAD_COMPLETE;
+                                    getBus(tClass).post(new InitComplete());
+                                }
+                            }, new Callback() {
+                                @Override
+                                public void callBack(Object obj) {
+                                    getBus(tClass).post(new InitComplete());
+                                }
+                            });
+                        }
+                    });
+                    break;
+            }
         }
 
 
@@ -189,7 +229,7 @@ public abstract class DataHandler {
         ServerCommunicator.getAll(tClass, new Callback<ArrayList<T>>() {
             @Override
             public void callBack(final ArrayList<T> objs) {
-                for (T i : objs) addFromNetwork(tClass, i);
+                for (T i : objs) put(tClass, i, false);
                 callback.callBack(objs);
             }
         }, failure);
@@ -219,80 +259,94 @@ public abstract class DataHandler {
         return null;
     }
 
-    /**
-     *
-     * add a new item to the dataset, the database, and the server
-     *
-     * @param item
-     */
+
     @SuppressWarnings("unchecked")
-    public static <T extends DBOperable> void addNew(final Class<T> tClass, final T item) {
-        getDataSource(tClass).create(item, new Callback<Integer>() {
-            @Override
-            public void callBack(final Integer dbObj) {
-                getDataRef(tClass).add((T) item.setLocalId(dbObj));
-                getBus(tClass).post(item);
+    public static <T extends DBOperable> void put(final Class<T> tClass, final T item, final boolean serverUpdate) {
+        if (item.isPending()) return;
+        item.pending(true);
+
+        if (item.getLocalId() == null) {
+
+            if (item.getServerId() == null) {
+                getDataSource(tClass).create(item, new Callback<Integer>() {
+                    @Override
+                    public void callBack(final Integer dbObj) {
+                        getDataRef(tClass).add((T) item.setLocalId(dbObj));
+                        getBus(tClass).post(item);
+                        ServerCommunicator.postObject(item, tClass, new Callback<T>() {
+                            @Override
+                            public void callBack(T obj) {
+                                item.setServerId(obj.getServerId());
+                                getDataSource(tClass).update(item);
+                                item.pending(false);
+                            }
+                        }, new Callback<VolleyError>() {
+                            @Override
+                            public void callBack(VolleyError obj) {
+                                item.pending(false);
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                getDataSource(tClass).create(item, new Callback<Integer>() {
+                    @Override
+                    public void callBack(Integer obj) {
+                        getDataRef(tClass).add((T) item.setLocalId(obj));
+                        getBus(tClass).post(item);
+                        if (serverUpdate) {
+                            ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                                @Override
+                                public void callBack(T obj) {
+                                    item.pending(false);
+                                }
+                            }, new Callback<VolleyError>() {
+                                @Override
+                                public void callBack(VolleyError obj) {
+                                    item.pending(false);
+                                }
+                            });
+                        } else item.pending(false);
+                    }
+                });
+            }
+
+        } else {
+
+            if (item.getServerId() == null) {
                 ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                     @Override
                     public void callBack(T obj) {
                         item.setServerId(obj.getServerId());
                         getDataSource(tClass).update(item);
+                        item.pending(false);
+                    }
+                }, new Callback<VolleyError>() {
+                    @Override
+                    public void callBack(VolleyError obj) {
+                        item.pending(false);
+                    }
+                });
+
+            } else { //item has both ids
+                getDataSource(tClass).update(item);
+                ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                    @Override
+                    public void callBack(T obj) {
+                        item.pending(false);
+                    }
+                }, new Callback<VolleyError>() {
+                    @Override
+                    public void callBack(VolleyError obj) {
+                        item.pending(false);
                     }
                 });
             }
-        });
-    }
-
-    /**
-     *
-     * add an item from the network; picks up
-     * called only for updates from the server
-     *
-     * @param item the new item
-     */
-    public static <T extends DBOperable> void addFromNetwork(final Class<T> tClass, final T item) {
-        if (getByServerId(tClass, item.getServerId()) != null) {
-            if (!getByServerId(tClass, item.getServerId()).getUpdated().after(item.getUpdated())) { //if we've got the item and it hasn't been updated more recently than the argument
-                getDataSource(tClass).update(item);
-                synchronized (getDataRef(tClass)) {
-                    getDataRef(tClass).remove(item); //we find the object that .equals() item, remove it, and re-add it, so we don't have to update it manually
-                    getDataRef(tClass).add(item);
-                    getBus(tClass).post(item);
-                }
-            } else {
-                ServerCommunicator.patchObject(item, tClass, new Callback.NullCb());
-            }
-        } else {
-            getDataSource(tClass).create(item, new Callback<Integer>() {
-                @Override
-                public void callBack(Integer obj) {
-                    item.setLocalId(obj);
-                    getDataRef(tClass).add(item);
-                    getBus(tClass).post(item);
-                }
-            });
         }
+
     }
 
-    /**
-     *
-     * updates the server and the database with item. this method should not be used to update the manager's data. use add instead.
-     *
-     * @param item the item to update, definitely has localid
-     */
-    public static <T extends DBOperable> void updateFromUser(final Class<T> tClass, final T item) {
-        if (getDataRef(tClass).contains(item)) {
-            ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
-                @Override
-                public void callBack(T obj) {
-                    item.setServerId(obj.getServerId());
-                    item.updated();
-                    getBus(tClass).post(item);
-                    getDataSource(tClass).update(item);
-                }
-            });
-        } else Log.w(tag(), item.toString() + " isn't in the dataset, so it couldn't be updated");
-    }
 
     public static <T extends DBOperable> void register(Class<T> tClass, Object subscriber) {
         getBus(tClass).register(subscriber);

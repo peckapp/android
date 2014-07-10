@@ -40,11 +40,17 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_circles, new Feed<Circle>());
         buttons.put(R.id.bt_explore, new Feed<Event>());
 
-        ((Feed<Peck>)buttons.get(R.id.bt_peck)).setUp(Peck.class);
-        ((Feed<Circle>)buttons.get(R.id.bt_circles)).setUp(Circle.class);
-        ((Feed<Event>)buttons.get(R.id.bt_explore)).setUp(Event.class);
+        Bundle bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Peck");
+        buttons.get(R.id.bt_peck).setArguments(bundle);
 
+        bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Circle");
+        buttons.get(R.id.bt_circles).setArguments(bundle);
 
+        bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Event");
+        buttons.get(R.id.bt_explore).setArguments(bundle);
     }
 
     @Override
@@ -69,7 +75,10 @@ public class FeedActivity extends PeckActivity {
         setContentView(R.layout.activity_feed_root);
 
         Feed<Event> homeFeed = new Feed<Event>();
-        homeFeed.setUp(Event.class);
+        Bundle bundle = new Bundle();
+        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Event");
+        homeFeed.setArguments(bundle);
+
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, homeFeed).commit();
 
         for (final int i : buttons.keySet()) {

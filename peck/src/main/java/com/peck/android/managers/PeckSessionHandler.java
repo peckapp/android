@@ -71,7 +71,7 @@ public class PeckSessionHandler implements Singleton {
 
         if (user == null) {
             user = new User();
-            DataHandler.addNew(User.class, user); //temp user
+            DataHandler.put(User.class, user, true); //temp user
             //todo: server auth
         }
         else {
