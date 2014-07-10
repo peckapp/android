@@ -280,49 +280,21 @@ public abstract class DataHandler {
 
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> void put(final Class<T> tClass, final T item, final boolean serverUpdate) {
-        if (item.isPending()) return;
-        item.pending(true);
+        synchronized (item) {
+            if (item.getLocalId() == null) {
 
-        if (item.getLocalId() == null) {
-
-            if (item.getServerId() == null) {
-                getDataSource(tClass).create(item, new Callback<Integer>() {
-                    @Override
-                    public void callBack(final Integer dbObj) {
-                        item.setLocalId(dbObj);
-                        getDataRef(tClass).add(item);
-                        getBus(tClass).post(item);
-                        ServerCommunicator.postObject(item, tClass, new Callback<T>() {
-                            @Override
-                            public void callBack(T obj) {
-                                item.setServerId(obj.getServerId());
-                                getDataSource(tClass).update(item);
-                                item.pending(false);
-                            }
-                        }, new Callback<VolleyError>() {
-                            @Override
-                            public void callBack(VolleyError obj) {
-                                item.pending(false);
-                            }
-                        });
-                    }
-                });
-
-            } else {
-                getDataSource(tClass).create(item, new Callback<Integer>() {
-                    @Override
-                    public void callBack(@NonNull Integer obj) {
-                        item.setLocalId(obj);
-                        if (getByServerId(tClass, item.getServerId()) == null || getByServerId(tClass, item.getServerId()).getUpdated().before(item.getUpdated())) {
-                            synchronized (getDataRef(tClass)) {
-                                getDataRef(tClass).remove(item);
-                                getDataRef(tClass).add(item);
-                            }
-                        }
-                        if (serverUpdate) {
-                            ServerCommunicator.patchObject(getByServerId(tClass, item.getServerId()), tClass, new Callback<T>() {
+                if (item.getServerId() == null) {
+                    getDataSource(tClass).save(item, new Callback<Integer>() {
+                        @Override
+                        public void callBack(final Integer dbObj) {
+                            item.setLocalId(dbObj);
+                            getDataRef(tClass).add(item);
+                            getBus(tClass).post(item);
+                            ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                                 @Override
                                 public void callBack(T obj) {
+                                    item.setServerId(obj.getServerId());
+                                    getDataSource(tClass).save(item, new NullCb());
                                     item.pending(false);
                                 }
                             }, new Callback<VolleyError>() {
@@ -331,37 +303,48 @@ public abstract class DataHandler {
                                     item.pending(false);
                                 }
                             });
-                        } else {
-                            getBus(tClass).post(item);
-                            item.pending(false);
                         }
-                    }
-                });
-            }
+                    });
 
-        } else {
+                } else {
+                    getDataSource(tClass).save(item, new Callback<Integer>() {
+                        @Override
+                        public void callBack(@NonNull Integer obj) {
+                            item.setLocalId(obj);
+                            if (getByServerId(tClass, item.getServerId()) == null || getByServerId(tClass, item.getServerId()).getUpdated().before(item.getUpdated())) {
+                                synchronized (getDataRef(tClass)) {
+                                    getDataRef(tClass).remove(item);
+                                    getDataRef(tClass).add(item);
+                                }
+                            }
+                            if (serverUpdate) {
+                                ServerCommunicator.patchObject(getByServerId(tClass, item.getServerId()), tClass, new Callback<T>() {
+                                    @Override
+                                    public void callBack(T obj) {
+                                        item.pending(false);
+                                    }
+                                }, new Callback<VolleyError>() {
+                                    @Override
+                                    public void callBack(VolleyError obj) {
+                                        item.pending(false);
+                                    }
+                                });
+                            } else {
+                                getBus(tClass).post(item);
+                                item.pending(false);
+                            }
+                        }
+                    });
+                }
 
-            if (item.getServerId() == null) {
-                ServerCommunicator.postObject(item, tClass, new Callback<T>() {
-                    @Override
-                    public void callBack(T obj) {
-                        item.setServerId(obj.getServerId());
-                        getDataSource(tClass).create(item, new NullCb());
-                        item.pending(false);
-                    }
-                }, new Callback<VolleyError>() {
-                    @Override
-                    public void callBack(VolleyError obj) {
-                        item.pending(false);
-                    }
-                });
+            } else {
 
-            } else { //item has both ids
-                getDataSource(tClass).create(item, new Callback.NullCb());
-                if (serverUpdate) {
-                    ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                if (item.getServerId() == null) {
+                    ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                         @Override
                         public void callBack(T obj) {
+                            item.setServerId(obj.getServerId());
+                            getDataSource(tClass).save(item, new NullCb());
                             item.pending(false);
                         }
                     }, new Callback<VolleyError>() {
@@ -370,10 +353,25 @@ public abstract class DataHandler {
                             item.pending(false);
                         }
                     });
-                } else item.pending(false);
+
+                } else { //item has both ids
+                    getDataSource(tClass).save(item, new Callback.NullCb());
+                    if (serverUpdate) {
+                        ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                            @Override
+                            public void callBack(T obj) {
+                                item.pending(false);
+                            }
+                        }, new Callback<VolleyError>() {
+                            @Override
+                            public void callBack(VolleyError obj) {
+                                item.pending(false);
+                            }
+                        });
+                    } else item.pending(false);
+                }
             }
         }
-
     }
 
 

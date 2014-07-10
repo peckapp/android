@@ -46,10 +46,10 @@ public class DataSourceTest extends AndroidTestCase {
 //        boolean bool = false;
 //        try {
 //        dSource.open();
-//        dbHelper.create(testStr, testStr, testcol, testsv, testcr, testup);
+//        dbHelper.save(testStr, testStr, testcol, testsv, testcr, testup);
 //        dSource.close();
 //        } catch (Exception e) { throw new Exception("event creation threw an exception", e);}
-//        try { dbHelper.create(testStr, testStr, testcol*2, testsv*2, testcr, testup); }
+//        try { dbHelper.save(testStr, testStr, testcol*2, testsv*2, testcr, testup); }
 //        catch (Exception e) { bool = true; }
 //
 //        if (!bool) throw new Exception("event creation succeeded.");
@@ -66,7 +66,7 @@ public class DataSourceTest extends AndroidTestCase {
 //        values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
 //        values.put(dbHelper.COLUMN_HIDDEN, 0);
 //        dSource.open();
-//        Event e = dSource.create(values);
+//        Event e = dSource.save(values);
 //        Event f = new Event();
 //        dSource.close();
 //        f.setServerId(testsv);
@@ -92,7 +92,7 @@ public class DataSourceTest extends AndroidTestCase {
 //        values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
 //        values.put(dbHelper.COLUMN_HIDDEN, 0);
 //        dSource.open();
-//        Event e = dSource.create(values);
+//        Event e = dSource.save(values);
 //        dSource.close();
 //        final int i = e.getColor();
 //        values.remove(dbHelper.COLUMN_COLOR);
@@ -122,7 +122,7 @@ public class DataSourceTest extends AndroidTestCase {
 //        values.put(dbHelper.COLUMN_UPDATED, testup.getTime());
 //        values.put(dbHelper.COLUMN_HIDDEN, 0);
 //        dSource.open();
-//        Event e = dSource.create(values);
+//        Event e = dSource.save(values);
 //        dSource.delete(e);
 //        int x = dSource.getAll().size();
 //        dSource.close();
@@ -135,7 +135,7 @@ public class DataSourceTest extends AndroidTestCase {
 //        ContentValues cv = new ContentValues();
 //        cv.put(dbHelper.COLUMN_TITLE, testStr);
 //        dSource.open();
-//        Event e = dSource.create(cv);
+//        Event e = dSource.save(cv);
 //        Event f = dSource.getAll().get(0);
 //        dSource.close();
 //        if (e.hashCode() != f.hashCode()) throw new Exception("object hashcodes differ." +
