@@ -58,9 +58,8 @@ public abstract class DataHandler {
      *
      * for internal use only. returns a reference to the data held in the manager.
      *
-     * @param tClass
-     * @param <T>
-     * @return
+     * @param tClass the class the data belongs to
+     * @return reference to the data the manager holds
      */
 
     @NonNull
@@ -74,8 +73,7 @@ public abstract class DataHandler {
      * hands back a copy of the data currently contained in the datahandler, not a reference.
      * to modify the data in the handler, use update/add/remove operations.
      *
-     * @param tClass
-     * @param <T>
+     * @param tClass the class the data belongs to
      * @return a copy of the data contained in the manager
      */
 
@@ -152,6 +150,12 @@ public abstract class DataHandler {
                 case LOAD_COMPLETE:
                     getBus(tClass).post(new InitStart());
                     getBus(tClass).post(new InitComplete());
+                    downloadFromServer(tClass, new Callback<ArrayList<T>>() {
+                        @Override
+                        public void callBack(ArrayList<T> obj) {
+                            for (T i : obj) put(tClass, i, false);
+                        }
+                    }, new Callback.NullCb());
                     break;
                 case DB_LOADED:
                     getBus(tClass).post(new InitStart());
@@ -260,6 +264,17 @@ public abstract class DataHandler {
     }
 
 
+    /**
+     *
+     * add or update the object passed in. propagates changes to the arraylists stored in this handler,
+     * the database, and the server.
+     *
+     *
+     * @param tClass the class of the item being updated
+     * @param item the item
+     * @param serverUpdate determines whether the item will be patched up to the server. has no effect if the item does not have a serverId.
+     */
+
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> void put(final Class<T> tClass, final T item, final boolean serverUpdate) {
         if (item.isPending()) return;
@@ -293,10 +308,14 @@ public abstract class DataHandler {
                 getDataSource(tClass).create(item, new Callback<Integer>() {
                     @Override
                     public void callBack(Integer obj) {
-                        getDataRef(tClass).add((T) item.setLocalId(obj));
-                        getBus(tClass).post(item);
+                        if (getByServerId(tClass, item.getServerId()) == null || getByServerId(tClass, item.getServerId()).getUpdated().before(item.getUpdated())) {
+                            synchronized (getDataRef(tClass)) {
+                                getDataRef(tClass).remove(item);
+                                getDataRef(tClass).add((T) item.setLocalId(obj));
+                            }
+                        }
                         if (serverUpdate) {
-                            ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                            ServerCommunicator.patchObject(getByServerId(tClass, item.getServerId()), tClass, new Callback<T>() {
                                 @Override
                                 public void callBack(T obj) {
                                     item.pending(false);
@@ -307,7 +326,10 @@ public abstract class DataHandler {
                                     item.pending(false);
                                 }
                             });
-                        } else item.pending(false);
+                        } else {
+                            getBus(tClass).post(item);
+                            item.pending(false);
+                        }
                     }
                 });
             }
@@ -331,17 +353,19 @@ public abstract class DataHandler {
 
             } else { //item has both ids
                 getDataSource(tClass).update(item);
-                ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
-                    @Override
-                    public void callBack(T obj) {
-                        item.pending(false);
-                    }
-                }, new Callback<VolleyError>() {
-                    @Override
-                    public void callBack(VolleyError obj) {
-                        item.pending(false);
-                    }
-                });
+                if (serverUpdate) {
+                    ServerCommunicator.patchObject(item, tClass, new Callback<T>() {
+                        @Override
+                        public void callBack(T obj) {
+                            item.pending(false);
+                        }
+                    }, new Callback<VolleyError>() {
+                        @Override
+                        public void callBack(VolleyError obj) {
+                            item.pending(false);
+                        }
+                    });
+                } else item.pending(false);
             }
         }
 

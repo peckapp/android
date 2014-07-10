@@ -103,7 +103,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE) {
+                if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE || DataHandler.getData(Locale.class).size() == 0) {
                     findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
                     findViewById(R.id.rl_locale).setVisibility(View.GONE);
                     findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
