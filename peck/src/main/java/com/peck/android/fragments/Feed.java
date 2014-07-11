@@ -99,24 +99,35 @@ public class Feed<T extends DBOperable> extends Fragment {
     private void mergeFromHandler() {
         ArrayList<T> temp = DataHandler.getData(getParameterizedClass());
 
-        for (T item : temp) {
+        for (final T item : temp) {
             if (BuildConfig.DEBUG && item.getLocalId() == null) throw new IllegalArgumentException("localId can't be null.");
             if (data.contains(item)) {
                 if (data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
-                    synchronized (data) {
-                        data.remove(item);
-                        data.add(item);
-                    }
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            synchronized (data) {
+                                data.remove(item);
+                                data.add(item);
+                                if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
                 }
                 else {
                     DataHandler.put(tClass, data.get(data.indexOf(item)), true);
                 }
             } else {
-                synchronized (data) {
-                    data.add(item);
-                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (data) {
+                            data.add(item);
+                            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
             }
-            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
         }
     }
 
@@ -170,17 +181,27 @@ public class Feed<T extends DBOperable> extends Fragment {
 
 
     @Subscribe
-    public void receive(T t) {
+    public void receive(final T t) {
         if ((filtrationPolicy != null && filtrationPolicy.test(t)) || filtrationPolicy == null) {
             synchronized (data) {
                 if (!data.contains(t)) {
-                    data.add(t);
-                    feedAdapter.notifyDataSetChanged();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            data.add(t);
+                            feedAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
                 else if (!data.get(data.indexOf(t)).getUpdated().before(t.getUpdated())) {
-                    data.remove(t);
-                    data.add(t);
-                    feedAdapter.notifyDataSetChanged();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            data.remove(t);
+                            data.add(t);
+                            feedAdapter.notifyDataSetChanged();
+                        }
+                    });
                 } else {
                     DataHandler.put(tClass, data.get(data.indexOf(t)), false);
                 }
