@@ -13,12 +13,10 @@ import com.peck.android.interfaces.HasImage;
 public class User extends DBOperable implements HasImage {
 
     @Expose
-    @NonNull
     @SerializedName("first_name")
     private String firstName;
 
     @Expose
-    @NonNull
     @SerializedName("last_name")
     private String lastName;
 
@@ -69,7 +67,7 @@ public class User extends DBOperable implements HasImage {
     }
 
     public String getFullName() {
-        return firstName + " " + lastName;
+        return (firstName == null || lastName == null) ? firstName : firstName + " " + lastName;
     }
 
     public void setFullName(String string) {

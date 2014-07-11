@@ -1,5 +1,6 @@
 package com.peck.android.activities;
 
+import android.content.Intent;
 import android.content.IntentSender;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -43,6 +44,8 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 LocaleManager.setLocale((Locale) adapterView.getItemAtPosition(i));
+                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -92,6 +95,16 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
         loadLocales();
 
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (LocaleManager.getLocation() != null) {
+            Intent intent = new Intent(this, FeedActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void loadLocales() {

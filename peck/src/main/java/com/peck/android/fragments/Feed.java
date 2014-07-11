@@ -96,6 +96,30 @@ public class Feed<T extends DBOperable> extends Fragment {
         this.listener = listener;
     }
 
+    private void mergeFromHandler() {
+        ArrayList<T> temp = DataHandler.getData(getParameterizedClass());
+
+        for (T item : temp) {
+            if (BuildConfig.DEBUG && item.getLocalId() == null) throw new IllegalArgumentException("localId can't be null.");
+            if (data.contains(item)) {
+                if (data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
+                    synchronized (data) {
+                        data.remove(item);
+                        data.add(item);
+                    }
+                }
+                else {
+                    DataHandler.put(tClass, data.get(data.indexOf(item)), true);
+                }
+            } else {
+                synchronized (data) {
+                    data.add(item);
+                }
+            }
+            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
+        }
+    }
+
     @Subscribe
     public void initComplete(DataHandler.InitComplete complete) {
         if (!listening) return;
@@ -104,12 +128,10 @@ public class Feed<T extends DBOperable> extends Fragment {
                 //todo: handle these items differently
 
                 case DB_LOADED:
-                    data.addAll(DataHandler.getData(getParameterizedClass()));
-                    feedAdapter.notifyDataSetChanged();
+                    mergeFromHandler();
                     break;
                 case LOAD_COMPLETE:
-                    data.addAll(DataHandler.getData(getParameterizedClass()));
-                    feedAdapter.notifyDataSetChanged();
+                    mergeFromHandler();
                     break;
                 case NOT_LOADED:
                     //todo: throw an error
@@ -122,15 +144,13 @@ public class Feed<T extends DBOperable> extends Fragment {
     @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        synchronized (data) {
-            if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
-            View r = inflater.inflate(getLayoutRes(), container, false);
-            AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
-            v.setAdapter(feedAdapter);
-            v.setOnItemClickListener(listener);
-            feedAdapter.notifyDataSetChanged();
-            return r;
-        }
+        View r = inflater.inflate(getLayoutRes(), container, false);
+        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
+        v.setOnItemClickListener(listener);
+        if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
+        v.setAdapter(feedAdapter);
+        return r;
+
     }
 
     public void onResume() {
