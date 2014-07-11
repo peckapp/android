@@ -9,23 +9,25 @@ import android.widget.BaseAdapter;
 
 import com.peck.android.PeckApp;
 import com.peck.android.fragments.Feed;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.models.DBOperable;
 
 /**
  * Created by mammothbane on 6/9/2014.
  */
-public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> extends BaseAdapter {
+public class FeedAdapter<T extends DBOperable> extends BaseAdapter {
 
     private int resourceId;
 
     @NonNull
+    private ViewAdapter<T> viewAdapter;
+
+    @NonNull
     private Feed<T> feed;
 
-    public FeedAdapter(int resourceId, Feed<T> feed) {
+    public FeedAdapter(int resourceId, Feed<T> feed, ViewAdapter<T> viewAdapter) {
         this.resourceId = resourceId;
         this.feed = feed;
+        this.viewAdapter = viewAdapter;
     }
 
     @Override
@@ -51,8 +53,8 @@ public class FeedAdapter<T extends DBOperable & SelfSetup & HasFeedLayout> exten
             view = inflater.inflate(resourceId, null);
         }
 
-        T res = getItem(i);
-        res.setUp(view);
+        viewAdapter.setUp(view, getItem(i));
+
         return view;
     }
 

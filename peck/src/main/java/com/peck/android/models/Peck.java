@@ -1,16 +1,10 @@
 package com.peck.android.models;
 
-import android.view.View;
-import android.widget.TextView;
-
-import com.peck.android.R;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
 
 /**
  * Created by mammothbane on 6/16/2014.
  */
-public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Peck extends DBOperable {
     private String title = "";
     private String text = "";
     private boolean seen;
@@ -42,15 +36,4 @@ public class Peck extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    @Override
-    public int getResourceId()
-    {
-        return R.layout.lvitem_peck;
-    }
-
-    @Override
-    public void setUp(View v) {
-        ((TextView)v.findViewById(R.id.tv_text)).setText(text);
-        ((TextView)v.findViewById(R.id.tv_title)).setText(title);
-    }
 }

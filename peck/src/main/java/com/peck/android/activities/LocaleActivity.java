@@ -16,6 +16,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
+import com.peck.android.adapters.ViewAdapter;
 import com.peck.android.fragments.Feed;
 import com.peck.android.managers.DataHandler;
 import com.peck.android.managers.LocaleManager;
@@ -36,12 +37,19 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     {
         Bundle bundle = new Bundle();
         bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Locale");
+        bundle.putInt(Feed.FEED_ITEM_LAYOUT, R.layout.lvitem_locale);
         localeSelectionFeed.setArguments(bundle);
-        localeSelectionFeed.setOnClickListener(new AdapterView.OnItemClickListener() {
+        localeSelectionFeed.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                LocaleManager.setLocale((Locale)adapterView.getItemAtPosition(i));
+                LocaleManager.setLocale((Locale) adapterView.getItemAtPosition(i));
                 finish();
+            }
+        });
+        localeSelectionFeed.setViewAdapter(new ViewAdapter<Locale>() {
+            @Override
+            public void setUp(View view, Locale item) {
+                ((TextView)view.findViewById(R.id.tv_locale_name)).setText(item.toString());
             }
         });
     }

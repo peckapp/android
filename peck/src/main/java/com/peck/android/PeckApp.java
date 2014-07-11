@@ -47,7 +47,6 @@ public class PeckApp extends Application implements Singleton{
     public void onCreate() {
 
         AppContext.init(this);
-        PeckSessionHandler.init();
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
@@ -58,6 +57,9 @@ public class PeckApp extends Application implements Singleton{
             edit.apply();
             Log.d("PeckApp", "deleted database, cleared USER_PREFS SharedPreferences");
         }
+
+        PeckSessionHandler.init();
+
     }
 
 

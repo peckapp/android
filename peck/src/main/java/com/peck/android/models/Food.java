@@ -1,15 +1,11 @@
 package com.peck.android.models;
 
 import android.support.annotation.NonNull;
-import android.view.View;
-
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Food extends DBOperable {
     @NonNull
     private String title = "";
     private String text = "";
@@ -43,14 +39,5 @@ public class Food extends DBOperable implements SelfSetup, HasFeedLayout {
         return this;
     }
 
-    @Override
-    public int getResourceId() {
-        return 0;
-    }
-
-    @Override
-    public void setUp(View v) {
-
-    }
 
 }

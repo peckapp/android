@@ -3,20 +3,16 @@ package com.peck.android.models;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.View;
-import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.R;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
 import com.peck.android.managers.LocaleManager;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
-public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Locale extends DBOperable {
 
     private final static int resId = R.layout.lvitem_locale;
 
@@ -86,16 +82,6 @@ public class Locale extends DBOperable implements SelfSetup, HasFeedLayout {
     public Locale setName(String name) {
         this.name = name;
         return this;
-    }
-
-    @Override
-    public void setUp(@NonNull View v) {
-        ((TextView)v.findViewById(R.id.tv_locale_name)).setText(toString());
-    }
-
-    @Override
-    public int getResourceId() {
-        return resId;
     }
 
 

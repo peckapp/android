@@ -1,19 +1,12 @@
 package com.peck.android.models;
 
-import android.view.View;
-import android.widget.TextView;
-
-import com.peck.android.R;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
-
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Meal extends DBOperable {
 
 
     private Date mealtime = new Date(-1);
@@ -58,18 +51,6 @@ public class Meal extends DBOperable implements SelfSetup, HasFeedLayout {
     public Meal setCourses(ArrayList<Food> courses) {
         this.courses = courses;
         return this;
-    }
-
-    @Override
-    public int getResourceId() { //TODO: implement, create layout
-        return R.layout.lvitem_meal;
-    }
-
-    @Override
-    public void setUp(View v) {
-        ((TextView)v.findViewById(R.id.tv_title)).setText(getTitle());
-        ((TextView)v.findViewById(R.id.tv_location)).setText(Integer.toString(getLocation()));
-
     }
 
 

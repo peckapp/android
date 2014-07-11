@@ -1,23 +1,13 @@
 package com.peck.android.models;
 
-import android.view.View;
-import android.widget.TextView;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.makeramen.RoundedImageView;
-import com.peck.android.PeckApp;
-import com.peck.android.R;
 import com.peck.android.enums.CommentType;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.DataHandler;
-import com.squareup.picasso.Picasso;
 
 /**
  * Created by mammothbane on 7/8/2014.
  */
-public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
+public class Comment extends DBOperable {
 
     @Expose
     @SerializedName("comment_from")
@@ -67,22 +57,5 @@ public class Comment extends DBOperable implements SelfSetup, HasFeedLayout {
         this.type = type;
     }
 
-    @Override
-    public void setUp(final View v) {
-        User user = DataHandler.getByServerId(User.class, userId);
-        if (user == null) {} //throw an exception/force an update
-        else {
-            ((TextView) v.findViewById(R.id.tv_text)).setText(text);
-            ((TextView) v.findViewById(R.id.tv_title)).setText(user.getFullName());
-            if (user.getProfileUrl().length() > 0)
-            Picasso.with(PeckApp.getContext()).
-                    load(user.getProfileUrl())
-                    .into(((RoundedImageView) v.findViewById(R.id.riv_user)));
-        }
-    }
 
-    @Override
-    public int getResourceId() {
-        return R.layout.lvitem_comment;
-    }
 }
