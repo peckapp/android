@@ -4,20 +4,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.adapters.ViewAdapter;
-import com.peck.android.managers.DataHandler;
+import com.peck.android.database.DatabaseManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.policies.FiltrationPolicy;
-import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 
@@ -45,9 +45,8 @@ public class Feed<T extends DBOperable> extends Fragment {
     protected int listViewRes = R.id.lv_content;
     protected int layoutRes = R.layout.feed;
     protected int listItemRes;
-    private boolean listening;
     private AdapterView.OnItemClickListener listener;
-    private ViewAdapter<T> viewAdapter;
+    private SimpleCursorAdapter.ViewBinder viewBinder;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -77,9 +76,8 @@ public class Feed<T extends DBOperable> extends Fragment {
 
     }
 
-    public void setViewAdapter(@NonNull ViewAdapter<T> viewAdapter) {
-        if (BuildConfig.DEBUG && viewAdapter == null) throw new NullPointerException(getClass().getSimpleName() + "|" + tClass.getSimpleName() + ": the ViewAdapter can't be null");
-        this.viewAdapter = viewAdapter;
+    public void setViewBinder(SimpleCursorAdapter.ViewBinder binder) {
+        this.viewBinder = binder;
     }
 
     public void setFiltrationPolicy(@Nullable FiltrationPolicy<T> filtrationPolicy) {
@@ -96,66 +94,13 @@ public class Feed<T extends DBOperable> extends Fragment {
         this.listener = listener;
     }
 
-    private void mergeFromHandler() {
-        ArrayList<T> temp = DataHandler.getData(getParameterizedClass());
-
-        for (final T item : temp) {
-            if (BuildConfig.DEBUG && item.getLocalId() == null) throw new IllegalArgumentException("localId can't be null.");
-            if (data.contains(item)) {
-                if (data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (data) {
-                                data.remove(item);
-                                data.add(item);
-                                if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
-                            }
-                        }
-                    });
-                }
-                else {
-                    DataHandler.put(tClass, data.get(data.indexOf(item)), true);
-                }
-            } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (data) {
-                            data.add(item);
-                            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    @Subscribe
-    public void initComplete(DataHandler.InitComplete complete) {
-        if (!listening) return;
-        synchronized (data) {
-            switch (DataHandler.getLoadState(getParameterizedClass()).getValue()) {
-                //todo: handle these items differently
-
-                case DB_LOADED:
-                    mergeFromHandler();
-                    break;
-                case LOAD_COMPLETE:
-                    mergeFromHandler();
-                    break;
-                case NOT_LOADED:
-                    //todo: throw an error
-                    break;
-            }
-            listening = false;
-        }
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View r = inflater.inflate(getLayoutRes(), container, false);
+
+        ((ListView)r.findViewById(getListViewRes())).setAdapter(new SimpleCursorAdapter(getActivity(), listItemRes, DatabaseManager.openDB()));
+
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
         v.setOnItemClickListener(listener);
         if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
@@ -164,51 +109,7 @@ public class Feed<T extends DBOperable> extends Fragment {
 
     }
 
-    public void onResume() {
-        super.onResume();
-        DataHandler.register(getParameterizedClass(), this);
 
-        listening = true;
-        DataHandler.init(getParameterizedClass());
-
-    }
-
-
-    public void onPause() {
-        DataHandler.unregister(getParameterizedClass(), this);
-        super.onPause();
-    }
-
-
-    @Subscribe
-    public void receive(final T t) {
-        if ((filtrationPolicy != null && filtrationPolicy.test(t)) || filtrationPolicy == null) {
-            synchronized (data) {
-                if (!data.contains(t)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            data.add(t);
-                            feedAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-                else if (!data.get(data.indexOf(t)).getUpdated().before(t.getUpdated())) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            data.remove(t);
-                            data.add(t);
-                            feedAdapter.notifyDataSetChanged();
-                        }
-                    });
-                } else {
-                    DataHandler.put(tClass, data.get(data.indexOf(t)), false);
-                }
-            }
-        }
-
-    }
 
     public int getListViewRes() {
         return listViewRes;
@@ -223,18 +124,6 @@ public class Feed<T extends DBOperable> extends Fragment {
     public Class<T> getParameterizedClass() {
         if (tClass == null) throw new RuntimeException("tClass must be set before the Feed is instantiated.");
         return tClass;
-    }
-
-
-    /**
-     *
-     * made available for feedadapters.
-     *
-     * @return the arraylist of data this feed handles
-     */
-    @NonNull
-    public ArrayList<T> getData() {
-        return data;
     }
 
 }

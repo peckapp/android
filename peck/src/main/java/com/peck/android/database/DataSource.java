@@ -63,6 +63,14 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
     }
 
+    public Cursor query(String select, String[] selectArgs,  ) {
+        open();
+        Cursor ret = database.query(getTableName(), getColumns(), select, selectArgs)
+        close();
+        return ret;
+    }
+
+
 
     public DataSource(Class<T> tClass) {
         this.tClass = tClass;

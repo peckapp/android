@@ -44,7 +44,7 @@ public abstract class DataHandler {
 
     @NonNull
     @SuppressWarnings("unchecked")
-    private static <T extends DBOperable> DataSource<T> getDataSource(Class<T> tClass) {
+    public static <T extends DBOperable> DataSource<T> getDataSource(Class<T> tClass) {
         DataSource<T> dataSource;
         synchronized (dataSources) {
             dataSource = (DataSource<T>) dataSources.get(tClass);
