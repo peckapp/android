@@ -19,12 +19,13 @@ import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.adapters.ViewAdapter;
 import com.peck.android.fragments.Feed;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.DataHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 import com.squareup.otto.Subscribe;
 
-import java.util.Collections;
+import java.util.ArrayList;
 
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -121,19 +122,23 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Subscribe
     public void respondToLocaleLoad(DataHandler.InitComplete complete) {
         DataHandler.unregister(Locale.class, this);
-        runOnUiThread(new Runnable() {
+        DataHandler.getData(Locale.class, new Callback<ArrayList<Locale>>() {
             @Override
-            public void run() {
-                if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE || DataHandler.getData(Locale.class).size() == 0) {
-                    findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
-                } else {
-                    if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
-                    findViewById(R.id.tv_progress).setVisibility(View.GONE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-                }
+            public void callBack(final ArrayList<Locale> obj) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE || obj.size() == 0) {
+                            findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
+                            findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                            findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
+                        } else {
+                            findViewById(R.id.tv_progress).setVisibility(View.GONE);
+                            findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                            findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
             }
         });
     }

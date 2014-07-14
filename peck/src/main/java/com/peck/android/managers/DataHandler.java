@@ -309,7 +309,7 @@ public abstract class DataHandler {
                     @Override
                     public void callBack(@NonNull Integer obj) {
                         item.setLocalId(obj);
-                        if (getByServerId(tClass, item.getServerId()) == null || getByServerId(tClass, item.getServerId()).getUpdated().before(item.getUpdated())) {
+                        if (getByServerId(tClass, item.getServerId()) == null || !getByServerId(tClass, item.getServerId()).getUpdated().after(item.getUpdated())) {
                             synchronized (getDataRef(tClass)) {
                                 getDataRef(tClass).remove(item);
                                 getDataRef(tClass).add(item);

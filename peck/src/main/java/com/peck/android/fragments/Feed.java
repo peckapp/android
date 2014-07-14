@@ -14,6 +14,7 @@ import com.peck.android.BuildConfig;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
 import com.peck.android.adapters.ViewAdapter;
+import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.DataHandler;
 import com.peck.android.models.DBOperable;
 import com.peck.android.policies.FiltrationPolicy;
@@ -82,12 +83,10 @@ public class Feed<T extends DBOperable> extends Fragment {
         this.viewAdapter = viewAdapter;
     }
 
-    public void setFiltrationPolicy(@Nullable FiltrationPolicy<T> filtrationPolicy) {
+    public synchronized void setFiltrationPolicy(@Nullable FiltrationPolicy<T> filtrationPolicy) {
         this.filtrationPolicy = filtrationPolicy;
         if (filtrationPolicy != null) {
-            synchronized (data) {
-                filtrationPolicy.filter(data);
-            }
+            filtrationPolicy.filter(data);
             if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
         }
     }
@@ -96,45 +95,44 @@ public class Feed<T extends DBOperable> extends Fragment {
         this.listener = listener;
     }
 
-    private void mergeFromHandler() {
-        ArrayList<T> temp = DataHandler.getData(getParameterizedClass());
+    private synchronized void mergeFromHandler() {
+        DataHandler.getData(getParameterizedClass(), new Callback<ArrayList<T>>() {
+            @Override
+            public void callBack(ArrayList<T> obj) {
+                for (final T item : obj) {
+                    if (BuildConfig.DEBUG && item.getLocalId() == null) throw new IllegalArgumentException("localId can't be null.");
+                    if (data.contains(item)) {
+                        if (!data.get(data.indexOf(item)).getUpdated().after(item.getUpdated())) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
 
-        for (final T item : temp) {
-            if (BuildConfig.DEBUG && item.getLocalId() == null) throw new IllegalArgumentException("localId can't be null.");
-            if (data.contains(item)) {
-                if (data.get(data.indexOf(item)).getUpdated().before(item.getUpdated())) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (data) {
-                                data.remove(item);
+                                    data.remove(item);
+                                    data.add(item);
+                                    if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        } else {
+                            DataHandler.put(tClass, data.get(data.indexOf(item)), true);
+                        }
+                    } else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
                                 data.add(item);
                                 if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
-                            }
-                        }
-                    });
-                }
-                else {
-                    DataHandler.put(tClass, data.get(data.indexOf(item)), true);
-                }
-            } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (data) {
-                            data.add(item);
-                            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
+                            }});
                         }
                     }
-                });
-            }
-        }
-    }
+                }
+            });
 
-    @Subscribe
-    public void initComplete(DataHandler.InitComplete complete) {
-        if (!listening) return;
-        synchronized (data) {
+
+        }
+
+        @Subscribe
+        public synchronized void initComplete(DataHandler.InitComplete complete) {
+            if (!listening) return;
             switch (DataHandler.getLoadState(getParameterizedClass()).getValue()) {
                 //todo: handle these items differently
 
@@ -150,19 +148,18 @@ public class Feed<T extends DBOperable> extends Fragment {
             }
             listening = false;
         }
-    }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View r = inflater.inflate(getLayoutRes(), container, false);
-        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
-        v.setOnItemClickListener(listener);
-        if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
-        v.setAdapter(feedAdapter);
-        return r;
+        @Override
+        @SuppressWarnings("unchecked")
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View r = inflater.inflate(getLayoutRes(), container, false);
+            AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
+            v.setOnItemClickListener(listener);
+            if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
+            v.setAdapter(feedAdapter);
+            return r;
 
-    }
+        }
 
     public void onResume() {
         super.onResume();
@@ -181,30 +178,28 @@ public class Feed<T extends DBOperable> extends Fragment {
 
 
     @Subscribe
-    public void receive(final T t) {
+    public synchronized void receive(final T t) {
         if ((filtrationPolicy != null && filtrationPolicy.test(t)) || filtrationPolicy == null) {
-            synchronized (data) {
-                if (!data.contains(t)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            data.add(t);
-                            feedAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-                else if (!data.get(data.indexOf(t)).getUpdated().before(t.getUpdated())) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            data.remove(t);
-                            data.add(t);
-                            feedAdapter.notifyDataSetChanged();
-                        }
-                    });
-                } else {
-                    DataHandler.put(tClass, data.get(data.indexOf(t)), false);
-                }
+            if (!data.contains(t)) {
+                data.add(t);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        feedAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+            else if (!data.get(data.indexOf(t)).getUpdated().after(t.getUpdated())) {
+                data.remove(t);
+                data.add(t);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        feedAdapter.notifyDataSetChanged();
+                    }
+                });
+            } else {
+                DataHandler.put(tClass, data.get(data.indexOf(t)), false);
             }
         }
 
