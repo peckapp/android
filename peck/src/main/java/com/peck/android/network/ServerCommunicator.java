@@ -25,14 +25,11 @@ import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
-import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
-import com.peck.android.models.Food;
 import com.peck.android.models.Locale;
-import com.peck.android.models.Meal;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 
@@ -62,8 +59,6 @@ public class ServerCommunicator implements Singleton {
         apiMap.put(Event.class, Network.EVENTS);
         apiMap.put(Circle.class, Network.CIRCLES);
         apiMap.put(Locale.class, Network.LOCALES);
-        apiMap.put(Meal.class, Network.MEAL);
-        apiMap.put(Food.class, Network.FOOD);
         apiMap.put(Peck.class, Network.PECK);
         apiMap.put(User.class, Network.USERS);
         apiMap.put(Comment.class, Network.COMMENTS);
@@ -73,17 +68,15 @@ public class ServerCommunicator implements Singleton {
     private ServerCommunicator() { }
 
     public static <T extends DBOperable> JSONObject toJson(T obj, Class<T> tClass) throws JSONException {
-        Locale locale = LocaleManager.getLocale();
-        if (locale == null) {
+        int locale = LocaleManager.getLocale();
+        if (locale == 0) {
                 /* todo: throw an error dialog to the user/put them in locale selection */
 
-            //TEST:
-            locale = new Locale();
-            locale.setServerId(1);
+            locale = 1;
         }
 
         JsonObject object = (JsonObject)gson.toJsonTree(obj, tClass); //take our object and JSONize it
-        object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale.getServerId());
+        object.addProperty(PeckApp.Constants.Network.INSTITUTION, locale);
 
         JsonObject ret = new JsonObject(); //wrap it in another object
         ret.add(apiMap.get(tClass).substring(0, apiMap.get(tClass).length() - 2), object);
@@ -108,7 +101,7 @@ public class ServerCommunicator implements Singleton {
 
     private static JsonObject authBlock() {
         JsonObject auth = new JsonObject();
-        auth.addProperty("user_id", PeckSessionHandler.getUser().getServerId());
+        //auth.addProperty("user_id", PeckSessionHandler.getUser().getServerId());
         auth.addProperty("api_key", "");
         auth.addProperty("auth_token", "");
         auth.addProperty("", "");

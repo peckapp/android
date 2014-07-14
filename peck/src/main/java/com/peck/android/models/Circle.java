@@ -13,9 +13,9 @@ import java.util.ArrayList;
  */
 public class Circle extends DBOperable {
 
-    public static final String MEMBERS = "circle_members";
-    public static final String NAME = "circle_name";
-    public static final String IMAGE_URL = "image_link";
+    public static final transient String MEMBERS = "circle_members";
+    public static final transient String NAME = "circle_name";
+    public static final transient String IMAGE_URL = "image_link";
 
     @Expose
     @NonNull

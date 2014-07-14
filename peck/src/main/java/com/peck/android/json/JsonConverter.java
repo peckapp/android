@@ -11,7 +11,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.PeckApp;
 import com.peck.android.database.DBType;
 import com.peck.android.models.DBOperable;
 
@@ -39,7 +38,7 @@ public class JsonConverter {
     private JsonConverter() {}
 
     public static String getDatabaseCreate(DBOperable dbOperable) {
-        String dbCreate = "create table " + dbOperable.getClass().getSimpleName() + " (";
+        String dbCreate = "create table " + dbOperable.getTableName() + " (";
 
         for (Field objField : getAllFields(dbOperable.getClass())) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
             SerializedName annotation = objField.getAnnotation(SerializedName.class);
@@ -86,7 +85,7 @@ public class JsonConverter {
             }
         }
 
-        if (ret.containsKey(PeckApp.Constants.Database.LOCAL_ID)) ret.remove(PeckApp.Constants.Database.LOCAL_ID);
+        if (ret.containsKey(DBOperable.LOCAL_ID)) ret.remove(DBOperable.LOCAL_ID);
 
         return ret;
     }

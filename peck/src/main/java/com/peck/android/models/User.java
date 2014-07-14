@@ -8,11 +8,11 @@ import com.google.gson.annotations.SerializedName;
  */
 public class User extends DBOperable {
 
-    public static final String FIRST_NAME = "first_name";
-    public static final String LAST_NAME = "last_name";
-    public static final String USERNAME = "username";
-    public static final String FACEBOOK_ID = "facebook_link";
-    public static final String BIO = "blurb";
+    public static final transient String FIRST_NAME = "first_name";
+    public static final transient String LAST_NAME = "last_name";
+    public static final transient String USERNAME = "username";
+    public static final transient String FACEBOOK_ID = "facebook_link";
+    public static final transient String BIO = "blurb";
 
     @Expose
     @SerializedName(FIRST_NAME)

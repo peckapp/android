@@ -21,10 +21,10 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable {
 
-    public static final String LOCAL_ID = "loc_id";
-    public static final String SV_ID = "id";
-    public static final String CREATED_AT = "created_at";
-    public static final String UPDATED_AT = "updated_at";
+    public static final transient String LOCAL_ID = "_id";
+    public static final transient String SV_ID = "id";
+    public static final transient String CREATED_AT = "created_at";
+    public static final transient String UPDATED_AT = "updated_at";
 
 
     @DBType("integer primary key autoincrement")
@@ -40,13 +40,13 @@ public abstract class DBOperable implements Serializable {
 
     @Expose
     @NonNull
-    @SerializedName("created_at")
+    @SerializedName(CREATED_AT)
     @DBType("integer")
     public Date created;
 
     @Expose
     @NonNull
-    @SerializedName("updated_at")
+    @SerializedName(UPDATED_AT)
     @DBType("integer")
     public Date updated;
 

@@ -13,13 +13,13 @@ import java.util.Date;
  */
 public class Event extends DBOperable {
 
-    public static final String START_DATE = "start_date";
-    public static final String END_DATE = "end_date";
-    public static final String TITLE = "title";
-    public static final String TEXT = "event_description";
-    public static final String IMAGE_URL = "image_url";
-    public static final String EVENT_URL = "event_url";
-    public static final String USER_IDS = "user_ids";
+    public static final transient String START_DATE = "start_date";
+    public static final transient String END_DATE = "end_date";
+    public static final transient String TITLE = "title";
+    public static final transient String TEXT = "event_description";
+    public static final transient String IMAGE_URL = "image_url";
+    public static final transient String EVENT_URL = "event_url";
+    public static final transient String USER_IDS = "user_ids";
 
     @NonNull
     @Expose

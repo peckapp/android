@@ -1,26 +1,24 @@
 package com.peck.android.fragments;
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
-import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.interfaces.Callback;
-import com.peck.android.managers.DataHandler;
 import com.peck.android.models.DBOperable;
-import com.peck.android.policies.FiltrationPolicy;
-
-import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -29,48 +27,133 @@ import java.util.ArrayList;
  *
  */
 
-public class Feed<T extends DBOperable> extends Fragment {
+public class Feed<T extends DBOperable> extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String CLASS_NAME = "class name";
-    public static final String LV_RES = "list view resource identifier";
-    public static final String LAYOUT_RES = "layout identifier";
-    public static final String FEED_ITEM_LAYOUT = "feed item layout identifier";
-    public static final String SQL_QUERY = "sql query";
+    private static final String LV_RES = "list view resource identifier";
+    private static final String LAYOUT_RES = "layout identifier";
+    private static final String FEED_ITEM_LAYOUT = "feed item layout identifier";
+    private static final String LOADER_BUNDLE = "loader bundle";
+    private static final String BINDS_FROM = "bindings from";
+    private static final String BINDS_TO = "bindings to";
+
+    //query arguments
+    private static final String LOADER_URI = "uri"; //necessary
+    private static final String LOADER_SELECTION = "selection";
+    private static final String LOADER_PROJECTION = "projection";
+    private static final String LOADER_SELECT_ARGS = "selection arguments";
+    private static final String LOADER_SORT_ORDER = "sort order";
 
     protected String tag() {
         return ((Object)this).getClass().getName();
     }
-    protected FeedAdapter<T> feedAdapter;
-    protected final ArrayList<T> data = new ArrayList<T>();
-    private FiltrationPolicy<T> filtrationPolicy;
-    private Class<T> tClass;
-    protected int listViewRes = R.id.lv_content;
-    protected int layoutRes = R.layout.feed;
-    protected int listItemRes;
+    private int listViewRes = R.id.lv_content;
+    private int layoutRes = R.layout.feed;
+    private int listItemRes;
+    private String[] binds_from;
+    private int[] binds_to;
+    private SimpleCursorAdapter mAdapter;
     private AdapterView.OnItemClickListener listener;
     private SimpleCursorAdapter.ViewBinder viewBinder;
-    private String query;
-    private Cursor cursor;
+    private Bundle loaderBundle;
+    private static final int URL_LOADER = 0;
+
+    public static class Builder {
+        private Bundle loaderBundle = new Bundle();
+        private Bundle feedBundle = new Bundle();
+        private int itemLayout;
+        private AdapterView.OnItemClickListener listener;
+        private SimpleCursorAdapter.ViewBinder viewBinder;
+
+        public Builder(@NonNull Uri loaderUri, int itemLayout) {
+            feedBundle.putInt(FEED_ITEM_LAYOUT, itemLayout);
+            this.itemLayout = itemLayout;
+            loaderBundle.putParcelable(LOADER_URI, loaderUri);
+        }
+
+        public Builder withSelection(@NonNull String selection, @Nullable String[] selectionArgs) {
+            loaderBundle.putString(LOADER_SELECTION, selection);
+            if (selectionArgs != null) loaderBundle.putStringArray(LOADER_SELECT_ARGS, selectionArgs);
+            return this;
+        }
+
+        public Builder withProjection (String[] projection) {
+            loaderBundle.putStringArray(LOADER_PROJECTION, projection);
+            return this;
+        }
+
+        public Builder orderedBy(@NonNull String ordering) {
+            loaderBundle.putString(LOADER_SORT_ORDER, ordering);
+            return this;
+        }
+
+        public Builder layout(int layout) {
+            feedBundle.putInt(LAYOUT_RES, layout);
+            return this;
+        }
+
+        public Builder bindToListView (int lvId) {
+            feedBundle.putInt(LV_RES, lvId);
+            return this;
+        }
+
+        public Builder withTextBindings(@NonNull String[] bindsFrom, @NonNull int[] bindsTo) {
+            if (BuildConfig.DEBUG && bindsFrom.length != bindsTo.length) throw new IllegalArgumentException("must have the same number of fields assigning as are present.");
+            feedBundle.putStringArray(BINDS_FROM, bindsFrom);
+            feedBundle.putIntArray(BINDS_TO, bindsTo);
+            return this;
+        }
+
+        public Builder withViewBinder(@NonNull SimpleCursorAdapter.ViewBinder viewBinder) {
+            this.viewBinder = viewBinder;
+            return this;
+        }
+
+        public Builder setOnItemClickListener(@NonNull AdapterView.OnItemClickListener listener) {
+            this.listener = listener;
+            return this;
+        }
+
+        public <T extends DBOperable> Feed<T> build() {
+            Feed<T> ret = new Feed<T>();
+
+            feedBundle.putBundle(LOADER_BUNDLE, loaderBundle);
+            ret.setArguments(feedBundle);
+            if (viewBinder != null) ret.setViewBinder(viewBinder);
+            if (listener != null) ret.setOnItemClickListener(listener);
+
+            return ret;
+        }
+
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        switch (i) {
+            case URL_LOADER:
+                return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
+                        bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mAdapter.changeCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mAdapter.changeCursor(null);
+    }
 
     @Override
     @SuppressWarnings("unchecked")
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        String str = args.getString(CLASS_NAME);
-        try {
-            if (BuildConfig.DEBUG && str == null) throw new IllegalArgumentException(getClass().getSimpleName() + "You MUST include a fully qualified class in the bundle.");
-            tClass = (Class<T>)Class.forName(str);
-            if (BuildConfig.DEBUG && !DBOperable.class.isAssignableFrom(tClass)) throw new IllegalArgumentException("tClass was not assignable from " + str);
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(getClass().getSimpleName() + "|" + tClass.getSimpleName() +
-                    "tClass wasn't assignable from " + str + ". Class name should be fully qualified, of the form 'com.peck.android.fragments.Feed'.");
-        }
-
-        str = args.getString(SQL_QUERY, "");
-        if (str.length() == 0) throw new IllegalArgumentException("Every feed must have an associated SQL query.");
-        query = str;
-        DataHandler.getDataSource(tClass).query(query, new Callback<Cursor>() { public void callBack(Cursor obj) { cursor = obj; } });
+        binds_from = args.getStringArray(BINDS_FROM);
+        binds_to = args.getIntArray(BINDS_TO);
 
         int res = args.getInt(LV_RES, -1);
         if (res != -1) listViewRes = res;
@@ -79,54 +162,33 @@ public class Feed<T extends DBOperable> extends Fragment {
         if (res != -1) layoutRes = res;
 
         res = args.getInt(FEED_ITEM_LAYOUT, -1);
-        if (BuildConfig.DEBUG && res == -1) throw new IllegalArgumentException(getClass().getSimpleName() + "|" + tClass.getSimpleName() +
+        if (BuildConfig.DEBUG && res == -1) throw new IllegalArgumentException(getClass().getSimpleName() +
                 ": You must pass a valid layout identifier into the bundle.");
         listItemRes = res;
 
+        loaderBundle = args.getBundle(LOADER_BUNDLE);
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(layoutRes, container, false);
+
+        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, binds_from, binds_to, 0);
+
+        ((ListView)view.findViewById(listViewRes)).setAdapter(mAdapter);
+        if (listener != null) ((ListView)view.findViewById(listViewRes)).setOnItemClickListener(listener);
+
+        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
+
+        return view;
     }
 
     public void setViewBinder(SimpleCursorAdapter.ViewBinder binder) {
         this.viewBinder = binder;
     }
 
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        this.listener = listener;
-    }
-
-
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View r = inflater.inflate(getLayoutRes(), container, false);
-
-        ((ListView)r.findViewById(getListViewRes())).setAdapter(new SimpleCursorAdapter(getActivity(), listItemRes, cursor, ));
-
-        AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
-        v.setOnItemClickListener(listener);
-        if (feedAdapter == null) feedAdapter = new FeedAdapter<T>(listItemRes, this, viewAdapter);
-        v.setAdapter(feedAdapter);
-        return r;
-
-    }
-
-
-
-    public int getListViewRes() {
-        return listViewRes;
-    }
-
-    public int getLayoutRes() {
-        return layoutRes;
-    }
-
-    @NonNull
-    @SuppressWarnings("unchecked")
-    public Class<T> getParameterizedClass() {
-        if (tClass == null) throw new RuntimeException("tClass must be set before the Feed is instantiated.");
-        return tClass;
-    }
+    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) { this.listener = listener; }
 
 }
-

@@ -9,20 +9,25 @@ import com.peck.android.enums.CommentType;
  */
 public class Comment extends DBOperable {
 
+    public static final transient String COMMENT_FROM = "comment_from";
+    public static final transient String USER_ID = "user_id";
+    public static final transient String TEXT = "content";
+    public static final transient String TYPE = "category";
+
     @Expose
-    @SerializedName("comment_from")
+    @SerializedName(COMMENT_FROM)
     private Integer parent;
 
     @Expose
-    @SerializedName("user_id")
+    @SerializedName(USER_ID)
     private Integer userId;
 
     @Expose
-    @SerializedName("content")
+    @SerializedName(TEXT)
     private String text = "";
 
     @Expose
-    @SerializedName("category")
+    @SerializedName(TYPE)
     private CommentType type;
 
 }

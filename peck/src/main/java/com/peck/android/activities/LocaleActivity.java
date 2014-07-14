@@ -3,6 +3,7 @@ package com.peck.android.activities;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -17,44 +18,36 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.adapters.ViewAdapter;
 import com.peck.android.fragments.Feed;
-import com.peck.android.managers.DataHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
-import com.squareup.otto.Subscribe;
-
-import java.util.Collections;
 
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
     private boolean locationServices = true;
     private static final String TAG = "LocaleActivity";
     private static final String fragmentTag = "locale selection feed";
-    private Feed<Locale> localeSelectionFeed = new Feed<Locale>();
+    private Feed<Locale> localeSelectionFeed;
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
     {
-        Bundle bundle = new Bundle();
-        bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Locale");
-        bundle.putInt(Feed.FEED_ITEM_LAYOUT, R.layout.lvitem_locale);
-        localeSelectionFeed.setArguments(bundle);
-        localeSelectionFeed.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                LocaleManager.setLocale((Locale) adapterView.getItemAtPosition(i));
-                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-        localeSelectionFeed.setViewAdapter(new ViewAdapter<Locale>() {
-            @Override
-            public void setUp(View view, Locale item) {
-                ((TextView)view.findViewById(R.id.tv_locale_name)).setText(item.toString());
-            }
-        });
+        localeSelectionFeed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), new Locale().getTableName()), R.layout.lvitem_locale)
+                .withTextBindings(new String[] { Locale.NAME }, new int[] { R.id.tv_title })
+                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                                //LocaleManager.setLocale((Locale) adapterView.getItemAtPosition(i));
+                                                //todo: temporary
+                                                LocaleManager.setLocale(1);
+
+
+                                                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                ).build();
     }
 
     @Override
@@ -113,12 +106,9 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         tv.setText(R.string.pb_loc);
         findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
         findViewById(R.id.rl_network_error).setVisibility(View.GONE);
-
-        DataHandler.register(Locale.class, this);
-        DataHandler.init(Locale.class);
     }
 
-    @Subscribe
+   /* @Subscribe
     public void respondToLocaleLoad(DataHandler.InitComplete complete) {
         DataHandler.unregister(Locale.class, this);
         runOnUiThread(new Runnable() {
@@ -136,7 +126,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 }
             }
         });
-    }
+    }*/
 
 
     @Override

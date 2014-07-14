@@ -10,6 +10,7 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
 
 
     <permission android:name="com.peck.android.gcm.permission.C2D_MESSAGE"
@@ -66,7 +67,10 @@
         <provider
             android:exported="false"
             android:authorities="com.peck.android.provider.all"
-            android:name=".PeckContentProvider"/>
+            android:name=".InternalContentProvider"
+            android:multiprocess="true"
+            android:syncable="true"
+            />
         
         <receiver
             android:name=".receivers.GcmBroadcastReceiver"

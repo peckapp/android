@@ -11,13 +11,13 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Locale extends DBOperable {
 
-    public static final String NAME = "name";
-    public static final String ADDRESS = "street_address";
-    public static final String STATE = "state";
-    public static final String COUNTRY = "country";
-    public static final String RANGE = "range";
-    public static final String LONGITUDE = "longitude";
-    public static final String LATITUDE = "latitude";
+    public static final transient String NAME = "name";
+    public static final transient String ADDRESS = "street_address";
+    public static final transient String STATE = "state";
+    public static final transient String COUNTRY = "country";
+    public static final transient String RANGE = "range";
+    public static final transient String LONGITUDE = "longitude";
+    public static final transient String LATITUDE = "latitude";
 
 
     @NonNull

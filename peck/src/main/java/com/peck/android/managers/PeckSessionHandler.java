@@ -4,13 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
-import com.squareup.otto.Subscribe;
 
 import java.io.FileOutputStream;
 import java.util.Date;
@@ -60,12 +57,9 @@ public class PeckSessionHandler implements Singleton {
 
         FacebookSessionHandler.init();
 
-        DataHandler.register(User.class, getHandler());
-        DataHandler.init(User.class);
-
     }
 
-    @Subscribe
+  /*  @Subscribe
     public void respondToInit(DataHandler.InitComplete complete) {
         User user = DataHandler.getByLocalId(User.class, context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
 
@@ -88,19 +82,19 @@ public class PeckSessionHandler implements Singleton {
                 }
             });
         }
-    }
+    }*/
 
 
 
     public static void notifyFbStateChanged(final boolean loggedIn) {
-        facebookMode = loggedIn;
+        /*facebookMode = loggedIn;
         FacebookSessionHandler.getGraphUser(new Callback<GraphUser>() {
             @Override
             public void callBack(GraphUser obj) {
                 user.setFbId(obj.getId());
                 if (!peckAuth && loggedIn) user.setFullName(obj.getName());
             }
-        });
+        });*/
     }
 
     public static User getUser() {

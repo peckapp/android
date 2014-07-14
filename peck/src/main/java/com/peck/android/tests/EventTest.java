@@ -41,30 +41,5 @@ public class EventTest extends AndroidTestCase {
         assertNull(e);
     }
 
-    public void testLocalId() throws Exception {
-        e.setLocalId(testid);
-        if (e.getLocalId() != testid) throw new Exception("get/set localId not working");
-    }
-
-
-    public void testServerId() throws Exception {
-        e.setServerId(testid);
-        if (e.getServerId() != testid) throw new Exception("get/set serverId not working");
-    }
-
-    public void testCreated() throws Exception {
-        e.setCreated(testdt);
-        if (e.getCreated() != testdt) throw new Exception("get/set created date not working");
-    }
-
-    public void testUpdated() throws Exception {
-        e.setLocalId(testid);
-        if (e.getLocalId() != testid) throw new Exception("get/set localId not working");
-    }
-
-    public void testTitle() throws Exception {
-        e.setTitle(testStr);
-        if (!e.getTitle().equals(testStr)) throw new Exception("get/set localId not working");
-    }
 
 }

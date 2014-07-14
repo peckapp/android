@@ -6,19 +6,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
-import com.makeramen.RoundedImageView;
-import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.FacebookSessionHandler;
-import com.peck.android.managers.PeckSessionHandler;
-import com.peck.android.models.User;
 import com.peck.android.views.PeckAuthButton;
-import com.squareup.picasso.Picasso;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -85,7 +79,7 @@ public class ProfileTab extends Fragment {
         PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
-        User user = PeckSessionHandler.getUser();
+        /*User user = PeckSessionHandler.getUser();
 
         view.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
 
@@ -102,7 +96,7 @@ public class ProfileTab extends Fragment {
         else {
             ((TextView) view.findViewById(R.id.tv_realname)).setText(user.getFullName());
             view.findViewById(R.id.tv_realname).setAlpha(1f);
-        }
+        }*/
 
         return view;
     }
