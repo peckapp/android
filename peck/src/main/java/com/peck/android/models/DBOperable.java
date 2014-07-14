@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public abstract class DBOperable implements Serializable {
 
-    public static final transient String LOCAL_ID = "_id";
+    public static final transient String LOCAL_ID = "_id"; //CursorAdapter requires this field to be "_id" exactly.
     public static final transient String SV_ID = "id";
     public static final transient String CREATED_AT = "created_at";
     public static final transient String UPDATED_AT = "updated_at";

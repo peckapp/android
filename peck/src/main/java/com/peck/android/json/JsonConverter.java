@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by mammothbane on 6/20/2014.
  *
- * this class prepares model objects for insertion into the database
+ * prepares model objects for insertion into the database
  * and restores them from database query cursors.
  *
  */
