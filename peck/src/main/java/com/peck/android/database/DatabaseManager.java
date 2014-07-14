@@ -10,9 +10,7 @@ import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
-import com.peck.android.models.Food;
 import com.peck.android.models.Locale;
-import com.peck.android.models.Meal;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 
@@ -32,8 +30,6 @@ public class DatabaseManager {
 
     static {
         dbOperables.add(new Event());
-        dbOperables.add(new Food());
-        dbOperables.add(new Meal());
         dbOperables.add(new Locale());
         dbOperables.add(new Peck());
         dbOperables.add(new Circle());

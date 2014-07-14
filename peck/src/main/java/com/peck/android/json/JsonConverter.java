@@ -39,7 +39,7 @@ public class JsonConverter {
     private JsonConverter() {}
 
     public static String getDatabaseCreate(DBOperable dbOperable) {
-        String dbCreate = "create table " + dbOperable.getTableName() + " (";
+        String dbCreate = "create table " + dbOperable.getClass().getSimpleName() + " (";
 
         for (Field objField : getAllFields(dbOperable.getClass())) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
             SerializedName annotation = objField.getAnnotation(SerializedName.class);
@@ -49,7 +49,7 @@ public class JsonConverter {
             dbCreate += DELIM;
         }
 
-        dbCreate += "unique (" + PeckApp.Constants.Network.SV_ID_NAME + "));";
+        dbCreate += "unique (" + DBOperable.SV_ID + "));";
 
         return dbCreate;
     }

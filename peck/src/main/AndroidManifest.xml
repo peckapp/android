@@ -63,6 +63,11 @@
             </intent-filter>
         </activity>
 
+        <provider
+            android:exported="false"
+            android:authorities="com.peck.android.provider.all"
+            android:name=".PeckContentProvider"/>
+        
         <receiver
             android:name=".receivers.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
