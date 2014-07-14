@@ -10,7 +10,6 @@ import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.models.DBOperable;
 import com.peck.android.network.ServerCommunicator;
-import com.rits.cloning.Cloner;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
@@ -27,8 +26,6 @@ import java.util.HashMap;
 public abstract class DataHandler {
 
     public static String tag = "Manager";
-
-    private static final Cloner cloner = new Cloner();
 
     //todo: maybe we want this to be a heap based on localid
     protected static final HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>> data = new HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>>();
@@ -81,10 +78,9 @@ public abstract class DataHandler {
      * @return a copy of the data contained in the manager
      */
 
-    @NonNull
     @SuppressWarnings("unchecked")
-    public static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
-        return (ArrayList<T>)cloner.deepClone(getPair(tClass).first);
+    public static <T extends DBOperable> void getData(Class<T> tClass, Callback<ArrayList<T>> callback) {
+        getDataSource(tClass).getAll(callback);
     }
 
     @NonNull
@@ -379,7 +375,12 @@ public abstract class DataHandler {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                getBus(tClass).post(cloner.deepClone(obj));
+                getDataSource(tClass).get(obj.getLocalId(), new Callback<T>() {
+                    @Override
+                    public void callBack(T obj) {
+                        getBus(tClass).post(obj);
+                    }
+                });
                 return null;
             }
         }.execute();

@@ -57,7 +57,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup:otto:+'
     compile 'uk.com.robust-it:cloning:+'
-
+    compile 'com.esotericsoftware.kryo:kryo:+'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     
