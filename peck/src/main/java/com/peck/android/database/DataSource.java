@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -63,10 +64,16 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
     }
 
-    public Cursor query(String select, String[] selectArgs,  ) {
-        open();
-        Cursor ret = database.query(getTableName(), getColumns(), select, selectArgs)
-        close();
+    public Cursor query(final String select, final String[] selectArgs, final String having, final String orderBy, final Callback<Cursor> ret) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                open();
+                Cursor ret = database.query(getTableName(), getColumns(), select, selectArgs, null, having, orderBy);
+                close();
+                return null;
+            }
+        }
         return ret;
     }
 
