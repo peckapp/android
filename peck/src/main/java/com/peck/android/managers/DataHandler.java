@@ -1,5 +1,6 @@
 package com.peck.android.managers;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
@@ -9,6 +10,7 @@ import com.peck.android.database.DataSource;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.models.DBOperable;
 import com.peck.android.network.ServerCommunicator;
+import com.rits.cloning.Cloner;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
@@ -25,6 +27,8 @@ import java.util.HashMap;
 public abstract class DataHandler {
 
     public static String tag = "Manager";
+
+    private static final Cloner cloner = new Cloner();
 
     //todo: maybe we want this to be a heap based on localid
     protected static final HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>> data = new HashMap<Class<? extends DBOperable>, Pair<ArrayList<? extends DBOperable>, LoadStateWrapper>>();
@@ -70,7 +74,7 @@ public abstract class DataHandler {
 
     /**
      *
-     * hands back a copy of the data currently contained in the datahandler, not a reference.
+     * hands back a deep clone of the data currently contained in the datahandler, not a reference.
      * to modify the data in the handler, use update/add/remove operations.
      *
      * @param tClass the class the data belongs to
@@ -80,7 +84,7 @@ public abstract class DataHandler {
     @NonNull
     @SuppressWarnings("unchecked")
     public static <T extends DBOperable> ArrayList<T> getData(Class<T> tClass) {
-        return new ArrayList<T>((ArrayList<T>)getPair(tClass).first);
+        return (ArrayList<T>)cloner.deepClone(getPair(tClass).first);
     }
 
     @NonNull
@@ -287,7 +291,7 @@ public abstract class DataHandler {
                     public void callBack(final Integer dbObj) {
                         item.setLocalId(dbObj);
                         getDataRef(tClass).add(item);
-                        getBus(tClass).post(item);
+                        post(tClass, item);
                         ServerCommunicator.postObject(item, tClass, new Callback<T>() {
                             @Override
                             public void callBack(T obj) {
@@ -328,7 +332,7 @@ public abstract class DataHandler {
                                 }
                             });
                         } else {
-                            getBus(tClass).post(item);
+                            post(tClass, item);
                             item.pending(false);
                         }
                     }
@@ -371,6 +375,15 @@ public abstract class DataHandler {
         }
     }
 
+    private static <T extends DBOperable> void post(final Class<T> tClass, final T obj) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                getBus(tClass).post(cloner.deepClone(obj));
+                return null;
+            }
+        }.execute();
+    }
 
     public static <T extends DBOperable> void register(Class<T> tClass, Object subscriber) {
         getBus(tClass).register(subscriber);

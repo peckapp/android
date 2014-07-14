@@ -32,7 +32,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
     productFlavors {
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
     }
 }
 
@@ -50,6 +56,7 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:+'
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup:otto:+'
+    compile 'uk.com.robust-it:cloning:+'
 
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
