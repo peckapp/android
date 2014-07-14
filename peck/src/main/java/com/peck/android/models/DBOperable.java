@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.PeckApp;
 import com.peck.android.database.DBType;
 
 import java.io.Serializable;
@@ -20,31 +19,22 @@ import java.util.Map;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DBOperable implements Serializable, Comparable<DBOperable> {
+public abstract class DBOperable implements Serializable {
 
-    private transient boolean pendingUpdates = false;
+    public static final String LOCAL_ID = "loc_id";
+    public static final String SV_ID = "id";
+    public static final String CREATED_AT = "created_at";
+    public static final String UPDATED_AT = "updated_at";
 
-    public void pending(boolean state) {
-        this.pendingUpdates = state;
-    }
-
-    public boolean isPending() {
-        return pendingUpdates;
-    }
-
-    public DBOperable() {
-        created = new Date(System.currentTimeMillis());
-        updated = new Date(System.currentTimeMillis());
-    }
 
     @DBType("integer primary key autoincrement")
-    @SerializedName(PeckApp.Constants.Database.LOCAL_ID)
+    @SerializedName(LOCAL_ID)
     public Integer localId = null;
 
     @Expose
     @Nullable
     @DBType("integer")
-    @SerializedName(PeckApp.Constants.Network.SV_ID_NAME)
+    @SerializedName(SV_ID)
     public Integer serverId = null;
 
 
@@ -61,6 +51,11 @@ public abstract class DBOperable implements Serializable, Comparable<DBOperable>
     public Date updated;
 
 
+    public DBOperable() {
+        created = new Date(System.currentTimeMillis());
+        updated = new Date(System.currentTimeMillis());
+    }
+
     public String getTableName() {
         return "tbl_" + getClass().getSimpleName().toLowerCase();
     }
@@ -76,83 +71,4 @@ public abstract class DBOperable implements Serializable, Comparable<DBOperable>
         return columns.toArray(ret);
     }
 
-    @Nullable
-    public Integer getServerId() {
-        return serverId;
-    }
-
-    public DBOperable setServerId(@NonNull Integer serverId) {
-        this.serverId = serverId;
-        updated();
-        return this;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public DBOperable setCreated(Date created) {
-        this.created = created;
-        updated();
-        return this;
-    }
-
-    @NonNull
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public DBOperable updated() {
-        updated = new Date(System.currentTimeMillis());
-        return this;
-    }
-
-    public DBOperable setUpdated(Date updated) {
-        this.updated = updated;
-        return this;
-    }
-
-    @NonNull
-    public Integer getLocalId() {
-        return localId;
-    }
-
-    public DBOperable setLocalId(@NonNull Integer id) {
-        localId = id;
-        updated();
-        return this;
-    }
-
-    public static long dateToInt(@Nullable Date date) {
-        if (date == null) return -1;
-        else return date.getTime();
-    }
-
-    /**
-     *
-     * check to see if two dboperables are equal
-     *
-     *
-     * @param o object to compare
-     * @return true if their local ids are the same
-     */
-
-    @Override
-    public boolean equals(@Nullable Object o) {
-        if (o == null || !getClass().equals(o.getClass())) return false;
-        return localId.equals(((DBOperable) o).getLocalId());
-
-    }
-
-    //todo: override hashcode properly
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[id: " + getLocalId() + " | sv_id: " + getServerId() + "]";
-    }
-
-    @Override
-    public int compareTo(@NonNull DBOperable dbOperable) {
-        return (int)Math.signum(this.getCreated().getTime() - dbOperable.getCreated().getTime());
-    }
 }

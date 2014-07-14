@@ -1,8 +1,8 @@
 package com.peck.android.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
@@ -15,7 +15,8 @@ import android.widget.ListView;
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
 import com.peck.android.adapters.FeedAdapter;
-import com.peck.android.database.DatabaseManager;
+import com.peck.android.interfaces.Callback;
+import com.peck.android.managers.DataHandler;
 import com.peck.android.models.DBOperable;
 import com.peck.android.policies.FiltrationPolicy;
 
@@ -34,6 +35,7 @@ public class Feed<T extends DBOperable> extends Fragment {
     public static final String LV_RES = "list view resource identifier";
     public static final String LAYOUT_RES = "layout identifier";
     public static final String FEED_ITEM_LAYOUT = "feed item layout identifier";
+    public static final String SQL_QUERY = "sql query";
 
     protected String tag() {
         return ((Object)this).getClass().getName();
@@ -47,6 +49,8 @@ public class Feed<T extends DBOperable> extends Fragment {
     protected int listItemRes;
     private AdapterView.OnItemClickListener listener;
     private SimpleCursorAdapter.ViewBinder viewBinder;
+    private String query;
+    private Cursor cursor;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -62,6 +66,11 @@ public class Feed<T extends DBOperable> extends Fragment {
             throw new RuntimeException(getClass().getSimpleName() + "|" + tClass.getSimpleName() +
                     "tClass wasn't assignable from " + str + ". Class name should be fully qualified, of the form 'com.peck.android.fragments.Feed'.");
         }
+
+        str = args.getString(SQL_QUERY, "");
+        if (str.length() == 0) throw new IllegalArgumentException("Every feed must have an associated SQL query.");
+        query = str;
+        DataHandler.getDataSource(tClass).query(query, new Callback<Cursor>() { public void callBack(Cursor obj) { cursor = obj; } });
 
         int res = args.getInt(LV_RES, -1);
         if (res != -1) listViewRes = res;
@@ -80,26 +89,19 @@ public class Feed<T extends DBOperable> extends Fragment {
         this.viewBinder = binder;
     }
 
-    public void setFiltrationPolicy(@Nullable FiltrationPolicy<T> filtrationPolicy) {
-        this.filtrationPolicy = filtrationPolicy;
-        if (filtrationPolicy != null) {
-            synchronized (data) {
-                filtrationPolicy.filter(data);
-            }
-            if (feedAdapter != null) feedAdapter.notifyDataSetChanged();
-        }
-    }
-
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
         this.listener = listener;
     }
+
+
+
 
     @Override
     @SuppressWarnings("unchecked")
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View r = inflater.inflate(getLayoutRes(), container, false);
 
-        ((ListView)r.findViewById(getListViewRes())).setAdapter(new SimpleCursorAdapter(getActivity(), listItemRes, DatabaseManager.openDB()));
+        ((ListView)r.findViewById(getListViewRes())).setAdapter(new SimpleCursorAdapter(getActivity(), listItemRes, cursor, ));
 
         AdapterView<ListAdapter> v = (AdapterView<ListAdapter>) r.findViewById(getListViewRes());
         v.setOnItemClickListener(listener);

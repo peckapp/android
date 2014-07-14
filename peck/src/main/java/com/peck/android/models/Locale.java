@@ -1,108 +1,55 @@
 package com.peck.android.models;
 
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.R;
-import com.peck.android.managers.LocaleManager;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
 public class Locale extends DBOperable {
 
-    private final static int resId = R.layout.lvitem_locale;
+    public static final String NAME = "name";
+    public static final String ADDRESS = "street_address";
+    public static final String STATE = "state";
+    public static final String COUNTRY = "country";
+    public static final String RANGE = "range";
+    public static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
 
 
     @NonNull
     @Expose
-    @SerializedName("name")
+    @SerializedName(NAME)
     private String name;
 
     @Expose
-    @SerializedName("street_address")
+    @SerializedName(ADDRESS)
     private String streetAddress;
 
     @Expose
-    @SerializedName("state")
+    @SerializedName(STATE)
     private String state;
 
     @Expose
-    @SerializedName("country")
+    @SerializedName(COUNTRY)
     private String country;
 
     @Expose
     @Nullable
-    @SerializedName("range")
+    @SerializedName(RANGE)
     private Float range = null;
 
     @Expose
     @Nullable
-    @SerializedName("gps_longitude")
+    @SerializedName(LONGITUDE)
     private Double longitude = null;
 
     @Expose
     @Nullable
-    @SerializedName("gps_latitude")
+    @SerializedName(LATITUDE)
     private Double latitutde = null;
 
-    private Location location;
-    private transient double dist; //don't add to database
-
-    public Location getLocation() {
-        if (location == null) {
-            location = new Location("null");
-            if (range != null) location.setAccuracy(range);
-            if (longitude != null) location.setLongitude(longitude);
-            if (latitutde != null) location.setLatitude(latitutde);
-        }
-        return location;
-    }
-
-
-    @Nullable
-    public Double getDist() {
-        if (location == null || LocaleManager.getLocation() == null) return null;
-
-        return (Math.sqrt(Math.pow((LocaleManager.getLocation().getLongitude() - getLocation().getLongitude()), 2) + Math.pow((LocaleManager.getLocation().getLatitude() - getLocation().getLatitude()), 2)));
-    }
-
-    public Locale setLocation(Location location) {
-        this.location = location;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Locale setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-
-    @Override
-    public int compareTo(@NonNull DBOperable dbOperable) {
-        if (!(dbOperable instanceof Locale)) return super.compareTo(dbOperable);
-        else {
-            Double myDist = getDist();
-            Double theirDist = ((Locale) dbOperable).getDist();
-
-            if (myDist == null) {
-                if (theirDist == null) return 0;
-                else return -1;
-            } else if (theirDist == null) return 1;
-
-            return ((int)Math.signum(this.getDist() - ((Locale) dbOperable).getDist()));
-        }
-    }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
 }

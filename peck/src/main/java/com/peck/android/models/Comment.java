@@ -25,37 +25,4 @@ public class Comment extends DBOperable {
     @SerializedName("category")
     private CommentType type;
 
-    public Integer getParent() {
-        return parent;
-    }
-
-    public void setParent(Integer parent) {
-        this.parent = parent;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public CommentType getType() {
-        return type;
-    }
-
-    public void setType(CommentType type) {
-        this.type = type;
-    }
-
-
 }

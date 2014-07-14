@@ -66,7 +66,6 @@ public class PeckApp extends Application implements Singleton{
     public static class Constants {
 
         public final static class Network {
-            public final static String SV_ID_NAME = "id";
 
             public final static int RETRY_INTERVAL = 200;
             public final static int TIMEOUT = 6000;
@@ -111,12 +110,7 @@ public class PeckApp extends Application implements Singleton{
 
 
         public final static class Database {
-
             public static final String DATABASE_NAME = "peck.db";
-
-            public final static String LOCAL_ID = "localId";
-
-
         }
 
         public final static class Location {

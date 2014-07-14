@@ -1,7 +1,6 @@
 package com.peck.android.models;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -14,94 +13,43 @@ import java.util.Date;
  */
 public class Event extends DBOperable {
 
+    public static final String START_DATE = "start_date";
+    public static final String END_DATE = "end_date";
+    public static final String TITLE = "title";
+    public static final String TEXT = "event_description";
+    public static final String IMAGE_URL = "image_url";
+    public static final String EVENT_URL = "event_url";
+    public static final String USER_IDS = "user_ids";
+
     @NonNull
     @Expose
-    @SerializedName("start_date")
+    @SerializedName(START_DATE)
     private Date startTime = new Date(-1);
 
     @NonNull
     @Expose
-    @SerializedName("end_date")
+    @SerializedName(END_DATE)
     private Date endTime = new Date(-1);
 
     @Expose
-    @SerializedName("title")
+    @SerializedName(TITLE)
     private String title = "";
 
     @Expose
-    @SerializedName("event_description")
+    @SerializedName(TEXT)
     private String text = "";
 
     @Expose
-    @SerializedName("image_url")
+    @SerializedName(IMAGE_URL)
     private String imageUrl;
 
     @Expose
-    @SerializedName("event_url")
+    @SerializedName(EVENT_URL)
     private String eventUrl;
 
     @NonNull
     @Expose
-    @SerializedName("user_ids")
+    @SerializedName(USER_IDS)
     private ArrayList<Integer> users = new ArrayList<Integer>();
-
-    @Nullable
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Event setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-        return this;
-    }
-
-    @Nullable
-    public String getEventUrl() {
-        return eventUrl;
-    }
-
-    public Event setEventUrl(String eventUrl) {
-        this.eventUrl = eventUrl;
-        return this;
-    }
-
-    @NonNull
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public Event setStartTime(@NonNull Date startTime) {
-        this.startTime = startTime;
-        return this;
-    }
-
-    @NonNull
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public Event setEndTime(@NonNull Date endTime) {
-        this.endTime = endTime;
-        return this;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public Event setText(String text) {
-        this.text = text;
-        return this;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Event setTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
 
 }

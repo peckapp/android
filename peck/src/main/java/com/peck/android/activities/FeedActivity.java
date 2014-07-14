@@ -1,9 +1,13 @@
 package com.peck.android.activities;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +24,7 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
+import com.peck.android.managers.DataHandler;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Event;
@@ -128,24 +133,16 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_explore, feed);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (resultCode) {
-            case RESULT_OK: {
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Crashlytics.start(this);
+
+        ListFragment fragment = new ListFragment();
+        SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter();
+
+        fragment.setListAdapter(new SimpleCursorAdapter(this, R.layout.lvitem_event, , null, null, null));
 
         setContentView(R.layout.activity_feed_root);
 
@@ -154,14 +151,24 @@ public class FeedActivity extends PeckActivity {
         bundle.putString(Feed.CLASS_NAME, "com.peck.android.models.Event");
         bundle.putInt(Feed.FEED_ITEM_LAYOUT, R.layout.lvitem_event);
         homeFeed.setArguments(bundle);
-        homeFeed.setViewAdapter(new ViewAdapter<Event>() {
+        String query = SQLiteQueryBuilder.buildQueryString(false, DataHandler.getDataSource(Event.class).getTableName(),
+                DataHandler.getDataSource(Event.class).getColumns(), null, null, null, null, null);
+        homeFeed.setQuery(query);
+        homeFeed.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
-            public void setUp(View v, Event item) {
-                ((TextView)v.findViewById(R.id.tv_title)).setText(item.getTitle());
-                ((TextView)v.findViewById(R.id.tv_text)).setText(item.getText());
+            public boolean setViewValue(View view, Cursor cursor, int i) {
+                switch (view.getId()) {
+                    case (R.id.tv_title):
+                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex()));
+                        break;
+                    case (R.id.tv_text):
+                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex()));
+                        break;
+                }
+
+                return true;
             }
         });
-
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, homeFeed).commit();
 
         for (final int i : buttons.keySet()) {

@@ -64,17 +64,21 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         }
     }
 
-    public Cursor query(final String select, final String[] selectArgs, final String having, final String orderBy, final Callback<Cursor> ret) {
-        new AsyncTask<Void, Void, Void>() {
+    public void query(final String query, final Callback<Cursor> ret) {
+        new AsyncTask<Void, Void, Cursor>() {
             @Override
-            protected Void doInBackground(Void... voids) {
+            protected Cursor doInBackground(Void... voids) {
                 open();
-                Cursor ret = database.query(getTableName(), getColumns(), select, selectArgs, null, having, orderBy);
+                Cursor cursor = database.rawQuery(query, null);
                 close();
-                return null;
+                return cursor;
             }
-        }
-        return ret;
+
+            @Override
+            protected void onPostExecute(Cursor cursor) {
+                ret.callBack(cursor);
+            }
+        }.execute();
     }
 
 
@@ -107,22 +111,12 @@ public class DataSource<T extends DBOperable> implements Factory<T> {
         queue.add(new get(id, callback));
     }
 
-    /**
-     * call to execute after a database operation. not guaranteed to execute before other ops.
-     * @param callback gets called once the queue reaches this item
-     */
-
-    public void post(Callback callback) {
-        queue.add(new post(callback));
-    }
-
-
-    private String[] getColumns() {
+    public String[] getColumns() {
         if (columns == null) columns = generate().getColumns();
         return columns;
     }
 
-    private String getTableName() {
+    public String getTableName() {
         if (tableName == null) tableName = generate().getTableName();
         return tableName;
     }

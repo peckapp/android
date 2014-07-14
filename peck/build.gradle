@@ -50,6 +50,7 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:+'
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup:otto:+'
+    compile 'com.squareup:tape:+'
 
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
