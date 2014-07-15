@@ -1,9 +1,10 @@
 package com.peck.android.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -18,7 +19,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
@@ -32,8 +32,14 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
+    public static final String AUTHORITY = "com.peck.android.provider.all";
+    public static final String ACCOUNT_TYPE = "peckapp.com";
+    public static final String ACCOUNT = "dummy";
+
+    private Account account = new Account(ACCOUNT, ACCOUNT_TYPE);
+
     {
-        localeSelectionFeed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), DBUtils.getTableName(Locale.class)), R.layout.lvitem_locale)
+        localeSelectionFeed = new Feed.Builder(PeckApp.buildLocalUri(Locale.class), R.layout.lvitem_locale)
                 .withTextBindings(new String[] { Locale.NAME }, new int[] { R.id.tv_title })
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                             @Override
@@ -66,6 +72,14 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 loadLocales();
             }
         });
+
+        if (((AccountManager)getSystemService(ACCOUNT_SERVICE)).addAccountExplicitly(account, null, null)) {
+            Log.v(getClass().getSimpleName(), "account added");
+        } else {
+            Log.e(getClass().getSimpleName(), "account wasn't created.");
+        }
+
+        getContentResolver().setSyncAutomatically(account, AUTHORITY, true);
 
     }
 
