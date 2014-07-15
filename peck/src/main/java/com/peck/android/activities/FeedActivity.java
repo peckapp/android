@@ -16,6 +16,7 @@ import com.peck.android.R;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
+import com.peck.android.json.JsonUtils;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Event;
 
@@ -36,7 +37,7 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
-        Feed feed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), new Event().getTableName()), R.layout.lvitem_event)
+        Feed feed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), JsonUtils.getTableName(Event.class)), R.layout.lvitem_event)
                 .withTextBindings(new String[] { Event.TITLE, Event.TEXT }, new int[] { R.id.tv_title, R.id.tv_text }).build();
 
         buttons.put(R.id.bt_explore, feed);

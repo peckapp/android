@@ -81,6 +81,16 @@
             </intent-filter>
         </receiver>
 
+        <service android:name=".network.AuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.peck.android.network.LoginAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="com.peck.android.network.LoginAuthenticator"
+                android:resource="@xml/authenticator"/>
+        </service>
+
+
         <service android:name=".services.GcmIntentService"/>
 
 

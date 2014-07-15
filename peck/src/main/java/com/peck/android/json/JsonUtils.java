@@ -6,17 +6,22 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.PeckApp;
 import com.peck.android.database.DBType;
 import com.peck.android.models.DBOperable;
+
+import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -29,18 +34,32 @@ import java.util.Map;
  */
 
 
-public class JsonConverter {
-    private static final transient String DELIM = ", ";
+public class JsonUtils {
+    private static final String DELIM = ", ";
     private static Gson gson = new GsonBuilder().serializeNulls().create();
     private static JsonParser parser = new JsonParser();
     private static final String ARRAY_MARKER = "#jsonarray#";
 
-    private JsonConverter() {}
+    private static final HashMap<Class, String[]> columnMap = new HashMap<Class, String[]>();
+    private static final HashMap<Class, DBOperable> refList = new HashMap<Class, DBOperable>();
 
-    public static String getDatabaseCreate(DBOperable dbOperable) {
-        String dbCreate = "create table " + dbOperable.getTableName() + " (";
+    static {
+        try {
+            for (Class t : PeckApp.getModelArray()) {
+                refList.put(t, (DBOperable)t.newInstance());
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("every model must have a nullary constructor.");
+        }
+    }
 
-        for (Field objField : getAllFields(dbOperable.getClass())) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
+
+    private JsonUtils() {}
+
+    public static <T extends DBOperable> String getDatabaseCreate(Class<T> tClass) {
+        String dbCreate = "create table " + getTableName(tClass) + " (";
+
+        for (Field objField : getAllFields(tClass)) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
             SerializedName annotation = objField.getAnnotation(SerializedName.class);
             dbCreate += ((annotation == null) ? objField.getName() + " " : annotation.value() + " ");
             DBType type = objField.getAnnotation(DBType.class);
@@ -51,6 +70,10 @@ public class JsonConverter {
         dbCreate += "unique (" + DBOperable.SV_ID + "));";
 
         return dbCreate;
+    }
+
+    public static <T extends DBOperable> String getTableName(Class<T> tClass) {
+        return "tbl_" + tClass.getSimpleName().toLowerCase();
     }
 
     @NonNull
@@ -64,6 +87,43 @@ public class JsonConverter {
         if (superClss != null) ret.addAll(getAllFields(superClss));
         return ret;
     }
+
+    public static <T extends DBOperable> String[] getColumns(Class<T> tClass) {
+        if (columnMap.get(tClass) == null) {
+            try {
+                ArrayList<String> columns = new ArrayList<String>();
+                T t = tClass.newInstance();
+                for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new GsonBuilder().serializeNulls().create().toJson(t, tClass))).entrySet()) {
+                    columns.add(entry.getKey());
+                }
+                columnMap.put(tClass, columns.toArray(new String[columns.size()]));
+            } catch (Exception e) { throw new IllegalArgumentException("DBOperables must provide a nullary constructor."); }
+        }
+
+        return columnMap.get(tClass);
+    }
+
+    public static HashMap<Integer, ContentValues> toMap(JSONObject object) {
+
+
+    }
+
+    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
+        ArrayList<T> ret = new ArrayList<T>();
+        if (obj.isJsonObject()) {
+            if (wrapsJsonElement((JsonObject) obj)) {
+                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
+            } else ret.add(gson.fromJson(obj, tClass));
+        } else if (obj.isJsonArray()) {
+            for (JsonElement arrayElement : (JsonArray)obj) {
+                ret.addAll(parseJson(arrayElement, tClass));
+            }
+        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
+        return ret;
+    }
+
+
+
 
     @NonNull
     public static <T> ContentValues toContentValues(T t) throws JsonParseException {
@@ -89,6 +149,18 @@ public class JsonConverter {
 
         return ret;
     }
+
+
+
+
+
+
+    public static <T extends DBOperable> ContentValues fromJson(JsonObject jsonObject, Class<T> tClass) {
+        ContentValues contentValues = new ContentValues();
+
+
+    }
+
 
     @NonNull
     public static <T> T fromCursor(Cursor cursor, Class<T> tClass) {

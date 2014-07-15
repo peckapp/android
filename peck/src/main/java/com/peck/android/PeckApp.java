@@ -3,17 +3,27 @@ package com.peck.android;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.peck.android.interfaces.Singleton;
+import com.peck.android.json.JsonUtils;
 import com.peck.android.managers.PeckSessionHandler;
+import com.peck.android.models.Circle;
+import com.peck.android.models.Comment;
+import com.peck.android.models.Event;
+import com.peck.android.models.Locale;
+import com.peck.android.models.Peck;
+import com.peck.android.models.User;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
+import java.util.HashMap;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -27,6 +37,39 @@ public class PeckApp extends Application implements Singleton{
     public static Context getContext() {
         return AppContext.mContext;
     }
+
+
+    private static final HashMap<Class, String> API_STRINGS = new HashMap<Class, String>();
+
+    static {
+        API_STRINGS.put(Circle.class, "circles");
+        API_STRINGS.put(Event.class, "simple_events");
+        API_STRINGS.put(Locale.class, "institutions");
+        API_STRINGS.put(Peck.class, "push_notifications");
+        API_STRINGS.put(Comment.class, "comments");
+        API_STRINGS.put(User.class, "users");
+    }
+
+    public static Class[] getModelArray() {
+        return API_STRINGS.keySet().toArray(new Class[API_STRINGS.entrySet().size()]);
+    }
+
+    public static Uri buildLocalUri(Class tClass) {
+        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
+        return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(JsonUtils.getTableName(tClass)).build();
+    }
+
+    public static String buildEndpointURL(Class tClass) {
+        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
+        return Constants.Network.ENDPOINT + API_STRINGS.get(tClass) + "/";
+    }
+
+    public static String getJsonHeader(Class tClass, boolean plural) {
+        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
+        if (plural) return API_STRINGS.get(tClass);
+        else return (API_STRINGS.get(tClass).substring(0, API_STRINGS.get(tClass).length() - 1));
+    }
+
 
     public static class AppContext {
         private static Context mContext;
@@ -63,6 +106,7 @@ public class PeckApp extends Application implements Singleton{
     }
 
 
+
     public static class Constants {
 
         public final static class Network {
@@ -73,17 +117,7 @@ public class PeckApp extends Application implements Singleton{
             /**
              * API strings
              */
-            public final static String API_STRING = "http://thor.peckapp.com:3500/api/";
-            public final static String EVENTS = "simple_events/";
-            public final static String CIRCLES = "circles/";
-            public final static String USERS = "users/";
-            public final static String LOCALES = "institutions/";
-            public final static String PECK = "push_notifications/";
-            public final static String COMMENTS= "comments/";
-
-            //todo: get these:
-            public final static String MEAL = null;
-            public final static String FOOD = null;
+            public final static String ENDPOINT = "http://thor.peckapp.com:3500/api/";
 
 
             public final static String API_TEST_KEY = "";
@@ -93,14 +127,6 @@ public class PeckApp extends Application implements Singleton{
 
         }
 
-        public final static class Food {
-
-
-            public final static int BREAKFAST = 1;
-            public final static int LUNCH = 2;
-            public final static int DINNER = 3;
-            public final static int NIGHT_MEAL = 4;
-        }
 
         public final static class Preferences {
             public final static String USER_PREFS = "user preferences";
@@ -110,6 +136,7 @@ public class PeckApp extends Application implements Singleton{
 
 
         public final static class Database {
+            public static final Uri BASE_AUTHORITY_URI = Uri.parse("content://com.peck.android.provider.all");
             public static final String DATABASE_NAME = "peck.db";
         }
 

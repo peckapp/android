@@ -8,13 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import com.peck.android.database.DatabaseManager;
-import com.peck.android.models.Circle;
-import com.peck.android.models.Comment;
+import com.peck.android.json.JsonUtils;
 import com.peck.android.models.DBOperable;
-import com.peck.android.models.Event;
-import com.peck.android.models.Locale;
-import com.peck.android.models.Peck;
-import com.peck.android.models.User;
 
 /**
  * Created by mammothbane on 7/14/2014.
@@ -22,14 +17,13 @@ import com.peck.android.models.User;
 public class InternalContentProvider extends ContentProvider {
 
     private final static String AUTHORITY = "com.peck.android.provider.all";
-    private final static DBOperable[] TYPES = { new Event(), new Circle(), new User(), new Comment(), new Locale(), new Peck()};
     private final static int[] URIs_ALL = { 10, 20, 30, 40, 50, 60 };
 
     private final static UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        for (int i = 0; i < TYPES.length; i++) {
-            uriMatcher.addURI(AUTHORITY, TYPES[i].getTableName(), URIs_ALL[i]);                 //return the whole list
+        for (int i = 0; i < PeckApp.getModelArray().length; i++) {
+            uriMatcher.addURI(AUTHORITY, JsonUtils.getTableName(PeckApp.getModelArray()[i]), URIs_ALL[i]);                 //return the whole list
         }
     }
 
@@ -48,7 +42,7 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length;  i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(TYPES[i].getTableName(), projection, selection, selectionArgs, null, null, sortOrder);
+                cursor = database.query(JsonUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.DELETED + " = false", selectionArgs, null, null, sortOrder);
                 break;
             }
         }
@@ -70,7 +64,7 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                insertId = database.insert(TYPES[i].getTableName(), null, contentValues);
+                insertId = database.insert(JsonUtils.getTableName(PeckApp.getModelArray()[i]), null, contentValues);
                 DatabaseManager.closeDB();
                 break;
             }
@@ -82,6 +76,10 @@ public class InternalContentProvider extends ContentProvider {
         return Uri.withAppendedPath(uri, Long.toString(insertId));
     }
 
+    public int prepForDelete(Uri uri, String selection, String[] selectionArgs) {
+
+    }
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = uriMatcher.match(uri);
@@ -90,11 +88,13 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                deleted = database.delete(TYPES[i].getTableName(), selection, selectionArgs);
+                deleted = database.delete(JsonUtils.getTableName(PeckApp.getModelArray()[i]), selection, selectionArgs);
                 DatabaseManager.closeDB();
                 break;
             }
         }
+
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return deleted;
     }
@@ -107,11 +107,13 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                updated = database.update(TYPES[i].getTableName(), contentValues, selection, selectionArgs);
+                updated = database.update(JsonUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection, selectionArgs);
                 DatabaseManager.closeDB();
                 break;
             }
         }
+
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return updated;
     }

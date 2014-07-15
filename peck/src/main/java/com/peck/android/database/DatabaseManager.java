@@ -5,10 +5,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
-import com.peck.android.json.JsonConverter;
+import com.peck.android.json.JsonUtils;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
-import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
@@ -26,15 +25,15 @@ public class DatabaseManager {
     private static SQLiteOpenHelper openHelper;
     private static int openCount = 0;
 
-    private static ArrayList<DBOperable> dbOperables = new ArrayList<DBOperable>();
+    private static ArrayList<Class> dbOperables = new ArrayList<Class>();
 
     static {
-        dbOperables.add(new Event());
-        dbOperables.add(new Locale());
-        dbOperables.add(new Peck());
-        dbOperables.add(new Circle());
-        dbOperables.add(new User());
-        dbOperables.add(new Comment());
+        dbOperables.add(Event.class);
+        dbOperables.add(Locale.class);
+        dbOperables.add(Peck.class);
+        dbOperables.add(Circle.class);
+        dbOperables.add(User.class);
+        dbOperables.add(Comment.class);
     }
 
     public static String getDbName() {
@@ -71,15 +70,15 @@ public class DatabaseManager {
         openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
-                for (DBOperable i : dbOperables) sqLiteDatabase.execSQL(JsonConverter.getDatabaseCreate(i));
+                for (Class i : dbOperables) sqLiteDatabase.execSQL(JsonUtils.getDatabaseCreate(i));
             }
 
             @Override
             public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
                 Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
 
-                for (DBOperable i : dbOperables) {
-                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + i.getTableName());
+                for (Class i : dbOperables) {
+                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + JsonUtils.getTableName(i));
                 }
             }
         };

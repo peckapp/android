@@ -2,7 +2,7 @@ package com.peck.android.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.enums.CommentType;
+import com.peck.android.database.DBType;
 
 /**
  * Created by mammothbane on 7/8/2014.
@@ -15,10 +15,12 @@ public class Comment extends DBOperable {
     public static final transient String TYPE = "category";
 
     @Expose
+    @DBType("integer")
     @SerializedName(COMMENT_FROM)
     private Integer parent;
 
     @Expose
+    @DBType("integer")
     @SerializedName(USER_ID)
     private Integer userId;
 
@@ -28,6 +30,6 @@ public class Comment extends DBOperable {
 
     @Expose
     @SerializedName(TYPE)
-    private CommentType type;
+    private String type;
 
 }

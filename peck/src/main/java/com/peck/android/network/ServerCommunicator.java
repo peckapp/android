@@ -20,18 +20,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
-import com.peck.android.PeckApp.Constants.Network;
 import com.peck.android.R;
 import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.LocaleManager;
-import com.peck.android.models.Circle;
-import com.peck.android.models.Comment;
 import com.peck.android.models.DBOperable;
-import com.peck.android.models.Event;
-import com.peck.android.models.Locale;
-import com.peck.android.models.Peck;
-import com.peck.android.models.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,20 +43,6 @@ public class ServerCommunicator implements Singleton {
     private static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().registerTypeAdapter(Date.class, new JsonDateDeserializer()).create();
     private static RequestQueue requestQueue = PeckApp.getRequestQueue();
     private static JsonParser parser = new JsonParser();
-
-    private static final HashMap<Class<? extends DBOperable>, String> apiMap =
-            new HashMap<Class<? extends DBOperable>, String>();
-
-
-    static {
-        apiMap.put(Event.class, Network.EVENTS);
-        apiMap.put(Circle.class, Network.CIRCLES);
-        apiMap.put(Locale.class, Network.LOCALES);
-        apiMap.put(Peck.class, Network.PECK);
-        apiMap.put(User.class, Network.USERS);
-        apiMap.put(Comment.class, Network.COMMENTS);
-    }
-
 
     private ServerCommunicator() { }
 
@@ -109,7 +88,7 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void getObject(int serverId, Class<T> tClass, final Callback<T> callback, final Callback failure) {
-        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass) + serverId;
+        String url = PeckApp.Constants.Network.ENDPOINT + apiMap.get(tClass) + serverId;
 
         get(tClass, new Callback<ArrayList<T>>() {
             @Override
@@ -121,12 +100,26 @@ public class ServerCommunicator implements Singleton {
     }
 
     public static <T extends DBOperable> void getAll(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure) {
-        String url = PeckApp.Constants.Network.API_STRING + apiMap.get(tClass);
+        String url = PeckApp.Constants.Network.ENDPOINT + apiMap.get(tClass);
         get(tClass, callback, failure, url);
     }
 
-    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<ArrayList<T>> callback, final Callback failure, final String url) {
+    private static <T extends DBOperable> void get(final Class<T> tClass, final Callback<HashMap<Integer, JsonObject>> callback, final Callback failure, final String url) {
         Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "sending GET to " + url);
+
+        requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.v(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), "received response from " + url);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }));
+
         requestQueue.add(new JsonObjectRequest(url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject object) {
@@ -160,10 +153,10 @@ public class ServerCommunicator implements Singleton {
     private static <T extends DBOperable> void sendObject(final int method, final T post, final Class<T> tClass, final Callback<T> callback, final Callback<VolleyError> failure) {
         try {
 
-            JSONObject item = toJson(post, tClass); //fixme: subtract 2 for the trailing slash and the s
+            JSONObject item = toJson(post, tClass);
 
             Log.d(ServerCommunicator.class.getSimpleName() + ": " + tClass.getSimpleName(), (method == Request.Method.PATCH) ? "PATCH" : "POST" + " item " + item.toString());
-            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.API_STRING + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
+            requestQueue.add(new JsonObjectRequest(method, PeckApp.Constants.Network.ENDPOINT + apiMap.get(tClass), item, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject object) {
                     callback.callBack(gson.fromJson(object.toString(), tClass));
