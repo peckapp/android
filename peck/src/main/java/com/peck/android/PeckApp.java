@@ -9,8 +9,8 @@ import android.util.Log;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
+import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.json.JsonUtils;
 import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
@@ -56,7 +56,7 @@ public class PeckApp extends Application implements Singleton{
 
     public static Uri buildLocalUri(Class tClass) {
         if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
-        return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(JsonUtils.getTableName(tClass)).build();
+        return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(tClass)).build();
     }
 
     public static String buildEndpointURL(Class tClass) {

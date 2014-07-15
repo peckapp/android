@@ -7,9 +7,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import com.peck.android.database.DBUtils;
 import com.peck.android.database.DatabaseManager;
-import com.peck.android.json.JsonUtils;
 import com.peck.android.models.DBOperable;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Created by mammothbane on 7/14/2014.
@@ -23,7 +25,8 @@ public class InternalContentProvider extends ContentProvider {
 
     static {
         for (int i = 0; i < PeckApp.getModelArray().length; i++) {
-            uriMatcher.addURI(AUTHORITY, JsonUtils.getTableName(PeckApp.getModelArray()[i]), URIs_ALL[i]);                 //return the whole list
+            uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]), URIs_ALL[i]);                 //operate on the whole list
+            uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]) + "/#", URIs_ALL[i] + 1);      //operate on a model by local id
         }
     }
 
@@ -42,7 +45,12 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length;  i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(JsonUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.DELETED + " = false", selectionArgs, null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.DELETED + " = ?", ArrayUtils.add(selectionArgs, "false"), null, null, sortOrder);
+                break;
+            } else if (uriType == URIs_ALL[i] + 1) {
+                SQLiteDatabase database = DatabaseManager.openDB();
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.LOCAL_ID + " = ?" + " and " +
+                        DBOperable.DELETED + " = ?", ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "false" ), null, null, sortOrder);
                 break;
             }
         }
@@ -64,22 +72,33 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                insertId = database.insert(JsonUtils.getTableName(PeckApp.getModelArray()[i]), null, contentValues);
+                insertId = database.insert(DBUtils.getTableName(PeckApp.getModelArray()[i]), null, contentValues);
                 DatabaseManager.closeDB();
                 break;
             }
         }
 
+        if (insertId == -1) throw new IllegalArgumentException("Couldn't insert ContentValues into the database: " + contentValues);
 
         getContext().getContentResolver().notifyChange(uri, null);
 
         return Uri.withAppendedPath(uri, Long.toString(insertId));
     }
 
-    public int prepForDelete(Uri uri, String selection, String[] selectionArgs) {
 
-    }
-
+    /**
+     *
+     * Pass [base uri]/[path]/[id] for a deletion marker. Sets a deletion flag on the item to true. If unsure, use this format.
+     * Pass [base uri]/[path]:
+     *      Selection null - sweeps the database for items marked to be deleted. Should be called by the SyncAdapter exclusively.
+     *      Selection non-null - marks all items in selection as for deletion
+     *
+     *
+     * @param uri the uri to delete or mark for deletion
+     * @param selection the selection of items to delete
+     * @param selectionArgs the arugments to selection
+     * @return the number of items deleted or marked for deletion
+     */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = uriMatcher.match(uri);
@@ -87,9 +106,20 @@ public class InternalContentProvider extends ContentProvider {
 
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
-                SQLiteDatabase database = DatabaseManager.openDB();
-                deleted = database.delete(JsonUtils.getTableName(PeckApp.getModelArray()[i]), selection, selectionArgs);
-                DatabaseManager.closeDB();
+                if (selection == null) {
+                    SQLiteDatabase database = DatabaseManager.openDB();
+                    deleted = database.delete(DBUtils.getTableName(PeckApp.getModelArray()[i]), DBOperable.DELETED + " = ?", new String[]{"true"});
+                    DatabaseManager.closeDB();
+                } else {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(DBOperable.DELETED, true);
+                    update(uri, contentValues, selection, selectionArgs);
+                }
+                break;
+            } else if (uriType == URIs_ALL[i] + 1) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(DBOperable.DELETED, true);
+                update(uri, contentValues, selection, selectionArgs);
                 break;
             }
         }
@@ -107,10 +137,16 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                updated = database.update(JsonUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection, selectionArgs);
+                updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection, selectionArgs);
+                DatabaseManager.closeDB();
+                break;
+            } else if (uriType == URIs_ALL[i] + 1) {
+                SQLiteDatabase database = DatabaseManager.openDB();
+                updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection + " and " + DBOperable.LOCAL_ID + " = ?", ArrayUtils.add(selectionArgs, uri.getLastPathSegment()));
                 DatabaseManager.closeDB();
                 break;
             }
+
         }
 
         getContext().getContentResolver().notifyChange(uri, null);

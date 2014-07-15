@@ -1,6 +1,5 @@
 package com.peck.android.models;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
@@ -8,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import com.peck.android.database.DBType;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -37,21 +35,13 @@ public abstract class DBOperable implements Serializable {
 
 
     @Expose
-    @NonNull
     @SerializedName(CREATED_AT)
     @DBType("integer")
-    public Date created;
+    public int created;
 
     @Expose
-    @NonNull
     @SerializedName(UPDATED_AT)
     @DBType("integer")
-    public Date updated;
-
-
-    public DBOperable() {
-        created = new Date(System.currentTimeMillis());
-        updated = new Date(System.currentTimeMillis());
-    }
+    public int updated;
 
 }

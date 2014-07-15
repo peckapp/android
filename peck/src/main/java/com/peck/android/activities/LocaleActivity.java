@@ -18,8 +18,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
+import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
-import com.peck.android.json.JsonUtils;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Locale;
 
@@ -33,7 +33,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
     {
-        localeSelectionFeed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), JsonUtils.getTableName(Locale.class)), R.layout.lvitem_locale)
+        localeSelectionFeed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), DBUtils.getTableName(Locale.class)), R.layout.lvitem_locale)
                 .withTextBindings(new String[] { Locale.NAME }, new int[] { R.id.tv_title })
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                             @Override

@@ -34,6 +34,12 @@ android {
     }
     productFlavors {
     }
+
+    packagingOptions{
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
 }
 
 dependencies {
@@ -50,6 +56,7 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:+'
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup:otto:+'
+    compile 'org.apache.commons:commons-lang3:+'
 
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'

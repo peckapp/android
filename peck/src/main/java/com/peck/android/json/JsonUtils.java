@@ -2,26 +2,23 @@ package com.peck.android.json;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.annotations.SerializedName;
 import com.peck.android.PeckApp;
-import com.peck.android.database.DBType;
-import com.peck.android.models.DBOperable;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 
@@ -35,102 +32,15 @@ import java.util.Map;
 
 
 public class JsonUtils {
-    private static final String DELIM = ", ";
-    private static Gson gson = new GsonBuilder().serializeNulls().create();
-    private static JsonParser parser = new JsonParser();
-    private static final String ARRAY_MARKER = "#jsonarray#";
 
-    private static final HashMap<Class, String[]> columnMap = new HashMap<Class, String[]>();
-    private static final HashMap<Class, DBOperable> refList = new HashMap<Class, DBOperable>();
 
-    static {
-        try {
-            for (Class t : PeckApp.getModelArray()) {
-                refList.put(t, (DBOperable)t.newInstance());
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("every model must have a nullary constructor.");
-        }
-    }
-
+    public static final String ARRAY_MARKER = "#jsonarray#";
+    public static JsonParser parser = new JsonParser();
 
     private JsonUtils() {}
 
-    public static <T extends DBOperable> String getDatabaseCreate(Class<T> tClass) {
-        String dbCreate = "create table " + getTableName(tClass) + " (";
-
-        for (Field objField : getAllFields(tClass)) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
-            SerializedName annotation = objField.getAnnotation(SerializedName.class);
-            dbCreate += ((annotation == null) ? objField.getName() + " " : annotation.value() + " ");
-            DBType type = objField.getAnnotation(DBType.class);
-            dbCreate += ((type == null) ? "text" : type.value());
-            dbCreate += DELIM;
-        }
-
-        dbCreate += "unique (" + DBOperable.SV_ID + "));";
-
-        return dbCreate;
-    }
-
-    public static <T extends DBOperable> String getTableName(Class<T> tClass) {
-        return "tbl_" + tClass.getSimpleName().toLowerCase();
-    }
-
-    @NonNull
-    public static ArrayList<Field> getAllFields(@NonNull Class clss){
-        ArrayList<Field> ret = new ArrayList<Field>();
-        for (Field field : clss.getDeclaredFields()) {
-            field.setAccessible(true);
-            if (!Modifier.isTransient(field.getModifiers())) ret.add(field);
-        }
-        Class superClss = clss.getSuperclass();
-        if (superClss != null) ret.addAll(getAllFields(superClss));
-        return ret;
-    }
-
-    public static <T extends DBOperable> String[] getColumns(Class<T> tClass) {
-        if (columnMap.get(tClass) == null) {
-            try {
-                ArrayList<String> columns = new ArrayList<String>();
-                T t = tClass.newInstance();
-                for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new GsonBuilder().serializeNulls().create().toJson(t, tClass))).entrySet()) {
-                    columns.add(entry.getKey());
-                }
-                columnMap.put(tClass, columns.toArray(new String[columns.size()]));
-            } catch (Exception e) { throw new IllegalArgumentException("DBOperables must provide a nullary constructor."); }
-        }
-
-        return columnMap.get(tClass);
-    }
-
-    public static HashMap<Integer, ContentValues> toMap(JSONObject object) {
-
-
-    }
-
-    private static <T extends DBOperable> ArrayList<T> parseJson(JsonElement obj, Class<T> tClass) {
-        ArrayList<T> ret = new ArrayList<T>();
-        if (obj.isJsonObject()) {
-            if (wrapsJsonElement((JsonObject) obj)) {
-                ret.addAll(parseJson(((JsonObject)obj).entrySet().iterator().next().getValue(), tClass));
-            } else ret.add(gson.fromJson(obj, tClass));
-        } else if (obj.isJsonArray()) {
-            for (JsonElement arrayElement : (JsonArray)obj) {
-                ret.addAll(parseJson(arrayElement, tClass));
-            }
-        } //if it's none of those, it's a jsonnull or a primitive, and we don't handle either of those, maybe todo: throw an exception
-        return ret;
-    }
-
-
-
-
-    @NonNull
-    public static <T> ContentValues toContentValues(T t) throws JsonParseException {
+    public static ContentValues jsonToContentValues(JsonObject object) {
         ContentValues ret = new ContentValues();
-
-        JsonObject object = (JsonObject)parser.parse(gson.toJson(t, t.getClass()));
-
         for (Map.Entry<String, JsonElement> field : object.entrySet()) {
             JsonElement element = field.getValue();
             if (element.isJsonPrimitive()) {
@@ -139,32 +49,18 @@ public class JsonUtils {
                 } else if (element.getAsJsonPrimitive().isNumber()) {
                     if (element.getAsDouble() != ((double)element.getAsInt())) ret.put(field.getKey(), element.getAsDouble());
                     else ret.put(field.getKey(), element.getAsInt());
+                } else if (element.getAsJsonPrimitive().isBoolean()) {
+                    ret.put(field.getKey(), element.getAsBoolean());
                 }
             } else if (element.isJsonArray()) {
                 ret.put(field.getKey(), ARRAY_MARKER + element.getAsJsonArray().toString());
             }
         }
 
-        if (ret.containsKey(DBOperable.LOCAL_ID)) ret.remove(DBOperable.LOCAL_ID);
-
         return ret;
     }
 
-
-
-
-
-
-    public static <T extends DBOperable> ContentValues fromJson(JsonObject jsonObject, Class<T> tClass) {
-        ContentValues contentValues = new ContentValues();
-
-
-    }
-
-
-    @NonNull
-    public static <T> T fromCursor(Cursor cursor, Class<T> tClass) {
-        T ret;
+    public static JsonObject cursorToJson(Cursor cursor) {
         JsonObject object = new JsonObject();
         for (int i = 0; i < cursor.getColumnCount(); i++) {
             int colType = cursor.getType(i);
@@ -187,10 +83,30 @@ public class JsonUtils {
             }
 
         }
-
-        ret = gson.fromJson(object, tClass);
-
-        return ret;
+        return object;
     }
+
+    public static JSONObject wrapJson(Class tClass, JsonObject object) throws JSONException {
+        JsonObject wrapper = new JsonObject();
+        wrapper.add(PeckApp.getJsonHeader(tClass, false), object);
+        return new JSONObject(wrapper.toString());
+    }
+
+    private static class JsonDateDeserializer implements JsonDeserializer<Date> {
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss.SSS'Z'");
+
+        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            Date ret = new Date(-1);
+            try {
+                ret = simpleDateFormat.parse(json.getAsJsonPrimitive().getAsString());
+            } catch (ParseException e) {
+                Log.e("Json date deserializer", "parse exception: " + e.toString());
+            }
+            return ret;
+        }
+
+    }
+
+
 
 }

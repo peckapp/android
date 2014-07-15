@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
-import com.peck.android.json.JsonUtils;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
 import com.peck.android.models.Event;
@@ -70,7 +69,7 @@ public class DatabaseManager {
         openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
-                for (Class i : dbOperables) sqLiteDatabase.execSQL(JsonUtils.getDatabaseCreate(i));
+                for (Class i : dbOperables) sqLiteDatabase.execSQL(DBUtils.getDatabaseCreate(i));
             }
 
             @Override
@@ -78,7 +77,7 @@ public class DatabaseManager {
                 Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
 
                 for (Class i : dbOperables) {
-                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + JsonUtils.getTableName(i));
+                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DBUtils.getTableName(i));
                 }
             }
         };
