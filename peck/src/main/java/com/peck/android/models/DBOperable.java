@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.database.DBType;
+import com.peck.android.annotations.DBType;
 
 import java.io.Serializable;
 

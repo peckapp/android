@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.annotations.DBType;
 import com.peck.android.models.DBOperable;
 
 import java.lang.reflect.Field;

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.annotations.Header;
 
 import java.util.ArrayList;
 
@@ -11,8 +12,9 @@ import java.util.ArrayList;
 /**
  * Created by mammothbane on 6/12/2014.
  */
-public class Circle extends DBOperable {
 
+@Header(plural = "circles", singular = "circle")
+public class Circle extends DBOperable {
     public static final transient String MEMBERS = "circle_members";
     public static final transient String NAME = "circle_name";
     public static final transient String IMAGE_URL = "image_link";

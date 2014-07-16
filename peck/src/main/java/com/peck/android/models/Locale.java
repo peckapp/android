@@ -5,10 +5,12 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.annotations.Header;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
+@Header(plural = "institutions", singular = "institution")
 public class Locale extends DBOperable {
 
     public static final transient String NAME = "name";

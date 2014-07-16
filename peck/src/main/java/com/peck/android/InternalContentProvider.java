@@ -42,7 +42,9 @@ public class InternalContentProvider extends ContentProvider {
     }
 
     private String extendSelection(String selection, String append) {
-        return new StringBuilder().append(((selection != null && selection.length() != 0) ? selection + " and " : "")).append(append).toString();
+        String s = new StringBuilder().append(((selection != null && selection.length() != 0) ? selection + " and " : "")).append(append).toString();
+        Log.v(getClass().getSimpleName(), s);
+        return s;
     }
 
     @Override
@@ -54,12 +56,12 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length;  i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.DELETED + " = ?"), ArrayUtils.add(selectionArgs, "false"), null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.DELETED + " = ?"), ArrayUtils.add(selectionArgs, "not 0"), null, null, sortOrder);
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
                 SQLiteDatabase database = DatabaseManager.openDB();
                 cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.LOCAL_ID + " = ? and " +
-                        DBOperable.DELETED + " = ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "false" ), null, null, sortOrder);
+                        DBOperable.DELETED + " = ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "not 0" ), null, null, sortOrder);
                 break;
             }
         }
@@ -121,7 +123,7 @@ public class InternalContentProvider extends ContentProvider {
                 if (selection == null) {
                     Log.v(getClass().getSimpleName(), "Sweep for deletes: " + trimUri(uri));
                     SQLiteDatabase database = DatabaseManager.openDB();
-                    deleted = database.delete(DBUtils.getTableName(PeckApp.getModelArray()[i]), DBOperable.DELETED + " = ?", new String[]{"true"});
+                    deleted = database.delete(DBUtils.getTableName(PeckApp.getModelArray()[i]), DBOperable.DELETED + " = ?", new String[]{"1"});
                     DatabaseManager.closeDB();
                 } else {
                     Log.v(getClass().getSimpleName(), "Mark for delete: " + trimUri(uri));

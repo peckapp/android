@@ -9,6 +9,7 @@ import android.util.Log;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
+import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckSessionHandler;
@@ -23,68 +24,48 @@ import com.squareup.picasso.Picasso;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import java.util.HashMap;
-
 /**
  * Created by mammothbane on 5/28/2014.
  *
- * the base app, created when the app starts.
+ * the base application, created when the app starts.
  *
  */
 public class PeckApp extends Application implements Singleton{
-
 
     public static Context getContext() {
         return AppContext.mContext;
     }
 
-
-    private static final HashMap<Class, String> API_STRINGS = new HashMap<Class, String>();
-
-    static {
-        API_STRINGS.put(Circle.class, "circles");
-        API_STRINGS.put(Event.class, "simple_events");
-        API_STRINGS.put(Locale.class, "institutions");
-        API_STRINGS.put(Peck.class, "push_notifications");
-        API_STRINGS.put(Comment.class, "comments");
-        API_STRINGS.put(User.class, "users");
-    }
+    private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class };
 
     public static Class[] getModelArray() {
-        return API_STRINGS.keySet().toArray(new Class[API_STRINGS.entrySet().size()]);
+        return MODELS;
     }
 
     public static Uri buildLocalUri(Class tClass) {
-        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
         return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(tClass)).build();
     }
 
     public static String buildEndpointURL(Class tClass) {
-        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
-        return Constants.Network.ENDPOINT + API_STRINGS.get(tClass) + "/";
+        Header header = (Header)tClass.getAnnotation(Header.class);
+        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
+        return Constants.Network.ENDPOINT + header.plural() + "/";
     }
 
     public static String getJsonHeader(Class tClass, boolean plural) {
-        if (!API_STRINGS.containsKey(tClass)) throw new IllegalArgumentException("You must pass a model class to this method");
-        if (plural) return API_STRINGS.get(tClass);
-        else return (API_STRINGS.get(tClass).substring(0, API_STRINGS.get(tClass).length() - 1));
+        Header header = (Header)tClass.getAnnotation(Header.class);
+        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
+        if (plural) return header.plural();
+        else return header.singular();
     }
 
 
     public static class AppContext {
         private static Context mContext;
-        private static AppContext appContext;
-
         private AppContext() {}
-
         protected static void init(Context context) {
             mContext = context;
         }
-
-        public static AppContext getAppContext() {
-            return appContext;
-        }
-
     }
 
     public void onCreate() {

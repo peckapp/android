@@ -81,7 +81,11 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         }
 
         ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
-        //ContentResolver.requestSync(new SyncRequest.Builder().setManual(true).setSyncAdapter(account, AUTHORITY).syncOnce().build());
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(account, AUTHORITY, bundle);
 
     }
 
@@ -115,10 +119,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             startActivity(intent);
             finish();
         } else {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-            ContentResolver.requestSync(account, AUTHORITY, bundle);
+
         }
     }
 
