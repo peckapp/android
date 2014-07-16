@@ -94,11 +94,16 @@ public class PeckApp extends Application implements Singleton{
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
             Picasso.with(getContext()).setLoggingEnabled(true);
-            getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
+
+            /*synchronized (DatabaseManager.class) {
+                DatabaseManager.closeDB();
+                getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
+            }
+*/
             SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
             edit.clear();
             edit.apply();
-            Log.d("PeckApp", "deleted database, cleared USER_PREFS SharedPreferences");
+            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");
         }
 
         PeckSessionHandler.init();
@@ -112,7 +117,8 @@ public class PeckApp extends Application implements Singleton{
         public final static class Network {
 
             public final static int RETRY_INTERVAL = 200;
-            public final static int TIMEOUT = 6000;
+            public final static int CONNECT_TIMEOUT = 5000;
+            public final static int READ_TIMEOUT = 6000;
 
             /**
              * API strings

@@ -6,6 +6,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import com.peck.android.database.DBUtils;
 import com.peck.android.database.DatabaseManager;
@@ -36,8 +37,16 @@ public class InternalContentProvider extends ContentProvider {
         return false;
     }
 
+    private String trimUri(Uri uri) {
+        return (uri.getPath());
+    }
+
+    private String extendSelection(String selection, String append) {
+        return new StringBuilder().append(((selection != null && selection.length() != 0) ? selection + " and " : "")).append(append).toString();
+    }
+
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public synchronized Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         int uriType = uriMatcher.match(uri);
 
         Cursor cursor = null;
@@ -45,12 +54,12 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length;  i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.DELETED + " = ?", ArrayUtils.add(selectionArgs, "false"), null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.DELETED + " = ?"), ArrayUtils.add(selectionArgs, "false"), null, null, sortOrder);
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, selection + " and " + DBOperable.LOCAL_ID + " = ?" + " and " +
-                        DBOperable.DELETED + " = ?", ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "false" ), null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.LOCAL_ID + " = ? and " +
+                        DBOperable.DELETED + " = ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "false" ), null, null, sortOrder);
                 break;
             }
         }
@@ -59,13 +68,16 @@ public class InternalContentProvider extends ContentProvider {
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
-        return cursor;
+        Log.v(getClass().getSimpleName(), "[" + cursor.getCount() + "]query: " + trimUri(uri) + ", type: " + uriType);
 
+
+        return cursor;
     }
 
 
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public synchronized Uri insert(Uri uri, ContentValues contentValues) {
+        //Log.v(getClass().getSimpleName(), "Insert: " + trimUri(uri) + ": " + contentValues);
         int uriType = uriMatcher.match(uri);
         long insertId = -1;
 
@@ -100,23 +112,26 @@ public class InternalContentProvider extends ContentProvider {
      * @return the number of items deleted or marked for deletion
      */
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public synchronized int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = uriMatcher.match(uri);
         int deleted = 0;
 
         for (int i = 0; i < URIs_ALL.length; i++) {
             if (uriType == URIs_ALL[i]) {
                 if (selection == null) {
+                    Log.v(getClass().getSimpleName(), "Sweep for deletes: " + trimUri(uri));
                     SQLiteDatabase database = DatabaseManager.openDB();
                     deleted = database.delete(DBUtils.getTableName(PeckApp.getModelArray()[i]), DBOperable.DELETED + " = ?", new String[]{"true"});
                     DatabaseManager.closeDB();
                 } else {
+                    Log.v(getClass().getSimpleName(), "Mark for delete: " + trimUri(uri));
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(DBOperable.DELETED, true);
                     update(uri, contentValues, selection, selectionArgs);
                 }
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
+                Log.v(getClass().getSimpleName(), "Mark for delete: " + trimUri(uri));
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(DBOperable.DELETED, true);
                 update(uri, contentValues, selection, selectionArgs);
@@ -130,7 +145,8 @@ public class InternalContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+    public synchronized int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+        Log.v(getClass().getSimpleName(), "Update: " + trimUri(uri) + ": " + contentValues);
         int uriType = uriMatcher.match(uri);
         int updated = 0;
 
@@ -142,7 +158,8 @@ public class InternalContentProvider extends ContentProvider {
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection + " and " + DBOperable.LOCAL_ID + " = ?", ArrayUtils.add(selectionArgs, uri.getLastPathSegment()));
+                updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, extendSelection(selection, DBOperable.LOCAL_ID + " = ?"),
+                        ArrayUtils.add(selectionArgs, uri.getLastPathSegment()));
                 DatabaseManager.closeDB();
                 break;
             }
@@ -155,7 +172,7 @@ public class InternalContentProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public synchronized String getType(Uri uri) {
         return null;
     }
 

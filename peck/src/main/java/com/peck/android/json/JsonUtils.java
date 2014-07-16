@@ -14,7 +14,6 @@ import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -90,10 +89,10 @@ public class JsonUtils {
         return object;
     }
 
-    public static JSONObject wrapJson(Class tClass, JsonObject object) throws JSONException {
+    public static JsonObject wrapJson(Class tClass, JsonObject object) throws JSONException {
         JsonObject wrapper = new JsonObject();
         wrapper.add(PeckApp.getJsonHeader(tClass, false), object);
-        return new JSONObject(wrapper.toString());
+        return wrapper;
     }
 
     private static class JsonDateDeserializer implements JsonDeserializer<Date> {

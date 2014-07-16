@@ -16,9 +16,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -30,8 +29,10 @@ import com.peck.android.models.DBOperable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mammothbane on 7/14/2014.
@@ -39,8 +40,6 @@ import java.util.HashMap;
 public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static final String SYNC_TYPE = "sync type";
-    private static long last_synced;
-
     final ContentResolver contentResolver;
 
     public PeckSyncAdapter(Context context, boolean autoInitialize) {
@@ -55,160 +54,155 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient client, SyncResult syncResult) {
-        Class clss;
+        Class clss = null;
 
         String s = bundle.getString(SYNC_TYPE);
 
         try {
             if (s != null) {
-                try {
-                    clss = Class.forName(s);
-                    sync(clss, account, authority, client, syncResult);
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalArgumentException("class could not be parsed.");
-                }
+                clss = Class.forName(s);
+                sync(clss, account, authority, client, syncResult);
+
             } else for (Class clzz : PeckApp.getModelArray()) {
                 sync(clzz, account, authority, client, syncResult);
             }
-        } catch (RemoteException e) {
-            Log.e("SyncAdapter", "Database Error encountered", e);
-            syncResult.databaseError = true;
+        } catch (Exception e) {
+            handleException(e);
         }
     }
 
-    private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult) throws RemoteException {
+    private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult)
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException {
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+        final long sResultEntries = syncResult.stats.numEntries;
+        final long sResultSkipped = syncResult.stats.numSkippedEntries;
+        final long sResultUpdated = syncResult.stats.numUpdates;
+        final long sResultDeleted = syncResult.stats.numDeletes;
+        final long sResultInserts = syncResult.stats.numInserts;
 
-        PeckApp.getRequestQueue().add(new JsonObjectRequest(PeckApp.buildEndpointURL(tClass), null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        JsonObject object = (JsonObject)new JsonParser().parse(response.toString());
-                        HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>();
-                        Uri uri = PeckApp.buildLocalUri(tClass);
+        JsonObject object = get(PeckApp.buildEndpointURL(tClass));
 
-                        try {
-                            JsonArray array = object.getAsJsonArray(PeckApp.getJsonHeader(tClass, true));
-                            for(int i = 0; i < array.size(); i++) {
-                                JsonObject temp = (JsonObject)array.get(i);
-                                incoming.put(temp.get(DBOperable.SV_ID).getAsInt(), temp);
-                            }
+        HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>();
+        Uri uri = PeckApp.buildLocalUri(tClass);
 
-                            Cursor cursor = client.query(uri, DBUtils.getColumns(DBOperable.class), null, null, null);
+        JsonArray array = object.getAsJsonArray(PeckApp.getJsonHeader(tClass, true));
+        for (int i = 0; i < array.size(); i++) {
+            JsonObject temp = (JsonObject) array.get(i);
+            incoming.put(temp.get(DBOperable.SV_ID).getAsInt(), temp);
+        }
 
-                            while (cursor.moveToNext()) { //iterate through every item in the relevant table
-                                syncResult.stats.numEntries++;
-                                JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
+        Cursor cursor = client.query(uri, DBUtils.getColumns(DBOperable.class), null, null, null);
 
-                                if (match == null) { //if the incoming data doesn't contain the item, delete it
-                                    if (cursor.getLong(cursor.getColumnIndex(DBOperable.CREATED_AT)) > last_synced) { //if ours was created since the last time we synced,
-                                        try {
-                                        post(tClass, JsonUtils.cursorToJson(cursor), null, null);  //post it to the server
-                                        } catch (JSONException e) { Log.e(getClass().getSimpleName(), "couldn't serialize to json, e"); }
-                                    } else {                                                                                    //if it's older and we haven't updated it, just delete it
-                                        batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
-                                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
-                                    }
+        while (cursor.moveToNext()) { //iterate through every item in the relevant table
+            syncResult.stats.numEntries++;
+            JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
-                                } else {
-                                    //there's a match. remove from incoming to prevent being inserted into the database
-                                    incoming.remove(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
+            if (match == null) { //if the incoming data doesn't contain the item, delete it
+                if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
+                    //if ours was created since the last time we synced
+                    Log.v(getClass().getSimpleName(), "Posting " + tClass.getSimpleName() + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)) + " to server." );
+                    post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));  //post it to the server
+                } else {
+                    //if it's older and we haven't updated it, just delete it
+                    syncResult.stats.numDeletes++;
+                    batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
+                            Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
+                }
 
-                                    if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
-                                        try {
-                                            if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) delete(tClass, cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), null, null); //delete the object
-                                            else patch(tClass, object, null, null); //patch the object
-                                        } catch (JSONException e) {
-                                            Log.e(getClass().getSimpleName(), "couldn't convert to JSON", e);
-                                        }
-                                    } else { //the server version is newer
-                                        if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
-                                            ContentValues contentValues = new ContentValues();
-                                            contentValues.put(DBOperable.DELETED, false);
-                                            client.update(uri.buildUpon().appendPath(Integer.toString(
-                                                    cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build(), contentValues, null, null);
-                                        }
+            } else {
+                //there's a match. remove from incoming to prevent being inserted into the database
+                incoming.remove(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
-                                        batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
-                                                appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
-                                                .withValues(JsonUtils.jsonToContentValues(match, tClass))
-                                                .build());
-
-                                    }
-                                }
-                            }
-
-                            cursor.close();
-
-                            for (JsonObject json : incoming.values()) {
-                                batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json, tClass)).build());
-                            }
-                            try {
-                                contentResolver.applyBatch(authority, batch);
-                            } catch (OperationApplicationException e) {
-                                Log.e(getClass().getSimpleName(), "couln't apply batch update", e);
-                            }
-
-                            contentResolver.notifyChange(uri, null, false);
-                            client.delete(uri, null, null);
-
-                        } catch (RemoteException e) {
-                            Log.e("SyncAdapter", "Database Error encountered", e);
-                            syncResult.databaseError = true;
-                        }
-
-                        last_synced = System.currentTimeMillis();
+                if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
+                    if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) {
+                        Log.v(getClass().getSimpleName(), "Sending delete to server");
+                        delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))); //delete the object
+                    } else {
+                        Log.v(getClass().getSimpleName(), "Sending patch to server");
+                        patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));
+                    }//patch the object
+                } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
+                    if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(DBOperable.DELETED, false);
+                        client.update(uri.buildUpon().appendPath(Integer.toString(
+                                cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build(), contentValues, null, null);
+                        syncResult.stats.numDeletes++;
+                    } else {
+                        syncResult.stats.numUpdates++;
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
 
-                    }
-                }));
+                    batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
+                            appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
+                            .withValues(JsonUtils.jsonToContentValues(match, tClass))
+                            .build());
+
+
+                } else {
+                    syncResult.stats.numSkippedEntries++;
+                }
+            }
+        }
+
+        cursor.close();
+
+        for (JsonObject json : incoming.values()) {
+            batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json, tClass)).build());
+            syncResult.stats.numInserts++;
+        }
+
+        Log.v(getClass().getSimpleName() + "/" + tClass.getSimpleName(), "[" + (syncResult.stats.numInserts - sResultInserts) + "]" + "skipped: " + (syncResult.stats.numSkippedEntries - sResultSkipped) +
+                ", updated: " + (syncResult.stats.numUpdates - sResultUpdated) + ", deleted: " + (syncResult.stats.numDeletes - sResultDeleted));
+
+        contentResolver.applyBatch(authority, batch);
+        contentResolver.notifyChange(uri, null, false);
+
+        client.delete(uri, null, null);
 
     }
 
+    private static void handleException(Exception e) {
+        //todo: handle these
+        if (e instanceof IOException) {
 
-    private static void post(Class tClass, JsonObject object, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) throws JSONException {
-        PeckApp.getRequestQueue().add(new JsonObjectRequest(Request.Method.POST, PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(tClass, object), (listener != null) ? listener : new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
+        } else if (e instanceof RemoteException) {
 
-            }
-        }, (errorListener != null) ? errorListener : new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+        } else if (e instanceof OperationApplicationException) {
 
-            }
-        }));
+        } else {
+
+        }
+
+    }
+
+    private static JsonObject send(String url, int method, JsonObject data) throws InterruptedException, ExecutionException, JSONException {
+        RequestFuture<JSONObject> future = RequestFuture.newFuture();
+        JsonObjectRequest request = new JsonObjectRequest(method, url, new JSONObject(data.toString()), future, future);
+
+        PeckApp.getRequestQueue().add(request);
+
+        return ((JsonObject)new JsonParser().parse(future.get().toString()));
+    }
+
+    private static JsonObject get(String url) throws InterruptedException, ExecutionException, JSONException {
+        return send(url, Request.Method.GET, null);
     }
 
 
-    private static void patch(Class tClass, JsonObject object, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) throws JSONException {
-        PeckApp.getRequestQueue().add(new JsonObjectRequest(Request.Method.PATCH, PeckApp.buildEndpointURL(tClass) + "/" + object.get(DBOperable.SV_ID), JsonUtils.wrapJson(tClass, object), (listener != null) ? listener : new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
 
-            }
-        }, (errorListener != null) ? errorListener : new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }));
+    private static JsonObject post(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException {
+        return send(url, Request.Method.POST, object);
     }
 
-    private static void delete(Class tClass, int id, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) throws JSONException {
-        PeckApp.getRequestQueue().add(new JsonObjectRequest(Request.Method.DELETE, PeckApp.buildEndpointURL(tClass) + "/" + id, null, (listener != null) ? listener : new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
 
-            }
-        }, (errorListener != null) ? errorListener : new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+    private static JsonObject patch(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException  {
+        return send(url, Request.Method.PATCH, object);
+    }
 
-            }
-        }));
+    private static boolean delete(String url) throws InterruptedException, ExecutionException, JSONException  {
+        send(url, Request.Method.DELETE, null);
+        //todo: what happens when we run a delete? how do we return?
+        return true;
     }
 
 

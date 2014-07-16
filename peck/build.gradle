@@ -57,7 +57,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup:otto:+'
     compile 'org.apache.commons:commons-lang3:+'
-
+    compile 'commons-io:commons-io:+'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     

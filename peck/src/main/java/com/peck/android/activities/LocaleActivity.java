@@ -5,7 +5,6 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SyncRequest;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -82,7 +81,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         }
 
         ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
-        ContentResolver.requestSync(new SyncRequest.Builder().setManual(true).setSyncAdapter(account, AUTHORITY).syncOnce().build());
+        //ContentResolver.requestSync(new SyncRequest.Builder().setManual(true).setSyncAdapter(account, AUTHORITY).syncOnce().build());
 
     }
 
@@ -111,10 +110,15 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (LocaleManager.getLocation() != null) {
+        if (LocaleManager.getLocale() > 0) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
             finish();
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            ContentResolver.requestSync(account, AUTHORITY, bundle);
         }
     }
 

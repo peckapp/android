@@ -48,21 +48,12 @@ public class DatabaseManager {
     }
 
     public static synchronized SQLiteDatabase openDB() {
-        if (openCount == 0) {
-            database = openHelper.getWritableDatabase();
-            database.enableWriteAheadLogging();
-        }
-        openCount++;
-        Log.i("DatabaseManager", "[" + openCount + "] opening db socket");
+        database = openHelper.getWritableDatabase();
         return database;
     }
 
     public static synchronized void closeDB() {
-        openCount--;
-        if (openCount == 0) {
-            database.close();
-        }
-        Log.d("DatabaseManager", "[" + openCount + "] closing db socket");
+        database.close();
     }
 
     private DatabaseManager() {
