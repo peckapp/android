@@ -1,7 +1,5 @@
 package com.peck.android.models;
 
-import android.support.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
@@ -26,29 +24,28 @@ public class DBOperable implements Serializable {
 
     @DBType("integer primary key autoincrement")
     @SerializedName(LOCAL_ID)
-    public Integer localId = null;
+    public long localId;
 
     @Expose
-    @Nullable
     @DBType("integer")
     @SerializedName(SV_ID)
-    public Integer serverId = null;
+    public long serverId;
 
 
     @Expose
     @SerializedName(CREATED_AT)
-    @DBType("integer")
-    public int created;
+    @DBType("real")
+    public double created;
 
     @Expose
     @SerializedName(UPDATED_AT)
-    @DBType("integer")
-    public int updated;
+    @DBType("real")
+    public double updated;
 
     @Expose
     @SerializedName(LOCALE)
     @DBType("integer")
-    public int locale;
+    public long locale;
 
 
 

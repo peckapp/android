@@ -18,12 +18,12 @@ public class Comment extends DBOperable {
     @Expose
     @DBType("integer")
     @SerializedName(COMMENT_FROM)
-    private Integer parent;
+    private long parent;
 
     @Expose
     @DBType("integer")
     @SerializedName(USER_ID)
-    private Integer userId;
+    private long userId;
 
     @Expose
     @SerializedName(TEXT)

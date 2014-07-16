@@ -58,17 +58,24 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
         String s = bundle.getString(SYNC_TYPE);
 
-        try {
-            if (s != null) {
+
+        if (s != null) {
+            try {
                 clss = Class.forName(s);
                 sync(clss, account, authority, client, syncResult);
-
-            } else for (Class clzz : PeckApp.getModelArray()) {
-                sync(clzz, account, authority, client, syncResult);
+            } catch (Exception e) {
+                handleException(e, syncResult);
             }
-        } catch (Exception e) {
-            handleException(e);
+
+        } else for (Class clzz : PeckApp.getModelArray()) {
+            try {
+                Log.v(getClass().getSimpleName(), "initting sync for " + clzz.getSimpleName());
+                sync(clzz, account, authority, client, syncResult);
+            } catch (Exception e) {
+                handleException(e, syncResult);
+            }
         }
+
     }
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult)
@@ -161,26 +168,25 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     }
 
-    private static void handleException(Exception e) {
+    private static void handleException(Exception e, SyncResult syncResult) {
         //todo: handle these
+        Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync.", e);
         if (e instanceof IOException) {
-
-        } else if (e instanceof RemoteException) {
-
-        } else if (e instanceof OperationApplicationException) {
-
-        } else {
-
+            syncResult.stats.numIoExceptions++;
+        } else if (e instanceof JSONException) {
+            syncResult.stats.numParseExceptions++;
+        } else if (!(   e instanceof RemoteException    || e instanceof InterruptedException ||
+                        e instanceof ExecutionException || e instanceof OperationApplicationException) ) {
+            throw new RuntimeException(e);
         }
 
     }
 
     private static JsonObject send(String url, int method, JsonObject data) throws InterruptedException, ExecutionException, JSONException {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        JsonObjectRequest request = new JsonObjectRequest(method, url, new JSONObject(data.toString()), future, future);
+        JsonObjectRequest request = new JsonObjectRequest(method, url, (data != null) ? new JSONObject(data.toString()) : null, future, future);
 
         PeckApp.getRequestQueue().add(request);
-
         return ((JsonObject)new JsonParser().parse(future.get().toString()));
     }
 

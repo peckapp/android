@@ -56,12 +56,12 @@ public class InternalContentProvider extends ContentProvider {
         for (int i = 0; i < URIs_ALL.length;  i++) {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
-                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.DELETED + " = ?"), ArrayUtils.add(selectionArgs, "not 0"), null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
                 SQLiteDatabase database = DatabaseManager.openDB();
                 cursor = database.query(DBUtils.getTableName(PeckApp.getModelArray()[i]), projection, extendSelection(selection, DBOperable.LOCAL_ID + " = ? and " +
-                        DBOperable.DELETED + " = ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "not 0" ), null, null, sortOrder);
+                        DBOperable.DELETED + " IS NOT ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "0" ), null, null, sortOrder);
                 break;
             }
         }

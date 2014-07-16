@@ -106,12 +106,6 @@ public class PeckApp extends Application implements Singleton{
              */
             public final static String ENDPOINT = "http://thor.peckapp.com:3500/api/";
 
-
-            public final static String API_TEST_KEY = "";
-
-
-            public final static String INSTITUTION = "institution_id";
-
         }
 
 

@@ -2,23 +2,16 @@ package com.peck.android.json;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
 
 import org.json.JSONException;
 
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.lang.reflect.Field;
 
 
 /**
@@ -41,16 +34,18 @@ public class JsonUtils {
     public static ContentValues jsonToContentValues(JsonObject object, Class tClass) {
         ContentValues ret = new ContentValues();
 
-        for (String s : DBUtils.getColumns(tClass)) {
+        for (Field field : DBUtils.getAllFields(tClass)) {
+            String s = DBUtils.getSerializedFieldName(field);
             JsonElement element = object.get(s);
             if (element != null) {
                 if (element.isJsonPrimitive()) {
                     if (element.getAsJsonPrimitive().isString()) {
                         ret.put(s, element.getAsString());
                     } else if (element.getAsJsonPrimitive().isNumber()) {
-                        if (element.getAsDouble() != ((double) element.getAsInt()))
+                        if (field.getType().equals(double.class) || field.getType().equals(float.class)
+                                || field.getType().equals(Double.class) || field.getType().equals(Float.class)) {
                             ret.put(s, element.getAsDouble());
-                        else ret.put(s, element.getAsInt());
+                        } else ret.put(s, element.getAsInt());
                     } else if (element.getAsJsonPrimitive().isBoolean()) {
                         ret.put(s, element.getAsBoolean());
                     }
@@ -94,22 +89,4 @@ public class JsonUtils {
         wrapper.add(PeckApp.getJsonHeader(tClass, false), object);
         return wrapper;
     }
-
-    private static class JsonDateDeserializer implements JsonDeserializer<Date> {
-        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'kk:mm:ss.SSS'Z'");
-
-        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            Date ret = new Date(-1);
-            try {
-                ret = simpleDateFormat.parse(json.getAsJsonPrimitive().getAsString());
-            } catch (ParseException e) {
-                Log.e("Json date deserializer", "parse exception: " + e.toString());
-            }
-            return ret;
-        }
-
-    }
-
-
-
 }

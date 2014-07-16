@@ -1,8 +1,5 @@
 package com.peck.android.models;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.Header;
@@ -21,8 +18,6 @@ public class Locale extends DBOperable {
     public static final transient String LONGITUDE = "longitude";
     public static final transient String LATITUDE = "latitude";
 
-
-    @NonNull
     @Expose
     @SerializedName(NAME)
     private String name;
@@ -40,18 +35,15 @@ public class Locale extends DBOperable {
     private String country;
 
     @Expose
-    @Nullable
     @SerializedName(RANGE)
-    private Float range = null;
+    private double range;
 
     @Expose
-    @Nullable
     @SerializedName(LONGITUDE)
-    private Double longitude = null;
+    private double longitude;
 
     @Expose
-    @Nullable
     @SerializedName(LATITUDE)
-    private Double latitutde = null;
+    private double latitutde;
 
 }

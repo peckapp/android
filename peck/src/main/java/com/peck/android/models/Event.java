@@ -4,10 +4,10 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.Header;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -22,15 +22,15 @@ public class Event extends DBOperable {
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_IDS = "user_ids";
 
-    @NonNull
     @Expose
+    @DBType("real")
     @SerializedName(START_DATE)
-    private Date startTime = new Date(-1);
+    private double startTime;
 
-    @NonNull
     @Expose
+    @DBType("real")
     @SerializedName(END_DATE)
-    private Date endTime = new Date(-1);
+    private double endTime;
 
     @Expose
     @SerializedName(TITLE)
