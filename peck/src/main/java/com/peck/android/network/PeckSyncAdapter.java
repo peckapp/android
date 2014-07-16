@@ -130,7 +130,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
                                         batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
                                                 appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
-                                                .withValues(JsonUtils.jsonToContentValues(match))
+                                                .withValues(JsonUtils.jsonToContentValues(match, tClass))
                                                 .build());
 
                                     }
@@ -140,7 +140,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                             cursor.close();
 
                             for (JsonObject json : incoming.values()) {
-                                batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json)).build());
+                                batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json, tClass)).build());
                             }
                             try {
                                 contentResolver.applyBatch(authority, batch);

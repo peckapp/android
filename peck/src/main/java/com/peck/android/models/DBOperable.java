@@ -11,13 +11,14 @@ import java.io.Serializable;
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public abstract class DBOperable implements Serializable {
+public class DBOperable implements Serializable {
 
     public static final transient String LOCAL_ID = "_id"; //CursorAdapter requires this field to be "_id" exactly.
     public static final transient String SV_ID = "id";
     public static final transient String CREATED_AT = "created_at";
     public static final transient String UPDATED_AT = "updated_at";
     public static final transient String DELETED = "deleted";
+    public static final transient String LOCALE = "institution_id";
 
     @SerializedName(DELETED)
     @DBType("boolean")
@@ -43,5 +44,12 @@ public abstract class DBOperable implements Serializable {
     @SerializedName(UPDATED_AT)
     @DBType("integer")
     public int updated;
+
+    @Expose
+    @SerializedName(LOCALE)
+    @DBType("integer")
+    public int locale;
+
+
 
 }

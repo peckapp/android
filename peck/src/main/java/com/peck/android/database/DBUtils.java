@@ -35,7 +35,7 @@ public class DBUtils {
             dbCreate += DELIM;
         }
 
-        dbCreate += "unique (" + DBOperable.SV_ID + "));";
+        dbCreate += "unique (" + DBOperable.SV_ID + ") on conflict replace);";
 
         return dbCreate;
     }
@@ -65,7 +65,7 @@ public class DBUtils {
                     columns.add(entry.getKey());
                 }
                 columnMap.put(tClass, columns.toArray(new String[columns.size()]));
-            } catch (Exception e) { throw new IllegalArgumentException("DBOperables must provide a nullary constructor."); }
+            } catch (Exception e) { throw new IllegalArgumentException("DBOperables must provide a nullary constructor.", e); }
         }
 
         return columnMap.get(tClass);

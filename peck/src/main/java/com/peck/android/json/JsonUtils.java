@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
+import com.peck.android.database.DBUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +20,6 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 
 
 /**
@@ -39,21 +39,25 @@ public class JsonUtils {
 
     private JsonUtils() {}
 
-    public static ContentValues jsonToContentValues(JsonObject object) {
+    public static ContentValues jsonToContentValues(JsonObject object, Class tClass) {
         ContentValues ret = new ContentValues();
-        for (Map.Entry<String, JsonElement> field : object.entrySet()) {
-            JsonElement element = field.getValue();
-            if (element.isJsonPrimitive()) {
-                if (element.getAsJsonPrimitive().isString()) {
-                    ret.put(field.getKey(), element.getAsString());
-                } else if (element.getAsJsonPrimitive().isNumber()) {
-                    if (element.getAsDouble() != ((double)element.getAsInt())) ret.put(field.getKey(), element.getAsDouble());
-                    else ret.put(field.getKey(), element.getAsInt());
-                } else if (element.getAsJsonPrimitive().isBoolean()) {
-                    ret.put(field.getKey(), element.getAsBoolean());
+
+        for (String s : DBUtils.getColumns(tClass)) {
+            JsonElement element = object.get(s);
+            if (element != null) {
+                if (element.isJsonPrimitive()) {
+                    if (element.getAsJsonPrimitive().isString()) {
+                        ret.put(s, element.getAsString());
+                    } else if (element.getAsJsonPrimitive().isNumber()) {
+                        if (element.getAsDouble() != ((double) element.getAsInt()))
+                            ret.put(s, element.getAsDouble());
+                        else ret.put(s, element.getAsInt());
+                    } else if (element.getAsJsonPrimitive().isBoolean()) {
+                        ret.put(s, element.getAsBoolean());
+                    }
+                } else if (element.isJsonArray()) {
+                    ret.put(s, ARRAY_MARKER + element.getAsJsonArray().toString());
                 }
-            } else if (element.isJsonArray()) {
-                ret.put(field.getKey(), ARRAY_MARKER + element.getAsJsonArray().toString());
             }
         }
 

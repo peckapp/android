@@ -2,8 +2,10 @@ package com.peck.android.activities;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SyncRequest;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -79,7 +81,8 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             Log.e(getClass().getSimpleName(), "account wasn't created.");
         }
 
-        getContentResolver().setSyncAutomatically(account, AUTHORITY, true);
+        ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+        ContentResolver.requestSync(new SyncRequest.Builder().setManual(true).setSyncAdapter(account, AUTHORITY).syncOnce().build());
 
     }
 

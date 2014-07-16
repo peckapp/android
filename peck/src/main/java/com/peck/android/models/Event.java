@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.database.DBType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,6 +21,12 @@ public class Event extends DBOperable {
     public static final transient String IMAGE_URL = "image_url";
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_IDS = "user_ids";
+    public static final transient String OPEN = "open";
+
+    @Expose
+    @SerializedName(OPEN)
+    @DBType("boolean")
+    public boolean open;
 
     @NonNull
     @Expose
