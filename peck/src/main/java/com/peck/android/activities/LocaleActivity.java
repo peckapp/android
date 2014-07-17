@@ -121,6 +121,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                                 ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
                                 "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
                         .orderedBy("dist asc, " + Locale.NAME)
+                        .layout(R.layout.localeselectionfeed)
                         .build(), fragmentTag);
                 ft.commit();
                 loadLocales();
