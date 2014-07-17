@@ -110,11 +110,10 @@ public class PeckApp extends Application implements Singleton{
 
         }
 
-
         public final static class Preferences {
             public final static String USER_PREFS = "user preferences";
             public final static String USER_ID = "persistent user id";
-
+            public final static String LOCALE_ID = "persistent locale id";
         }
 
 

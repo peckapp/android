@@ -11,13 +11,13 @@ import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
-import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Event;
 
 import java.util.HashMap;
@@ -77,9 +77,10 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-        if (LocaleManager.getLocale() == 0) {
+        if (getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getLong(PeckApp.Constants.Preferences.LOCALE_ID, 0) == 0) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 
