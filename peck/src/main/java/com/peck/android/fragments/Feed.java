@@ -19,8 +19,6 @@ import android.widget.ListView;
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
 
-import it.sephiroth.android.library.widget.HListView;
-
 /**
  * Created by mammothbane on 6/9/2014.
  *
@@ -52,7 +50,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private SimpleCursorAdapter mAdapter;
 
     private AdapterView.OnItemClickListener listener;
-    private it.sephiroth.android.library.widget.AdapterView.OnItemClickListener hListener;
 
     private SimpleCursorAdapter.ViewBinder viewBinder;
     private Bundle loaderBundle;
@@ -63,7 +60,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         private Bundle loaderBundle = new Bundle();
         private Bundle feedBundle = new Bundle();
         private AdapterView.OnItemClickListener listener;
-        private it.sephiroth.android.library.widget.AdapterView.OnItemClickListener hListener;
         private SimpleCursorAdapter.ViewBinder viewBinder;
 
         public Builder(@NonNull Uri loaderUri, int itemLayout) {
@@ -109,11 +105,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             return this;
         }
 
-        public Builder setChildItemClickListener(@NonNull it.sephiroth.android.library.widget.AdapterView.OnItemClickListener listener) {
-            this.hListener = listener;
-            return this;
-        }
-
         public Feed build() {
             Feed ret = new Feed();
 
@@ -121,7 +112,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             ret.setArguments(feedBundle);
             if (viewBinder != null) ret.setViewBinder(viewBinder);
             if (listener != null) ret.setOnItemClickListener(listener);
-            if (hListener != null) ret.setOnItemClickListener(hListener);
 
             return ret;
         }
@@ -134,16 +124,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
         adapterView.setAdapter(mAdapter);
         if (listener != null) (adapterView).setOnItemClickListener(listener);
-
-        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
-    }
-
-    public void bindToAdapterView(HListView adapterView) {
-        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0);
-        if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
-
-        adapterView.setAdapter(mAdapter);
-        if (hListener != null) (adapterView).setOnItemClickListener(hListener);
 
         getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
     }
@@ -190,11 +170,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
-
-        View subView = view.findViewById(listViewRes);
-
-        if (subView instanceof ListView) bindToAdapterView((ListView)subView);
-        else if (subView instanceof HListView) bindToAdapterView((HListView)subView);
+        bindToAdapterView((ListView)view.findViewById(listViewRes));
 
         return view;
     }
@@ -205,15 +181,5 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     }
 
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) { this.listener = listener; }
-
-    public void setOnItemClickListener(it.sephiroth.android.library.widget.AdapterView.OnItemClickListener listener) {
-        hListener = listener;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (mAdapter != null) mAdapter.changeCursor(null);
-    }
 
 }

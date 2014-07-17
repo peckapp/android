@@ -2,6 +2,7 @@ package com.peck.android.activities;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SimpleAdapter;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -20,12 +22,15 @@ import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
-import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+
+import it.sephiroth.android.library.widget.HListView;
 
 
 public class FeedActivity extends PeckActivity {
@@ -33,7 +38,6 @@ public class FeedActivity extends PeckActivity {
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    private Feed feed2 = new Feed();
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -48,25 +52,38 @@ public class FeedActivity extends PeckActivity {
                 .withBindings(new String[]{Event.TITLE, Event.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
         buttons.put(R.id.bt_explore, feed);
 
-        feed2 = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[] { Circle.NAME, Circle.MEMBERS }, new int[] { R.id.tv_title, R.id.ll_userfeed })
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
+                .withBindings(new String[] { Circle.NAME, Circle.MEMBERS }, new int[] { R.id.tv_title, R.id.hlv_users })
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
-                    public boolean setViewValue(View view, Cursor cursor, int i) {
+                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
                         switch (view.getId()) {
-                            case R.id.ll_userfeed:
-                                Feed userFeed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(User.class)).build(), R.layout.hlvitem_user)
-                                        .withProjection(new String[]{DBOperable.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME})
-                                        .withBindings(new String[]{User.FIRST_NAME}, new int[]{R.id.tv_title})
-                                        .layout(R.layout.user_feed)
-                                        .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                                            @Override
-                                            public boolean setViewValue(View view, Cursor cursor, int i) {
-                                                return false;
-                                            }
-                                        })
-                                        .build();
-                                feed2.getChildFragmentManager().beginTransaction().add(R.id.ll_userfeed, userFeed).commit();
+                            case R.id.hlv_users:
+                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
+                                    @Override
+                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
+                                        ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(User.class)).build(),
+                                                null, null, null, null);
+                                        while (nested.moveToNext()) {
+                                            Map<String, Object> map = new HashMap<String, Object>();
+                                            map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
+                                            ret.add(map);
+                                        }
+                                        nested.close();
+                                        return ret;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(ArrayList<Map<String, Object>> contentValues) {
+                                        if (contentValues != null) {
+                                            SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, contentValues, R.layout.hlvitem_user,
+                                                    new String[]{User.FIRST_NAME}, new int[]{R.id.tv_title});
+                                            ((HListView)view).setAdapter(simpleAdapter);
+                                        }
+                                    }
+                                }.execute();
+
                                 return true;
                             default:
                                 return false;
@@ -74,7 +91,7 @@ public class FeedActivity extends PeckActivity {
                     }
                 })
                 .build();
-        buttons.put(R.id.bt_circles, feed2);
+        buttons.put(R.id.bt_circles, feed);
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
                 .withBindings(new String[]{Peck.NAME, Peck.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
