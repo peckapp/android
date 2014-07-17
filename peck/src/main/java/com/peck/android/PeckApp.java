@@ -9,6 +9,7 @@ import android.util.Log;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
+import com.crashlytics.android.Crashlytics;
 import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
@@ -71,6 +72,7 @@ public class PeckApp extends Application implements Singleton{
     public void onCreate() {
 
         AppContext.init(this);
+        Crashlytics.start(this);
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);

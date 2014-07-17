@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.peck.android.R;
@@ -49,7 +48,6 @@ public class FeedActivity extends PeckActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Crashlytics.start(this);
         setContentView(R.layout.activity_feed_root);
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
