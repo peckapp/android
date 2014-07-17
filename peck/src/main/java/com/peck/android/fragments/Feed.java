@@ -1,5 +1,6 @@
 package com.peck.android.fragments;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.peck.android.BuildConfig;
@@ -126,6 +128,16 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
 
     }
 
+    public void bindToAdapterView(AdapterView<ListAdapter> adapterView, Activity context) {
+        mAdapter = new SimpleCursorAdapter(context, listItemRes, null, binds_from, binds_to, 0);
+        if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
+
+        adapterView.setAdapter(mAdapter);
+        if (listener != null) (adapterView).setOnItemClickListener(listener);
+
+        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         switch (i) {
@@ -174,8 +186,10 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
+        bindToAdapterView((AdapterView<ListAdapter>)view.findViewById(listItemRes), getActivity());
 
         mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, binds_from, binds_to, 0);
+        if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
 
         ((ListView)view.findViewById(listViewRes)).setAdapter(mAdapter);
         if (listener != null) ((ListView)view.findViewById(listViewRes)).setOnItemClickListener(listener);
@@ -187,6 +201,7 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
 
     public void setViewBinder(SimpleCursorAdapter.ViewBinder binder) {
         this.viewBinder = binder;
+        if (mAdapter != null) mAdapter.setViewBinder(viewBinder);
     }
 
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) { this.listener = listener; }

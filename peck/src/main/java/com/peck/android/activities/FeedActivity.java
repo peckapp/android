@@ -1,13 +1,16 @@
 package com.peck.android.activities;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListAdapter;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -18,7 +21,11 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
+import com.peck.android.models.Circle;
+import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
+import com.peck.android.models.Peck;
+import com.peck.android.models.User;
 
 import java.util.HashMap;
 
@@ -37,10 +44,41 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
-        Feed feed = new Feed.Builder(Uri.withAppendedPath(Uri.parse("content://com.peck.android.provider.all"), DBUtils.getTableName(Event.class)), R.layout.lvitem_event)
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withTextBindings(new String[] { Event.TITLE, Event.TEXT }, new int[] { R.id.tv_title, R.id.tv_text }).build();
-
         buttons.put(R.id.bt_explore, feed);
+
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
+                .withTextBindings(new String[] { Circle.NAME }, new int[] { R.id.tv_title })
+                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(View view, Cursor cursor, int i) {
+                        switch (view.getId()) {
+                            case R.id.ll_userfeed:
+                                Log.d(getClass().getSimpleName(), "setting view");
+                                Feed userFeed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(User.class)).build(), R.layout.hlvitem_user)
+                                        .withProjection(new String[]{DBOperable.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME})
+                                        .withTextBindings(new String[]{User.FIRST_NAME}, new int[]{R.id.tv_title})
+                                        .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                                            @Override
+                                            public boolean setViewValue(View view, Cursor cursor, int i) {
+                                                return false;
+                                            }
+                                        })
+                                        .build();
+                                userFeed.bindToAdapterView((AdapterView<ListAdapter>) view.findViewById(R.id.hlv_users), FeedActivity.this);
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                })
+                .build();
+        buttons.put(R.id.bt_circles, feed);
+
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
+                .withTextBindings(new String[] { Peck.NAME, Peck.TEXT }, new int[] { R.id.tv_title, R.id.tv_text }).build();
+        buttons.put(R.id.bt_peck, feed);
 
     }
 
@@ -65,6 +103,10 @@ public class FeedActivity extends PeckActivity {
             fragmentSwitcherListener.setAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
+
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
+                .withTextBindings(new String[] { Event.TITLE, Event.TEXT }, new int[] { R.id.tv_title, R.id.tv_text }).build();
+        getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
         if (!checkPlayServices()) {
             //todo: prompt for valid play services download
