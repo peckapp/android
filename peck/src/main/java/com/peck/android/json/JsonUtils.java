@@ -45,7 +45,8 @@ public class JsonUtils {
                         if (field.getType().equals(double.class) || field.getType().equals(float.class)
                                 || field.getType().equals(Double.class) || field.getType().equals(Float.class)) {
                             ret.put(s, element.getAsDouble());
-                        } else ret.put(s, element.getAsInt());
+                        } else if (field.getType().equals(long.class) || field.getType().equals(Long.class)) ret.put(s, element.getAsLong());
+                        else ret.put(s, element.getAsInt());
                     } else if (element.getAsJsonPrimitive().isBoolean()) {
                         ret.put(s, element.getAsBoolean());
                     }

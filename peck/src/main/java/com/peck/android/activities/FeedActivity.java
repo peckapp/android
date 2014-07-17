@@ -17,6 +17,7 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
+import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.LocaleManager;
 import com.peck.android.models.Event;
 
@@ -49,7 +50,27 @@ public class FeedActivity extends PeckActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Crashlytics.start(this);
+        setContentView(R.layout.activity_feed_root);
+        for (final int i : buttons.keySet()) {
+            final String tag = "btn " + i;
+            FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
+                @Override
+                public void onClick(View view) {
+                    super.onClick(view);
 
+                    getSupportFragmentManager().executePendingTransactions();
+                    if (lastPressed != null && lastPressed.equals(view)) toggleVisibility();
+                    else findViewById(R.id.ll_feed_content).setVisibility(View.VISIBLE);
+                    lastPressed = (Button)view;
+                }
+            };
+            fragmentSwitcherListener.setAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            findViewById(i).setOnClickListener(fragmentSwitcherListener);
+        }
+
+        if (!checkPlayServices()) {
+            //todo: prompt for valid play services download
+        }
     }
 
     @Override

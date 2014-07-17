@@ -6,6 +6,9 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -20,8 +23,10 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
+import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.managers.LocaleManager;
+import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
 
 
@@ -55,7 +60,9 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                                                 finish();
                                             }
                                         }
-                ).build();
+                )
+                .withProjection(new String[] {DBOperable.LOCAL_ID, Locale.NAME})
+                .build();
     }
 
     @Override
@@ -107,8 +114,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
         }
 
-        loadLocales();
-
     }
 
     @Override
@@ -119,37 +124,55 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             startActivity(intent);
             finish();
         } else {
-
+            loadLocales();
         }
     }
 
     private void loadLocales() {
-        final TextView tv = (TextView)findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
-        tv.setVisibility(View.VISIBLE);
-        tv.setText(R.string.pb_loc);
-        findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
-        findViewById(R.id.rl_network_error).setVisibility(View.GONE);
+        NetworkInfo info = ((ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (info != null && info.isConnectedOrConnecting()) {
+            final TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+            tv.setVisibility(View.VISIBLE);
+            tv.setText(R.string.pb_loc);
+            findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
+            findViewById(R.id.rl_network_error).setVisibility(View.GONE);
+
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+                    long startTime = System.currentTimeMillis();
+                    while (getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
+                            new String[]{DBOperable.LOCAL_ID}, null, null, null).getCount() == 0 && System.currentTimeMillis() - startTime < PeckApp.Constants.Network.CONNECT_TIMEOUT) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
+                            new String[]{DBOperable.LOCAL_ID}, null, null, null).getCount() != 0;
+                }
+
+                @Override
+                protected void onPostExecute(Boolean ret) {
+                    if (ret) {
+                        findViewById(R.id.tv_progress).setVisibility(View.GONE);
+                        findViewById(R.id.rl_locale).setVisibility(View.GONE);
+                        findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
+                    } else displayError();
+
+                }
+            }.execute();
+        } else {
+            displayError();
+        }
     }
 
-   /* @Subscribe
-    public void respondToLocaleLoad(DataHandler.InitComplete complete) {
-        DataHandler.unregister(Locale.class, this);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (DataHandler.getLoadState(Locale.class).getValue() != DataHandler.LoadState.LOAD_COMPLETE || DataHandler.getData(Locale.class).size() == 0) {
-                    findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
-                } else {
-                    if (locationServices) Collections.sort(DataHandler.getData(Locale.class));
-                    findViewById(R.id.tv_progress).setVisibility(View.GONE);
-                    findViewById(R.id.rl_locale).setVisibility(View.GONE);
-                    findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
-                }
-            }
-        });
-    }*/
+    private void displayError() {
+        findViewById(R.id.rl_network_error).setVisibility(View.VISIBLE);
+        findViewById(R.id.rl_locale).setVisibility(View.GONE);
+        findViewById(R.id.rl_loc_select).setVisibility(View.GONE);
+    }
 
 
     @Override

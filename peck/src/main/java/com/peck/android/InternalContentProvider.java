@@ -42,9 +42,7 @@ public class InternalContentProvider extends ContentProvider {
     }
 
     private String extendSelection(String selection, String append) {
-        String s = new StringBuilder().append(((selection != null && selection.length() != 0) ? selection + " and " : "")).append(append).toString();
-        Log.v(getClass().getSimpleName(), s);
-        return s;
+        return ((selection != null && selection.length() != 0) ? selection + " and " : "") + append;
     }
 
     @Override
@@ -70,7 +68,7 @@ public class InternalContentProvider extends ContentProvider {
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
-        Log.v(getClass().getSimpleName(), "[" + cursor.getCount() + "]query: " + trimUri(uri) + ", type: " + uriType);
+        //Log.v(getClass().getSimpleName(), "[" + cursor.getCount() + "]query: " + trimUri(uri) + ", type: " + uriType);
 
 
         return cursor;
@@ -87,7 +85,6 @@ public class InternalContentProvider extends ContentProvider {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
                 insertId = database.insert(DBUtils.getTableName(PeckApp.getModelArray()[i]), null, contentValues);
-                DatabaseManager.closeDB();
                 break;
             }
         }
@@ -124,7 +121,6 @@ public class InternalContentProvider extends ContentProvider {
                     Log.v(getClass().getSimpleName(), "Sweep for deletes: " + trimUri(uri));
                     SQLiteDatabase database = DatabaseManager.openDB();
                     deleted = database.delete(DBUtils.getTableName(PeckApp.getModelArray()[i]), DBOperable.DELETED + " = ?", new String[]{"1"});
-                    DatabaseManager.closeDB();
                 } else {
                     Log.v(getClass().getSimpleName(), "Mark for delete: " + trimUri(uri));
                     ContentValues contentValues = new ContentValues();
@@ -156,13 +152,11 @@ public class InternalContentProvider extends ContentProvider {
             if (uriType == URIs_ALL[i]) {
                 SQLiteDatabase database = DatabaseManager.openDB();
                 updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, selection, selectionArgs);
-                DatabaseManager.closeDB();
                 break;
             } else if (uriType == URIs_ALL[i] + 1) {
                 SQLiteDatabase database = DatabaseManager.openDB();
                 updated = database.update(DBUtils.getTableName(PeckApp.getModelArray()[i]), contentValues, extendSelection(selection, DBOperable.LOCAL_ID + " = ?"),
                         ArrayUtils.add(selectionArgs, uri.getLastPathSegment()));
-                DatabaseManager.closeDB();
                 break;
             }
 

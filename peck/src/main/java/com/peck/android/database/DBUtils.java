@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
 import com.peck.android.models.DBOperable;
@@ -17,7 +14,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by mammothbane on 7/15/2014.
@@ -65,15 +61,11 @@ public class DBUtils {
 
     public static <T extends DBOperable> String[] getColumns(Class<T> tClass) {
         if (columnMap.get(tClass) == null) {
-            try {
-                ArrayList<String> columns = new ArrayList<String>();
-                T t = tClass.newInstance();
-                for (Map.Entry<String, JsonElement> entry : ((JsonObject)new JsonParser().parse(new GsonBuilder().serializeNulls().create().toJson(t, tClass))).entrySet()) {
-                    columns.add(entry.getKey());
-                }
-                columnMap.put(tClass, columns.toArray(new String[columns.size()]));
-            } catch (InstantiationException e) { throw new IllegalArgumentException("DBOperables must provide a nullary constructor.", e);
-            } catch (IllegalAccessException e) { throw new IllegalArgumentException("couldn't instantiate a " + tClass.getSimpleName() + " object", e); }
+            ArrayList<String> columns = new ArrayList<String>();
+            for (Field field : getAllFields(tClass)) {
+                columns.add(getSerializedFieldName(field));
+            }
+            columnMap.put(tClass, columns.toArray(new String[columns.size()]));
         }
 
         return columnMap.get(tClass);

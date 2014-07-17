@@ -26,6 +26,7 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.json.JsonUtils;
 import com.peck.android.models.DBOperable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -86,6 +87,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         final long sResultUpdated = syncResult.stats.numUpdates;
         final long sResultDeleted = syncResult.stats.numDeletes;
         final long sResultInserts = syncResult.stats.numInserts;
+        int svGet = 0;
+        int svUpdated = 0;
+        int svCreated = 0;
+        int svDeleted = 0;
 
         JsonObject object = get(PeckApp.buildEndpointURL(tClass));
 
@@ -97,6 +102,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             JsonObject temp = (JsonObject) array.get(i);
             incoming.put(temp.get(DBOperable.SV_ID).getAsInt(), temp);
         }
+        svGet = array.size();
 
         Cursor cursor = client.query(uri, DBUtils.getColumns(DBOperable.class), null, null, null);
 
@@ -107,7 +113,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             if (match == null) { //if the incoming data doesn't contain the item, delete it
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
-                    Log.v(getClass().getSimpleName(), "Posting " + tClass.getSimpleName() + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)) + " to server." );
+                    svCreated++;
                     post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));  //post it to the server
                 } else {
                     //if it's older and we haven't updated it, just delete it
@@ -122,10 +128,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) {
-                        Log.v(getClass().getSimpleName(), "Sending delete to server");
+                        svDeleted++;
                         delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))); //delete the object
                     } else {
-                        Log.v(getClass().getSimpleName(), "Sending patch to server");
+                        svUpdated++;
                         patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));
                     }//patch the object
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
@@ -158,8 +164,16 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numInserts++;
         }
 
-        Log.v(getClass().getSimpleName() + "/" + tClass.getSimpleName(), "[" + (syncResult.stats.numInserts - sResultInserts) + "]" + "skipped: " + (syncResult.stats.numSkippedEntries - sResultSkipped) +
-                ", updated: " + (syncResult.stats.numUpdates - sResultUpdated) + ", deleted: " + (syncResult.stats.numDeletes - sResultDeleted));
+
+
+        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(syncResult.stats.numEntries - sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) +"]" +
+                " noΔ: " + StringUtils.rightPad(Long.toString((syncResult.stats.numSkippedEntries - sResultSkipped)), 5) +
+                " ins: " + StringUtils.leftPad(Long.toString((syncResult.stats.numInserts - sResultInserts)), 5)  +
+                "|" + StringUtils.rightPad(Long.toString(svCreated), 4) +
+                " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
+                StringUtils.rightPad(Long.toString(svUpdated), 4) +
+                " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
+                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + tClass.getSimpleName().toLowerCase());
 
         contentResolver.applyBatch(authority, batch);
         contentResolver.notifyChange(uri, null, false);
@@ -178,6 +192,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         } else if (!(   e instanceof RemoteException    || e instanceof InterruptedException ||
                         e instanceof ExecutionException || e instanceof OperationApplicationException) ) {
             throw new RuntimeException(e);
+        } else {
+            e.printStackTrace();
         }
 
     }
