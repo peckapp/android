@@ -1,6 +1,5 @@
 package com.peck.android.fragments;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,12 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
-import com.peck.android.models.DBOperable;
+
+import it.sephiroth.android.library.widget.HListView;
 
 /**
  * Created by mammothbane on 6/9/2014.
@@ -29,7 +28,7 @@ import com.peck.android.models.DBOperable;
  *
  */
 
-public class Feed<T extends DBOperable> extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LV_RES = "list view resource identifier";
     private static final String LAYOUT_RES = "layout identifier";
@@ -45,30 +44,30 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
     private static final String LOADER_SELECT_ARGS = "selection arguments";
     private static final String LOADER_SORT_ORDER = "sort order";
 
-    protected String tag() {
-        return ((Object)this).getClass().getName();
-    }
     private int listViewRes = R.id.lv_content;
     private int layoutRes = R.layout.feed;
     private int listItemRes;
     private String[] binds_from;
     private int[] binds_to;
     private SimpleCursorAdapter mAdapter;
+
     private AdapterView.OnItemClickListener listener;
+    private it.sephiroth.android.library.widget.AdapterView.OnItemClickListener hListener;
+
     private SimpleCursorAdapter.ViewBinder viewBinder;
     private Bundle loaderBundle;
-    private static final int URL_LOADER = 0;
+    private static int loader_static = 0;
+    private final int URL_LOADER = loader_static++;
 
     public static class Builder {
         private Bundle loaderBundle = new Bundle();
         private Bundle feedBundle = new Bundle();
-        private int itemLayout;
         private AdapterView.OnItemClickListener listener;
+        private it.sephiroth.android.library.widget.AdapterView.OnItemClickListener hListener;
         private SimpleCursorAdapter.ViewBinder viewBinder;
 
         public Builder(@NonNull Uri loaderUri, int itemLayout) {
             feedBundle.putInt(FEED_ITEM_LAYOUT, itemLayout);
-            this.itemLayout = itemLayout;
             loaderBundle.putParcelable(LOADER_URI, loaderUri);
         }
 
@@ -93,13 +92,8 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
             return this;
         }
 
-        public Builder bindToListView (int lvId) {
-            feedBundle.putInt(LV_RES, lvId);
-            return this;
-        }
-
-        public Builder withTextBindings(@NonNull String[] bindsFrom, @NonNull int[] bindsTo) {
-            if (BuildConfig.DEBUG && bindsFrom.length != bindsTo.length) throw new IllegalArgumentException("must have the same number of fields assigning as are present.");
+        public Builder withBindings(@NonNull String[] bindsFrom, @NonNull int[] bindsTo) {
+            //if (BuildConfig.DEBUG && bindsFrom.length < bindsTo.length) throw new IllegalArgumentException("too few fields to bind from");
             feedBundle.putStringArray(BINDS_FROM, bindsFrom);
             feedBundle.putIntArray(BINDS_TO, bindsTo);
             return this;
@@ -115,21 +109,27 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
             return this;
         }
 
-        public <T extends DBOperable> Feed<T> build() {
-            Feed<T> ret = new Feed<T>();
+        public Builder setChildItemClickListener(@NonNull it.sephiroth.android.library.widget.AdapterView.OnItemClickListener listener) {
+            this.hListener = listener;
+            return this;
+        }
+
+        public Feed build() {
+            Feed ret = new Feed();
 
             feedBundle.putBundle(LOADER_BUNDLE, loaderBundle);
             ret.setArguments(feedBundle);
             if (viewBinder != null) ret.setViewBinder(viewBinder);
             if (listener != null) ret.setOnItemClickListener(listener);
+            if (hListener != null) ret.setOnItemClickListener(hListener);
 
             return ret;
         }
 
     }
 
-    public void bindToAdapterView(AdapterView<ListAdapter> adapterView, Activity context) {
-        mAdapter = new SimpleCursorAdapter(context, listItemRes, null, binds_from, binds_to, 0);
+    public void bindToAdapterView(ListView adapterView) {
+        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0);
         if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
 
         adapterView.setAdapter(mAdapter);
@@ -138,15 +138,21 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
         getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
     }
 
+    public void bindToAdapterView(HListView adapterView) {
+        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0);
+        if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
+
+        adapterView.setAdapter(mAdapter);
+        if (hListener != null) (adapterView).setOnItemClickListener(hListener);
+
+        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        switch (i) {
-            case URL_LOADER:
-                return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
+        if (i == URL_LOADER) return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
                         bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
-            default:
-                return null;
-        }
+        else return null;
     }
 
     @Override
@@ -179,22 +185,16 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
         listItemRes = res;
 
         loaderBundle = args.getBundle(LOADER_BUNDLE);
-
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
-        bindToAdapterView((AdapterView<ListAdapter>)view.findViewById(listItemRes), getActivity());
 
-        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, binds_from, binds_to, 0);
-        if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
+        View subView = view.findViewById(listViewRes);
 
-        ((ListView)view.findViewById(listViewRes)).setAdapter(mAdapter);
-        if (listener != null) ((ListView)view.findViewById(listViewRes)).setOnItemClickListener(listener);
-
-        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
+        if (subView instanceof ListView) bindToAdapterView((ListView)subView);
+        else if (subView instanceof HListView) bindToAdapterView((HListView)subView);
 
         return view;
     }
@@ -205,5 +205,15 @@ public class Feed<T extends DBOperable> extends Fragment implements LoaderManage
     }
 
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) { this.listener = listener; }
+
+    public void setOnItemClickListener(it.sephiroth.android.library.widget.AdapterView.OnItemClickListener listener) {
+        hListener = listener;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mAdapter != null) mAdapter.changeCursor(null);
+    }
 
 }

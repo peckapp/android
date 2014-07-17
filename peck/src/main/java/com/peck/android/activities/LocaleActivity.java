@@ -103,7 +103,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             protected void onPostExecute(Boolean bool) {
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.add(R.id.rl_loc_select, new Feed.Builder(PeckApp.buildLocalUri(Locale.class), R.layout.lvitem_locale)
-                        .withTextBindings(new String[] { Locale.NAME }, new int[] { R.id.tv_title })
+                        .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
                         .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                     @Override
                                                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -117,7 +117,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                                                     }
                                                 }
                         )
-                        .withProjection(new String[] {DBOperable.LOCAL_ID, Locale.NAME, (bool
+                        .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
                                 ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
                                 "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
                         .orderedBy("dist asc, " + Locale.NAME)
