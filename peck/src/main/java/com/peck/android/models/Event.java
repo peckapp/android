@@ -1,125 +1,56 @@
 package com.peck.android.models;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.view.View;
-import android.widget.TextView;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.peck.android.R;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.SelfSetup;
+import com.peck.android.annotations.DBType;
+import com.peck.android.annotations.Header;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by mammothbane on 5/28/2014.
  */
-public class Event extends DBOperable implements HasFeedLayout, SelfSetup {
-
-    @NonNull
-    @Expose
-    @SerializedName("start_date")
-    private Date startTime = new Date(-1);
-
-    @NonNull
-    @Expose
-    @SerializedName("end_date")
-    private Date endTime = new Date(-1);
+@Header(plural = "simple_events", singular = "simple_event")
+public class Event extends DBOperable {
+    public static final transient String START_DATE = "start_date";
+    public static final transient String END_DATE = "end_date";
+    public static final transient String TITLE = "title";
+    public static final transient String TEXT = "event_description";
+    public static final transient String IMAGE_URL = "image_url";
+    public static final transient String EVENT_URL = "event_url";
+    public static final transient String USER_IDS = "user_ids";
 
     @Expose
-    @SerializedName("title")
+    @DBType("real")
+    @SerializedName(START_DATE)
+    private double startTime;
+
+    @Expose
+    @DBType("real")
+    @SerializedName(END_DATE)
+    private double endTime;
+
+    @Expose
+    @SerializedName(TITLE)
     private String title = "";
 
     @Expose
-    @SerializedName("event_description")
+    @SerializedName(TEXT)
     private String text = "";
 
     @Expose
-    @SerializedName("image_url")
+    @SerializedName(IMAGE_URL)
     private String imageUrl;
 
     @Expose
-    @SerializedName("event_url")
+    @SerializedName(EVENT_URL)
     private String eventUrl;
 
     @NonNull
     @Expose
-    @SerializedName("user_ids")
+    @SerializedName(USER_IDS)
     private ArrayList<Integer> users = new ArrayList<Integer>();
-
-    @Nullable
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Event setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-        return this;
-    }
-
-    @Nullable
-    public String getEventUrl() {
-        return eventUrl;
-    }
-
-    public Event setEventUrl(String eventUrl) {
-        this.eventUrl = eventUrl;
-        return this;
-    }
-
-    @NonNull
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public Event setStartTime(@NonNull Date startTime) {
-        this.startTime = startTime;
-        return this;
-    }
-
-    @NonNull
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public Event setEndTime(@NonNull Date endTime) {
-        this.endTime = endTime;
-        return this;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public Event setText(String text) {
-        this.text = text;
-        return this;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Event setTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
-    @Override
-    public int getResourceId() { //TODO: implement, create layout
-        return R.layout.lvitem_event;
-    }
-
-
-
-    @Override
-    public void setUp(View v, Activity activity) { //TODO: set up a layout that's passed in with the correct information
-        ((TextView)v.findViewById(R.id.tv_title)).setText(title);
-        ((TextView)v.findViewById(R.id.tv_text)).setText(text);
-    }
 
 }

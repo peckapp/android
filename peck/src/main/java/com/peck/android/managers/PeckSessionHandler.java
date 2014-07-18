@@ -1,19 +1,15 @@
 package com.peck.android.managers;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.models.User;
 
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -28,7 +24,7 @@ public class PeckSessionHandler implements Singleton {
     private final static String PROFILE_FILENAME = "proPicCache";
     private final static String TAG = "UserSessionManager";
 
-    private static PeckSessionHandler manager = new PeckSessionHandler();
+    private static PeckSessionHandler handler = new PeckSessionHandler();
     private static int profileDimens;
     private static Context context;
 
@@ -50,8 +46,8 @@ public class PeckSessionHandler implements Singleton {
 
     private PeckSessionHandler() {}
 
-    public static PeckSessionHandler getManager() {
-        return manager;
+    public static PeckSessionHandler getHandler() {
+        return handler;
     }
 
     public static void init() {
@@ -61,57 +57,44 @@ public class PeckSessionHandler implements Singleton {
 
         FacebookSessionHandler.init();
 
-        //test: remove before production
-        context.deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
-        SharedPreferences.Editor edit = context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
-        edit.clear();
-        edit.apply();
-        Log.i(TAG, "deleted database, cleared USER_PREFS SharedPreferences");
-
-        UserManager.getManager().initialize(new Callback<ArrayList<User>>() {
-            @Override
-            public void callBack(ArrayList<User> obj) {
-                user.setLocalId(context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
-                //load saved user id from sharedpreferences
-
-                user = UserManager.getManager().getByLocalId(user.getLocalId());
-
-                if (user == null) {
-                    user = new User();
-                    UserManager.getManager().getData().add(user); //temp user
-                    //todo: server auth
-                }
-                else LoginManager.authenticateUsingCached(new Callback<Boolean>() {
-                    @Override
-                    public void callBack(Boolean obj) {
-                        if (obj) {
-                            ImageCacher.init(user);
-                            Log.i(TAG, "initialized with user " + user.getServerId());
-                        } else {
-                            //todo: give the user an alert dialog, prompting them to log in
-
-                        }
-                    }
-                });
-
-
-            }
-
-        });
-
-
-
     }
 
+  /*  @Subscribe
+    public void respondToInit(DataHandler.InitComplete complete) {
+        User user = DataHandler.getByLocalId(User.class, context.getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(PeckApp.Constants.Preferences.USER_ID, 0));
+
+        if (user == null) {
+            user = new User();
+            DataHandler.put(User.class, user, true); //temp user
+            //todo: server auth
+        }
+        else {
+            final User ret = user;
+            LoginManager.authenticateUsingCached(new Callback<Boolean>() {
+                @Override
+                public void callBack(Boolean obj) {
+                    if (obj) {
+                        Log.i(TAG, "initialized with user " + ret.getServerId());
+                    } else {
+                        //todo: give the user an alert dialog, prompting them to log in
+
+                    }
+                }
+            });
+        }
+    }*/
+
+
+
     public static void notifyFbStateChanged(final boolean loggedIn) {
-        facebookMode = loggedIn;
+        /*facebookMode = loggedIn;
         FacebookSessionHandler.getGraphUser(new Callback<GraphUser>() {
             @Override
             public void callBack(GraphUser obj) {
                 user.setFbId(obj.getId());
                 if (!peckAuth && loggedIn) user.setFullName(obj.getName());
             }
-        });
+        });*/
     }
 
     public static User getUser() {
@@ -139,7 +122,7 @@ public class PeckSessionHandler implements Singleton {
             outputStream = new FileOutputStream(filepath);
             bmp.compress(Bitmap.CompressFormat.PNG, PeckApp.Constants.Graphics.PNG_COMPRESSION, outputStream);
         } catch (Exception e) {
-            Log.e(manager.getClass().getName(), e.toString());
+            Log.e(handler.getClass().getName(), e.toString());
         } finally {
             try {
                 outputStream.close();

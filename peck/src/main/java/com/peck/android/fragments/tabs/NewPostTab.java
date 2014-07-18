@@ -7,8 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
-import com.peck.android.fragments.BaseTab;
-import com.peck.android.interfaces.Singleton;
+import com.peck.android.fragments.posts.AnnouncementPost;
+import com.peck.android.fragments.posts.EventPost;
+import com.peck.android.fragments.posts.PhotoPost;
 import com.peck.android.listeners.FragmentSwitcherListener;
 
 import java.util.HashMap;
@@ -16,14 +17,14 @@ import java.util.HashMap;
 /**
  * Created by mammothbane on 6/16/2014.
  */
-public class NewPostTab extends BaseTab {
+public class NewPostTab extends Fragment {
 
     private final static HashMap<Integer, Fragment> buttonIds = new HashMap<Integer, Fragment>(3); //don't use a sparsearray, we need the keys
 
     static {
-        buttonIds.put(R.id.bt_event, new EventPostTab());
-        buttonIds.put(R.id.bt_announce, new AnnouncementPostTab());
-        buttonIds.put(R.id.bt_photo, new PhotoPostTab());
+        buttonIds.put(R.id.bt_event, new EventPost());
+        buttonIds.put(R.id.bt_announce, new AnnouncementPost());
+        buttonIds.put(R.id.bt_photo, new PhotoPost());
     }
 
     @Override
@@ -43,12 +44,6 @@ public class NewPostTab extends BaseTab {
     }
 
     //todo: animate text field into visible area
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Class<? extends Singleton> getManagerClass() {
-        return null;
-    }
 
 
 }

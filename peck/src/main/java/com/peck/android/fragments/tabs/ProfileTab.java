@@ -2,6 +2,7 @@ package com.peck.android.fragments.tabs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,17 +10,14 @@ import android.view.ViewGroup;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
-import com.peck.android.fragments.BaseTab;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
-import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.views.PeckAuthButton;
 
 /**
  * Created by mammothbane on 6/10/2014.
  */
-public class ProfileTab extends BaseTab {
+public class ProfileTab extends Fragment {
 
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.tab_profile;
@@ -32,10 +30,7 @@ public class ProfileTab extends BaseTab {
 
         lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionHandler.SessionStatusCallback(new Callback() {
             @Override
-            public void callBack(Object obj) {
-                PeckSessionHandler.getUser().setUp(getActivity().findViewById(R.id.ll_profile), null);
-            }
-        }));
+            public void callBack(Object obj) {}}));
 
         lifecycleHelper.onCreate(savedInstanceState);
 
@@ -84,14 +79,27 @@ public class ProfileTab extends BaseTab {
         PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
-        PeckSessionHandler.getUser().setUp(view.findViewById(R.id.ll_profile), null);
+        /*User user = PeckSessionHandler.getUser();
+
+        view.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
+
+        if (user.getProfileUrl().length() > 0) {
+            Picasso.with(PeckApp.getContext())
+                    .load(user.getProfileUrl())
+                    .into(((RoundedImageView) view.findViewById(R.id.riv_user)));
+            view.findViewById(R.id.riv_user).setAlpha(1f);
+        }
+
+        view.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
+        if (user.getFullName() == null) ((TextView) view.findViewById(R.id.tv_realname)).setText("Your Name");
+
+        else {
+            ((TextView) view.findViewById(R.id.tv_realname)).setText(user.getFullName());
+            view.findViewById(R.id.tv_realname).setAlpha(1f);
+        }*/
 
         return view;
     }
 
 
-    @Override
-    public Class<? extends Singleton> getManagerClass() {
-        return null;
-    }
 }

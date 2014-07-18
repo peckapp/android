@@ -1,58 +1,101 @@
 package com.peck.android.activities;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SimpleAdapter;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.fragments.BaseTab;
-import com.peck.android.fragments.tabs.CirclesFeed;
-import com.peck.android.fragments.tabs.ExploreFeed;
+import com.peck.android.database.DBUtils;
+import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
-import com.peck.android.fragments.tabs.PeckFeed;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
-import com.peck.android.managers.LocaleManager;
+import com.peck.android.models.Circle;
+import com.peck.android.models.Event;
+import com.peck.android.models.Peck;
+import com.peck.android.models.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+
+import it.sephiroth.android.library.widget.HListView;
+
 
 public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    private final static HashMap<Integer, BaseTab> buttons = new HashMap<Integer, BaseTab>(); //don't use a sparsearray, we need the keyset
+
+    private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
     @Nullable
     private Button lastPressed;
 
-    static {
+    {
         buttons.put(R.id.bt_add, new NewPostTab());
-        buttons.put(R.id.bt_peck, new PeckFeed());
         buttons.put(R.id.bt_profile, new ProfileTab());
-        buttons.put(R.id.bt_circles, new CirclesFeed());
-        buttons.put(R.id.bt_newsfeed, new ExploreFeed());
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
+                .withBindings(new String[]{Event.TITLE}, new int[]{R.id.tv_title}).build();
+        buttons.put(R.id.bt_explore, feed);
 
-        switch (resultCode) {
-            case RESULT_OK: {
-                break;
-            }
-            default: {
-                break;
-            }
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
+                .withBindings(new String[] { Circle.NAME, Circle.MEMBERS }, new int[] { R.id.tv_title, R.id.hlv_users })
+                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                        switch (view.getId()) {
+                            case R.id.hlv_users:
+                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
+                                    @Override
+                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
+                                        ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(User.class)).build(),
+                                                null, null, null, null);
+                                        while (nested.moveToNext()) {
+                                            Map<String, Object> map = new HashMap<String, Object>();
+                                            map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
+                                            ret.add(map);
+                                        }
+                                        nested.close();
+                                        return ret;
+                                    }
 
-        }
+                                    @Override
+                                    protected void onPostExecute(ArrayList<Map<String, Object>> contentValues) {
+                                        if (contentValues != null) {
+                                            SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, contentValues, R.layout.hlvitem_user,
+                                                    new String[]{User.FIRST_NAME}, new int[]{R.id.tv_title});
+                                            ((HListView)view).setAdapter(simpleAdapter);
+                                        }
+                                    }
+                                }.execute();
+
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                })
+                .build();
+        buttons.put(R.id.bt_circles, feed);
+
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
+                .withBindings(new String[]{Peck.NAME, Peck.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
+        buttons.put(R.id.bt_peck, feed);
 
     }
 
@@ -60,10 +103,7 @@ public class FeedActivity extends PeckActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Crashlytics.start(this);
-
         setContentView(R.layout.activity_feed_root);
-
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
             FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
@@ -81,11 +121,13 @@ public class FeedActivity extends PeckActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
+                .withBindings(new String[]{Event.TITLE, Event.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
+        getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
+
         if (!checkPlayServices()) {
             //todo: prompt for valid play services download
         }
-
-
     }
 
     @Override
@@ -94,10 +136,10 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-
-        if (LocaleManager.getManager().getLocale() == null) {
+        if (getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getLong(PeckApp.Constants.Preferences.LOCALE_ID, 0) == 0) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 

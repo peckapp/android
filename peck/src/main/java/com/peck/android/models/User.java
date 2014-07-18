@@ -1,173 +1,39 @@
 package com.peck.android.models;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.makeramen.RoundedImageView;
-import com.peck.android.R;
-import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.HasFeedLayout;
-import com.peck.android.interfaces.HasImage;
-import com.peck.android.interfaces.SelfSetup;
-import com.peck.android.managers.ImageCacher;
+import com.peck.android.annotations.Header;
 
 /**
  * Created by mammothbane on 6/18/2014.
  */
-public class User extends DBOperable implements HasFeedLayout, SelfSetup, HasImage {
+@Header(plural = "users", singular = "user")
+public class User extends DBOperable {
+
+    public static final transient String FIRST_NAME = "first_name";
+    public static final transient String LAST_NAME = "last_name";
+    public static final transient String USERNAME = "username";
+    public static final transient String FACEBOOK_ID = "facebook_link";
+    public static final transient String BIO = "blurb";
 
     @Expose
-    @NonNull
-    @SerializedName("first_name")
+    @SerializedName(FIRST_NAME)
     private String firstName;
 
     @Expose
-    @NonNull
-    @SerializedName("last_name")
+    @SerializedName(LAST_NAME)
     private String lastName;
 
     @Expose
-    @SerializedName("username")
+    @SerializedName(USERNAME)
     private String username;
 
     @Expose
-    @SerializedName("facebook_link")
+    @SerializedName(FACEBOOK_ID)
     private String fbId = "";
 
     @Expose
-    @SerializedName("blurb")
+    @SerializedName(BIO)
     private String bio = "";
-
-    @Expose
-    private String profileUrl = "";
-
-
-    @Nullable
-    public String getFbId() {
-        return fbId;
-    }
-
-    public User setFbId(String fbId) {
-        this.fbId = fbId;
-        return this;
-    }
-
-    @Nullable
-    public String getBio() {
-        return bio;
-    }
-
-    public User setBio(String bio) {
-        this.bio = bio;
-        return this;
-    }
-
-    @Nullable
-    public String getImageUrl() {
-        return profileUrl;
-    }
-
-    public User setProfileUrl(String profileUrl) {
-        this.profileUrl = profileUrl;
-        return this;
-    }
-
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
-
-    public void setFullName(String string) {
-        String[] temp = string.split(" ");
-        //todo: support for names with multiple spaces?
-        firstName = temp[0];
-        lastName = temp[1];
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(@NonNull String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(@NonNull String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getProfileUrl() {
-        return profileUrl;
-    }
-
-    public void getProfilePicture(Callback<Bitmap> callback) {
-        ImageCacher.get(this, callback);
-    }
-
-    @Override
-    public int getResourceId() {
-        return R.layout.lvitem_user;
-    }
-
-    @Override
-    public void setUp(final View v, Activity activity) {
-
-        Log.d("User " + getLocalId(), "Setting up " + ((v instanceof RelativeLayout) ? "circles user item." :
-                (v instanceof LinearLayout) ? "profile." : "unknown view."));
-
-        if (v instanceof RelativeLayout) { //todo: fix this, this is a stupid way to make this work
-            final RoundedImageView roundedImageView = (RoundedImageView)v.findViewById(R.id.riv_user);
-            roundedImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d("User " + getLocalId(), "I was clicked");
-                    //todo: open the user's profile page
-                }
-            });
-            getProfilePicture(new Callback<Bitmap>() {
-                @Override
-                public void callBack(Bitmap obj) {
-                    roundedImageView.setImageBitmap(obj);
-                }
-            });
-        } else if (v instanceof LinearLayout) {
-            //if this is a profile page
-            v.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
-            getProfilePicture(new Callback<Bitmap>() {
-                @Override
-                public void callBack(Bitmap obj) {
-                    ((RoundedImageView) v.findViewById(R.id.riv_user)).setImageBitmap(obj);
-                    //todo: check this: v.findViewById(R.id.riv_user).setAlpha(1f);
-                    v.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
-                }
-            });
-                ((TextView) v.findViewById(R.id.tv_realname)).setText(getFullName());
-                v.findViewById(R.id.tv_realname).setAlpha(1f);
-        }
-
-
-    }
-
-
 
 }

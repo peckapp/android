@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -27,7 +26,7 @@
             android:textColor="@color/primary_text_dark_focused"/>
 
         <Button
-            android:id="@+id/bt_newsfeed"
+            android:id="@+id/bt_explore"
             android:text="explore"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0px"
@@ -64,22 +63,18 @@
 
     </LinearLayout>
 
-    <fragment android:name="com.peck.android.fragments.tabs.HomeFeed"
-        android:id="@+id/frag_home"
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/ll_home_feed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_below="@+id/ll_buttonbar"
-        tools:layout="@layout/tab_homefeed" />
+        android:layout_below="@+id/ll_buttonbar"/>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/ll_feed_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
         android:layout_below="@+id/ll_buttonbar" />
 
 

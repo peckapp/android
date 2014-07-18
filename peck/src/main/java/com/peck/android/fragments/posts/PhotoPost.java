@@ -1,4 +1,4 @@
-package com.peck.android.fragments.tabs;
+package com.peck.android.fragments.posts;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 /**
  * Created by mammothbane on 7/7/2014.
  */
-public class PhotoPostTab extends Fragment {
+public class PhotoPost extends Fragment {
 
 
     @Override
