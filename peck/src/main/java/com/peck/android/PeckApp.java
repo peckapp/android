@@ -1,5 +1,7 @@
 package com.peck.android;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,6 +23,7 @@ import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
 import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
+import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
@@ -37,8 +40,31 @@ public class PeckApp extends Application implements Singleton{
     public static Context getContext() {
         return AppContext.mContext;
     }
+    private static Account account;
 
     private static final Class[] MODELS = { Circle.class, SimpleEvent.class, AthleticEvent.class, Locale.class, Peck.class, Comment.class, User.class };
+
+    public static void setActiveAccount(Account account) {
+        PeckApp.account = account;
+    }
+
+    public static Account getActiveAccount() {
+        if (account != null) return account;
+        Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
+        if (accounts.length == 1) {
+            account = accounts[0];
+        } else {
+            String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
+            if (name != null) for (Account acct : accounts) {
+                if (acct.name.equals(name)) {
+                    account = acct;
+                    return account;
+                }
+            }
+        }
+        return null;
+    }
+
 
     public static Class[] getModelArray() {
         return MODELS;

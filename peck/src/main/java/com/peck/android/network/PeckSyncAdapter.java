@@ -1,6 +1,9 @@
 package com.peck.android.network;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
@@ -15,19 +18,16 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.AuthFailureError;
+import com.android.volley.VolleyError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
 import com.peck.android.models.DBOperable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,17 +54,18 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient client, SyncResult syncResult) {
-        Class clss = null;
+        Class clss;
 
         String s = bundle.getString(SYNC_TYPE);
 
+        final String authToken = AccountManager.get(getContext()).peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
 
         if (s != null) {
             try {
                 clss = Class.forName(s);
                 sync(clss, account, authority, client, syncResult);
             } catch (Exception e) {
-                handleException(e, syncResult);
+                handleException(e, syncResult, authToken);
             }
 
         } else for (Class clzz : PeckApp.getModelArray()) {
@@ -72,14 +73,14 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.v(getClass().getSimpleName(), "initting sync for " + clzz.getSimpleName());
                 sync(clzz, account, authority, client, syncResult);
             } catch (Exception e) {
-                handleException(e, syncResult);
+                handleException(e, syncResult, authToken);
             }
         }
 
     }
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException {
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException, VolleyError, IOException, OperationCanceledException, AuthenticatorException {
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
         final long sResultEntries = syncResult.stats.numEntries;
         final long sResultSkipped = syncResult.stats.numSkippedEntries;
@@ -91,7 +92,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = get(PeckApp.buildEndpointURL(tClass));
+        JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = PeckApp.buildLocalUri(tClass);
@@ -113,7 +114,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));  //post it to the server
+                    ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(PeckApp.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor), account));  //post it to the server
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -128,10 +129,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))); //delete it from the server
+                        ServerCommunicator.delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(null, null, account)); //delete it from the server
                     } else { //if it hasn't been
                         svUpdated++; //patch it
-                        patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));
+                        ServerCommunicator.patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(PeckApp.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor), account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
@@ -180,11 +181,16 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     }
 
-    private static void handleException(Exception e, SyncResult syncResult) {
+    private static void handleException(Exception e, SyncResult syncResult, String authToken) {
         //todo: handle these
-        Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync.", e);
+        Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync: " + e.getClass().getSimpleName());
         if (e instanceof IOException) {
             syncResult.stats.numIoExceptions++;
+        } else if (e instanceof VolleyError) {
+            if (e instanceof AuthFailureError) AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
+            syncResult.stats.numAuthExceptions++;
+        } else if (e instanceof AuthenticatorException) {
+            syncResult.stats.numAuthExceptions++;
         } else if (e instanceof JSONException) {
             syncResult.stats.numParseExceptions++;
         } else if (!(   e instanceof RemoteException    || e instanceof InterruptedException ||
@@ -195,36 +201,6 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
     }
-
-    private static JsonObject send(String url, int method, JsonObject data) throws InterruptedException, ExecutionException, JSONException {
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        JsonObjectRequest request = new JsonObjectRequest(method, url, (data != null) ? new JSONObject(data.toString()) : null, future, future);
-
-        PeckApp.getRequestQueue().add(request);
-        return ((JsonObject)new JsonParser().parse(future.get().toString()));
-    }
-
-    private static JsonObject get(String url) throws InterruptedException, ExecutionException, JSONException {
-        return send(url, Request.Method.GET, null);
-    }
-
-
-
-    private static JsonObject post(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException {
-        return send(url, Request.Method.POST, object);
-    }
-
-
-    private static JsonObject patch(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException  {
-        return send(url, Request.Method.PATCH, object);
-    }
-
-    private static boolean delete(String url) throws InterruptedException, ExecutionException, JSONException  {
-        send(url, Request.Method.DELETE, null);
-        //todo: what happens when we run a delete? how do we return?
-        return true;
-    }
-
 
 
 }

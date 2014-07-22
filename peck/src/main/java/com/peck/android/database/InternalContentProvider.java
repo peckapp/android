@@ -73,7 +73,6 @@ public class InternalContentProvider extends ContentProvider {
 
     @Override
     public synchronized Uri insert(Uri uri, ContentValues contentValues) {
-        //Log.v(getClass().getSimpleName(), "Insert: " + trimUri(uri) + ": " + contentValues);
         int uriType = uriMatcher.match(uri);
         long insertId = -1;
 
@@ -154,5 +153,4 @@ public class InternalContentProvider extends ContentProvider {
     public synchronized String getType(Uri uri) {
         return null;
     }
-
 }

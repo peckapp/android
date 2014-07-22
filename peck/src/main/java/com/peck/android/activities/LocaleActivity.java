@@ -23,12 +23,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
+import com.peck.android.network.PeckAccountAuthenticator;
 
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -40,10 +42,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     public static final long LOCATION_TIMEOUT = 6000;
 
     public static final String AUTHORITY = "com.peck.android.provider.all";
-    public static final String ACCOUNT_TYPE = "peckapp.com";
-    public static final String ACCOUNT = "dummy";
-
-    private Account account = new Account(ACCOUNT, ACCOUNT_TYPE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,18 +55,20 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             }
         });
 
-        if (((AccountManager)getSystemService(ACCOUNT_SERVICE)).addAccountExplicitly(account, null, null)) {
-            Log.v(getClass().getSimpleName(), "account added");
-        } else {
-            Log.e(getClass().getSimpleName(), "account wasn't created.");
+        if (PeckApp.getActiveAccount() == null) {
+            Account account = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+            if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
+                PeckApp.setActiveAccount(account);
+                getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, PeckAccountAuthenticator.TEMPORARY_USER).apply();
+            } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
         }
 
-        ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), AUTHORITY, true);
 
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(account, AUTHORITY, bundle);
+        ContentResolver.requestSync(PeckApp.getActiveAccount(), AUTHORITY, bundle);
 
     }
 
@@ -140,9 +140,14 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         }
     }
 
+
+
+
+
     private void loadLocales() {
         NetworkInfo info = ((ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnectedOrConnecting()) {
+
             final TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
             tv.setVisibility(View.VISIBLE);
             tv.setText(R.string.pb_loc);

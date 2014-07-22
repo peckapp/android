@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.peck.android.R;
-import com.peck.android.listeners.ImageGetterListener;
+import com.peck.android.listeners.ImagePickerListener;
 
 import java.io.FileNotFoundException;
 
@@ -26,7 +26,7 @@ public class PhotoPost extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.pst_photo, container, false);
-        view.findViewById(R.id.bt_photo_select).setOnClickListener(new ImageGetterListener(this));
+        view.findViewById(R.id.bt_photo_select).setOnClickListener(new ImagePickerListener(this));
         return view;
     }
 
@@ -36,7 +36,7 @@ public class PhotoPost extends Fragment {
         switch (resultCode) {
             case Activity.RESULT_OK:
                 switch (requestCode) {
-                    case ImageGetterListener.REQUEST_CODE:
+                    case ImagePickerListener.REQUEST_CODE:
                         try {
                             Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(data.getData()));
                             Log.d("tag", "i have a bitmap");

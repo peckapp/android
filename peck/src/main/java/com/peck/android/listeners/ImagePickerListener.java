@@ -8,13 +8,13 @@ import android.view.View;
 /**
  * Created by mammothbane on 7/7/2014.
  */
-public class ImageGetterListener implements View.OnClickListener {
+public class ImagePickerListener implements View.OnClickListener {
     public final static int REQUEST_CODE = 5;
 
     @NonNull
     private Fragment fragment;
 
-    public ImageGetterListener(Fragment fragment) {
+    public ImagePickerListener(Fragment fragment) {
         this.fragment = fragment;
     }
 

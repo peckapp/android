@@ -1,16 +1,20 @@
 package com.peck.android.network;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
 
-import org.json.JSONException;
-
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 
@@ -85,9 +89,30 @@ public class JsonUtils {
         return object;
     }
 
-    public static JsonObject wrapJson(Class tClass, JsonObject object) throws JSONException {
-        JsonObject wrapper = new JsonObject();
-        wrapper.add(PeckApp.getJsonHeader(tClass, false), object);
-        return wrapper;
+    /**
+     * blocking method to add authentication to a json object
+     *
+     * @param object the object
+     * @param account the account to authenticate with
+     * @return the authenticated object
+     */
+    public static JsonObject auth(String objHeader, JsonObject object, Account account) throws IOException, OperationCanceledException, AuthenticatorException {
+        AccountManager accountManager = AccountManager.get(PeckApp.getContext());
+        String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
+        String authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
+
+        if (BuildConfig.DEBUG && apiKey == null) { throw new IllegalArgumentException("API key can't be null"); }
+
+        JsonObject ret = new JsonObject();
+
+        JsonObject auth = new JsonObject();
+        auth.addProperty("authentication_token", authToken);
+        auth.addProperty("api_key", apiKey);
+
+        ret.add("authentication", auth);
+        if (object != null && objHeader != null) ret.add(objHeader, object);
+
+        return ret;
     }
+
 }
