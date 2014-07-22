@@ -22,8 +22,8 @@ import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
-import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
+import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 
 import java.util.ArrayList;
@@ -48,8 +48,8 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
-        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
-                .withBindings(new String[]{Event.TITLE}, new int[]{R.id.tv_title}).build();
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(SimpleEvent.class)).build(), R.layout.lvitem_explore)
+                .withBindings(new String[]{SimpleEvent.TITLE}, new int[]{R.id.tv_title}).build();
         buttons.put(R.id.bt_explore, feed);
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
@@ -121,8 +121,8 @@ public class FeedActivity extends PeckActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
-        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{Event.TITLE, Event.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(SimpleEvent.class)).build(), R.layout.lvitem_event)
+                .withBindings(new String[]{SimpleEvent.TITLE, SimpleEvent.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
         if (!checkPlayServices()) {

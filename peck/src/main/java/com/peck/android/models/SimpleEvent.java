@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.Header;
+import com.peck.android.annotations.Table;
 
 import java.util.ArrayList;
 
@@ -13,7 +14,8 @@ import java.util.ArrayList;
  * Created by mammothbane on 5/28/2014.
  */
 @Header(plural = "simple_events", singular = "simple_event")
-public class Event extends DBOperable {
+@Table("events")
+public class SimpleEvent extends DBOperable {
     public static final transient String START_DATE = "start_date";
     public static final transient String END_DATE = "end_date";
     public static final transient String TITLE = "title";

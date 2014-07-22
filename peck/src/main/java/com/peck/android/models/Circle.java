@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.Header;
+import com.peck.android.annotations.Table;
 
 import java.util.ArrayList;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
  */
 
 @Header(plural = "circles", singular = "circle")
+@Table("circles")
 public class Circle extends DBOperable {
     public static final transient String MEMBERS = "circle_members";
     public static final transient String NAME = "circle_name";

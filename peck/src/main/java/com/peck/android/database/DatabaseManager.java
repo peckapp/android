@@ -7,9 +7,9 @@ import android.util.Log;
 import com.peck.android.PeckApp;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
-import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
+import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class DatabaseManager {
     private static ArrayList<Class> dbOperables = new ArrayList<Class>();
 
     static {
-        dbOperables.add(Event.class);
+        dbOperables.add(SimpleEvent.class);
         dbOperables.add(Locale.class);
         dbOperables.add(Peck.class);
         dbOperables.add(Circle.class);

@@ -16,9 +16,9 @@ import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.PeckSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
-import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
+import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 import com.squareup.picasso.Picasso;
 
@@ -37,7 +37,7 @@ public class PeckApp extends Application implements Singleton{
         return AppContext.mContext;
     }
 
-    private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class };
+    private static final Class[] MODELS = { Circle.class, SimpleEvent.class, Locale.class, Peck.class, Comment.class, User.class };
 
     public static Class[] getModelArray() {
         return MODELS;
