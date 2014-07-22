@@ -7,12 +7,10 @@ import android.util.Log;
 import com.peck.android.PeckApp;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
+import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
-import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
-
-import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 6/10/2014.
@@ -22,18 +20,8 @@ public class DatabaseManager {
     private static final int version = 1;
     private static SQLiteDatabase database;
     private static SQLiteOpenHelper openHelper;
-    private static int openCount = 0;
 
-    private static ArrayList<Class> dbOperables = new ArrayList<Class>();
-
-    static {
-        dbOperables.add(SimpleEvent.class);
-        dbOperables.add(Locale.class);
-        dbOperables.add(Peck.class);
-        dbOperables.add(Circle.class);
-        dbOperables.add(User.class);
-        dbOperables.add(Comment.class);
-    }
+    private static Class[] dbOperables = new Class[] { Event.class, Locale.class, Peck.class, Circle.class, User.class, Comment.class };
 
     public static String getDbName() {
         return PeckApp.Constants.Database.DATABASE_NAME;

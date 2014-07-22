@@ -1,4 +1,4 @@
-package com.peck.android;
+package com.peck.android.database;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -8,8 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import com.peck.android.database.DBUtils;
-import com.peck.android.database.DatabaseManager;
+import com.peck.android.PeckApp;
 import com.peck.android.models.DBOperable;
 
 import org.apache.commons.lang3.ArrayUtils;

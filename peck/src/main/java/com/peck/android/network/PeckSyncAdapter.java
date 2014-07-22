@@ -23,7 +23,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
-import com.peck.android.json.JsonUtils;
 import com.peck.android.models.DBOperable;
 
 import org.apache.commons.lang3.StringUtils;

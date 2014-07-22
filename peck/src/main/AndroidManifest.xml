@@ -83,7 +83,7 @@
         <provider
             android:exported="false"
             android:authorities="com.peck.android.provider.all"
-            android:name=".InternalContentProvider"
+            android:name=".database.InternalContentProvider"
             android:multiprocess="false"
             android:syncable="true"
             />

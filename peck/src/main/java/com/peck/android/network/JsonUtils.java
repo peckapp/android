@@ -1,4 +1,4 @@
-package com.peck.android.json;
+package com.peck.android.network;
 
 import android.content.ContentValues;
 import android.database.Cursor;
