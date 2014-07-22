@@ -93,7 +93,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
         JsonObject object = get(PeckApp.buildEndpointURL(tClass));
 
-        HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>();
+        HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = PeckApp.buildLocalUri(tClass);
 
         JsonArray array = object.getAsJsonArray(PeckApp.getJsonHeader(tClass, true));
@@ -109,7 +109,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numEntries++;
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
-            if (match == null) { //if the incoming data doesn't contain the item, delete it
+            if (match == null) { //if the incoming data doesn't contain the item
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
@@ -126,24 +126,23 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 incoming.remove(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
-                    if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) {
+                    if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))); //delete the object
-                    } else {
-                        svUpdated++;
+                        delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))); //delete it from the server
+                    } else { //if it hasn't been
+                        svUpdated++; //patch it
                         patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.wrapJson(tClass, JsonUtils.cursorToJson(cursor)));
-                    }//patch the object
+                    }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(DBOperable.DELETED, false);
                         client.update(uri.buildUpon().appendPath(Integer.toString(
-                                cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build(), contentValues, null, null);
-                        syncResult.stats.numDeletes++;
-                    } else {
-                        syncResult.stats.numUpdates++;
+                                cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build(), contentValues, null, null); //run an update immediately to unflag for deletion
                     }
 
+                    //update our item
+                    syncResult.stats.numUpdates++;
                     batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
                             appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
                             .withValues(JsonUtils.jsonToContentValues(match, tClass))
@@ -151,14 +150,14 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
                 } else {
-                    syncResult.stats.numSkippedEntries++;
+                    syncResult.stats.numSkippedEntries++; //if it's the same age as the server's, do nothing.
                 }
             }
         }
 
         cursor.close();
 
-        for (JsonObject json : incoming.values()) {
+        for (JsonObject json : incoming.values()) { //add all the items that weren't matched to our database
             batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json, tClass)).build());
             syncResult.stats.numInserts++;
         }
