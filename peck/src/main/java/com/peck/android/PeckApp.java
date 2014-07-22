@@ -45,6 +45,7 @@ public class PeckApp extends Application implements Singleton{
     private static final Class[] MODELS = { Circle.class, SimpleEvent.class, AthleticEvent.class, Locale.class, Peck.class, Comment.class, User.class };
 
     public static void setActiveAccount(Account account) {
+        getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, account.name).apply();
         PeckApp.account = account;
     }
 
@@ -53,6 +54,7 @@ public class PeckApp extends Application implements Singleton{
         Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
         if (accounts.length == 1) {
             account = accounts[0];
+            return account;
         } else {
             String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
             if (name != null) for (Account acct : accounts) {

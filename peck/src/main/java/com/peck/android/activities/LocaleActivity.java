@@ -19,10 +19,12 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
+import com.google.gson.JsonObject;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
@@ -30,7 +32,13 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
+import com.peck.android.models.User;
 import com.peck.android.network.PeckAccountAuthenticator;
+import com.peck.android.network.ServerCommunicator;
+
+import org.json.JSONException;
+
+import java.util.concurrent.ExecutionException;
 
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -59,7 +67,26 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             Account account = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
             if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
                 PeckApp.setActiveAccount(account);
-                getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, PeckAccountAuthenticator.TEMPORARY_USER).apply();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        JsonObject object = new JsonObject();
+                        object.add();
+                        try {
+                            final JsonObject ret = ServerCommunicator.post(PeckApp.buildEndpointURL(User.class), object);
+                            throw new
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (VolleyError volleyError) {
+                            volleyError.printStackTrace();
+                        }
+                        return null;
+                    }
+                }.execute();
             } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
         }
 

@@ -59,6 +59,11 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
+    public void createAccount(Account account) {
+
+    }
+
+
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String s, Bundle bundle) throws NetworkErrorException {
         AccountManager actMgr = AccountManager.get(context);

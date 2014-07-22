@@ -182,12 +182,11 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void handleException(Exception e, SyncResult syncResult, String authToken) {
-        //todo: handle these
         Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync: " + e.getClass().getSimpleName());
         if (e instanceof IOException) {
             syncResult.stats.numIoExceptions++;
-        } else if (e instanceof VolleyError) {
-            if (e instanceof AuthFailureError) AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
+        } else if (e instanceof VolleyError || e.getCause() != null && e.getCause() instanceof VolleyError) {
+            if (e instanceof AuthFailureError || e.getCause() instanceof AuthFailureError) AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
             syncResult.stats.numAuthExceptions++;
         } else if (e instanceof AuthenticatorException) {
             syncResult.stats.numAuthExceptions++;
