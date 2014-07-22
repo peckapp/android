@@ -1,11 +1,13 @@
 package com.peck.android.database;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
+import com.peck.android.annotations.Table;
 import com.peck.android.models.DBOperable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,8 +30,10 @@ public class DBUtils {
         return "create table " + getTableName(tClass) + " (" + StringUtils.join(fieldToCreatorString(tClass), DELIM) + DELIM + "unique (" + DBOperable.SV_ID + ") on conflict replace);";
     }
 
+    @Nullable
     public static <T extends DBOperable> String getTableName(Class<T> tClass) {
-        return "tbl_" + tClass.getSimpleName().toLowerCase();
+        Table table = tClass.getAnnotation(Table.class);
+        return (table != null) ? table.value() : null;
     }
 
     public static String getSerializedFieldName(Field field) {
