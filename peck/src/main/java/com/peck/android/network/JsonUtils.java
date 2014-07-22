@@ -6,6 +6,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -13,6 +14,9 @@ import com.google.gson.JsonParser;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -111,6 +115,10 @@ public class JsonUtils {
 
         ret.add("authentication", auth);
         if (object != null && objHeader != null) ret.add(objHeader, object);
+
+        try {
+            Log.d(JsonUtils.class.getSimpleName(), new JSONObject(ret.toString()).toString(4));
+        } catch (JSONException e) {}
 
         return ret;
     }

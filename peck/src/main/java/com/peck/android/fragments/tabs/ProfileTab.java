@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.peck.android.R;
-import com.peck.android.interfaces.Callback;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.views.PeckAuthButton;
 
@@ -28,9 +27,7 @@ public class ProfileTab extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionHandler.SessionStatusCallback(new Callback() {
-            @Override
-            public void callBack(Object obj) {}}));
+        lifecycleHelper = new UiLifecycleHelper(getActivity(), new FacebookSessionHandler.SessionStatusCallback());
 
         lifecycleHelper.onCreate(savedInstanceState);
 

@@ -15,7 +15,7 @@ import com.crashlytics.android.Crashlytics;
 import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.PeckSessionHandler;
+import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.AthleticEvent;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
@@ -118,8 +118,7 @@ public class PeckApp extends Application implements Singleton{
             Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");
         }
 
-        PeckSessionHandler.init();
-
+        FacebookSessionHandler.init();
     }
 
 

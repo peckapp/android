@@ -47,13 +47,9 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         contentResolver = context.getContentResolver();
     }
 
-    public PeckSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
-        super(context, autoInitialize, allowParallelSyncs);
-        contentResolver = context.getContentResolver();
-    }
-
     @Override
     public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient client, SyncResult syncResult) {
+        Log.v(PeckSyncAdapter.class.getSimpleName(), "syncing");
         Class clss;
 
         String s = bundle.getString(SYNC_TYPE);
@@ -92,7 +88,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass));
+        JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(null, null, account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = PeckApp.buildLocalUri(tClass);
@@ -183,11 +179,12 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static void handleException(Exception e, SyncResult syncResult, String authToken) {
         Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync: " + e.getClass().getSimpleName());
-        if (e instanceof IOException) {
-            syncResult.stats.numIoExceptions++;
-        } else if (e instanceof VolleyError || e.getCause() != null && e.getCause() instanceof VolleyError) {
-            if (e instanceof AuthFailureError || e.getCause() instanceof AuthFailureError) AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
+        if (e instanceof VolleyError || e.getCause() != null && e.getCause() instanceof VolleyError) {
+            if (e instanceof AuthFailureError || e.getCause() instanceof AuthFailureError)
+                AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
             syncResult.stats.numAuthExceptions++;
+        } else if (e instanceof IOException) {
+            syncResult.stats.numIoExceptions++;
         } else if (e instanceof AuthenticatorException) {
             syncResult.stats.numAuthExceptions++;
         } else if (e instanceof JSONException) {

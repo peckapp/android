@@ -1,6 +1,5 @@
 package com.peck.android.managers;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,37 +18,20 @@ import com.peck.android.interfaces.Singleton;
 public class FacebookSessionHandler implements Singleton {
 
     private final static String TAG = "FacebookSessionManager";
-
+    private FacebookSessionHandler() {}
     private static Session session;
-    private static Context context;
-    private static GraphUser user;
-
-    private static AsyncTask<Void, Void, Void> fbInit = new AsyncTask<Void, Void, Void>() {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Log.i(TAG, "initializing");
-            session = Session.openActiveSessionFromCache(context);
-            Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
-            return null;
-        }
-    };
-
-    private static FacebookSessionHandler manager = new FacebookSessionHandler();
-
-    static {
-        context = PeckApp.getContext();
-    }
-
-    private FacebookSessionHandler() {
-    }
-
-    public FacebookSessionHandler getManager() {
-        return manager;
-    }
 
 
     public static void init() {
-        fbInit.execute();
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Log.i(TAG, "initializing");
+                session = Session.openActiveSessionFromCache(PeckApp.getContext());
+                Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
+                return null;
+            }
+        }.execute();
     }
 
     public static void getGraphUser(final Callback<GraphUser> callback) {
@@ -58,46 +40,22 @@ public class FacebookSessionHandler implements Singleton {
                     @Override
                     public void onCompleted(final GraphUser user, Response response) {
                         callback.callBack(user);
-                        FacebookSessionHandler.user = user;
                     }
                 }
         ).executeAsync();
     }
 
     public static class SessionStatusCallback implements Session.StatusCallback {
-        Callback callback;
-
-        public SessionStatusCallback(Callback callback) {
-            this.callback = callback;
-        }
-
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-
-
-        private void onSessionStateChange(Session session, SessionState state, Exception exception) {
             if (state.isOpened()) {
-                Log.i(((Object) this).getClass().getName(), "Logged in...");
+                Log.i(((Object) this).getClass().getName(), "logged in to facebook");
                 FacebookSessionHandler.session = session;
 
-                PeckSessionHandler.notifyFbStateChanged(true);
-
             } else if (state.isClosed()) {
-                Log.i(((Object)this).getClass().getName(), "Logged out...");
+                Log.i(((Object)this).getClass().getName(), "logged out of facebook");
                 FacebookSessionHandler.session = null;
-
-                PeckSessionHandler.notifyFbStateChanged(false);
-
             }
-
-            callback.callBack(null);
-
         }
-
     }
-
-
-
 }

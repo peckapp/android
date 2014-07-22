@@ -63,18 +63,23 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             }
         });
 
+        final AccountManager manager = AccountManager.get(this);
+
         if (PeckApp.getActiveAccount() == null) {
-            Account account = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
-            if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
+            final Account account = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+            if (manager.addAccountExplicitly(account, null, null)) {
                 PeckApp.setActiveAccount(account);
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... voids) {
                         JsonObject object = new JsonObject();
-                        object.add();
+                        object.addProperty(User.FIRST_NAME, (String) null);
+                        object.addProperty(User.LAST_NAME, (String)null);
+
                         try {
-                            final JsonObject ret = ServerCommunicator.post(PeckApp.buildEndpointURL(User.class), object);
-                            throw new
+                            final JsonObject ret = ServerCommunicator.post(PeckApp.buildEndpointURL(User.class), object).get("user").getAsJsonObject();
+                            manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
+                            manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -86,16 +91,20 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         }
                         return null;
                     }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), AUTHORITY, true);
+
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+                        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+                        ContentResolver.requestSync(PeckApp.getActiveAccount(), AUTHORITY, bundle);
+
+                    }
                 }.execute();
             } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
         }
-
-        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), AUTHORITY, true);
-
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(PeckApp.getActiveAccount(), AUTHORITY, bundle);
 
     }
 

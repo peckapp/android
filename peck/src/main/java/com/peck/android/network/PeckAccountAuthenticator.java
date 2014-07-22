@@ -8,6 +8,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.google.gson.JsonObject;
@@ -15,6 +16,7 @@ import com.peck.android.PeckApp;
 import com.peck.android.activities.LoginActivity;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
@@ -36,6 +38,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
     public static final String ACCOUNT_NAME = "acct_name";
 
     public static final String USER_ID = "userid";
+    public static final String EMAIL = "email";
     public static final String API_KEY = "api_key";
     public static final String INSTITUTION = "institution_id";
     public static final String TOKEN_TYPE = "peck_internal";
@@ -59,10 +62,6 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
-    public void createAccount(Account account) {
-
-    }
-
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String s, Bundle bundle) throws NetworkErrorException {
@@ -81,12 +80,13 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
         if (actMgr.getUserData(account, USER_ID) != null) {
             try {
                 JsonObject user = new JsonObject();
-                user.addProperty("email", (String) null);
-                user.addProperty("password", (String) null);
+                user.addProperty("email", actMgr.getUserData(account, EMAIL));
+                user.addProperty("password", actMgr.getPassword(account));
 
                 JsonObject auth = new JsonObject();
                 auth.addProperty("api_key", actMgr.getUserData(account, API_KEY));
                 auth.addProperty("user_id", actMgr.getUserData(account, USER_ID));
+                auth.addProperty("institution_id", 1);
 
                 JsonObject post = new JsonObject();
                 post.add("user", user);
@@ -94,13 +94,16 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
 
                 ret.putString(AccountManager.KEY_AUTHTOKEN, ServerCommunicator.post(PeckApp.Constants.Network.ENDPOINT + "access", post).get("user").getAsJsonObject().get("authentication_token").getAsString());
 
+                Log.e("Authenticator", new JSONObject(ret.toString()).toString(4));
+
                 return ret;
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
             } catch (VolleyError e) {
                 throw new NetworkErrorException(e);
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof VolleyError) throw new NetworkErrorException(e);
+                else e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }

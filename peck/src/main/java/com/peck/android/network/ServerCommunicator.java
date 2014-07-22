@@ -25,8 +25,8 @@ public class ServerCommunicator {
         return ((JsonObject)new JsonParser().parse(future.get().toString()));
     }
 
-    public static JsonObject get(String url) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return send(url, Request.Method.GET, null);
+    public static JsonObject get(String url, JsonObject auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
+        return send(url, Request.Method.GET, auth);
     }
 
     public static JsonObject post(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException, VolleyError {
@@ -37,8 +37,8 @@ public class ServerCommunicator {
         return send(url, Request.Method.PATCH, object);
     }
 
-    public static boolean delete(String url, JsonObject object) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        send(url, Request.Method.DELETE, null);
+    public static boolean delete(String url, JsonObject auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
+        send(url, Request.Method.DELETE, auth);
         //todo: what happens when we run a delete? how do we return?
         return true;
     }
