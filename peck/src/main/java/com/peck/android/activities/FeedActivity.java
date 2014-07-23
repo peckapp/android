@@ -3,8 +3,15 @@ package com.peck.android.activities;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -61,6 +68,18 @@ public class FeedActivity extends PeckActivity {
                             case R.id.iv_event:
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                 Log.v(FeedActivity.class.getSimpleName(), "url: " + ((url != null) ? url : "null"));
+                                if (Build.VERSION.SDK_INT >= 17) {
+                                    RenderScript renderScript = RenderScript.create(FeedActivity.this);
+                                    final Allocation input = Allocation.createFromBitmap(renderScript, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+                                    final Allocation output = Allocation.createTyped(renderScript, input.getType());
+                                    final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+                                    script.setRadius(10.f);
+                                    script.setInput(input);
+                                    script.forEach(output);
+                                    Bitmap ret = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+                                    output.copyTo(ret);
+                                    ((ImageView) view).setImageBitmap(ret);
+                                }
                                 if (url != null && url.length() > 0) {
                                     Picasso.with(FeedActivity.this)
                                             .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
@@ -76,79 +95,81 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_explore, feed);
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[] { Circle.NAME, Circle.MEMBERS }, new int[] { R.id.tv_title, R.id.hlv_users })
+                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS}, new int[]{R.id.tv_title, R.id.hlv_users})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                    @Override
-                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
-                        switch (view.getId()) {
-                            case R.id.hlv_users:
-                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
                                     @Override
-                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
-                                        ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
-                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
-                                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).appendPath("users").build(), null, null, null, null);
-                                        while (nested.moveToNext()) {
-                                            Map<String, Object> map = new HashMap<String, Object>();
-                                            map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
-                                            map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
-                                            ret.add(map);
-                                        }
-                                        nested.close();
-                                        return ret;
-                                    }
+                                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                                        switch (view.getId()) {
+                                            case R.id.hlv_users:
+                                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
+                                                    @Override
+                                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
+                                                        ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
 
-                                    @Override
-                                    protected void onPostExecute(final ArrayList<Map<String, Object>> list) {
-                                        if (list != null) {
-                                            final SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, list, R.layout.hlvitem_user,
-                                                    new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
-                                            ((HListView) view).setAdapter(simpleAdapter);
-                                            simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                                @Override
-                                                public boolean setViewValue(View view, Object o, String s) {
-                                                    switch (view.getId()) {
-                                                        case R.id.iv_event:
-                                                            Log.v(FeedActivity.class.getSimpleName(), "object: " + ((o != null) ? o.toString() : "null"));
-                                                            if (o != null && o.toString().length() > 0) {
-                                                                Picasso.with(FeedActivity.this)
-                                                                        .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                        .placeholder(R.drawable.ic_peck)
-                                                                        .into((RoundedImageView) view);
-                                                            }
-                                                            return true;
+                                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
+                                                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).appendPath("users").build(), null, null, null, null);
+
+                                                        while (nested.moveToNext()) {
+                                                            Map<String, Object> map = new HashMap<String, Object>();
+                                                            map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
+                                                            map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
+                                                            ret.add(map);
+                                                        }
+
+                                                        return ret;
                                                     }
 
-                                                    return false;
-                                                }
-                                            });
+                                                    @Override
+                                                    protected void onPostExecute(
+                                                            final ArrayList<Map<String, Object>> list) {
+                                                        if (list != null) {
+                                                            final SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, list, R.layout.hlvitem_user,
+                                                                    new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
+                                                            ((HListView) view).setAdapter(simpleAdapter);
+                                                            simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                                                                @Override
+                                                                public boolean setViewValue(View view, Object o, String s) {
+                                                                    switch (view.getId()) {
+                                                                        case R.id.iv_event:
+                                                                            Log.v(FeedActivity.class.getSimpleName(), "object: " + ((o != null) ? o.toString() : "null"));
+                                                                            if (o != null && o.toString().length() > 0) {
+                                                                                Picasso.with(FeedActivity.this)
+                                                                                        .load(PeckApp.Constants.Network.BASE_URL + o)
+                                                                                        .placeholder(R.drawable.ic_peck)
+                                                                                        .into((RoundedImageView) view);
+                                                                            }
+                                                                            return true;
+                                                                    }
+
+                                                                    return false;
+                                                                }
+                                                            });
+                                                        }
+                                                    }
+                                                }.execute();
+
+                                                return true;
+                                            default:
+                                                return false;
                                         }
                                     }
-                                }.execute();
+                                }).build();
 
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                })
-                .build();
-        buttons.put(R.id.bt_circles, feed);
+        buttons.put(R.id.bt_circles,feed);
 
-        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
+        feed=new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().
+                appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
                 .withBindings(new String[]{Peck.NAME, Peck.TEXT}, new int[]{R.id.tv_title, R.id.tv_text})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(View view, Cursor cursor, int i) {
-
                         switch (view.getId()) {
-
                         }
-
                         return false;
                     }
-                }).build();
-        buttons.put(R.id.bt_peck, feed);
+                }).
+                        build();
+        buttons.put(R.id.bt_peck,feed);
 
     }
 

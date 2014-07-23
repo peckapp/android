@@ -148,6 +148,7 @@ public class PeckApp extends Application implements Singleton{
 
     public void onCreate() {
 
+        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().penaltyLog().build());
         AppContext.init(this);
         Crashlytics.start(this);
 
