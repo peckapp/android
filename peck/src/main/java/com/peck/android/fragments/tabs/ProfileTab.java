@@ -76,25 +76,6 @@ public class ProfileTab extends Fragment {
         PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
-        /*User user = PeckSessionHandler.getUser();
-
-        view.findViewById(R.id.pb_prof_loading).setVisibility(View.VISIBLE);
-
-        if (user.getProfileUrl().length() > 0) {
-            Picasso.with(PeckApp.getContext())
-                    .load(user.getProfileUrl())
-                    .into(((RoundedImageView) view.findViewById(R.id.riv_user)));
-            view.findViewById(R.id.riv_user).setAlpha(1f);
-        }
-
-        view.findViewById(R.id.pb_prof_loading).setVisibility(View.INVISIBLE);
-        if (user.getFullName() == null) ((TextView) view.findViewById(R.id.tv_realname)).setText("Your Name");
-
-        else {
-            ((TextView) view.findViewById(R.id.tv_realname)).setText(user.getFullName());
-            view.findViewById(R.id.tv_realname).setAlpha(1f);
-        }*/
-
         return view;
     }
 

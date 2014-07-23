@@ -15,11 +15,10 @@ import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.database.DBUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -93,34 +92,37 @@ public class JsonUtils {
         return object;
     }
 
-    /**
-     * blocking method to add authentication to a json object
-     *
-     * @param object the object
-     * @param account the account to authenticate with
-     * @return the authenticated object
-     */
-    public static JsonObject auth(String objHeader, JsonObject object, Account account) throws IOException, OperationCanceledException, AuthenticatorException {
-        AccountManager accountManager = AccountManager.get(PeckApp.getContext());
-        String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
-        String authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
+    public static JsonObject wrapJson(String objHeader, JsonObject object) {
+        JsonObject ret = new JsonObject();
+        ret.add(objHeader, object);
+        return ret;
+    }
 
+    /**
+     * blocking method to build authentication parameters
+     *
+     * @param account the authenticating account
+     * @return the authentication map
+     */
+    public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException {
+        AccountManager accountManager = AccountManager.get(PeckApp.getContext());
+        Map<String, String> auth = new HashMap<String, String>();
+        String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
         if (BuildConfig.DEBUG && apiKey == null) { throw new IllegalArgumentException("API key can't be null"); }
 
-        JsonObject ret = new JsonObject();
+        String authToken = null;
+        if (!accountManager.getUserData(account, PeckAccountAuthenticator.IS_TEMP).equals("true")) {
+            authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
+        }
 
-        JsonObject auth = new JsonObject();
-        auth.addProperty("authentication_token", authToken);
-        auth.addProperty("api_key", apiKey);
+        if (authToken != null) auth.put("authentication_token", authToken);
+        auth.put("user_id", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
+        auth.put("institution_id", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+        auth.put("api_key", apiKey);
 
-        ret.add("authentication", auth);
-        if (object != null && objHeader != null) ret.add(objHeader, object);
+        Log.d(JsonUtils.class.getSimpleName(), auth.toString());
 
-        try {
-            Log.d(JsonUtils.class.getSimpleName(), new JSONObject(ret.toString()).toString(4));
-        } catch (JSONException e) {}
-
-        return ret;
+        return auth;
     }
 
 }

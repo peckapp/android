@@ -6,12 +6,15 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.JsonObject;
 import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
@@ -23,11 +26,17 @@ import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
 import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
+import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
+import com.peck.android.network.ServerCommunicator;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -41,6 +50,7 @@ public class PeckApp extends Application implements Singleton{
         return AppContext.mContext;
     }
     private static Account account;
+    public static final String AUTHORITY = "com.peck.android.provider.all";
 
     private static final Class[] MODELS = { Circle.class, SimpleEvent.class, AthleticEvent.class, Locale.class, Peck.class, Comment.class, User.class };
 
@@ -49,22 +59,51 @@ public class PeckApp extends Application implements Singleton{
         PeckApp.account = account;
     }
 
+    @NonNull
     public static Account getActiveAccount() {
         if (account != null) return account;
         Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
         if (accounts.length == 1) {
             account = accounts[0];
-            return account;
         } else {
             String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
             if (name != null) for (Account acct : accounts) {
                 if (acct.name.equals(name)) {
                     account = acct;
-                    return account;
                 }
             }
+
+            if (account == null) {
+                final AccountManager manager = AccountManager.get(getContext());
+                final Account acct = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+                if (manager.addAccountExplicitly(acct, null, null)) {
+                    account = acct;
+                    JsonObject object = new JsonObject();
+                    object.addProperty(User.FIRST_NAME, (String) null);
+                    object.addProperty(User.LAST_NAME, (String)null);
+
+                    try {
+                        final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
+                        manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
+                        manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
+                        manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
+
+                        manager.setUserData(account, PeckAccountAuthenticator.INSTITUTION, "1");
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (VolleyError volleyError) {
+                        volleyError.printStackTrace();
+                    }
+
+                } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
+            }
         }
-        return null;
+        return account;
     }
 
 
@@ -134,13 +173,12 @@ public class PeckApp extends Application implements Singleton{
             /**
              * API strings
              */
-            public final static String ENDPOINT = "http://thor.peckapp.com:3500/api/";
+            public final static String ENDPOINT = "http://loki.peckapp.com:3000/api/";
 
         }
 
         public final static class Preferences {
             public final static String USER_PREFS = "user preferences";
-            public final static String USER_ID = "persistent user id";
             public final static String LOCALE_ID = "persistent locale id";
         }
 

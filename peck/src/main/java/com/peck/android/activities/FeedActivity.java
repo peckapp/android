@@ -1,5 +1,6 @@
 package com.peck.android.activities;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -104,6 +105,9 @@ public class FeedActivity extends PeckActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_root);
+
+        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), PeckApp.AUTHORITY, true);
+
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
             FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){

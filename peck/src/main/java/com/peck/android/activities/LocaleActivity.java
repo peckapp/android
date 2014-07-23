@@ -1,7 +1,6 @@
 package com.peck.android.activities;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -19,26 +18,17 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
-import com.google.gson.JsonObject;
-import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
-import com.peck.android.models.User;
-import com.peck.android.network.PeckAccountAuthenticator;
-import com.peck.android.network.ServerCommunicator;
-
-import org.json.JSONException;
-
-import java.util.concurrent.ExecutionException;
+import com.peck.android.network.PeckSyncAdapter;
 
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -48,8 +38,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
 
     public static final long LOCATION_TIMEOUT = 6000;
-
-    public static final String AUTHORITY = "com.peck.android.provider.all";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,48 +51,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             }
         });
 
-        final AccountManager manager = AccountManager.get(this);
-
-        if (PeckApp.getActiveAccount() == null) {
-            final Account account = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
-            if (manager.addAccountExplicitly(account, null, null)) {
-                PeckApp.setActiveAccount(account);
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        JsonObject object = new JsonObject();
-                        object.addProperty(User.FIRST_NAME, (String) null);
-                        object.addProperty(User.LAST_NAME, (String)null);
-
-                        try {
-                            final JsonObject ret = ServerCommunicator.post(PeckApp.buildEndpointURL(User.class), object).get("user").getAsJsonObject();
-                            manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
-                            manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (VolleyError volleyError) {
-                            volleyError.printStackTrace();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), AUTHORITY, true);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-                        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-                        ContentResolver.requestSync(PeckApp.getActiveAccount(), AUTHORITY, bundle);
-
-                    }
-                }.execute();
-            } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
-        }
 
     }
 
@@ -124,6 +70,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
+
                 long started = System.currentTimeMillis();
                 while (location == null && System.currentTimeMillis() - started < LOCATION_TIMEOUT) {
                     try {
@@ -137,6 +84,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
             @Override
             protected void onPostExecute(Boolean bool) {
+
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.add(R.id.rl_loc_select, new Feed.Builder(PeckApp.buildLocalUri(Locale.class), R.layout.lvitem_locale)
                         .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
@@ -191,8 +139,11 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             findViewById(R.id.rl_network_error).setVisibility(View.GONE);
 
             new AsyncTask<Void, Void, Boolean>() {
+                private Account account;
                 @Override
                 protected Boolean doInBackground(Void... voids) {
+                    account = PeckApp.getActiveAccount();
+
                     long startTime = System.currentTimeMillis();
                     while (getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
                             new String[]{DBOperable.LOCAL_ID}, null, null, null).getCount() == 0 && System.currentTimeMillis() - startTime < PeckApp.Constants.Network.CONNECT_TIMEOUT) {
@@ -208,6 +159,12 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
                 @Override
                 protected void onPostExecute(Boolean ret) {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+                    bundle.putString(PeckSyncAdapter.SYNC_TYPE, "com.peck.android.models.Locale");
+                    ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
+
                     if (ret) {
                         findViewById(R.id.tv_progress).setVisibility(View.GONE);
                         findViewById(R.id.rl_locale).setVisibility(View.GONE);
