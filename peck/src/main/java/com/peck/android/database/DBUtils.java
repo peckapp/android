@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
-import com.peck.android.annotations.Table;
+import com.peck.android.annotations.UriPath;
 import com.peck.android.models.DBOperable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +32,8 @@ public class DBUtils {
 
     @Nullable
     public static <T extends DBOperable> String getTableName(Class<T> tClass) {
-        Table table = tClass.getAnnotation(Table.class);
-        return (table != null) ? table.value() : null;
+        UriPath uriPath = tClass.getAnnotation(UriPath.class);
+        return (uriPath != null) ? uriPath.value() : null;
     }
 
     public static String getSerializedFieldName(Field field) {

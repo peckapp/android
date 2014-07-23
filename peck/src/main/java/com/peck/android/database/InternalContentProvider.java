@@ -10,7 +10,10 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.peck.android.PeckApp;
+import com.peck.android.models.AthleticEvent;
 import com.peck.android.models.DBOperable;
+import com.peck.android.models.Event;
+import com.peck.android.models.SimpleEvent;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -33,6 +36,8 @@ public class InternalContentProvider extends ContentProvider {
             uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]), i);                          //operate on the whole list
             uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]) + "/#", PARTITION + i);      //operate on a model by local id
         }
+        URIs_ALL.put(1000, Event.class);
+        uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Event.class), 1000);
     }
 
 
@@ -57,7 +62,9 @@ public class InternalContentProvider extends ContentProvider {
 
         SQLiteDatabase database = DatabaseManager.openDB();
 
-        if (uriType < PARTITION) {
+        if (uriType == 1000) {
+            cursor = database.query(DBUtils.getTableName(SimpleEvent.class) + ", " + DBUtils.getTableName(AthleticEvent.class), projection, extendSelection(selection, DBOperable.DELETED + "IS NOT ?"), ArrayUtils.add() )
+        } else if (uriType < PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
         } else if (uriType >= PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.LOCAL_ID + " = ? and " +

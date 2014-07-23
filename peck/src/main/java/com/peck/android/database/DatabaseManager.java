@@ -5,11 +5,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.peck.android.PeckApp;
+import com.peck.android.models.AthleticEvent;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
-import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
+import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 
 /**
@@ -21,7 +22,7 @@ public class DatabaseManager {
     private static SQLiteDatabase database;
     private static SQLiteOpenHelper openHelper;
 
-    private static Class[] dbOperables = new Class[] { Event.class, Locale.class, Peck.class, Circle.class, User.class, Comment.class };
+    private static Class[] dbOperables = new Class[] { SimpleEvent.class, AthleticEvent.class, Locale.class, Peck.class, Circle.class, User.class, Comment.class };
 
     public static String getDbName() {
         return PeckApp.Constants.Database.DATABASE_NAME;

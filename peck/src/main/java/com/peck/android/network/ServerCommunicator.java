@@ -1,5 +1,7 @@
 package com.peck.android.network;
 
+import android.util.Log;
+
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -8,11 +10,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -22,25 +22,14 @@ import java.util.concurrent.ExecutionException;
 public class ServerCommunicator {
     private static JsonObject send(String url, int method, JsonObject data, final Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        String newUrl = String.format((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url + "?authentication=[%1:%2,%3:%4,%5:%6]",
+        String newUrl = ((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + String.format("?authentication[%s]=%s" +
+                        "&authentication[%s]=%s&authentication[%s]=%s",
                 "api_key", auth.get("api_key"),
                 "user_id", auth.get("user_id"),
                 "institution_id", auth.get("institution_id"));
 
-        StringBuilder sb = new StringBuilder(url);
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            builder.addParameter("authentication", );
-
-        } catch (URISyntaxException e) { e.printStackTrace(); }
-        if (sb.charAt(sb.length()-1) == '/') sb.deleteCharAt(sb.length() - 1);
-        sb.append("?");
-        for (String s : auth.keySet()) {
-            sb.append(s).append("=").append(auth.get(s)).append("&");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-
-        JsonObjectRequest request = new JsonObjectRequest(method, sb.toString(), (data != null) ? new JSONObject(data.toString()) : null, future, future);
+        Log.v("ServerCommunicator", newUrl);
+        JsonObjectRequest request = new JsonObjectRequest(method, newUrl, (data != null) ? new JSONObject(data.toString()) : null, future, future);
 
         PeckApp.getRequestQueue().add(request);
         return ((JsonObject)new JsonParser().parse(future.get().toString()));

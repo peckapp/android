@@ -3,13 +3,13 @@ package com.peck.android.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.Header;
-import com.peck.android.annotations.Table;
+import com.peck.android.annotations.UriPath;
 
 /**
  * Created by mammothbane on 6/11/2014.
  */
 @Header(plural = "institutions", singular = "institution")
-@Table("locales")
+@UriPath("locales")
 public class Locale extends DBOperable {
 
     public static final transient String NAME = "name";

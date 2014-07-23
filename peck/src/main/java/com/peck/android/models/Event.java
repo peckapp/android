@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
-import com.peck.android.annotations.Table;
+import com.peck.android.annotations.UriPath;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * Created by mammothbane on 7/22/2014.
  */
 
-@Table("events")
+@UriPath("events")
 public class Event extends DBOperable {
     public static final transient String START_DATE = "start_date";
     public static final transient String END_DATE = "end_date";

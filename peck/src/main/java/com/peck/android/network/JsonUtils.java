@@ -6,7 +6,6 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -119,8 +118,6 @@ public class JsonUtils {
         auth.put("user_id", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
         auth.put("institution_id", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
         auth.put("api_key", apiKey);
-
-        Log.d(JsonUtils.class.getSimpleName(), auth.toString());
 
         return auth;
     }

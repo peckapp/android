@@ -173,7 +173,7 @@ public class PeckApp extends Application implements Singleton{
             /**
              * API strings
              */
-            public final static String ENDPOINT = "http://loki.peckapp.com:3000/api/";
+            public final static String ENDPOINT = "http://loki.peckapp.com:3500/api/";
 
         }
 
