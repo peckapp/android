@@ -50,6 +50,7 @@ public class DatabaseManager {
             @Override
             public void onCreate(SQLiteDatabase sqLiteDatabase) {
                 for (Class i : dbOperables) sqLiteDatabase.execSQL(DBUtils.getDatabaseCreate(i));
+                sqLiteDatabase.execSQL("create view events select * from simple_events as simple, athletic_events as athletic");
             }
 
             @Override

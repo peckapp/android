@@ -21,6 +21,7 @@ import com.peck.android.models.User;
 import com.peck.android.network.JsonUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 
@@ -70,8 +71,7 @@ public class InternalContentProvider extends ContentProvider {
         SQLiteDatabase database = DatabaseManager.openDB();
 
         if (uriType == 1000) {
-            cursor = database.rawQuery("")
-
+            String query = "select " + StringUtils.join(projection, ", ") + " from events where " + selection + " CASE "
             cursor = database.query(DBUtils.getTableName(SimpleEvent.class) + ", " + DBUtils.getTableName(AthleticEvent.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
         } else if (uriType == 1001) {
             Cursor temp = database.query(DBUtils.getTableName(Circle.class), new String[] { DBOperable.LOCAL_ID, Circle.MEMBERS },
