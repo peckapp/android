@@ -13,9 +13,14 @@ import com.peck.android.annotations.UriPath;
 public class User extends DBOperable {
     public static final transient String FIRST_NAME = "first_name";
     public static final transient String LAST_NAME = "last_name";
-    public static final transient String USERNAME = "username";
+    public static final transient String EMAIL = "username";
     public static final transient String FACEBOOK_ID = "facebook_link";
     public static final transient String BIO = "blurb";
+    public static final transient String IMAGE_NAME = "image_file_name";
+
+    @Expose
+    @SerializedName(IMAGE_NAME)
+    private String imageName;
 
     @Expose
     @SerializedName(FIRST_NAME)
@@ -26,8 +31,8 @@ public class User extends DBOperable {
     private String lastName;
 
     @Expose
-    @SerializedName(USERNAME)
-    private String username;
+    @SerializedName(EMAIL)
+    private String email;
 
     @Expose
     @SerializedName(FACEBOOK_ID)

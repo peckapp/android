@@ -22,10 +22,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/pb_prof_loading"
-                android:layout_alignTop="@+id/riv_user"
-                android:layout_alignBottom="@+id/riv_user"
-                android:layout_alignRight="@+id/riv_user"
-                android:layout_alignLeft="@+id/riv_user"
+                android:layout_alignTop="@+id/iv_event"
+                android:layout_alignBottom="@+id/iv_event"
+                android:layout_alignRight="@+id/iv_event"
+                android:layout_alignLeft="@+id/iv_event"
                 android:visibility="invisible"/>
 
             <com.makeramen.RoundedImageView
@@ -33,7 +33,7 @@
                 app:oval="true"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:id="@+id/riv_user"
+                android:id="@+id/iv_event"
                 style="@style/riv_default"
                 android:alpha="@dimen/alpha_unauth" />
 

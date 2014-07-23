@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -58,6 +59,11 @@ public class PeckApp extends Application implements Singleton{
         PeckApp.account = account;
     }
 
+    @Nullable
+    public static Account peekActiveAccount() {
+        return account;
+    }
+
     @NonNull
     public static Account getActiveAccount() {
         if (account != null) return account;
@@ -71,36 +77,36 @@ public class PeckApp extends Application implements Singleton{
                     account = acct;
                 }
             }
+        }
+        if (account == null || AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) == null ||
+                AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) == null) {
+            final AccountManager manager = AccountManager.get(getContext());
+            final Account acct = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+            if (manager.addAccountExplicitly(acct, null, null)) {
+                account = acct;
+                JsonObject object = new JsonObject();
+                object.addProperty(User.FIRST_NAME, (String) null);
+                object.addProperty(User.LAST_NAME, (String)null);
 
-            if (account == null) {
-                final AccountManager manager = AccountManager.get(getContext());
-                final Account acct = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
-                if (manager.addAccountExplicitly(acct, null, null)) {
-                    account = acct;
-                    JsonObject object = new JsonObject();
-                    object.addProperty(User.FIRST_NAME, (String) null);
-                    object.addProperty(User.LAST_NAME, (String)null);
+                try {
+                    final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
+                    manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
+                    manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
+                    manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
 
-                    try {
-                        final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
-                        manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
-                        manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
-                        manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
+                    manager.setUserData(account, PeckAccountAuthenticator.INSTITUTION, "1");
 
-                        manager.setUserData(account, PeckAccountAuthenticator.INSTITUTION, "1");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (VolleyError volleyError) {
+                    volleyError.printStackTrace();
+                }
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (VolleyError volleyError) {
-                        volleyError.printStackTrace();
-                    }
-
-                } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
-            }
+            } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
         }
         return account;
     }
@@ -117,7 +123,7 @@ public class PeckApp extends Application implements Singleton{
     public static String buildEndpointURL(Class tClass) {
         Header header = (Header)tClass.getAnnotation(Header.class);
         if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        return Constants.Network.ENDPOINT + header.plural() + "/";
+        return Constants.Network.API_ENDPOINT + header.plural() + "/";
     }
 
     public static String getJsonHeader(Class tClass, boolean plural) {
@@ -145,11 +151,6 @@ public class PeckApp extends Application implements Singleton{
             Picasso.with(getContext()).setIndicatorsEnabled(true);
             Picasso.with(getContext()).setLoggingEnabled(true);
 
-            /*synchronized (DatabaseManager.class) {
-                DatabaseManager.closeDB();
-                getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
-            }
-*/
             SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
             edit.clear();
             edit.apply();
@@ -172,7 +173,8 @@ public class PeckApp extends Application implements Singleton{
             /**
              * API strings
              */
-            public final static String ENDPOINT = "http://loki.peckapp.com:3500/api/";
+            public final static String BASE_URL = "http://loki.peckapp.com:3500";
+            public final static String API_ENDPOINT = BASE_URL + "/api/";
 
         }
 

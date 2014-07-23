@@ -88,7 +88,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
                 user.addProperty("email", actMgr.getUserData(account, EMAIL));
                 user.addProperty("password", actMgr.getPassword(account));
 
-                ret.putString(AccountManager.KEY_AUTHTOKEN, ServerCommunicator.post(PeckApp.Constants.Network.ENDPOINT + "access", JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), user),
+                ret.putString(AccountManager.KEY_AUTHTOKEN, ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "access", JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), user),
                         JsonUtils.auth(account)).get("user").getAsJsonObject().get("authentication_token").getAsString());
 
                 Log.e("Authenticator", new JSONObject(ret.toString()).toString(4));

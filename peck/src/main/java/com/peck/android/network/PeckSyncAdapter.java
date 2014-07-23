@@ -198,7 +198,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.ENDPOINT + "simple_events", JsonUtils.auth(account));
+        JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.API_ENDPOINT + "simple_events", JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = PeckApp.buildLocalUri(Event.class);
@@ -220,7 +220,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    ServerCommunicator.post(PeckApp.Constants.Network.ENDPOINT + "simple_events", JsonUtils.wrapJson("simple_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "simple_events", JsonUtils.wrapJson("simple_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -235,11 +235,11 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        ServerCommunicator.delete(PeckApp.Constants.Network.ENDPOINT + "simple_events/" +
+                        ServerCommunicator.delete(PeckApp.Constants.Network.API_ENDPOINT + "simple_events/" +
                                 cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(account)); //delete it from the server
                     } else { //if it hasn't been
                         svUpdated++; //patch it
-                        ServerCommunicator.patch(PeckApp.Constants.Network.ENDPOINT + "simple_events/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
+                        ServerCommunicator.patch(PeckApp.Constants.Network.API_ENDPOINT + "simple_events/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
                                 JsonUtils.wrapJson("simple_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
@@ -282,7 +282,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svUpdated), 4) +
                 " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
-                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + "simpleEvent");
+                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + "simple");
 
         contentResolver.applyBatch(authority, batch);
         contentResolver.notifyChange(uri, null, false);
@@ -305,7 +305,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.ENDPOINT + "athletic_events", JsonUtils.auth(account));
+        JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.API_ENDPOINT + "athletic_events", JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = PeckApp.buildLocalUri(Event.class);
@@ -327,7 +327,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    ServerCommunicator.post(PeckApp.Constants.Network.ENDPOINT + "athletic_events", JsonUtils.wrapJson("athletic_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "athletic_events", JsonUtils.wrapJson("athletic_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -342,11 +342,11 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong()) { //our version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        ServerCommunicator.delete(PeckApp.Constants.Network.ENDPOINT + "athletic_events/" +
+                        ServerCommunicator.delete(PeckApp.Constants.Network.API_ENDPOINT + "athletic_events/" +
                                 cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(account)); //delete it from the server
                     } else { //if it hasn't been
                         svUpdated++; //patch it
-                        ServerCommunicator.patch(PeckApp.Constants.Network.ENDPOINT + "athletic_events/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
+                        ServerCommunicator.patch(PeckApp.Constants.Network.API_ENDPOINT + "athletic_events/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
                                 JsonUtils.wrapJson("athletic_event", JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
@@ -389,7 +389,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svUpdated), 4) +
                 " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
-                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + "athleticEvent");
+                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + "athletic");
 
         contentResolver.applyBatch(authority, batch);
         contentResolver.notifyChange(uri, null, false);
