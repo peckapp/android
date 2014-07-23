@@ -12,11 +12,8 @@ import android.util.SparseArray;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.peck.android.PeckApp;
-import com.peck.android.models.AthleticEvent;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
-import com.peck.android.models.Event;
-import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 import com.peck.android.network.JsonUtils;
 
@@ -44,8 +41,6 @@ public class InternalContentProvider extends ContentProvider {
             uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]), i);                          //operate on the whole list
             uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]) + "/#", PARTITION + i);      //operate on a model by local id
         }
-        URIs_ALL.put(1000, Event.class);
-        uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Event.class), 1000);
         uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Circle.class) + "/#/users", 1001);
     }
 
@@ -70,30 +65,24 @@ public class InternalContentProvider extends ContentProvider {
 
         SQLiteDatabase database = DatabaseManager.openDB();
 
-        if (uriType == 1000) {
-            String query = "select " + StringUtils.join(projection, ", ") + " from events where " + selection + " CASE "
-            cursor = database.query(DBUtils.getTableName(SimpleEvent.class) + ", " + DBUtils.getTableName(AthleticEvent.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
-        } else if (uriType == 1001) {
+        if (uriType == 1001) {
             Cursor temp = database.query(DBUtils.getTableName(Circle.class), new String[] { DBOperable.LOCAL_ID, Circle.MEMBERS },
                     DBOperable.LOCAL_ID + " = ?", new String[] { uri.getPathSegments().get(1) }, null, null, null);
             if (temp.moveToFirst()) {
-                ArrayList<String> ints = new Gson().fromJson(JsonUtils.cursorToJson(temp), new TypeToken<ArrayList<Integer>>() {}.getType());
+                ArrayList<Integer> ints = new Gson().fromJson(JsonUtils.cursorToJson(temp).getAsJsonArray(Circle.MEMBERS), new TypeToken<ArrayList<Integer>>() {
+                }.getType());
 
-                StringBuilder builder = new StringBuilder("(");
+                String s = null;
+                if (ints.size() > 0) s = "(" + StringUtils.join(ints, ",") + ")";
 
-                for (String s : ints) {
-                    builder.append(s).append(",");
-                }
-                builder.deleteCharAt(builder.length() - 1).append(")");
-
-                cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.LOCAL_ID + " IN ?"),
-                        ArrayUtils.addAll(selectionArgs, "0", builder.toString()), null, null, sortOrder);
+                cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.LOCAL_ID + ((s != null) ? (" IN " + s) : "")),
+                        ArrayUtils.addAll(selectionArgs, "0"), null, null, sortOrder);
             }
         } else if (uriType < PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
         } else if (uriType >= PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.LOCAL_ID + " = ? and " +
-                    DBOperable.DELETED + " IS NOT ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "0" ), null, null, sortOrder);
+                    DBOperable.DELETED + " IS NOT ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "0"), null, null, sortOrder);
         }
 
         if (cursor == null) throw new IllegalArgumentException();
@@ -111,8 +100,6 @@ public class InternalContentProvider extends ContentProvider {
         if (uriType >= 1000) throw new IllegalArgumentException("This uri should only be used for queries.");
 
         if (uriType < PARTITION) {
-            if (URIs_ALL.get(uriType).equals(SimpleEvent.class)) contentValues.put(Event.TYPE, Event.SIMPLE_EVENT);
-            else if (URIs_ALL.get(uriType).equals(AthleticEvent.class)) contentValues.put(Event.TYPE, Event.ATHLETIC_EVENT);
             insertId = DatabaseManager.openDB().insert(DBUtils.getTableName(URIs_ALL.get(uriType)), null, contentValues);
         } else throw new IllegalArgumentException("Uri may not specify a localId to insert.");
 
@@ -176,8 +163,8 @@ public class InternalContentProvider extends ContentProvider {
         if (uriType >= 1000) throw new IllegalArgumentException("This uri should only be used for queries.");
 
         if (uriType < PARTITION) {
-                SQLiteDatabase database = DatabaseManager.openDB();
-                updated = database.update(DBUtils.getTableName(URIs_ALL.get(uriType)), contentValues, selection, selectionArgs);
+            SQLiteDatabase database = DatabaseManager.openDB();
+            updated = database.update(DBUtils.getTableName(URIs_ALL.get(uriType)), contentValues, selection, selectionArgs);
         } else if (uriType >= PARTITION) {
             SQLiteDatabase database = DatabaseManager.openDB();
             updated = database.update(DBUtils.getTableName(URIs_ALL.get(uriType)), contentValues, extendSelection(selection, DBOperable.LOCAL_ID + " = ?"),

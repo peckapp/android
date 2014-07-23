@@ -50,8 +50,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 loadLocales();
             }
         });
-
-
     }
 
     @Override
@@ -107,7 +105,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         .orderedBy("dist asc, " + Locale.NAME)
                         .layout(R.layout.localeselectionfeed)
                         .build(), fragmentTag);
-                ft.commit();
+                ft.commitAllowingStateLoss();
                 loadLocales();
             }
         }.execute();

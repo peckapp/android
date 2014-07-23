@@ -107,7 +107,7 @@ public class JsonUtils {
         AccountManager accountManager = AccountManager.get(PeckApp.getContext());
         Map<String, String> auth = new HashMap<String, String>();
         String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
-        if (BuildConfig.DEBUG && apiKey == null) { throw new IllegalArgumentException("API key can't be null"); }
+        if (BuildConfig.DEBUG && apiKey == null) { throw new AuthenticatorException("API key can't be null"); }
 
         String authToken = null;
         if (!accountManager.getUserData(account, PeckAccountAuthenticator.IS_TEMP).equals("true")) {

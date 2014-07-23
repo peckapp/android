@@ -19,12 +19,11 @@ import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
-import com.peck.android.models.AthleticEvent;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Comment;
+import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.Peck;
-import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
@@ -52,7 +51,7 @@ public class PeckApp extends Application implements Singleton{
     private static Account account;
     public static final String AUTHORITY = "com.peck.android.provider.all";
 
-    private static final Class[] MODELS = { Circle.class, SimpleEvent.class, AthleticEvent.class, Locale.class, Peck.class, Comment.class, User.class };
+    private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class };
 
     public static void setActiveAccount(Account account) {
         getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, account.name).apply();

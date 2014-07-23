@@ -26,7 +26,6 @@ import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
-import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
 
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import it.sephiroth.android.library.widget.HListView;
-
 
 public class FeedActivity extends PeckActivity {
 
@@ -52,7 +50,7 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_profile, new ProfileTab());
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
-                .withBindings(new String[]{SimpleEvent.TITLE}, new int[]{R.id.tv_title}).build();
+                .withBindings(new String[]{Event.TITLE}, new int[]{R.id.tv_title}).build();
         buttons.put(R.id.bt_explore, feed);
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
@@ -66,8 +64,8 @@ public class FeedActivity extends PeckActivity {
                                     @Override
                                     protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
                                         ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
-                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles/" +
-                                                        cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)) + "/users").build(), null, null, null, null);
+                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
+                                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).appendPath("users").build(), null, null, null, null);
                                         while (nested.moveToNext()) {
                                             Map<String, Object> map = new HashMap<String, Object>();
                                             map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
@@ -109,6 +107,10 @@ public class FeedActivity extends PeckActivity {
         setContentView(R.layout.activity_feed_root);
 
         ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), PeckApp.AUTHORITY, true);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(PeckApp.getActiveAccount(), PeckApp.AUTHORITY, bundle);
 
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
@@ -128,7 +130,7 @@ public class FeedActivity extends PeckActivity {
         }
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{SimpleEvent.TITLE, SimpleEvent.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
+                .withBindings(new String[]{Event.TITLE, Event.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
         if (!checkPlayServices()) {
