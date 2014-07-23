@@ -22,10 +22,13 @@ public class Event extends DBOperable {
     public static final transient String IMAGE_URL = "image_url";
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_IDS = "user_ids";
+    public static final transient String TYPE = "type";
 
     public static final transient int ATHLETIC_EVENT = 1;
     public static final transient int SIMPLE_EVENT = 0;
 
+    @SerializedName("type")
+    @DBType("integer")
     int type;
 
 

@@ -9,13 +9,20 @@ import android.net.Uri;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.peck.android.PeckApp;
 import com.peck.android.models.AthleticEvent;
+import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.SimpleEvent;
+import com.peck.android.models.User;
+import com.peck.android.network.JsonUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 7/14/2014.
@@ -38,6 +45,7 @@ public class InternalContentProvider extends ContentProvider {
         }
         URIs_ALL.put(1000, Event.class);
         uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Event.class), 1000);
+        uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Circle.class) + "/#/users", 1001);
     }
 
 
@@ -57,13 +65,30 @@ public class InternalContentProvider extends ContentProvider {
     @Override
     public synchronized Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         int uriType = uriMatcher.match(uri);
-
         Cursor cursor = null;
 
         SQLiteDatabase database = DatabaseManager.openDB();
 
         if (uriType == 1000) {
-            cursor = database.query(DBUtils.getTableName(SimpleEvent.class) + ", " + DBUtils.getTableName(AthleticEvent.class), projection, extendSelection(selection, DBOperable.DELETED + "IS NOT ?"), ArrayUtils.add() )
+            cursor = database.rawQuery("")
+
+            cursor = database.query(DBUtils.getTableName(SimpleEvent.class) + ", " + DBUtils.getTableName(AthleticEvent.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
+        } else if (uriType == 1001) {
+            Cursor temp = database.query(DBUtils.getTableName(Circle.class), new String[] { DBOperable.LOCAL_ID, Circle.MEMBERS },
+                    DBOperable.LOCAL_ID + " = ?", new String[] { uri.getPathSegments().get(1) }, null, null, null);
+            if (temp.moveToFirst()) {
+                ArrayList<String> ints = new Gson().fromJson(JsonUtils.cursorToJson(temp), new TypeToken<ArrayList<Integer>>() {}.getType());
+
+                StringBuilder builder = new StringBuilder("(");
+
+                for (String s : ints) {
+                    builder.append(s).append(",");
+                }
+                builder.deleteCharAt(builder.length() - 1).append(")");
+
+                cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.LOCAL_ID + " IN ?"),
+                        ArrayUtils.addAll(selectionArgs, "0", builder.toString()), null, null, sortOrder);
+            }
         } else if (uriType < PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
         } else if (uriType >= PARTITION) {
@@ -83,7 +108,11 @@ public class InternalContentProvider extends ContentProvider {
         int uriType = uriMatcher.match(uri);
         long insertId = -1;
 
+        if (uriType >= 1000) throw new IllegalArgumentException("This uri should only be used for queries.");
+
         if (uriType < PARTITION) {
+            if (URIs_ALL.get(uriType).equals(SimpleEvent.class)) contentValues.put(Event.TYPE, Event.SIMPLE_EVENT);
+            else if (URIs_ALL.get(uriType).equals(AthleticEvent.class)) contentValues.put(Event.TYPE, Event.ATHLETIC_EVENT);
             insertId = DatabaseManager.openDB().insert(DBUtils.getTableName(URIs_ALL.get(uriType)), null, contentValues);
         } else throw new IllegalArgumentException("Uri may not specify a localId to insert.");
 
@@ -111,6 +140,8 @@ public class InternalContentProvider extends ContentProvider {
     public synchronized int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = uriMatcher.match(uri);
         int deleted = 0;
+
+        if (uriType >= 1000) throw new IllegalArgumentException("This uri should only be used for queries.");
 
         if (uriType < PARTITION) {
             if (selection == null) {
@@ -141,6 +172,8 @@ public class InternalContentProvider extends ContentProvider {
         Log.v(getClass().getSimpleName(), "Update: " + trimUri(uri) + ": " + contentValues);
         int uriType = uriMatcher.match(uri);
         int updated = 0;
+
+        if (uriType >= 1000) throw new IllegalArgumentException("This uri should only be used for queries.");
 
         if (uriType < PARTITION) {
                 SQLiteDatabase database = DatabaseManager.openDB();

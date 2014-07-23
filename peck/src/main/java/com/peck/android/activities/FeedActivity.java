@@ -23,6 +23,8 @@ import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
+import com.peck.android.models.DBOperable;
+import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.SimpleEvent;
 import com.peck.android.models.User;
@@ -49,7 +51,7 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
-        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(SimpleEvent.class)).build(), R.layout.lvitem_explore)
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
                 .withBindings(new String[]{SimpleEvent.TITLE}, new int[]{R.id.tv_title}).build();
         buttons.put(R.id.bt_explore, feed);
 
@@ -64,8 +66,8 @@ public class FeedActivity extends PeckActivity {
                                     @Override
                                     protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
                                         ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
-                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(User.class)).build(),
-                                                null, null, null, null);
+                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles/" +
+                                                        cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)) + "/users").build(), null, null, null, null);
                                         while (nested.moveToNext()) {
                                             Map<String, Object> map = new HashMap<String, Object>();
                                             map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
@@ -76,9 +78,9 @@ public class FeedActivity extends PeckActivity {
                                     }
 
                                     @Override
-                                    protected void onPostExecute(ArrayList<Map<String, Object>> contentValues) {
-                                        if (contentValues != null) {
-                                            SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, contentValues, R.layout.hlvitem_user,
+                                    protected void onPostExecute(ArrayList<Map<String, Object>> map) {
+                                        if (map != null) {
+                                            SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, map, R.layout.hlvitem_user,
                                                     new String[]{User.FIRST_NAME}, new int[]{R.id.tv_title});
                                             ((HListView)view).setAdapter(simpleAdapter);
                                         }
@@ -125,7 +127,7 @@ public class FeedActivity extends PeckActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
-        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(SimpleEvent.class)).build(), R.layout.lvitem_event)
+        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{SimpleEvent.TITLE, SimpleEvent.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
