@@ -115,15 +115,12 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getLong(PeckApp.Constants.Preferences.LOCALE_ID, 0) != 0) {
+        if (PeckApp.peekValidAccount() != null) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
             finish();
         }
     }
-
-
-
 
 
     private void loadLocales() {

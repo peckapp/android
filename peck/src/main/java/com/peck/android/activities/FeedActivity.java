@@ -199,7 +199,7 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-        if (getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getLong(PeckApp.Constants.Preferences.LOCALE_ID, 0) == 0) {
+        if (PeckApp.peekValidAccount() == null) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
             finish();

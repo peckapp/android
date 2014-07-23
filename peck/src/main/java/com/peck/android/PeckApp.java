@@ -60,30 +60,34 @@ public class PeckApp extends Application implements Singleton{
     }
 
     @Nullable
-    public static Account peekActiveAccount() {
-        return account;
+    public static Account peekValidAccount()
+    {
+        Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
+        if (accounts.length == 1) {
+            setActiveAccount(accounts[0]);
+        } else {
+            String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
+            if (name != null) for (Account acct : accounts) {
+                if (acct.name.equals(name)) {
+                    setActiveAccount(acct);
+                }
+            }
+        }
+        if (account != null && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null
+                && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) != null) return account;
+        else return null;
     }
 
     @NonNull
     public static Account getActiveAccount() {
         if (account != null) return account;
-        Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
-        if (accounts.length == 1) {
-            account = accounts[0];
-        } else {
-            String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
-            if (name != null) for (Account acct : accounts) {
-                if (acct.name.equals(name)) {
-                    account = acct;
-                }
-            }
-        }
+        if (peekValidAccount() != null) setActiveAccount(peekValidAccount());
         if (account == null || AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) == null ||
                 AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) == null) {
             final AccountManager manager = AccountManager.get(getContext());
             final Account acct = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
             if (manager.addAccountExplicitly(acct, null, null)) {
-                account = acct;
+                setActiveAccount(acct);
                 JsonObject object = new JsonObject();
                 object.addProperty(User.FIRST_NAME, (String) null);
                 object.addProperty(User.LAST_NAME, (String)null);
