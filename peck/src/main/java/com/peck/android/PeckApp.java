@@ -79,18 +79,6 @@ public class PeckApp extends Application implements Singleton{
 
     }
 
-    @Nullable
-    public static Account getActiveAccount() {
-        Account tmp = peekValidAccount();
-        if (tmp == null) {
-            tmp = createTempAccount();
-            if (tmp == null) return null;
-            else setActiveAccount(tmp);
-        }
-
-        return peekValidAccount();
-    }
-
     public static Account createTempAccount() {
         final AccountManager manager = AccountManager.get(getContext());
         Account tmp = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);

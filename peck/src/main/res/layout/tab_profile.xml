@@ -65,7 +65,6 @@
         <com.peck.android.views.PeckAuthButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/bt_peck_login"
             android:id="@+id/bt_peck_login"
             android:layout_marginTop="300dp"
             android:layout_gravity="center_horizontal" />

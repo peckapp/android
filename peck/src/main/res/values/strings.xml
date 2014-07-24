@@ -2,12 +2,12 @@
 <resources>
 
     <string name="app_name">Peck</string>
-    <string name="app_id">291944037642057</string> <!-- set this to get facebook to work -->
+    <string name="app_id">291944037642057</string> <!-- facebook app id -->
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="login">Login</string>
-    <string name="username">username</string>
+    <string name="email">email</string>
     <string name="password">password</string>
     <string name="bt_login">@string/login</string>
     <string name="bt_cancel">Cancel</string>

@@ -137,7 +137,12 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 private Account account;
                 @Override
                 protected Boolean doInBackground(Void... voids) {
-                    account = PeckApp.getActiveAccount();
+                    account = PeckApp.peekValidAccount();
+                    if (account == null) {
+                        account = PeckApp.createTempAccount();
+                        if (account == null) return false;
+                    }
+
 
                     long startTime = System.currentTimeMillis();
                     while (getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),

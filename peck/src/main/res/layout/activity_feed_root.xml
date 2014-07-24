@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="@dimen/bar_height"
         android:background="@color/main_purple"
         android:orientation="horizontal"
         android:id="@+id/ll_buttonbar"

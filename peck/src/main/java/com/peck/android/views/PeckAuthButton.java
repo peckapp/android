@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 
@@ -30,6 +31,14 @@ public class PeckAuthButton extends Button {
         super(context);
     }
 
+    public PeckAuthButton(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public PeckAuthButton(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+    }
+
     public void update() {
         String btnText;
         View.OnClickListener onClickListener;
@@ -40,6 +49,8 @@ public class PeckAuthButton extends Button {
             onClickListener = (new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    AccountManager.get(getContext()).addAccount(PeckAccountAuthenticator.ACCOUNT_TYPE, PeckAccountAuthenticator.TOKEN_TYPE, null, null,
+                            null, null, null);
                     Intent intent = new Intent(fragment.getActivity(), LoginActivity.class);
                     fragment.startActivity(intent);
                 }

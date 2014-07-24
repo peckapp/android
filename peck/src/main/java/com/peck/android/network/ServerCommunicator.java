@@ -22,11 +22,12 @@ import java.util.concurrent.ExecutionException;
 public class ServerCommunicator {
     private static JsonObject send(String url, int method, JsonObject data, final Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        String newUrl = ((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + String.format("?authentication[%s]=%s" +
-                        "&authentication[%s]=%s&authentication[%s]=%s",
+        String newUrl = ((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) +
+                String.format("?authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s",
                 "api_key", auth.get("api_key"),
                 "user_id", auth.get("user_id"),
-                "institution_id", auth.get("institution_id"));
+                "institution_id", auth.get("institution_id"),
+                "authentication_token", auth.get("authentication_token"));
 
         Log.v("ServerCommunicator", newUrl);
         JsonObjectRequest request = new JsonObjectRequest(method, newUrl, (data != null) ? new JSONObject(data.toString()) : null, future, future);
