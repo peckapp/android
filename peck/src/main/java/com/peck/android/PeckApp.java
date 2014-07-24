@@ -6,7 +6,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -81,16 +80,15 @@ public class PeckApp extends Application implements Singleton{
 
     }
 
-    @NonNull
+    @Nullable
     public static Account getActiveAccount() {
-        if (account != null) return account;
-        if (peekValidAccount() != null) setActiveAccount(peekValidAccount());
-        if (account == null || AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) == null ||
-                AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) == null) {
+        Account tmp = peekValidAccount();
+        if (tmp != null) return tmp;
+        else {
             final AccountManager manager = AccountManager.get(getContext());
-            final Account acct = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
-            if (manager.addAccountExplicitly(acct, null, null)) {
-                setActiveAccount(acct);
+            tmp = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+            if (manager.addAccountExplicitly(tmp, null, null)) {
+                setActiveAccount(tmp);
                 JsonObject object = new JsonObject();
                 object.addProperty(User.FIRST_NAME, (String) null);
                 object.addProperty(User.LAST_NAME, (String)null);
@@ -114,8 +112,11 @@ public class PeckApp extends Application implements Singleton{
                 }
 
             } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
+
+
         }
-        return account;
+
+        return peekValidAccount();
     }
 
 
@@ -140,7 +141,7 @@ public class PeckApp extends Application implements Singleton{
 
     public void onCreate() {
 
-        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().penaltyLog().build());
+        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         AppContext.init(this);
         Crashlytics.start(this);
 

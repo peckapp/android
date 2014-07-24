@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -90,63 +91,71 @@ public class FeedActivity extends PeckActivity {
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
                 .withBindings(new String[]{Circle.NAME, Circle.MEMBERS}, new int[]{R.id.tv_title, R.id.hlv_users})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                    final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
+                    @Override
+                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                        switch (view.getId()) {
+                            case R.id.hlv_users:
+                                final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
+                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
                                     @Override
-                                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
-                                        switch (view.getId()) {
-                                            case R.id.hlv_users:
-                                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
-                                                    @Override
-                                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
-                                                        ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
+                                        ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
 
-                                                        Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
-                                                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).appendPath("users").build(), null, null, null, null);
+                                        if (ret == null) {
+                                            Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
+                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{ User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID,
+                                                            "lower(" + User.FIRST_NAME + ") as lwr_index" }, null, null, "lwr_index");
+                                            ret = new ArrayList<Map<String, Object>>();
 
-                                                        while (nested.moveToNext()) {
-                                                            Map<String, Object> map = new HashMap<String, Object>();
-                                                            map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
-                                                            map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
-                                                            ret.add(map);
-                                                        }
+                                            while (nested.moveToNext()) {
+                                                Map<String, Object> map = new HashMap<String, Object>();
+                                                map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
+                                                map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
+                                                ret.add(map);
+                                            }
+                                            circleMembers.put(circle_id, ret);
+                                            nested.close();
+                                        }
 
-                                                        return ret;
+                                        return circleMembers.get(circle_id);
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(
+                                            final ArrayList<Map<String, Object>> list) {
+                                        if (list != null) {
+                                            final SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, list, R.layout.hlvitem_user,
+                                                    new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
+                                            ((HListView) view).setAdapter(simpleAdapter);
+                                            simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                                                @Override
+                                                public boolean setViewValue(View view, Object o, String s) {
+                                                    switch (view.getId()) {
+                                                        case R.id.iv_event:
+                                                            Log.v(FeedActivity.class.getSimpleName(), "object: " + ((o != null) ? o.toString() : "null"));
+                                                            if (o != null && o.toString().length() > 0) {
+                                                                Picasso.with(FeedActivity.this)
+                                                                        .load(PeckApp.Constants.Network.BASE_URL + o)
+                                                                        .placeholder(R.drawable.ic_peck)
+                                                                        .into((RoundedImageView) view);
+                                                            }
+                                                            return true;
                                                     }
 
-                                                    @Override
-                                                    protected void onPostExecute(
-                                                            final ArrayList<Map<String, Object>> list) {
-                                                        if (list != null) {
-                                                            final SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, list, R.layout.hlvitem_user,
-                                                                    new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
-                                                            ((HListView) view).setAdapter(simpleAdapter);
-                                                            simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                                                @Override
-                                                                public boolean setViewValue(View view, Object o, String s) {
-                                                                    switch (view.getId()) {
-                                                                        case R.id.iv_event:
-                                                                            Log.v(FeedActivity.class.getSimpleName(), "object: " + ((o != null) ? o.toString() : "null"));
-                                                                            if (o != null && o.toString().length() > 0) {
-                                                                                Picasso.with(FeedActivity.this)
-                                                                                        .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                                        .placeholder(R.drawable.ic_peck)
-                                                                                        .into((RoundedImageView) view);
-                                                                            }
-                                                                            return true;
-                                                                    }
-
-                                                                    return false;
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                }.execute();
-
-                                                return true;
-                                            default:
-                                                return false;
+                                                    return false;
+                                                }
+                                            });
                                         }
                                     }
-                                }).build();
+                                }.execute();
+
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                }).build();
 
         buttons.put(R.id.bt_circles,feed);
 

@@ -105,7 +105,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         .orderedBy("dist asc, " + Locale.NAME)
                         .layout(R.layout.localeselectionfeed)
                         .build(), fragmentTag);
-                ft.commitAllowingStateLoss();
+                ft.commit();
                 loadLocales();
             }
         }.execute();
