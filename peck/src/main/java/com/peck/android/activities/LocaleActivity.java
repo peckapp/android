@@ -1,10 +1,10 @@
 package com.peck.android.activities;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -28,6 +28,7 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
+import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.PeckSyncAdapter;
 
 
@@ -89,9 +90,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                     @Override
                                                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                        SharedPreferences.Editor editor = getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit();
-                                                        editor.putLong(PeckApp.Constants.Preferences.LOCALE_ID, adapterView.getItemIdAtPosition(i));
-                                                        editor.apply();
+                                                        AccountManager.get(LocaleActivity.this).setUserData(PeckApp.peekValidAccount(), PeckAccountAuthenticator.INSTITUTION, Long.toString(l));
 
                                                         Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
                                                         startActivity(intent);
@@ -115,7 +114,8 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (PeckApp.peekValidAccount() != null) {
+        Account account = PeckApp.peekValidAccount();
+        if (account != null && AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
             finish();

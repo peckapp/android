@@ -74,8 +74,7 @@ public class PeckApp extends Application implements Singleton{
             }
         }
 
-        if (account != null && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null
-                && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) != null) return account;
+        if (account != null && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) != null) return account;
         else return null;
 
     }
@@ -98,8 +97,6 @@ public class PeckApp extends Application implements Singleton{
                     manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
                     manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
                     manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
-
-                    manager.setUserData(account, PeckAccountAuthenticator.INSTITUTION, "1");
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();

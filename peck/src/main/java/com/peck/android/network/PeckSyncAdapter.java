@@ -97,6 +97,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
         JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(account));
 
+        /*JsonArray post = new JsonArray();
+        JsonArray patch = new JsonArray();*/
+
+
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = DBUtils.buildLocalUri(tClass);
 
@@ -117,7 +121,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
+
+                    //post.add(JsonUtils.cursorToJson(cursor));
                     ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;

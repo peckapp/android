@@ -1,5 +1,7 @@
 package com.peck.android.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -30,6 +32,7 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
+import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -184,12 +187,6 @@ public class FeedActivity extends PeckActivity {
         Picasso.with(this).setLoggingEnabled(true);
         Picasso.with(this).setIndicatorsEnabled(true);
 
-        ContentResolver.setSyncAutomatically(PeckApp.getActiveAccount(), PeckApp.AUTHORITY, true);
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(PeckApp.getActiveAccount(), PeckApp.AUTHORITY, bundle);
-
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
             FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
@@ -222,10 +219,17 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-        if (PeckApp.peekValidAccount() == null) {
+        Account account = PeckApp.peekValidAccount();
+        if (account == null || AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) == null) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
             finish();
+        } else {
+            ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, true);
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
         }
     }
 
