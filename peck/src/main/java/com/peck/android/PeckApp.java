@@ -81,7 +81,7 @@ public class PeckApp extends Application implements Singleton{
 
     public static Account createTempAccount() {
         final AccountManager manager = AccountManager.get(getContext());
-        Account tmp = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+        Account tmp = new Account(PeckAccountAuthenticator.getUserId(), PeckAccountAuthenticator.ACCOUNT_TYPE);
         if (manager.addAccountExplicitly(tmp, null, null)) {
             JsonObject object = new JsonObject();
             object.addProperty(User.FIRST_NAME, (String) null);
@@ -104,7 +104,7 @@ public class PeckApp extends Application implements Singleton{
                 volleyError.printStackTrace();
             }
 
-        } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
+        }
         return null;
     }
 

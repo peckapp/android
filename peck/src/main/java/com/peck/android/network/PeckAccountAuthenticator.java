@@ -37,7 +37,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
     }
 
     public static final String ACCOUNT_TYPE = "peckapp.com";
-    public static final String TEMPORARY_USER = "temporary user";
+    public static final String USER_ID_PREF = "user id preferences";
 
     public static final String ACCOUNT_NAME = "acct_name";
 
@@ -115,9 +115,19 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
+    public static synchronized String getUserId() {
+        incUserId();
+        return Integer.toString(PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(USER_ID_PREF, 0));
+    }
+
+    private static synchronized void incUserId() {
+        int id = PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getInt(USER_ID_PREF, 0);
+        PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putInt(USER_ID_PREF, id + 1).apply();
+    }
+
     @Override
     public String getAuthTokenLabel(String authTokenType) {
-        return null;
+        return TOKEN_TYPE;
     }
 
     @Override

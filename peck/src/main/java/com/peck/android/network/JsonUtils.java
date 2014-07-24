@@ -105,6 +105,7 @@ public class JsonUtils {
      * @return the authentication map
      */
     public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException {
+        if (account == null) return new HashMap<String, String>();
         AccountManager accountManager = AccountManager.get(PeckApp.getContext());
         Map<String, String> auth = new HashMap<String, String>();
         String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);

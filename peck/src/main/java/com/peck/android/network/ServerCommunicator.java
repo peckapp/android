@@ -27,7 +27,7 @@ public class ServerCommunicator {
                 "api_key", auth.get("api_key"),
                 "user_id", auth.get("user_id"),
                 "institution_id", auth.get("institution_id"),
-                "authentication_token", auth.get("authentication_token"));
+                "authentication_token", (auth.get("authentication_token") == null) ? "" : auth.get("authentication_token"));
 
         Log.v("ServerCommunicator", newUrl);
         JsonObjectRequest request = new JsonObjectRequest(method, newUrl, (data != null) ? new JSONObject(data.toString()) : null, future, future);
