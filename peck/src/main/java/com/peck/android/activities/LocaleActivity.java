@@ -84,7 +84,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             protected void onPostExecute(Boolean bool) {
 
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.add(R.id.rl_loc_select, new Feed.Builder(PeckApp.buildLocalUri(Locale.class), R.layout.lvitem_locale)
+                ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
                         .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
                         .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                     @Override

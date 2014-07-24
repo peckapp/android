@@ -17,7 +17,6 @@ import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.JsonObject;
 import com.peck.android.annotations.Header;
-import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
@@ -62,20 +61,24 @@ public class PeckApp extends Application implements Singleton{
     @Nullable
     public static Account peekValidAccount()
     {
-        Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
-        if (accounts.length == 1) {
-            setActiveAccount(accounts[0]);
-        } else {
-            String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
-            if (name != null) for (Account acct : accounts) {
-                if (acct.name.equals(name)) {
-                    setActiveAccount(acct);
+        if (account == null) {
+            Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
+            if (accounts.length == 1) {
+                setActiveAccount(accounts[0]);
+            } else {
+                String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
+                if (name != null) for (Account acct : accounts) {
+                    if (acct.name.equals(name)) {
+                        setActiveAccount(acct);
+                    }
                 }
             }
         }
+
         if (account != null && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null
                 && AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.API_KEY) != null) return account;
         else return null;
+
     }
 
     @NonNull
@@ -93,7 +96,7 @@ public class PeckApp extends Application implements Singleton{
                 object.addProperty(User.LAST_NAME, (String)null);
 
                 try {
-                    final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(PeckApp.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
+                    final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
                     manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
                     manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
                     manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
@@ -120,21 +123,10 @@ public class PeckApp extends Application implements Singleton{
         return MODELS;
     }
 
-    public static Uri buildLocalUri(Class tClass) {
-        return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(tClass)).build();
-    }
-
     public static String buildEndpointURL(Class tClass) {
         Header header = (Header)tClass.getAnnotation(Header.class);
         if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
         return Constants.Network.API_ENDPOINT + header.plural() + "/";
-    }
-
-    public static String getJsonHeader(Class tClass, boolean plural) {
-        Header header = (Header)tClass.getAnnotation(Header.class);
-        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        if (plural) return header.plural();
-        else return header.singular();
     }
 
 

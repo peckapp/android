@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
+import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
 
 import java.io.IOException;
@@ -122,4 +123,10 @@ public class JsonUtils {
         return auth;
     }
 
+    public static String getJsonHeader(Class tClass, boolean plural) {
+        Header header = (Header)tClass.getAnnotation(Header.class);
+        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
+        if (plural) return header.plural();
+        else return header.singular();
+    }
 }

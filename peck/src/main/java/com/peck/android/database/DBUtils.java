@@ -1,11 +1,13 @@
 package com.peck.android.database;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.PeckApp;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.UriPath;
 import com.peck.android.models.DBOperable;
@@ -79,4 +81,7 @@ public class DBUtils {
         return columnMap.get(tClass);
     }
 
+    public static Uri buildLocalUri(Class tClass) {
+        return PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(getTableName(tClass)).build();
+    }
 }

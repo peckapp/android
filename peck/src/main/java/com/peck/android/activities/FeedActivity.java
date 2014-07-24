@@ -3,15 +3,8 @@ package com.peck.android.activities;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -68,7 +61,7 @@ public class FeedActivity extends PeckActivity {
                             case R.id.iv_event:
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                 Log.v(FeedActivity.class.getSimpleName(), "url: " + ((url != null) ? url : "null"));
-                                if (Build.VERSION.SDK_INT >= 17) {
+                                /*if (Build.VERSION.SDK_INT >= 17) {
                                     RenderScript renderScript = RenderScript.create(FeedActivity.this);
                                     final Allocation input = Allocation.createFromBitmap(renderScript, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
                                     final Allocation output = Allocation.createTyped(renderScript, input.getType());
@@ -79,7 +72,7 @@ public class FeedActivity extends PeckActivity {
                                     Bitmap ret = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
                                     output.copyTo(ret);
                                     ((ImageView) view).setImageBitmap(ret);
-                                }
+                                }*/
                                 if (url != null && url.length() > 0) {
                                     Picasso.with(FeedActivity.this)
                                             .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))

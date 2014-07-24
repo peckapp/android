@@ -98,9 +98,9 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
-        Uri uri = PeckApp.buildLocalUri(tClass);
+        Uri uri = DBUtils.buildLocalUri(tClass);
 
-        JsonArray array = object.getAsJsonArray(PeckApp.getJsonHeader(tClass, true));
+        JsonArray array = object.getAsJsonArray(JsonUtils.getJsonHeader(tClass, true));
         for (int i = 0; i < array.size(); i++) {
             JsonObject temp = (JsonObject) array.get(i);
             incoming.put(temp.get(DBOperable.SV_ID).getAsInt(), temp);
@@ -117,7 +117,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID))) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(PeckApp.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -136,7 +136,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     } else { //if it hasn't been
                         svUpdated++; //patch it
                         ServerCommunicator.patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
-                                JsonUtils.wrapJson(PeckApp.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
+                                JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
@@ -201,7 +201,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.API_ENDPOINT + "simple_events", JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
-        Uri uri = PeckApp.buildLocalUri(Event.class);
+        Uri uri = DBUtils.buildLocalUri(Event.class);
 
         JsonArray array = object.getAsJsonArray("simple_events");
         for (int i = 0; i < array.size(); i++) {
@@ -308,7 +308,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.API_ENDPOINT + "athletic_events", JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
-        Uri uri = PeckApp.buildLocalUri(Event.class);
+        Uri uri = DBUtils.buildLocalUri(Event.class);
 
         JsonArray array = object.getAsJsonArray("athletic_events");
         for (int i = 0; i < array.size(); i++) {
