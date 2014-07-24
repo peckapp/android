@@ -82,38 +82,42 @@ public class PeckApp extends Application implements Singleton{
     @Nullable
     public static Account getActiveAccount() {
         Account tmp = peekValidAccount();
-        if (tmp != null) return tmp;
-        else {
-            final AccountManager manager = AccountManager.get(getContext());
-            tmp = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
-            if (manager.addAccountExplicitly(tmp, null, null)) {
-                setActiveAccount(tmp);
-                JsonObject object = new JsonObject();
-                object.addProperty(User.FIRST_NAME, (String) null);
-                object.addProperty(User.LAST_NAME, (String)null);
-
-                try {
-                    final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
-                    manager.setUserData(account, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
-                    manager.setUserData(account, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
-                    manager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "true");
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (VolleyError volleyError) {
-                    volleyError.printStackTrace();
-                }
-
-            } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
-
-
+        if (tmp == null) {
+            tmp = createTempAccount();
+            if (tmp == null) return null;
+            else setActiveAccount(tmp);
         }
 
         return peekValidAccount();
+    }
+
+    public static Account createTempAccount() {
+        final AccountManager manager = AccountManager.get(getContext());
+        Account tmp = new Account(PeckAccountAuthenticator.TEMPORARY_USER, PeckAccountAuthenticator.ACCOUNT_TYPE);
+        if (manager.addAccountExplicitly(tmp, null, null)) {
+            JsonObject object = new JsonObject();
+            object.addProperty(User.FIRST_NAME, (String) null);
+            object.addProperty(User.LAST_NAME, (String)null);
+
+            try {
+                final JsonObject ret = ServerCommunicator.post(buildEndpointURL(User.class), JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), new HashMap<String, String>()).get("user").getAsJsonObject();
+                manager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
+                manager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
+                manager.setUserData(tmp, PeckAccountAuthenticator.IS_TEMP, "true");
+                return tmp;
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (VolleyError volleyError) {
+                volleyError.printStackTrace();
+            }
+
+        } else if (BuildConfig.DEBUG) throw new IllegalStateException("account failed to create");
+        return null;
     }
 
 

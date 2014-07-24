@@ -66,6 +66,18 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             }
         }
 
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Account account = PeckApp.peekValidAccount();
+        if (account != null && AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null) {
+            Intent intent = new Intent(this, FeedActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... voids) {
@@ -108,18 +120,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 loadLocales();
             }
         }.execute();
-
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        Account account = PeckApp.peekValidAccount();
-        if (account != null && AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null) {
-            Intent intent = new Intent(this, FeedActivity.class);
-            startActivity(intent);
-            finish();
-        }
     }
 
 
