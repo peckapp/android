@@ -13,6 +13,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
@@ -93,8 +94,17 @@ public class FeedActivity extends PeckActivity {
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
                 .withBindings(new String[]{Circle.NAME, Circle.MEMBERS}, new int[]{R.id.tv_title, R.id.hlv_users})
+                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        view.setCamer
+
+
+                    }
+                })
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
+
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
                         switch (view.getId()) {
@@ -107,8 +117,8 @@ public class FeedActivity extends PeckActivity {
 
                                         if (ret == null) {
                                             Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
-                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{ User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID,
-                                                            "lower(" + User.FIRST_NAME + ") as lwr_index" }, null, null, "lwr_index");
+                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID,
+                                                    "lower(" + User.FIRST_NAME + ") as lwr_index"}, null, null, "lwr_index");
                                             ret = new ArrayList<Map<String, Object>>();
 
                                             while (nested.moveToNext()) {
