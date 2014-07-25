@@ -36,10 +36,10 @@ public class User extends DBOperable {
 
     @Expose
     @SerializedName(FACEBOOK_ID)
-    private String fbId = "";
+    private String fbId;
 
     @Expose
     @SerializedName(BIO)
-    private String bio = "";
+    private String bio;
 
 }

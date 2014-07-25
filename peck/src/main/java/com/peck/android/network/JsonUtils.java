@@ -116,10 +116,10 @@ public class JsonUtils {
             authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
         }
 
-        if (authToken != null) auth.put("authentication_token", authToken);
-        auth.put("user_id", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
-        auth.put("institution_id", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
-        auth.put("api_key", apiKey);
+        if (authToken != null) auth.put("authentication[authentication_token]", authToken);
+        auth.put("authentication[user_id]", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
+        auth.put("authentication[institution_id]", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+        auth.put("authentication[api_key]", apiKey);
 
         return auth;
     }

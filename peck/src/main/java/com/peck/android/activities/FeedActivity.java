@@ -116,18 +116,20 @@ public class FeedActivity extends PeckActivity {
 
                                         if (ret == null) {
                                             Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
-                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID,
+                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
                                                     "lower(" + User.FIRST_NAME + ") as lwr_index"}, null, null, "lwr_index");
                                             ret = new ArrayList<Map<String, Object>>();
 
-                                            while (nested.moveToNext()) {
-                                                Map<String, Object> map = new HashMap<String, Object>();
-                                                map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
-                                                map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
-                                                ret.add(map);
+                                            if (nested != null) {
+                                                while (nested.moveToNext()) {
+                                                    Map<String, Object> map = new HashMap<String, Object>();
+                                                    map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
+                                                    map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
+                                                    ret.add(map);
+                                                }
+                                                nested.close();
                                             }
                                             circleMembers.put(circle_id, ret);
-                                            nested.close();
                                         }
 
                                         return circleMembers.get(circle_id);

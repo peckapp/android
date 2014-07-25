@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -111,7 +112,14 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                                                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                                                             if (account != null) {
                                                                 PeckApp.setActiveAccount(account);
-                                                                AccountManager.get(LocaleActivity.this).setUserData(account, PeckAccountAuthenticator.INSTITUTION, Long.toString(l));
+                                                                Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
+                                                                        new String[] { DBOperable.SV_ID, DBOperable.LOCAL_ID }, DBOperable.LOCAL_ID + " = ?", new String[] {Long.toString(l)}, null);
+                                                                cursor.moveToFirst();
+                                                                String instid = Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
+
+                                                                AccountManager.get(LocaleActivity.this).setUserData(account, PeckAccountAuthenticator.INSTITUTION, instid);
+                                                                getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().
+                                                                        putString(PeckApp.Constants.Preferences.LOCALE_ID, instid).apply();
 
                                                                 PeckApp.logAccount(account);
 

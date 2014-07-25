@@ -49,10 +49,10 @@ public class PeckAuthButton extends Button {
             onClickListener = (new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    AccountManager.get(getContext()).addAccount(PeckAccountAuthenticator.ACCOUNT_TYPE, PeckAccountAuthenticator.TOKEN_TYPE, null, null,
-                            null, null, null);
-                    Intent intent = new Intent(fragment.getActivity(), LoginActivity.class);
-                    fragment.startActivity(intent);
+                        AccountManager.get(getContext()).addAccount(PeckAccountAuthenticator.ACCOUNT_TYPE, PeckAccountAuthenticator.TOKEN_TYPE, null, null,
+                                null, null, null);
+                        Intent intent = new Intent(fragment.getActivity(), LoginActivity.class);
+                        fragment.startActivity(intent);
                 }
             });
 
@@ -102,7 +102,12 @@ public class PeckAuthButton extends Button {
                             }).create().show();
                 }
             });
+
+
             fragment.getActivity().findViewById(R.id.bt_fb_link).setVisibility(View.VISIBLE);
+
+
+
             //TODO: probably going to want to release facebook session here too
 
         }

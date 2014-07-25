@@ -22,6 +22,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -84,12 +86,14 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
 
         if (actMgr.getUserData(account, USER_ID) != null) {
             try {
-                JsonObject user = new JsonObject();
-                user.addProperty("email", actMgr.getUserData(account, EMAIL));
-                user.addProperty("password", actMgr.getPassword(account));
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("user[password]", actMgr.getPassword(account));
+                map.put("user[email]", actMgr.getUserData(account, PeckAccountAuthenticator.EMAIL));
+                map.putAll(JsonUtils.auth(account));
 
-                ret.putString(AccountManager.KEY_AUTHTOKEN, ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), user),
-                        JsonUtils.auth(account)).get("user").getAsJsonObject().get("authentication_token").getAsString());
+                JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
+
+                ret.putString(AccountManager.KEY_AUTHTOKEN, jsonRet.get("authentication_token").getAsString());
 
                 Log.e("Authenticator", new JSONObject(ret.toString()).toString(4));
 

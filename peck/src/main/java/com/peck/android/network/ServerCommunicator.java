@@ -2,6 +2,7 @@ package com.peck.android.network;
 
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -21,37 +22,45 @@ import java.util.concurrent.ExecutionException;
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
-    private static JsonObject send(String url, int method, JsonObject data, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
+    private static JsonObject sendJson(String url, int method, JsonObject data, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
         if (auth == null) auth = new HashMap<String, String>();
-        String newUrl = ((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) +
-                String.format("?authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s",
-                "api_key", (auth.get("api_key") == null) ? "" : auth.get("api_key"),
-                "user_id", (auth.get("user_id") == null) ? "" : auth.get("user_id"),
-                "institution_id", (auth.get("institution_id") == null) ? "" : auth.get("institution_id"),
-                "authentication_token", (auth.get("authentication_token") == null) ? "" : auth.get("authentication_token"));
 
-        Log.v("ServerCommunicator", newUrl);
-        JsonObjectRequest request = new JsonObjectRequest(method, newUrl, (data != null) ? new JSONObject(data.toString()) : null, future, future);
+        StringBuilder stringBuilder = new StringBuilder(((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + "?");
+        for (String key : auth.keySet()) {
+            stringBuilder.append(key).append("=").append((auth.get(key) == null) ? "" : auth.get(key)).append("&");
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
+        Log.v("ServerCommunicator", stringBuilder.toString());
+        JsonObjectRequest request = new JsonObjectRequest(method, stringBuilder.toString(), (data != null) ? new JSONObject(data.toString()) : null, future, future) {
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("Content-Type", "application/json");
+                return map;
+            }
+        };
 
         PeckApp.getRequestQueue().add(request);
         return ((JsonObject)new JsonParser().parse(future.get().toString()));
     }
 
     public static JsonObject get(String url, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return send(url, Request.Method.GET, null, auth);
+        return sendJson(url, Request.Method.GET, null, auth);
     }
 
     public static JsonObject post(String url, JsonObject object, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return send(url, Request.Method.POST, object, auth);
+        return sendJson(url, Request.Method.POST, object, auth);
     }
 
     public static JsonObject patch(String url, JsonObject object, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return send(url, Request.Method.PATCH, object, auth);
+        return sendJson(url, Request.Method.PATCH, object, auth);
     }
 
     public static boolean delete(String url, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        send(url, Request.Method.DELETE, null,auth);
+        sendJson(url, Request.Method.DELETE, null, auth);
         //todo: what happens when we run a delete? how do we return?
         return true;
     }

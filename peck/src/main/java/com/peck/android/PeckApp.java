@@ -97,14 +97,11 @@ public class PeckApp extends Application implements Singleton{
     {
         if (account == null) {
             Account[] accounts = AccountManager.get(getContext()).getAccountsByType(PeckAccountAuthenticator.ACCOUNT_TYPE);
-            if (accounts.length == 1) {
-                setActiveAccount(accounts[0]);
-            } else {
-                String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
-                if (name != null) for (Account acct : accounts) {
-                    if (acct.name.equals(name)) {
-                        setActiveAccount(acct);
-                    }
+            String name = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckAccountAuthenticator.ACCOUNT_NAME, null);
+            if (name != null) for (Account acct : accounts) {
+                if (acct.name.equals(name)) {
+                    setActiveAccount(acct);
+                    break;
                 }
             }
         }
@@ -127,6 +124,7 @@ public class PeckApp extends Application implements Singleton{
         String temp = accountManager.getUserData(account, PeckAccountAuthenticator.IS_TEMP);
         String password = (accountManager.getPassword(account) == null) ? "null" : "set";
         String api_key = (accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) == null) ? "null" : "set";
+        String auth_token = (accountManager.peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE) == null) ? "null" : "set";
         Log.d("Account Log", String.format(" \nAccount %s \n" +
                 "type            %s\n" +
                 "user_id         %s\n" +
@@ -134,7 +132,8 @@ public class PeckApp extends Application implements Singleton{
                 "email           %s\n" +
                 "password        %s\n" +
                 "api_key         %s\n" +
-                "temp            %s", name, type, id, inst, email, password, api_key, temp));
+                "auth_token      %s\n" +
+                "temp            %s", name, type, id, inst, email, password, api_key, auth_token, temp));
     }
 
 

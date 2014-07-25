@@ -14,8 +14,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
@@ -71,7 +71,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 if (!EmailValidator.getInstance().isValid(email)) {
                     Toast.makeText(LoginActivity.this, "Invalid email", Toast.LENGTH_LONG).show();
                     return;
-                } else if (password.length() < 4 || password.length() > 20 || !password.equals(passwordConfirmation)) {
+                } else if (password.length() < 5 || password.length() > 20 || !password.equals(passwordConfirmation)) {
                     //todo: make this check more stringent
                     Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_LONG).show();
                     return;
@@ -94,9 +94,25 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         object.addProperty(User.FIRST_NAME, name[0]);
                         object.addProperty(User.LAST_NAME, name[1]);
 
+                        Log.e(LoginActivity.class.getSimpleName(), "test");
+
                         try {
-                            ServerCommunicator.patch(PeckApp.buildEndpointURL(User.class) + "/" + accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID),
-                                    JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(account));
+                            JsonObject ret = (ServerCommunicator.patch(PeckApp.buildEndpointURL(User.class) + "/" + accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID) + "/super_create",
+                                    JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(account)));
+
+                            JsonObject user = ((JsonObject) ret.get("user"));
+                            JsonArray errors = ((JsonArray) ret.get("errors"));
+
+                            if (errors.size() > 0) Log.e(LoginActivity.class.getSimpleName(), errors.toString());
+
+                            PeckApp.setActiveAccount(account);
+
+                            accountManager.setUserData(account, PeckAccountAuthenticator.EMAIL, user.get(User.EMAIL).getAsString());
+                            accountManager.setAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, user.get("authentication_token").getAsString());
+                            accountManager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "false");
+                            accountManager.setPassword(account, password);
+
+                            PeckApp.logAccount(account);
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -113,11 +129,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         } catch (VolleyError volleyError) {
                             volleyError.printStackTrace();
                         }
-
-                        accountManager.setUserData(account, PeckAccountAuthenticator.EMAIL, email);
-                        accountManager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "false");
-                        accountManager.setPassword(account, password);
-                        login(email, password);
 
                         return null;
                     }
@@ -169,84 +180,55 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             }
         }
 
-        new AsyncTask<Account, Void, Intent>() {
+        new AsyncTask<Account, Void, Void>() {
             @Override
-            protected Intent doInBackground(Account... accounts) {
+            protected Void doInBackground(Account... accounts) {
                 if (BuildConfig.DEBUG && accounts.length != 1) throw new IllegalArgumentException();
                 Account account = accounts[0];
-                Account authAccount = PeckApp.peekValidAccount();
-                if (authAccount == null) return null;
+                String inst = getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).getString(PeckApp.Constants.Preferences.LOCALE_ID, null);
 
                 if (account == null) {
-                    if (accountManager.getUserData(authAccount, PeckAccountAuthenticator.IS_TEMP).equals("true")) account = authAccount;
-                    else {
-                        account = PeckApp.createTempAccount();
-                        if (account == null) {
-                            return null;
-                        } else {
-                            accountManager.addAccountExplicitly(account, password, null);
-                        }
+                    account = PeckApp.createTempAccount();
+                    if (account == null) {
+                        return null;
+                    } else {
+                        accountManager.addAccountExplicitly(account, password, null);
                     }
                 }
 
-                PeckApp.logAccount(account);
-                PeckApp.logAccount(authAccount);
+                accountManager.setUserData(account, PeckAccountAuthenticator.INSTITUTION, inst);
+                accountManager.setPassword(account, password);
+                accountManager.setUserData(account, PeckAccountAuthenticator.EMAIL, email);
 
                 try {
-                    JsonObject object = new JsonObject();
-                    object.addProperty(User.EMAIL, email);
-                    object.addProperty("password", password);
-                    JsonObject ret;
+                    String result = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, false);
+                    if ( result != null){
 
-                    ret = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(authAccount));
-                    String authToken = ret.get("authentication_token").toString();
-                    String apiKey = ret.get(PeckAccountAuthenticator.API_KEY).toString();
-                    String userId = ret.get(PeckAccountAuthenticator.USER_ID).toString();
+                        Intent intent = new Intent();
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, account);
+                        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, PeckAccountAuthenticator.ACCOUNT_TYPE);
+                        intent.putExtra(AccountManager.KEY_AUTHTOKEN, result);
+                        intent.putExtra(AccountManager.KEY_AUTH_TOKEN_LABEL, PeckAccountAuthenticator.TOKEN_TYPE);
 
-                    accountManager.setUserData(account, PeckAccountAuthenticator.API_KEY, apiKey);
-                    accountManager.setUserData(account, PeckAccountAuthenticator.USER_ID, userId);
-                    accountManager.setAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, authToken);
+                        LoginActivity.this.setAccountAuthenticatorResult(intent.getExtras());
+                        LoginActivity.this.setResult(RESULT_OK, intent);
+                        Log.d(LoginActivity.class.getSimpleName(), "preparing to finish activity");
+                        LoginActivity.this.finish();
 
-                    PeckApp.setActiveAccount(account);
+                    }
 
-                    Intent intent = new Intent();
-                    intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, account);
-                    intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, PeckAccountAuthenticator.ACCOUNT_TYPE);
-                    intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
-                    intent.putExtra(AccountManager.KEY_AUTH_TOKEN_LABEL, PeckAccountAuthenticator.TOKEN_TYPE);
+                } catch (OperationCanceledException e) { e.printStackTrace(); }
+                catch (IOException e) { e.printStackTrace(); }
+                catch (AuthenticatorException e) { e.printStackTrace(); }
 
-                    return intent;
-
-                } catch (ServerError e) {
-                    e.printStackTrace();
-                } catch (VolleyError volleyError) {
-                    accountManager.removeAccount(account, null, null);
-                    volleyError.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (OperationCanceledException e) {
-                    e.printStackTrace();
-                } catch (AuthenticatorException e) {
-                    e.printStackTrace();
-                }
+                PeckApp.logAccount(account);
 
                 return null;
             }
 
             @Override
-            protected void onPostExecute(Intent intent) {
-                if (intent != null) {
-                    LoginActivity.this.setAccountAuthenticatorResult(intent.getExtras());
-                    LoginActivity.this.setResult(RESULT_OK, intent);
-                    Log.d(LoginActivity.class.getSimpleName(), "preparing to finish activity");
-                    LoginActivity.this.finish();
-                }
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
             }
         }.execute(tmp);
 

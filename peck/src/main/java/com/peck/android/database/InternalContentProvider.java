@@ -72,11 +72,12 @@ public class InternalContentProvider extends ContentProvider {
                 ArrayList<Integer> ints = new Gson().fromJson(JsonUtils.cursorToJson(temp).getAsJsonArray(Circle.MEMBERS), new TypeToken<ArrayList<Integer>>() {
                 }.getType());
 
-                String s = null;
-                if (ints.size() > 0) s = "(" + StringUtils.join(ints, ",") + ")";
+                if (ints.size() > 0) {
+                    String s = "(" + StringUtils.join(ints, ",") + ")";
 
-                cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.LOCAL_ID + ((s != null) ? (" IN " + s) : "")),
-                        ArrayUtils.addAll(selectionArgs, "0"), null, null, sortOrder);
+                    cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.SV_ID + (" IN " + s)),
+                            ArrayUtils.addAll(selectionArgs, "0"), null, null, sortOrder);
+                }
             }
         } else if (uriType < PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
@@ -85,9 +86,7 @@ public class InternalContentProvider extends ContentProvider {
                     DBOperable.DELETED + " IS NOT ?"), ArrayUtils.addAll(selectionArgs, uri.getLastPathSegment(), "0"), null, null, sortOrder);
         }
 
-        if (cursor == null) throw new IllegalArgumentException();
-
-        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        if (cursor != null) cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
     }
