@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -166,8 +167,13 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
 
         if (tmp == null) {
-            tmp = new Account(PeckAccountAuthenticator.getUserId(), PeckAccountAuthenticator.ACCOUNT_TYPE);
-            accountManager.addAccountExplicitly(tmp, password, null);
+            tmp = PeckApp.createTempAccount();
+            if (tmp == null) {
+                Log.d(LoginActivity.class.getSimpleName(), "Couldn't create temporary account.");
+                return;
+            } else {
+                accountManager.addAccountExplicitly(tmp, password, null);
+            }
         }
 
         new AsyncTask<Account, Void, Void>() {
