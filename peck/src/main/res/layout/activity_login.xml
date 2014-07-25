@@ -67,7 +67,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:id="@+id/rl_login"
-                android:visibility="invisible">
+                android:visibility="visible">
 
                 <Button
                     android:layout_width="@dimen/login_bt_width"
@@ -96,7 +96,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal"
                 android:id="@+id/rl_create"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <EditText
                     android:layout_width="match_parent"

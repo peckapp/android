@@ -13,7 +13,7 @@ import com.peck.android.annotations.UriPath;
 public class User extends DBOperable {
     public static final transient String FIRST_NAME = "first_name";
     public static final transient String LAST_NAME = "last_name";
-    public static final transient String EMAIL = "username";
+    public static final transient String EMAIL = "email";
     public static final transient String FACEBOOK_ID = "facebook_link";
     public static final transient String BIO = "blurb";
     public static final transient String IMAGE_NAME = "image_file_name";

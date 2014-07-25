@@ -13,6 +13,7 @@ import com.peck.android.PeckApp;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -20,13 +21,14 @@ import java.util.concurrent.ExecutionException;
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
-    private static JsonObject send(String url, int method, JsonObject data, final Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
+    private static JsonObject send(String url, int method, JsonObject data, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
+        if (auth == null) auth = new HashMap<String, String>();
         String newUrl = ((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) +
                 String.format("?authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s&authentication[%s]=%s",
-                "api_key", auth.get("api_key"),
-                "user_id", auth.get("user_id"),
-                "institution_id", auth.get("institution_id"),
+                "api_key", (auth.get("api_key") == null) ? "" : auth.get("api_key"),
+                "user_id", (auth.get("user_id") == null) ? "" : auth.get("user_id"),
+                "institution_id", (auth.get("institution_id") == null) ? "" : auth.get("institution_id"),
                 "authentication_token", (auth.get("authentication_token") == null) ? "" : auth.get("authentication_token"));
 
         Log.v("ServerCommunicator", newUrl);

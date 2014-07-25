@@ -432,7 +432,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numParseExceptions++;
         } else if (!(   e instanceof RemoteException    || e instanceof InterruptedException ||
                         e instanceof ExecutionException || e instanceof OperationApplicationException) ) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         } else {
             e.printStackTrace();
         }

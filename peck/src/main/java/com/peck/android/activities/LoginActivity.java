@@ -84,7 +84,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     finish();
                 }
 
-
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... voids) {
@@ -116,6 +115,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         }
 
                         accountManager.setUserData(account, PeckAccountAuthenticator.EMAIL, email);
+                        accountManager.setUserData(account, PeckAccountAuthenticator.IS_TEMP, "false");
                         accountManager.setPassword(account, password);
                         login(email, password);
 
@@ -159,35 +159,46 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         Account tmp = null;
 
-        for (Account account : accounts) {
-            if (accountManager.getUserData(account, PeckAccountAuthenticator.EMAIL).equals(email)) {
-                tmp = account;
-                break;
+        if (accounts != null) {
+            for (Account account : accounts) {
+                String tEmail = accountManager.getUserData(account, PeckAccountAuthenticator.EMAIL);
+                if (tEmail != null && tEmail.equals(email)) {
+                    tmp = account;
+                    break;
+                }
             }
         }
 
-        if (tmp == null) {
-            tmp = PeckApp.createTempAccount();
-            if (tmp == null) {
-                Log.d(LoginActivity.class.getSimpleName(), "Couldn't create temporary account.");
-                return;
-            } else {
-                accountManager.addAccountExplicitly(tmp, password, null);
-            }
-        }
-
-        new AsyncTask<Account, Void, Void>() {
+        new AsyncTask<Account, Void, Intent>() {
             @Override
-            protected Void doInBackground(Account... accounts) {
+            protected Intent doInBackground(Account... accounts) {
                 if (BuildConfig.DEBUG && accounts.length != 1) throw new IllegalArgumentException();
                 Account account = accounts[0];
+                Account authAccount = PeckApp.peekValidAccount();
+                if (authAccount == null) return null;
+
+                if (account == null) {
+                    if (accountManager.getUserData(authAccount, PeckAccountAuthenticator.IS_TEMP).equals("true")) account = authAccount;
+                    else {
+                        account = PeckApp.createTempAccount();
+                        if (account == null) {
+                            return null;
+                        } else {
+                            accountManager.addAccountExplicitly(account, password, null);
+                        }
+                    }
+                }
+
+                PeckApp.logAccount(account);
+                PeckApp.logAccount(authAccount);
+
                 try {
                     JsonObject object = new JsonObject();
                     object.addProperty(User.EMAIL, email);
                     object.addProperty("password", password);
                     JsonObject ret;
 
-                    ret = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(account));
+                    ret = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(authAccount));
                     String authToken = ret.get("authentication_token").toString();
                     String apiKey = ret.get(PeckAccountAuthenticator.API_KEY).toString();
                     String userId = ret.get(PeckAccountAuthenticator.USER_ID).toString();
@@ -203,11 +214,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, PeckAccountAuthenticator.ACCOUNT_TYPE);
                     intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
                     intent.putExtra(AccountManager.KEY_AUTH_TOKEN_LABEL, PeckAccountAuthenticator.TOKEN_TYPE);
-                    setAccountAuthenticatorResult(intent.getExtras());
-                    setResult(RESULT_OK, intent);
-                    finish();
 
-
+                    return intent;
 
                 } catch (ServerError e) {
                     e.printStackTrace();
@@ -229,6 +237,16 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 }
 
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Intent intent) {
+                if (intent != null) {
+                    LoginActivity.this.setAccountAuthenticatorResult(intent.getExtras());
+                    LoginActivity.this.setResult(RESULT_OK, intent);
+                    Log.d(LoginActivity.class.getSimpleName(), "preparing to finish activity");
+                    LoginActivity.this.finish();
+                }
             }
         }.execute(tmp);
 

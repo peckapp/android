@@ -37,6 +37,8 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private static final String fragmentTag = "locale selection feed";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
+    private boolean syncing = false;
+    private Account account;
 
     public static final long LOCATION_TIMEOUT = 6000;
 
@@ -71,77 +73,106 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        Account account = PeckApp.peekValidAccount();
-        if (account != null && AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null) {
+        Account acct = PeckApp.peekValidAccount();
+        if (acct != null) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
             finish();
-        }
+        } else {
+            loadLocales();
 
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... voids) {
 
-                long started = System.currentTimeMillis();
-                while (location == null && System.currentTimeMillis() - started < LOCATION_TIMEOUT) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            /**
+             * wait for location from location client, then build the selection fragment
+             */
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+
+                    long started = System.currentTimeMillis();
+                    while (location == null && System.currentTimeMillis() - started < LOCATION_TIMEOUT) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
+                    return location != null;
                 }
-                return location != null;
-            }
 
-            @Override
-            protected void onPostExecute(Boolean bool) {
+                @Override
+                protected void onPostExecute(Boolean bool) {
 
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
-                        .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
-                        .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                    @Override
-                                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                        AccountManager.get(LocaleActivity.this).setUserData(PeckApp.peekValidAccount(), PeckAccountAuthenticator.INSTITUTION, Long.toString(l));
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
+                            .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
+                            .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                        @Override
+                                                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                                            if (account != null) {
+                                                                PeckApp.setActiveAccount(account);
+                                                                AccountManager.get(LocaleActivity.this).setUserData(account, PeckAccountAuthenticator.INSTITUTION, Long.toString(l));
 
-                                                        Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                                                        startActivity(intent);
-                                                        finish();
+                                                                PeckApp.logAccount(account);
+
+                                                                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
+                                                        }
                                                     }
-                                                }
-                        )
-                        .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
-                                ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
-                                "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
-                        .orderedBy("dist asc, " + Locale.NAME)
-                        .layout(R.layout.localeselectionfeed)
-                        .build(), fragmentTag);
-                ft.commit();
-                loadLocales();
-            }
-        }.execute();
+                            )
+                            .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
+                                    ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
+                                    "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
+                            .orderedBy("dist asc, " + Locale.NAME)
+                            .layout(R.layout.localeselectionfeed)
+                            .build(), fragmentTag);
+                    ft.commit();
+                }
+            }.execute();
+        }
     }
 
 
     private void loadLocales() {
+
+        synchronized (this) {
+            if (syncing) return;
+            else syncing = true;
+        }
+
         NetworkInfo info = ((ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnectedOrConnecting()) {
 
+            //tell the user we're loading in
             final TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
             tv.setVisibility(View.VISIBLE);
             tv.setText(R.string.pb_loc);
             findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
             findViewById(R.id.rl_network_error).setVisibility(View.GONE);
 
+
             new AsyncTask<Void, Void, Boolean>() {
-                private Account account;
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     account = PeckApp.peekValidAccount();
                     if (account == null) {
                         account = PeckApp.createTempAccount();
-                        if (account == null) return false;
+                        if (account == null) {
+                            Log.d(LocaleActivity.class.getSimpleName(), "Couldn't create temp account");
+                            return false;
+                        }
+                        PeckApp.setActiveAccount(account);
                     }
+
+                    PeckApp.logAccount(account);
+
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+                    bundle.putString(PeckSyncAdapter.SYNC_TYPE, "com.peck.android.models.Locale");
+                    ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
 
 
                     long startTime = System.currentTimeMillis();
@@ -150,6 +181,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
+                            syncing = false;
                             e.printStackTrace();
                         }
                     }
@@ -159,21 +191,17 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
 
                 @Override
                 protected void onPostExecute(Boolean ret) {
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-                    bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-                    bundle.putString(PeckSyncAdapter.SYNC_TYPE, "com.peck.android.models.Locale");
-                    ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
-
                     if (ret) {
                         findViewById(R.id.tv_progress).setVisibility(View.GONE);
                         findViewById(R.id.rl_locale).setVisibility(View.GONE);
                         findViewById(R.id.rl_loc_select).setVisibility(View.VISIBLE);
                     } else displayError();
+                    syncing = false;
 
                 }
             }.execute();
         } else {
+            syncing = false;
             displayError();
         }
     }

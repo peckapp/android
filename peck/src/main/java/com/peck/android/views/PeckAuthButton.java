@@ -66,15 +66,6 @@ public class PeckAuthButton extends Button {
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, false);
-                                    if (ContentResolver.isSyncActive(account, PeckApp.AUTHORITY) || ContentResolver.isSyncPending(account, PeckApp.AUTHORITY))
-                                        ContentResolver.cancelSync(account, PeckApp.AUTHORITY);
-                                    DatabaseManager.closeDB();
-                                    getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
-                                    String token = AccountManager.get(getContext()).peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
-                                    if (token != null)
-                                        AccountManager.get(getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, token);
-
                                     new AsyncTask<Void, Void, Account>() {
                                         String inst_id = AccountManager.get(getContext()).getUserData(account, PeckAccountAuthenticator.INSTITUTION);
 
@@ -85,7 +76,7 @@ public class PeckAuthButton extends Button {
 
                                         @Override
                                         protected void onPostExecute(Account account) {
-                                            if (account == null) {
+                                            if (account == null || inst_id == null) {
                                                 Intent intent = new Intent(getContext(), LocaleActivity.class);
                                                 getContext().startActivity(intent);
                                                 fragment.getActivity().finish();
@@ -93,13 +84,22 @@ public class PeckAuthButton extends Button {
                                                 PeckApp.setActiveAccount(account);
                                                 AccountManager.get(getContext()).setUserData(account, PeckAccountAuthenticator.INSTITUTION, inst_id);
                                                 ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, true);
-                                                update();
+                                                ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, false);
+                                                if (ContentResolver.isSyncActive(account, PeckApp.AUTHORITY) || ContentResolver.isSyncPending(account, PeckApp.AUTHORITY))
+                                                    ContentResolver.cancelSync(account, PeckApp.AUTHORITY);
+                                                DatabaseManager.closeDB();
+                                                getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
+                                                String token = AccountManager.get(getContext()).peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
+                                                if (token != null)
+                                                    AccountManager.get(getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, token);
+
                                             }
+                                            update();
                                         }
                                     }.execute();
 
                                 }
-                            }).create();
+                            }).create().show();
                 }
             });
             fragment.getActivity().findViewById(R.id.bt_fb_link).setVisibility(View.VISIBLE);
