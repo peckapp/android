@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -219,7 +220,63 @@ public class FeedActivity extends PeckActivity {
         }
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{Event.TITLE, Event.TEXT}, new int[]{R.id.tv_title, R.id.tv_text}).build();
+                .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
+                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID})
+                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(final View view, Cursor cursor, int i) {
+                        switch (cursor.getInt(i)) {
+                            case Event.ATHLETIC_EVENT:
+                                switch (view.getId()) {
+                                    case R.id.tv_title:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
+                                        return true;
+                                    case R.id.tv_text:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+
+                            case Event.DINING_PERIOD:
+                                switch (view.getId()) {
+                                    case R.id.tv_title:
+                                        new AsyncTask<View, Void, String>() {
+                                            private View view;
+                                            @Override
+                                            protected String doInBackground(View... views) {
+                                                this.view = views[0];
+                                                getContentResolver().query(DBUtils.buildLocalUri(Event.class), new String[] {  } )
+                                                return null;
+                                            }
+
+                                            @Override
+                                            protected void onPostExecute(String title) {
+                                                ((TextView) view).setText(cursor.getString(cursor.getColumnIndex()));
+
+                                            }
+                                        }.execute();
+                                        return true;
+                                    case R.id.tv_text:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+
+                            case Event.SIMPLE_EVENT:
+                                switch (view.getId()) {
+                                    case R.id.tv_title:
+                                        return true;
+                                    case R.id.tv_text:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                        }
+                        return false;
+                    }
+                })
+                .build();
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
         if (!checkPlayServices()) {
