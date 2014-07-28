@@ -32,6 +32,7 @@ import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
+import com.peck.android.models.DiningOpportunity;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
@@ -221,24 +222,25 @@ public class FeedActivity extends PeckActivity {
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
-                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID})
+                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
-                    public boolean setViewValue(final View view, Cursor cursor, int i) {
+                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
                         switch (cursor.getInt(i)) {
                             case Event.ATHLETIC_EVENT:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
+                                        ((TextView)view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
                                         return true;
                                     case R.id.tv_text:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
+                                        ((TextView)view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
                                         return true;
                                     default:
                                         return false;
                                 }
 
                             case Event.DINING_PERIOD:
+                                final long diningId = cursor.getInt(cursor.getColumnIndex(Event.DINING_OPPORTUNITY_ID));
                                 switch (view.getId()) {
                                     case R.id.tv_title:
                                         new AsyncTask<View, Void, String>() {
@@ -246,18 +248,41 @@ public class FeedActivity extends PeckActivity {
                                             @Override
                                             protected String doInBackground(View... views) {
                                                 this.view = views[0];
-                                                getContentResolver().query(DBUtils.buildLocalUri(Event.class), new String[] {  } )
-                                                return null;
+                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningOpportunity.class),
+                                                        new String[] { DiningOpportunity.SV_ID, DiningOpportunity.TYPE }, DiningOpportunity.SV_ID + " = ?",
+                                                        new String[] { Long.toString(diningId) }, null );
+                                                temp.moveToFirst();
+                                                String ret = temp.getString(temp.getColumnIndex(DiningOpportunity.TYPE));
+                                                temp.close();
+                                                return ret;
                                             }
 
                                             @Override
                                             protected void onPostExecute(String title) {
-                                                ((TextView) view).setText(cursor.getString(cursor.getColumnIndex()));
-
+                                                ((TextView) view).setText(title);
                                             }
-                                        }.execute();
+                                        }.execute(view);
                                         return true;
                                     case R.id.tv_text:
+                                        new AsyncTask<View, Void, String>() {
+                                            private View view;
+                                            @Override
+                                            protected String doInBackground(View... views) {
+                                                this.view = views[0];
+                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningOpportunity.class),
+                                                        new String[] { DiningOpportunity.SV_ID, DiningOpportunity.TYPE}, DiningOpportunity.SV_ID + " = ?",
+                                                        new String[] { Long.toString(diningId) }, null );
+                                                temp.moveToFirst();
+                                                String ret = temp.getString(temp.getColumnIndex(DiningOpportunity.TYPE));
+                                                temp.close();
+                                                return ret;
+                                            }
+
+                                            @Override
+                                            protected void onPostExecute(String title) {
+                                                ((TextView) view).setText(title);
+                                            }
+                                        }.execute(view);
                                         return true;
                                     default:
                                         return false;
@@ -266,8 +291,10 @@ public class FeedActivity extends PeckActivity {
                             case Event.SIMPLE_EVENT:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
                                         return true;
                                     case R.id.tv_text:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
                                         return true;
                                     default:
                                         return false;

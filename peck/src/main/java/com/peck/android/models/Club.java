@@ -12,7 +12,7 @@ import com.peck.android.annotations.UriPath;
 
 @UriPath("clubs")
 @Header(plural = "clubs", singular = "club")
-public class Clubs extends DBOperable {
+public class Club extends DBOperable {
     public static final transient String NAME = "club_name";
     public static final transient String DESCRIPTION = "description";
     public static final transient String CREATOR_OWNER = "user_id";

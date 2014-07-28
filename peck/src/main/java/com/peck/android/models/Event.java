@@ -15,15 +15,6 @@ import java.util.ArrayList;
 
 @UriPath("events")
 public class Event extends DBOperable {
-    public static final transient String START_DATE = "start_date";
-    public static final transient String END_DATE = "end_date";
-    public static final transient String TITLE = "title";
-    public static final transient String TEXT = "event_description";
-    public static final transient String IMAGE_URL = "image_file_name";
-    public static final transient String EVENT_URL = "event_url";
-    public static final transient String USER_IDS = "user_ids";
-    public static final transient String TYPE = "type";
-
     public static final transient int SIMPLE_EVENT = 0;
     public static final transient int ATHLETIC_EVENT = 1;
     public static final transient int DINING_PERIOD = 2;
@@ -33,7 +24,28 @@ public class Event extends DBOperable {
     @DBType("integer")
     int type;
 
+    /* shared fields */
+    //simple events and announcements
+    @Expose
+    @SerializedName(TITLE)
+    String title;
+
+    //simple events and announcements
+    @Expose
+    @SerializedName(IMAGE_URL)
+    String imageUrl;
+
+
     /* simple event fields */
+    public static final transient String START_DATE = "start_date";
+    public static final transient String END_DATE = "end_date";
+    public static final transient String TITLE = "title";
+    public static final transient String TEXT = "event_description";
+    public static final transient String IMAGE_URL = "image_file_name";
+    public static final transient String EVENT_URL = "event_url";
+    public static final transient String USER_IDS = "user_ids";
+    public static final transient String TYPE = "type";
+
     @Expose
     @DBType("real")
     @SerializedName(START_DATE)
@@ -45,16 +57,8 @@ public class Event extends DBOperable {
     double endDate;
 
     @Expose
-    @SerializedName(TITLE)
-    String title;
-
-    @Expose
     @SerializedName(TEXT)
     String text;
-
-    @Expose
-    @SerializedName(IMAGE_URL)
-    String imageUrl;
 
     @Expose
     @SerializedName(EVENT_URL)
@@ -64,6 +68,7 @@ public class Event extends DBOperable {
     @Expose
     @SerializedName(USER_IDS)
     ArrayList<Integer> users = new ArrayList<Integer>();
+
 
     /* athletic event fields */
     public final static transient String ATHLETIC_HOME_SCORE = "team_score";
@@ -164,10 +169,6 @@ public class Event extends DBOperable {
     public static final transient String ANNOUNCEMENT_IMAGE_UPDATED_AT = "image_updated_at";
 
     @Expose
-    @SerializedName(ANNOUNCEMENT_TITLE)
-    String announceTitle;
-
-    @Expose
     @SerializedName(ANNOUNCEMENT_TEXT)
     String announceText;
 
@@ -200,10 +201,6 @@ public class Event extends DBOperable {
     @DBType("integer")
     @SerializedName(ANNOUNCEMENT_COMMENT_COUNT)
     int announceCommentCount;
-
-    @Expose
-    @SerializedName(ANNOUNCEMENT_IMAGE_FILE_NAME)
-    String announceImageFileName;
 
     @Expose
     @SerializedName(ANNOUNCEMENT_IMAGE_CONTENT_TYPE)

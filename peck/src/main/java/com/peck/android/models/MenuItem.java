@@ -5,12 +5,14 @@ import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.Header;
 import com.peck.android.annotations.NoMod;
+import com.peck.android.annotations.UriPath;
 
 /**
  * Created by mammothbane on 7/28/2014.
  */
 
 @NoMod
+@UriPath("menu_items")
 @Header(singular = "menu_item", plural = "menu_items")
 public class MenuItem extends DBOperable {
     public static final transient String NAME = "name";
