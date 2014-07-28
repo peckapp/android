@@ -38,11 +38,12 @@ import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeFieldType;
+import org.joda.time.DateTimeZone;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import it.sephiroth.android.library.widget.HListView;
 
@@ -50,7 +51,6 @@ public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -246,10 +246,10 @@ public class FeedActivity extends PeckActivity {
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                         return true;
                                     case R.id.tv_text:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME)));
-                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME)));
-                                        ((TextView) view).setText(start.get(DateTimeFieldType.clockhourOfHalfday()) + ":" + start.get(DateTimeFieldType.minuteOfHour()) +
-                                                " - " + end.get(DateTimeFieldType.clockhourOfHalfday()) + ":" + end.get(DateTimeFieldType.minuteOfHour()));
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(TimeZone.getDefault()));
+                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME))).toDateTime(DateTimeZone.forTimeZone(TimeZone.getDefault()));
+                                        ((TextView) view).setText(start.toString("K:mm") + " - " + end.toString("K:mm"));
+                                        return true;
                                     default:
                                         return false;
                                 }
