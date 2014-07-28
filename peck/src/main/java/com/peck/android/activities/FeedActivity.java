@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
@@ -62,6 +61,8 @@ public class FeedActivity extends PeckActivity {
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
                 .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.iv_event})
+                .withProjection(new String[]{ Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID })
+                .withSelection(Event.TYPE + " = ?", new String[]{"(" + Integer.toString(Event.SIMPLE_EVENT) + " OR " + Event.ATHLETIC_EVENT + ")"})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(View view, Cursor cursor, int i) {
@@ -118,8 +119,6 @@ public class FeedActivity extends PeckActivity {
                                         ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
 
                                         if (ret == null) {
-                                            CursorLoader loader = new CursorLoader(FeedActivity.this);
-
                                             Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
                                                     Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
                                                     "lower(" + User.FIRST_NAME + ") as lwr_index"}, null, null, "lwr_index");
