@@ -41,6 +41,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -51,6 +52,8 @@ public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    TimeZone tz = Calendar.getInstance().getTimeZone();
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -87,7 +90,8 @@ public class FeedActivity extends PeckActivity {
                                 if (url != null && url.length() > 0) {
                                     Picasso.with(FeedActivity.this)
                                             .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
-                                            .placeholder(R.drawable.ic_peck)
+                                            .fit()
+                                            .centerCrop()
                                             .into(((ImageView) view));
                                 }
                                 return true;
@@ -157,7 +161,8 @@ public class FeedActivity extends PeckActivity {
                                                             if (o != null && o.toString().length() > 0) {
                                                                 Picasso.with(FeedActivity.this)
                                                                         .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                        .placeholder(R.drawable.ic_peck)
+                                                                        .fit()
+                                                                        .centerCrop()
                                                                         .into((RoundedImageView) view);
                                                             }
                                                             return true;
@@ -222,8 +227,9 @@ public class FeedActivity extends PeckActivity {
         }
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
-                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_START_TIME, Event.DINING_END_TIME})
+                .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event})
+                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
+                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
@@ -246,8 +252,8 @@ public class FeedActivity extends PeckActivity {
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                         return true;
                                     case R.id.tv_text:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(TimeZone.getDefault()));
-                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME))).toDateTime(DateTimeZone.forTimeZone(TimeZone.getDefault()));
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
                                         ((TextView) view).setText(start.toString("K:mm") + " - " + end.toString("K:mm"));
                                         return true;
                                     default:
@@ -262,6 +268,17 @@ public class FeedActivity extends PeckActivity {
                                     case R.id.tv_text:
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
                                         return true;
+                                    case R.id.iv_event:
+                                        String urlPath = cursor.getString(i);
+                                        if (urlPath != null) {
+                                            Picasso.with(FeedActivity.this)
+                                                    .load(PeckApp.Constants.Network.BASE_URL + urlPath)
+                                                    .fit()
+                                                    .centerCrop()
+                                                    .into((ImageView)view);
+                                            return true;
+                                        }
+                                        else return false;
                                     default:
                                         return false;
                                 }

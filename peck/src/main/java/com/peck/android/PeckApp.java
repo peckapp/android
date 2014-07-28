@@ -89,7 +89,7 @@ public class PeckApp extends Application implements Singleton{
             }
             if (!exists) AccountManager.get(getContext()).addAccountExplicitly(account, null, null);
 
-            getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, account.name).apply();
+            //getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().putString(PeckAccountAuthenticator.ACCOUNT_NAME, account.name).apply();
             PeckApp.account = account;
         }
     }

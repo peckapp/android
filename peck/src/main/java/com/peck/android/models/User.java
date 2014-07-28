@@ -16,7 +16,7 @@ public class User extends DBOperable {
     public static final transient String EMAIL = "email";
     public static final transient String FACEBOOK_ID = "facebook_link";
     public static final transient String BIO = "blurb";
-    public static final transient String IMAGE_NAME = "image_file_name";
+    public static final transient String IMAGE_NAME = "image";
 
     @Expose
     @SerializedName(IMAGE_NAME)
