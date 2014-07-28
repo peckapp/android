@@ -24,32 +24,32 @@ public class Event extends DBOperable {
     public static final transient String USER_IDS = "user_ids";
     public static final transient String TYPE = "type";
 
-    public static final transient int ATHLETIC_EVENT = 1;
     public static final transient int SIMPLE_EVENT = 0;
+    public static final transient int ATHLETIC_EVENT = 1;
+    public static final transient int DINING_PERIOD = 2;
 
     @SerializedName("type")
     @DBType("integer")
     int type;
 
-
-    /* fields for both athletic and simple events */
+    /* simple event fields */
     @Expose
     @DBType("real")
     @SerializedName(START_DATE)
-    double startTime;
+    double startDate;
 
     @Expose
     @DBType("real")
     @SerializedName(END_DATE)
-    double endTime;
+    double endDate;
 
     @Expose
     @SerializedName(TITLE)
-    String title = "";
+    String title;
 
     @Expose
     @SerializedName(TEXT)
-    String text = "";
+    String text;
 
     @Expose
     @SerializedName(IMAGE_URL)
@@ -64,18 +64,89 @@ public class Event extends DBOperable {
     @SerializedName(USER_IDS)
     ArrayList<Integer> users = new ArrayList<Integer>();
 
-
-    /* athletic event fields: */
-    public final static transient String HOME_SCORE = "home_score";
-    public final static transient String AWAY_SCORE = "away_score";
+    /* athletic event fields */
+    public final static transient String ATHLETIC_HOME_SCORE = "team_score";
+    public final static transient String ATHLETIC_AWAY_SCORE = "opponent_score";
+    public final static transient String ATHLETIC_TEAM_ID = "athletic_team_id";
+    public final static transient String ATHLETIC_OPPONENT = "opponent";
+    public final static transient String ATHLETIC_HOME_AWAY = "home_or_away";
+    public final static transient String ATHLETIC_LOCATION = "location";
+    public final static transient String ATHLETIC_RESULT = "result";
+    public final static transient String ATHLETIC_NOTE = "note";
+    public final static transient String ATHLETIC_DATE_AND_TIME = "date_and_time";
 
     @Expose
-    @SerializedName(HOME_SCORE)
+    @DBType("integer")
+    @SerializedName(ATHLETIC_HOME_SCORE)
     int homeScore;
 
     @Expose
-    @SerializedName(AWAY_SCORE)
+    @DBType("integer")
+    @SerializedName(ATHLETIC_AWAY_SCORE)
     int awayScore;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(ATHLETIC_TEAM_ID)
+    long teamId;
+
+    @Expose
+    @SerializedName(ATHLETIC_OPPONENT)
+    String opponent;
+
+    @Expose
+    @SerializedName(ATHLETIC_HOME_AWAY)
+    String homeAway;
+
+    @Expose
+    @SerializedName(ATHLETIC_LOCATION)
+    String location;
+
+    @Expose
+    @SerializedName(ATHLETIC_RESULT)
+    String result;
+
+    @Expose
+    @SerializedName(ATHLETIC_NOTE)
+    String note;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(ATHLETIC_DATE_AND_TIME)
+    long dateTime;
+
+
+    /* dining period fields */
+    public final static transient String DINING_DAY_OF_WEEK = "day_of_week";
+    public final static transient String DINING_START_TIME = "start_time";
+    public final static transient String DINING_END_TIME = "end_time";
+    public final static transient String DINING_OPPORTUNITY_ID = "dining_opportunity_id";
+    public final static transient String DINING_PLACE_ID = "dining_place_id";
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(DINING_DAY_OF_WEEK)
+    int dayOfWeek;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(DINING_START_TIME)
+    long startTime;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(DINING_END_TIME)
+    long endTime;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(DINING_OPPORTUNITY_ID)
+    long opportunityId;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(DINING_PLACE_ID)
+    long placeId;
 
 }
 
