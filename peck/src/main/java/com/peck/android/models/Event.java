@@ -76,14 +76,14 @@ public class Event extends DBOperable {
     public final static transient String ATHLETIC_DATE_AND_TIME = "date_and_time";
 
     @Expose
-    @DBType("integer")
+    @DBType("real")
     @SerializedName(ATHLETIC_HOME_SCORE)
-    int homeScore;
+    double homeScore;
 
     @Expose
-    @DBType("integer")
+    @DBType("real")
     @SerializedName(ATHLETIC_AWAY_SCORE)
-    int awayScore;
+    double awayScore;
 
     @Expose
     @DBType("integer")
@@ -111,9 +111,9 @@ public class Event extends DBOperable {
     String note;
 
     @Expose
-    @DBType("integer")
+    @DBType("real")
     @SerializedName(ATHLETIC_DATE_AND_TIME)
-    long dateTime;
+    double dateTime;
 
 
     /* dining period fields */
@@ -129,14 +129,14 @@ public class Event extends DBOperable {
     int dayOfWeek;
 
     @Expose
-    @DBType("integer")
+    @DBType("real")
     @SerializedName(DINING_START_TIME)
     long startTime;
 
     @Expose
-    @DBType("integer")
+    @DBType("real")
     @SerializedName(DINING_END_TIME)
-    long endTime;
+    double endTime;
 
     @Expose
     @DBType("integer")

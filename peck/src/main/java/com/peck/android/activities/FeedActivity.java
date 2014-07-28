@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
@@ -115,6 +116,8 @@ public class FeedActivity extends PeckActivity {
                                         ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
 
                                         if (ret == null) {
+                                            CursorLoader loader = new CursorLoader(FeedActivity.this);
+
                                             Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
                                                     Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
                                                     "lower(" + User.FIRST_NAME + ") as lwr_index"}, null, null, "lwr_index");
