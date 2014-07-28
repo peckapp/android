@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class Event extends DBOperable {
     public static final transient int SIMPLE_EVENT = 0;
     public static final transient int ATHLETIC_EVENT = 1;
-    public static final transient int DINING_PERIOD = 2;
+    public static final transient int DINING_OPPORTUNITY = 2;
     public static final transient int ANNOUNCEMENT = 3;
 
     @SerializedName("type")
@@ -122,37 +122,24 @@ public class Event extends DBOperable {
     double dateTime;
 
 
-    /* dining period fields */
-    public final static transient String DINING_DAY_OF_WEEK = "day_of_week";
-    public final static transient String DINING_START_TIME = "start_time";
-    public final static transient String DINING_END_TIME = "end_time";
-    public final static transient String DINING_OPPORTUNITY_ID = "dining_opportunity_id";
-    public final static transient String DINING_PLACE_ID = "dining_place_id";
+    /* dining opportunity fields */
+    public static final transient String DINING_OP_TYPE = "dining_opportunity_type";
+    public static final transient String DINING_START_TIME = "start_time";
+    public static final transient String DINING_END_TIME = "end_time";
 
     @Expose
-    @DBType("integer")
-    @SerializedName(DINING_DAY_OF_WEEK)
-    int dayOfWeek;
+    @SerializedName(DINING_OP_TYPE)
+    String diningType;
 
     @Expose
     @DBType("real")
     @SerializedName(DINING_START_TIME)
-    long startTime;
+    double startTime;
 
     @Expose
     @DBType("real")
     @SerializedName(DINING_END_TIME)
     double endTime;
-
-    @Expose
-    @DBType("integer")
-    @SerializedName(DINING_OPPORTUNITY_ID)
-    long opportunityId;
-
-    @Expose
-    @DBType("integer")
-    @SerializedName(DINING_PLACE_ID)
-    long placeId;
 
     /* announcement fields */
     public static final transient String ANNOUNCEMENT_TITLE = "title";

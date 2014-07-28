@@ -31,13 +31,14 @@ import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
-import com.peck.android.models.DiningOpportunity;
-import com.peck.android.models.DiningPlace;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,7 +223,7 @@ public class FeedActivity extends PeckActivity {
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
-                .withProjection(new String[]{"tbl_events." + Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_PLACE_ID})
+                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_START_TIME, Event.DINING_END_TIME})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
@@ -230,61 +231,25 @@ public class FeedActivity extends PeckActivity {
                             case Event.ATHLETIC_EVENT:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
-                                        ((TextView)view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
                                         return true;
                                     case R.id.tv_text:
-                                        ((TextView)view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
                                         return true;
                                     default:
                                         return false;
                                 }
 
-                            case Event.DINING_PERIOD:
-                                final long diningOpId = cursor.getInt(cursor.getColumnIndex(Event.DINING_OPPORTUNITY_ID));
-                                final long diningPlaceId = cursor.getLong(cursor.getColumnIndex(Event.DINING_PLACE_ID));
+                            case Event.DINING_OPPORTUNITY:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
-                                        new AsyncTask<View, Void, String>() {
-                                            private View view;
-                                            @Override
-                                            protected String doInBackground(View... views) {
-                                                this.view = views[0];
-                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningOpportunity.class),
-                                                        new String[] { DiningOpportunity.SV_ID, DiningOpportunity.TYPE }, DiningOpportunity.SV_ID + " = ?",
-                                                        new String[] { Long.toString(diningOpId) }, null );
-                                                temp.moveToFirst();
-                                                String ret = temp.getString(temp.getColumnIndex(DiningOpportunity.TYPE));
-                                                temp.close();
-                                                return ret;
-                                            }
-
-                                            @Override
-                                            protected void onPostExecute(String title) {
-                                                ((TextView) view).setText(title);
-                                            }
-                                        }.execute(view);
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                         return true;
                                     case R.id.tv_text:
-                                        new AsyncTask<View, Void, String>() {
-                                            private View view;
-                                            @Override
-                                            protected String doInBackground(View... views) {
-                                                this.view = views[0];
-                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningPlace.class),
-                                                        new String[] { DiningPlace.SV_ID, DiningPlace.NAME}, DiningPlace.SV_ID + " = ?",
-                                                        new String[] { Long.toString(diningPlaceId) }, null );
-                                                temp.moveToFirst();
-                                                String ret = temp.getString(temp.getColumnIndex(DiningPlace.NAME));
-                                                temp.close();
-                                                return ret;
-                                            }
-
-                                            @Override
-                                            protected void onPostExecute(String title) {
-                                                ((TextView) view).setText(title);
-                                            }
-                                        }.execute(view);
-                                        return true;
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME)));
+                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME)));
+                                        ((TextView) view).setText(start.get(DateTimeFieldType.clockhourOfHalfday()) + ":" + start.get(DateTimeFieldType.minuteOfHour()) +
+                                                " - " + end.get(DateTimeFieldType.clockhourOfHalfday()) + ":" + end.get(DateTimeFieldType.minuteOfHour()));
                                     default:
                                         return false;
                                 }
