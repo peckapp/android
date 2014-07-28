@@ -222,7 +222,7 @@ public class FeedActivity extends PeckActivity {
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
-                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_PLACE_ID})
+                .withProjection(new String[]{"tbl_events." + Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_PLACE_ID})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
