@@ -20,6 +20,11 @@ public class DiningPlace extends DBOperable {
     public static final transient String LONGITUDE = "gps_longitude";
     public static final transient String LATITUDE = "gps_latitude";
     public static final transient String RANGE = "range";
+    public static final transient String HOURS = "hours";
+
+    @Expose
+    @SerializedName(HOURS)
+    String hours;
 
     @Expose
     @SerializedName(NAME)

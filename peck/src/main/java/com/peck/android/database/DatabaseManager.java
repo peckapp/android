@@ -10,12 +10,23 @@ import com.peck.android.PeckApp;
  * Created by mammothbane on 6/10/2014.
  */
 public class DatabaseManager {
-    private static DatabaseManager dbCreator = new DatabaseManager(); //keep this. we need to instantiate to get our sqliteopenhelper
     private static final int version = 1;
     private static SQLiteDatabase database;
-    private static SQLiteOpenHelper openHelper;
+    private static SQLiteOpenHelper openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
+        @Override
+        public void onCreate(SQLiteDatabase sqLiteDatabase) {
+            for (Class i : PeckApp.getModelArray()) sqLiteDatabase.execSQL(DBUtils.getDatabaseCreate(i));
+        }
 
-    //private static Class[] dbOperables = new Class[] { Event.class, Locale.class, Peck.class, Circle.class, User.class, Comment.class };
+        @Override
+        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+            Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
+
+            for (Class i : PeckApp.getModelArray()) {
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DBUtils.getTableName(i));
+            }
+        }
+    };
 
     public static synchronized SQLiteDatabase openDB() {
         database = openHelper.getWritableDatabase();
@@ -25,27 +36,5 @@ public class DatabaseManager {
     public static synchronized void closeDB() {
         database.close();
     }
-
-    private DatabaseManager() {
-        openHelper = new SQLiteOpenHelper(PeckApp.getContext(), PeckApp.Constants.Database.DATABASE_NAME, null, version) {
-            @Override
-            public void onCreate(SQLiteDatabase sqLiteDatabase) {
-                for (Class i : PeckApp.getModelArray()) sqLiteDatabase.execSQL(DBUtils.getDatabaseCreate(i));
-            }
-
-            @Override
-            public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-                Log.w(this.getClass().getName(), "Upgrading DB from v." + oldVersion + " to v." + newVersion + "destroying all old data.");
-
-                for (Class i : PeckApp.getModelArray()) {
-                    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DBUtils.getTableName(i));
-                }
-            }
-        };
-    }
-
-
-
-
 
 }
