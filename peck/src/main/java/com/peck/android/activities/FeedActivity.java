@@ -32,6 +32,7 @@ import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.DiningOpportunity;
+import com.peck.android.models.DiningPlace;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
@@ -62,7 +63,7 @@ public class FeedActivity extends PeckActivity {
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
                 .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.iv_event})
                 .withProjection(new String[]{ Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID })
-                .withSelection(Event.TYPE + " = ?", new String[]{"(" + Integer.toString(Event.SIMPLE_EVENT) + " OR " + Event.ATHLETIC_EVENT + ")"})
+                .withSelection(Event.TYPE + " = ?", new String[]{Integer.toString(Event.SIMPLE_EVENT)})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(View view, Cursor cursor, int i) {
@@ -177,7 +178,7 @@ public class FeedActivity extends PeckActivity {
 
         buttons.put(R.id.bt_circles,feed);
 
-        feed=new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().
+        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().
                 appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
                 .withBindings(new String[]{Peck.NAME, Peck.TEXT}, new int[]{R.id.tv_title, R.id.tv_text})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
@@ -221,7 +222,7 @@ public class FeedActivity extends PeckActivity {
 
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE}, new int[]{R.id.tv_title, R.id.tv_text})
-                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE})
+                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OPPORTUNITY_ID, DBOperable.LOCAL_ID, Event.TYPE, Event.DINING_PLACE_ID})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
@@ -239,7 +240,8 @@ public class FeedActivity extends PeckActivity {
                                 }
 
                             case Event.DINING_PERIOD:
-                                final long diningId = cursor.getInt(cursor.getColumnIndex(Event.DINING_OPPORTUNITY_ID));
+                                final long diningOpId = cursor.getInt(cursor.getColumnIndex(Event.DINING_OPPORTUNITY_ID));
+                                final long diningPlaceId = cursor.getLong(cursor.getColumnIndex(Event.DINING_PLACE_ID));
                                 switch (view.getId()) {
                                     case R.id.tv_title:
                                         new AsyncTask<View, Void, String>() {
@@ -249,7 +251,7 @@ public class FeedActivity extends PeckActivity {
                                                 this.view = views[0];
                                                 Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningOpportunity.class),
                                                         new String[] { DiningOpportunity.SV_ID, DiningOpportunity.TYPE }, DiningOpportunity.SV_ID + " = ?",
-                                                        new String[] { Long.toString(diningId) }, null );
+                                                        new String[] { Long.toString(diningOpId) }, null );
                                                 temp.moveToFirst();
                                                 String ret = temp.getString(temp.getColumnIndex(DiningOpportunity.TYPE));
                                                 temp.close();
@@ -268,11 +270,11 @@ public class FeedActivity extends PeckActivity {
                                             @Override
                                             protected String doInBackground(View... views) {
                                                 this.view = views[0];
-                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningOpportunity.class),
-                                                        new String[] { DiningOpportunity.SV_ID, DiningOpportunity.TYPE}, DiningOpportunity.SV_ID + " = ?",
-                                                        new String[] { Long.toString(diningId) }, null );
+                                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(DiningPlace.class),
+                                                        new String[] { DiningPlace.SV_ID, DiningPlace.NAME}, DiningPlace.SV_ID + " = ?",
+                                                        new String[] { Long.toString(diningPlaceId) }, null );
                                                 temp.moveToFirst();
-                                                String ret = temp.getString(temp.getColumnIndex(DiningOpportunity.TYPE));
+                                                String ret = temp.getString(temp.getColumnIndex(DiningPlace.NAME));
                                                 temp.close();
                                                 return ret;
                                             }
