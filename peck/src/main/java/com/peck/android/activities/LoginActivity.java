@@ -1,9 +1,7 @@
 package com.peck.android.activities;
 
 import android.accounts.AccountAuthenticatorActivity;
-import android.accounts.AccountManager;
 import android.accounts.OperationCanceledException;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -23,8 +21,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final AccountManager accountManager = (AccountManager) getSystemService(Context.ACCOUNT_SERVICE);
-
         findViewById(R.id.bt_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -34,36 +30,44 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         findViewById(R.id.bt_login).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 final String email = ((EditText) findViewById(R.id.et_email)).getText().toString();
                 final String password = ((EditText) findViewById(R.id.et_password)).getText().toString();
 
-                new AsyncTask<Void, Void, LoginManager.InvalidCredentialsException>() {
+                new AsyncTask<Void, Void, Void>() {
                     @Override
-                    protected LoginManager.InvalidCredentialsException doInBackground(Void... voids) {
+                    protected Void doInBackground(Void... voids) {
                         try {
                             LoginManager.login(email, password);
                         } catch (LoginManager.InvalidEmailException e) {
-                            return e;
+                            view.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(LoginActivity.this, "Invalid email", Toast.LENGTH_LONG).show();
+                                }
+                            });
                         } catch (LoginManager.InvalidPasswordException e) {
-                            return e;
+                            view.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_LONG).show();
+                                }
+                            });
                         } catch (OperationCanceledException e) {
+                            LoginManager.cleanInvalid();
                             e.printStackTrace();
                         } catch (IOException e) {
+                            LoginManager.cleanInvalid();
                             e.printStackTrace();
                         }
                         return null;
                     }
 
                     @Override
-                    protected void onPostExecute(LoginManager.InvalidCredentialsException e) {
-                        if (e == null) {
+                    protected void onPostExecute(Void avoid) {
+                        //todo: finish the activity
+                        LoginManager.cleanInvalid();
 
-                        } else if (e instanceof LoginManager.InvalidEmailException) {
-                            Toast.makeText(LoginActivity.this, "Invalid email", Toast.LENGTH_LONG).show();
-                        } else if (e instanceof LoginManager.InvalidPasswordException) {
-                            Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_LONG).show();
-                        }
                     }
 
                 }.execute();
@@ -73,29 +77,57 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         findViewById(R.id.bt_create_acct).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 final String email = ((EditText) findViewById(R.id.et_email)).getText().toString();
                 final String password = ((EditText) findViewById(R.id.et_password)).getText().toString();
                 final String passwordConfirmation = ((EditText) findViewById(R.id.et_password_confirm)).getText().toString();
                 final String[] name = ((EditText) findViewById(R.id.et_name)).getText().toString().split(" ");
 
-
-
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        try {
-                            LoginManager.create(email, password, name[0], name[1]);
-                        } catch (LoginManager.InvalidEmailException e) {
-                            e.printStackTrace();
-                        } catch (LoginManager.InvalidPasswordException e) {
-                            e.printStackTrace();
-                        } catch (LoginManager.AccountAlreadyExistsException e) {
-                            e.printStackTrace();
+                if (!password.equals(passwordConfirmation)) Toast.makeText(LoginActivity.this, "Passwords must match", Toast.LENGTH_LONG).show();
+                else {
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            try {
+                                LoginManager.create(email, password, name[0], name[1]);
+                            } catch (LoginManager.InvalidEmailException e) {
+                                view.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(view.getContext(), "Invalid email", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                e.printStackTrace();
+                            } catch (LoginManager.InvalidPasswordException e) {
+                                view.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(view.getContext(), "Invalid password", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                e.printStackTrace();
+                            } catch (LoginManager.AccountAlreadyExistsException e) {
+                                LoginManager.cleanInvalid();
+                                view.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(view.getContext(), "That account is already registered on this device", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                e.printStackTrace();
+                            } catch (OperationCanceledException e) {
+                                LoginManager.cleanInvalid();
+                                e.printStackTrace();
+                            }
+                            return null;
                         }
-                        return null;
-                    }
-                }.execute();
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            LoginManager.cleanInvalid();
+                        }
+                    }.execute();
+                }
             }
         });
 

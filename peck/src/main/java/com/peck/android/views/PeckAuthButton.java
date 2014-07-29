@@ -13,7 +13,6 @@ import android.widget.Button;
 import com.peck.android.R;
 import com.peck.android.activities.LoginActivity;
 import com.peck.android.managers.LoginManager;
-import com.peck.android.network.PeckAccountAuthenticator;
 
 /**
  * Created by mammothbane on 6/24/2014.
@@ -38,7 +37,7 @@ public class PeckAuthButton extends Button {
         String btnText;
         View.OnClickListener onClickListener;
         final Account account = LoginManager.getActive();
-        if (account == null || account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
+        if (LoginManager.isValid(account)) {
             btnText = fragment.getActivity().getString(R.string.bt_peck_login);
             fragment.getActivity().findViewById(R.id.bt_fb_link).setVisibility(View.GONE);
             onClickListener = (new View.OnClickListener() {

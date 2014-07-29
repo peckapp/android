@@ -17,10 +17,15 @@ public class User extends DBOperable {
     public static final transient String FACEBOOK_ID = "facebook_link";
     public static final transient String BIO = "blurb";
     public static final transient String IMAGE_NAME = "image";
+    public static final transient String THUMBNAIL = "thumb_image";
 
     @Expose
     @SerializedName(IMAGE_NAME)
     private String imageName;
+
+    @Expose
+    @SerializedName(THUMBNAIL)
+    private String thumbnailUrl;
 
     @Expose
     @SerializedName(FIRST_NAME)

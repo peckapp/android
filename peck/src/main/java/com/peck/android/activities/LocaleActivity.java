@@ -57,6 +57,8 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     protected void onStart() {
         super.onStart();
 
+        LoginManager.cleanInvalid();
+
         LocationManager lm = (LocationManager)getSystemService(LOCATION_SERVICE);
 
         if ((servicesConnected() && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
@@ -71,6 +73,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
+
         if (LoginManager.isValid(LoginManager.getActive())) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
@@ -155,7 +158,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             new AsyncTask<Void, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Void... voids) {
-                    int counter = 0;
+                    int counter = 1;
                     while (!LoginManager.hasTemp() && counter < 30) {
                         LoginManager.createTemp();
                         Log.v(LocaleActivity.class.getSimpleName(), "try #" + counter++);

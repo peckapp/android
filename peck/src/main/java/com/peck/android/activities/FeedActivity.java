@@ -75,7 +75,6 @@ public class FeedActivity extends PeckActivity {
                         switch (view.getId()) {
                             case R.id.iv_event:
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
-                                Log.v(FeedActivity.class.getSimpleName(), "url: " + ((url != null) ? url : "null"));
                                 /*if (Build.VERSION.SDK_INT >= 17) {
                                     RenderScript renderScript = RenderScript.create(FeedActivity.this);
                                     final Allocation input = Allocation.createFromBitmap(renderScript, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
@@ -167,7 +166,6 @@ public class FeedActivity extends PeckActivity {
                                                 public boolean setViewValue(View view, Object o, String s) {
                                                     switch (view.getId()) {
                                                         case R.id.iv_event:
-                                                            Log.v(FeedActivity.class.getSimpleName(), "object: " + ((o != null) ? o.toString() : "null"));
                                                             if (o != null && o.toString().length() > 0) {
                                                                 Picasso.with(FeedActivity.this)
                                                                         .load(PeckApp.Constants.Network.BASE_URL + o)

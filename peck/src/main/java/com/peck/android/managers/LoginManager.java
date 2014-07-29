@@ -113,7 +113,8 @@ public class LoginManager {
 
     }
 
-    public static synchronized boolean create(String email, String password, String firstName, String lastName) throws InvalidEmailException, InvalidPasswordException, AccountAlreadyExistsException {
+    public static synchronized boolean create(String email, String password, String firstName, String lastName)
+            throws InvalidEmailException, InvalidPasswordException, AccountAlreadyExistsException, OperationCanceledException {
 
         if (!EmailValidator.getInstance().isValid(email)) {
             throw new InvalidEmailException();
@@ -138,7 +139,7 @@ public class LoginManager {
 
         Account temp = new Account(email, PeckAccountAuthenticator.ACCOUNT_TYPE);
 
-        accountManager.addAccountExplicitly(temp, password, null);
+        if (!accountManager.addAccountExplicitly(temp, password, null)) throw new OperationCanceledException();
 
 
         try {
@@ -154,17 +155,21 @@ public class LoginManager {
 
             accountManager.setUserData(temp, PeckAccountAuthenticator.EMAIL, user.get(User.EMAIL).getAsString());
             accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, user.get(User.LOCALE).getAsString());
-            accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, user.get("api_key").getAsString());
-            accountManager.setAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, user.get("authentication_token").getAsString());
+            accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, accountManager.getUserData(authAccount, PeckAccountAuthenticator.API_KEY));
+            String token = user.get("authentication_token").getAsString();
+            Log.v(LoginManager.class.getSimpleName(), token);
+            accountManager.setAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, token);
             accountManager.setPassword(temp, password);
 
             LoginManager.logAccount(temp);
 
-            accountManager.removeAccount(authAccount, null, null);
+            clearTemp();
 
             while (!hasTemp()) {
                 createTemp();
             }
+            Log.v(LoginManager.class.getSimpleName(), "temp account created");
+            logAccount(getTemp());
 
             return true;
         } catch (IOException e) {
@@ -186,6 +191,29 @@ public class LoginManager {
         return false;
     }
 
+    public static synchronized void clearTemp() {
+        Account temp = getTemp();
+        if (temp != null) {
+            accountManager.setPassword(temp, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, null);
+        }
+    }
+
+    public static synchronized void cleanInvalid() {
+        int removed = 0;
+        HashMap<String, Account> accounts = getAccounts();
+        for (Account account : accounts.values()) {
+            if (!isValid(account) && !account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
+                accountManager.removeAccount(account, null, null);
+                removed++;
+            }
+        }
+        Log.v(LoginManager.class.getSimpleName(), removed + " invalid accounts removed.");
+    }
+
     public static synchronized void logout(Account account) {
         logout(account.name);
     }
@@ -205,6 +233,29 @@ public class LoginManager {
         return (accounts.containsKey(PeckAccountAuthenticator.TEMP_NAME) && accountManager.getUserData(accounts.get(PeckAccountAuthenticator.TEMP_NAME),
                 PeckAccountAuthenticator.API_KEY) != null && accountManager.getUserData(accounts.get(PeckAccountAuthenticator.TEMP_NAME), PeckAccountAuthenticator.USER_ID) != null);
     }
+
+
+    /**
+     *
+     * check a given account for validity as a temporary account.
+     *
+     * @param account the account to check
+     * @return true if the account's name is the same as the temp account name defined in {@link com.peck.android.network.PeckAccountAuthenticator},
+     * it has a user id, and it has an api key. false otherwise.
+     */
+    public static synchronized boolean isValidTemp(Account account) {
+        return (account != null && account.name.equals(PeckAccountAuthenticator.TEMP_NAME) &&
+                accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) != null && accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID) != null);
+    }
+
+
+    /**
+     *
+     * checks the validity of a given account.
+     *
+     * @param account the account to check
+     * @return true if the account is registered in the account manager && it has an api key && it has an institution
+     */
 
     public static synchronized boolean isValid(Account account) {
         if (account == null) return false;
@@ -234,6 +285,8 @@ public class LoginManager {
 
     private static synchronized void setActiveAccount(String name) {
         PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, name).apply();
+        Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
+        logAccount(getAccounts().get(name));
     }
 
     private static synchronized void setActiveAccount(Account account) {
@@ -242,7 +295,7 @@ public class LoginManager {
 
     /**
      * blocking method to create a temporary account with the server and add to accounts stored on device.
-     * @return the account; null if not created
+     * @return true if created, false if not
      */
     public static synchronized boolean createTemp() {
         Account tmp;
@@ -261,6 +314,8 @@ public class LoginManager {
             accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
             accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
             if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());
+            Log.v(LoginManager.class.getSimpleName(), "Temp account created.");
+            logAccount(tmp);
             return true;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -301,7 +356,6 @@ public class LoginManager {
         String id = accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID);
         String inst = accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION);
         String email = accountManager.getUserData(account, PeckAccountAuthenticator.EMAIL);
-        String temp = accountManager.getUserData(account, PeckAccountAuthenticator.IS_TEMP);
         String password = (accountManager.getPassword(account) == null) ? "null" : "set";
         String api_key = (accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) == null) ? "null" : "set";
         String auth_token = (accountManager.peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE) == null) ? "null" : "set";
@@ -312,7 +366,6 @@ public class LoginManager {
                 "email           %s\n" +
                 "password        %s\n" +
                 "api_key         %s\n" +
-                "auth_token      %s\n" +
-                "temp            %s", name, type, id, inst, email, password, api_key, auth_token, temp));
+                "auth_token      %s", name, type, id, inst, email, password, api_key, auth_token));
     }
 }

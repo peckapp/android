@@ -42,15 +42,13 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
     public static final String ACCOUNT_TYPE = "peckapp.com";
     public static final String USER_ID_PREF = "user id preferences";
 
-    public static final String ACCOUNT_NAME = "acct_name";
-    public static final String TEMP_NAME = "temporary_account";
+    public static final String TEMP_NAME = "Auxiliary Account";
 
     public static final String USER_ID = "userid";
     public static final String EMAIL = "email";
     public static final String API_KEY = "api_key";
     public static final String INSTITUTION = "institution_id";
     public static final String TOKEN_TYPE = "peck_internal";
-    public static final String IS_TEMP = "temporary";
 
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse, String s) {

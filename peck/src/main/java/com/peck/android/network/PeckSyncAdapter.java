@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.VolleyError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -292,7 +291,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         }
         svGet = array.size();
 
-        Cursor cursor = client.query(uri, ArrayUtils.add(DBUtils.getColumns(DBOperable.class), Event.TYPE), Event.TYPE + " = ?", new String[] { Integer.toString(type) }, null);
+        Cursor cursor = client.query(uri, ArrayUtils.add(DBUtils.getColumns(DBOperable.class), Event.TYPE), Event.TYPE + " = ?", new String[]{Integer.toString(type)}, null);
 
         while (cursor.moveToNext()) { //iterate through every item in the relevant table
             syncResult.stats.numEntries++;
@@ -324,7 +323,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                         ServerCommunicator.patch(PeckApp.Constants.Network.API_ENDPOINT + single + "/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
                                 JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
-                } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()){ //the server version is newer
+                } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()) { //the server version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(DBOperable.DELETED, false);
@@ -356,46 +355,19 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 
-
-        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(syncResult.stats.numEntries - sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) +"]" +
+        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(syncResult.stats.numEntries - sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) + "]" +
                 " no Δ: " + StringUtils.rightPad(Long.toString((syncResult.stats.numSkippedEntries - sResultSkipped)), 5) +
-                " add: " + StringUtils.leftPad(Long.toString((syncResult.stats.numInserts - sResultInserts)), 5)  +
+                " add: " + StringUtils.leftPad(Long.toString((syncResult.stats.numInserts - sResultInserts)), 5) +
                 "|" + StringUtils.rightPad(Long.toString(svCreated), 4) +
                 " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svUpdated), 4) +
                 " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
-                StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + StringUtils.split(plural, "_")[0]);
+                StringUtils.rightPad(Long.toString(svDeleted), 4) + "   " + StringUtils.split(plural, "_")[0]);
 
         contentResolver.applyBatch(authority, batch);
         contentResolver.notifyChange(uri, null, false);
 
         client.delete(uri, null, null);
     }
-
-
-
-    private static void handleException(Exception e, SyncResult syncResult, String authToken) {
-        Log.e(PeckSyncAdapter.class.getSimpleName(), "Exception encountered on sync: " + e.getClass().getSimpleName());
-        if (e instanceof VolleyError || e.getCause() != null && e.getCause() instanceof VolleyError) {
-            if (e instanceof AuthFailureError || e.getCause() instanceof AuthFailureError)
-                AccountManager.get(PeckApp.getContext()).invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, authToken);
-            syncResult.stats.numAuthExceptions++;
-            if (e instanceof VolleyError && ((VolleyError) e).networkResponse != null) Log.v(PeckSyncAdapter.class.getSimpleName(), Integer.toString(((VolleyError) e).networkResponse.statusCode));
-            else if (e.getCause() instanceof VolleyError && ((VolleyError) e.getCause()).networkResponse != null) Log.v(PeckSyncAdapter.class.getSimpleName(), Integer.toString(((VolleyError) e.getCause()).networkResponse.statusCode));
-        } else if (e instanceof IOException) {
-            syncResult.stats.numIoExceptions++;
-        } else if (e instanceof AuthenticatorException) {
-            syncResult.stats.numAuthExceptions++;
-        } else if (e instanceof JSONException) {
-            syncResult.stats.numParseExceptions++;
-        } else if (!(   e instanceof RemoteException    || e instanceof InterruptedException ||
-                e instanceof ExecutionException || e instanceof OperationApplicationException) ) {
-            e.printStackTrace();
-        } else {
-            e.printStackTrace();
-        }
-
-    }
-
 
 }
