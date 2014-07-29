@@ -112,7 +112,7 @@ public class JsonUtils {
         if (BuildConfig.DEBUG && apiKey == null) { throw new AuthenticatorException("API key can't be null"); }
 
         String authToken = null;
-        if (!accountManager.getUserData(account, PeckAccountAuthenticator.IS_TEMP).equals("true")) {
+        if (!account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
             authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
         }
 

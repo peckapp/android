@@ -16,6 +16,7 @@ import com.android.volley.VolleyError;
 import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LoginActivity;
+import com.peck.android.managers.LoginManager;
 import com.peck.android.models.User;
 
 import org.json.JSONException;
@@ -42,6 +43,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
     public static final String USER_ID_PREF = "user id preferences";
 
     public static final String ACCOUNT_NAME = "acct_name";
+    public static final String TEMP_NAME = "temporary_account";
 
     public static final String USER_ID = "userid";
     public static final String EMAIL = "email";
@@ -86,10 +88,13 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
 
         if (actMgr.getUserData(account, USER_ID) != null) {
             try {
+                Account authAccount = LoginManager.getTemp();
+                if (authAccount == null) throw new RuntimeException("LoginManager had null temp account");
+
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("user[password]", actMgr.getPassword(account));
                 map.put("user[email]", actMgr.getUserData(account, PeckAccountAuthenticator.EMAIL));
-                map.putAll(JsonUtils.auth(account));
+                map.putAll(JsonUtils.auth(authAccount));
 
                 JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
 

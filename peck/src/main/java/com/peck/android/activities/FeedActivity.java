@@ -1,7 +1,6 @@
 package com.peck.android.activities;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -29,13 +28,13 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.tabs.NewPostTab;
 import com.peck.android.fragments.tabs.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
+import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 import com.peck.android.models.joins.CircleMember;
-import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
 
 import org.apache.commons.lang3.StringUtils;
@@ -323,8 +322,8 @@ public class FeedActivity extends PeckActivity {
 
         checkPlayServices();
 
-        Account account = PeckApp.peekValidAccount();
-        if (account == null || AccountManager.get(this).getUserData(account, PeckAccountAuthenticator.INSTITUTION) == null) {
+        Account account = LoginManager.getActive();
+        if (account == null || !LoginManager.isValid(account)) {
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
             finish();

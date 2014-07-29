@@ -1,7 +1,5 @@
 package com.peck.android.activities;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -27,9 +25,9 @@ import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
+import com.peck.android.managers.LoginManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
-import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.PeckSyncAdapter;
 
 
@@ -39,7 +37,6 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
     private boolean syncing = false;
-    private Account account;
 
     public static final long LOCATION_TIMEOUT = 6000;
 
@@ -74,8 +71,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        Account acct = PeckApp.peekValidAccount();
-        if (acct != null) {
+        if (LoginManager.isValid(LoginManager.getActive())) {
             Intent intent = new Intent(this, FeedActivity.class);
             startActivity(intent);
             finish();
@@ -110,23 +106,18 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                             .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                         @Override
                                                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                            if (account != null) {
-                                                                PeckApp.setActiveAccount(account);
+                                                            if (LoginManager.getActive() != null) {
                                                                 Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
                                                                         new String[] { DBOperable.SV_ID, DBOperable.LOCAL_ID }, DBOperable.LOCAL_ID + " = ?", new String[] {Long.toString(l)}, null);
                                                                 cursor.moveToFirst();
-                                                                String instid = Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
+                                                                long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
 
-                                                                AccountManager.get(LocaleActivity.this).setUserData(account, PeckAccountAuthenticator.INSTITUTION, instid);
-                                                                getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, MODE_PRIVATE).edit().
-                                                                        putString(PeckApp.Constants.Preferences.LOCALE_ID, instid).apply();
-
-                                                                PeckApp.logAccount(account);
+                                                                LoginManager.setLocale(LoginManager.getActive().name, id);
 
                                                                 Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
                                                                 startActivity(intent);
                                                                 finish();
-                                                            }
+                                                            } else Log.e(LocaleActivity.class.getSimpleName(), "LoginManager didn't have an active account to assign a locale to");
                                                         }
                                                     }
                             )
@@ -164,23 +155,20 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
             new AsyncTask<Void, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Void... voids) {
-                    account = PeckApp.peekValidAccount();
-                    if (account == null) {
-                        account = PeckApp.createTempAccount();
-                        if (account == null) {
-                            Log.d(LocaleActivity.class.getSimpleName(), "Couldn't create temp account");
-                            return false;
-                        }
-                        PeckApp.setActiveAccount(account);
+                    int counter = 0;
+                    while (!LoginManager.hasTemp() && counter < 30) {
+                        LoginManager.createTemp();
+                        Log.v(LocaleActivity.class.getSimpleName(), "try #" + counter++);
+                        try {
+                            Thread.sleep(400L);
+                        } catch (InterruptedException e) { e.printStackTrace(); }
                     }
-
-                    PeckApp.logAccount(account);
 
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
                     bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
                     bundle.putString(PeckSyncAdapter.SYNC_TYPE, "com.peck.android.models.Locale");
-                    ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
+                    ContentResolver.requestSync(LoginManager.getTemp(), PeckApp.AUTHORITY, bundle);
 
 
                     long startTime = System.currentTimeMillis();
