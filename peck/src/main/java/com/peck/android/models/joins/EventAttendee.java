@@ -13,7 +13,7 @@ import com.peck.android.models.DBOperable;
 
 @Header(singular = "event_attendee", plural = "event_attendees")
 @UriPath("event_attendees")
-public class EventAttendees extends DBOperable {
+public class EventAttendee extends DBOperable {
     public static final transient String USER_ID = "user_id";
     public static final transient String ADDED_BY = "added_by";
     public static final transient String CATEGORY = "category";

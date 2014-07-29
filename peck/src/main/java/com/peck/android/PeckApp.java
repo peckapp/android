@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -29,8 +28,8 @@ import com.peck.android.models.MenuItem;
 import com.peck.android.models.Peck;
 import com.peck.android.models.Subscription;
 import com.peck.android.models.User;
-import com.peck.android.models.joins.CircleMembers;
-import com.peck.android.models.joins.EventAttendees;
+import com.peck.android.models.joins.CircleMember;
+import com.peck.android.models.joins.EventAttendee;
 import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
@@ -57,7 +56,7 @@ public class PeckApp extends Application implements Singleton{
     public static final String AUTHORITY = "com.peck.android.provider.all";
 
     private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class, DiningPlace.class, Subscription.class,
-            CircleMembers.class, EventAttendees.class, Department.class, MenuItem.class, Club.class};
+            CircleMember.class, EventAttendee.class, Department.class, MenuItem.class, Club.class};
 
     /**
      * @param account the account to set active
@@ -205,12 +204,12 @@ public class PeckApp extends Application implements Singleton{
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
-            Picasso.with(getContext()).setLoggingEnabled(true);
+            //Picasso.with(getContext()).setLoggingEnabled(true);
 
-            SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
+            /*SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
             edit.clear();
             edit.apply();
-            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");
+            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");*/
         }
 
         FacebookSessionHandler.init();
@@ -225,6 +224,10 @@ public class PeckApp extends Application implements Singleton{
             public final static int RETRY_INTERVAL = 200;
             public final static int CONNECT_TIMEOUT = 10000;
             public final static int READ_TIMEOUT = 6000;
+
+            public final static long POLL_FREQUENCY = 1000L*60L;
+
+            public final static long LOW_PRIORITY_POLL_FREQUENCY = 1000L*60L*5L;
 
             /**
              * API strings

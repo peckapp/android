@@ -34,9 +34,11 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
+import com.peck.android.models.joins.CircleMember;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.squareup.picasso.Picasso;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -111,6 +113,7 @@ public class FeedActivity extends PeckActivity {
 
                     }
                 })
+                .orderedBy(DBOperable.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
 
@@ -125,19 +128,27 @@ public class FeedActivity extends PeckActivity {
                                         ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
 
                                         if (ret == null) {
-                                            Cursor nested = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath("circles").appendPath(
-                                                    Integer.toString(circle_id)).appendPath("users").build(), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
-                                                    "lower(" + User.FIRST_NAME + ") as lwr_index"}, null, null, "lwr_index");
+                                            Cursor first = getContentResolver().query(DBUtils.buildLocalUri(CircleMember.class), new String[]{CircleMember.CIRCLE_ID, CircleMember.LOCAL_ID,
+                                                    CircleMember.USER_ID}, CircleMember.CIRCLE_ID + " = ?", new String[]{Integer.toString(circle_id)}, null);
+
+                                            ArrayList<Integer> lst = new ArrayList<Integer>();
+                                            while (first.moveToNext()) {
+                                                lst.add(first.getInt(first.getColumnIndex(CircleMember.USER_ID)));
+                                            }
+                                            first.close();
+
+                                            Cursor second = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
+                                                    "lower(" + User.FIRST_NAME + ") as lwr_index"}, User.SV_ID + " IN (" + StringUtils.join(lst, ", ") + ")" , null, "lwr_index");
                                             ret = new ArrayList<Map<String, Object>>();
 
-                                            if (nested != null) {
-                                                while (nested.moveToNext()) {
+                                            if (second != null) {
+                                                while (second.moveToNext()) {
                                                     Map<String, Object> map = new HashMap<String, Object>();
-                                                    map.put(User.FIRST_NAME, nested.getString(nested.getColumnIndex(User.FIRST_NAME)));
-                                                    map.put(User.IMAGE_NAME, nested.getString(nested.getColumnIndex(User.IMAGE_NAME)));
+                                                    map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
+                                                    map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
                                                     ret.add(map);
                                                 }
-                                                nested.close();
+                                                second.close();
                                             }
                                             circleMembers.put(circle_id, ret);
                                         }
@@ -206,7 +217,6 @@ public class FeedActivity extends PeckActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_root);
 
-        Picasso.with(this).setLoggingEnabled(true);
         Picasso.with(this).setIndicatorsEnabled(true);
 
         for (final int i : buttons.keySet()) {
@@ -242,6 +252,11 @@ public class FeedActivity extends PeckActivity {
                                     case R.id.tv_text:
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
                                         return true;
+                                    case R.id.iv_event:
+                                        Picasso.with(FeedActivity.this)
+                                                .load(R.drawable.ic_peck)
+                                                .into((ImageView) view);
+                                        return true;
                                     default:
                                         return false;
                                 }
@@ -256,6 +271,11 @@ public class FeedActivity extends PeckActivity {
                                         DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
                                         ((TextView) view).setText(start.toString("K:mm") + " - " + end.toString("K:mm"));
                                         return true;
+                                    case R.id.iv_event:
+                                        Picasso.with(FeedActivity.this)
+                                                .load(R.drawable.ic_peck)
+                                                .into((ImageView) view);
+                                        return true;
                                     default:
                                         return false;
                                 }
@@ -269,16 +289,19 @@ public class FeedActivity extends PeckActivity {
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
                                         return true;
                                     case R.id.iv_event:
-                                        String urlPath = cursor.getString(i);
-                                        if (urlPath != null) {
+                                        String urlPath = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                        if (urlPath != null && urlPath.length() != 0) {
                                             Picasso.with(FeedActivity.this)
                                                     .load(PeckApp.Constants.Network.BASE_URL + urlPath)
                                                     .fit()
                                                     .centerCrop()
+                                                    .into((ImageView) view);
+                                        } else {
+                                            Picasso.with(FeedActivity.this)
+                                                    .load(R.drawable.ic_peck)
                                                     .into((ImageView)view);
-                                            return true;
                                         }
-                                        else return false;
+                                        return true;
                                     default:
                                         return false;
                                 }
@@ -306,7 +329,7 @@ public class FeedActivity extends PeckActivity {
             startActivity(intent);
             finish();
         } else {
-            ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, true);
+            ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
             Bundle bundle = new Bundle();
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);

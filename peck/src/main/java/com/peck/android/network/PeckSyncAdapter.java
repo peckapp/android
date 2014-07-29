@@ -43,6 +43,8 @@ import java.util.concurrent.ExecutionException;
 public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static final String SYNC_TYPE = "sync type";
+    public static final String URL = "url";
+    public static final String EVENT_TYPE = "event_type";
     final ContentResolver contentResolver;
 
     public PeckSyncAdapter(Context context, boolean autoInitialize) {
@@ -53,32 +55,99 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient client, SyncResult syncResult) {
         Log.v(PeckSyncAdapter.class.getSimpleName(), "syncing");
-        Class clss;
 
-        String s = bundle.getString(SYNC_TYPE);
+        String syncType = bundle.getString(SYNC_TYPE);
+        String urlToSync = bundle.getString(URL);
+        int eventType = bundle.getInt(EVENT_TYPE, -1);
 
         final String authToken = AccountManager.get(getContext()).peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
 
-        if (s != null) {
+        if (syncType != null) {
             try {
-                clss = Class.forName(s);
-                sync(clss, account, authority, client, syncResult);
-            } catch (Exception e) {
-                handleException(e, syncResult, authToken);
+                runSync(Class.forName(syncType), account, authority, client, syncResult, urlToSync, eventType, authToken);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Class not resolvable from name " + syncType);
             }
-
         } else for (Class clzz : PeckApp.getModelArray()) {
-            try {
-                Log.v(getClass().getSimpleName(), "initting sync for " + clzz.getSimpleName());
-                sync(clzz, account, authority, client, syncResult);
-            } catch (Exception e) {
-                handleException(e, syncResult, authToken);
-            }
+            runSync(clzz, account, authority, client, syncResult, urlToSync, eventType, authToken);
         }
-
     }
 
-    private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult)
+    private void runSync(Class tClass, Account account, String authority, ContentProviderClient client, SyncResult syncResult, String url, int eventType, String authToken) {
+        Log.v(getClass().getSimpleName(), "initting sync for " + tClass.getSimpleName());
+
+
+        try {
+            if (!tClass.equals(Event.class)) {
+                sync(tClass, account, authority, client, syncResult, url);
+            } else {
+                if (eventType == -1) {
+                    customSyncEvents(account, authority, client, syncResult, Event.SIMPLE_EVENT, true, url);
+                    customSyncEvents(account, authority, client, syncResult, Event.ATHLETIC_EVENT, false, url);
+                    customSyncEvents(account, authority, client, syncResult, Event.DINING_OPPORTUNITY, false, url);
+                    customSyncEvents(account, authority, client, syncResult, Event.ANNOUNCEMENT, true, url);
+                } else {
+                    customSyncEvents(account, authority, client, syncResult, eventType, (eventType == Event.SIMPLE_EVENT || eventType == Event.ANNOUNCEMENT), url);
+                }
+            }
+        } catch (VolleyError volleyError) {
+            if (volleyError.networkResponse != null) {
+                Log.d(getClass().getSimpleName(), respondToStatusCode(volleyError.networkResponse.statusCode));
+            }
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof VolleyError) {
+                VolleyError error = ((VolleyError) e.getCause());
+                if (error.networkResponse != null) Log.d(getClass().getSimpleName(), respondToStatusCode(error.networkResponse.statusCode));
+            }
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            syncResult.stats.numParseExceptions++;
+        } catch (IOException e) {
+            syncResult.stats.numIoExceptions++;
+        } catch (OperationCanceledException e) {
+            e.printStackTrace();
+        } catch (AuthenticatorException e) {
+            syncResult.stats.numAuthExceptions++;
+        }
+    }
+
+    public static String respondToStatusCode(int code) {
+        String ret = "Error " + code + ": ";
+
+        switch (code) {
+            case 400:
+                ret += "Bad request. Most likely malformed syntax";
+                break;
+            case 401:
+                ret += "Unauthorized.";
+                break;
+            case 403:
+                ret += "Forbidden.";
+                break;
+            case 404:
+                ret += "Not found";
+                break;
+            case 500:
+                ret += "Internal server error.";
+                break;
+            case 502:
+                ret += "Bad gateway.";
+                break;
+            default:
+                ret += "Unknown.";
+                break;
+        }
+        return ret;
+    }
+
+
+    private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
             throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException, VolleyError, IOException, OperationCanceledException, AuthenticatorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
@@ -91,14 +160,6 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svUpdated = 0;
         int svCreated = 0;
         int svDeleted = 0;
-
-        if (tClass.equals(Event.class)) {
-            customSyncEvents(account, authority, client, syncResult, "simple_event", "simple_events", Event.SIMPLE_EVENT, true);
-            customSyncEvents(account, authority, client, syncResult, "athletic_event", "athletic_events", Event.ATHLETIC_EVENT, false);
-            customSyncEvents(account, authority, client, syncResult, "dining_opportunity", "dining_opportunities", Event.DINING_OPPORTUNITY, false);
-            customSyncEvents(account, authority, client, syncResult, "announcement", "announcements", Event.ANNOUNCEMENT, true);
-            return;
-        }
 
         JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(account));
 
@@ -122,7 +183,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numEntries++;
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
-            if (match == null) { //if the incoming data doesn't contain the item
+            if (match == null && url == null) { //if the incoming data doesn't contain the item and this isn't an incremental sync
                     if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID)) && mod) {
                         //if ours was created since the last time we synced and we're allowed to modify the server's data
                         svCreated++;
@@ -199,10 +260,14 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void customSyncEvents(final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult,
-                                  final String single, final String plural, final int type, final boolean modServer)
-
+                                  final int type, final boolean modServer, final String url)
             throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException,
             VolleyError, IOException, OperationCanceledException, AuthenticatorException {
+
+        final String single = (type == Event.ANNOUNCEMENT) ? "announcement" : (type == Event.SIMPLE_EVENT) ? "simple_event" :
+                (type == Event.ATHLETIC_EVENT) ? "athletic_event" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunity" : null;
+        final String plural = (type == Event.ANNOUNCEMENT) ? "announcements" : (type == Event.SIMPLE_EVENT) ? "simple_events" :
+                (type == Event.ATHLETIC_EVENT) ? "athletic_events" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunities" : null;
 
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
         final long sResultEntries = syncResult.stats.numEntries;
@@ -305,10 +370,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         contentResolver.notifyChange(uri, null, false);
 
         client.delete(uri, null, null);
-
-
-
     }
+
 
 
     private static void handleException(Exception e, SyncResult syncResult, String authToken) {

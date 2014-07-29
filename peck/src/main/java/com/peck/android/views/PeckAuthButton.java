@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
 import android.view.View;
@@ -81,10 +82,10 @@ public class PeckAuthButton extends Button {
                                                 getContext().startActivity(intent);
                                                 fragment.getActivity().finish();
                                             } else {
+                                                ContentResolver.removePeriodicSync(PeckApp.peekValidAccount(), PeckApp.AUTHORITY, new Bundle());
                                                 PeckApp.setActiveAccount(account);
                                                 AccountManager.get(getContext()).setUserData(account, PeckAccountAuthenticator.INSTITUTION, inst_id);
-                                                ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, true);
-                                                ContentResolver.setSyncAutomatically(account, PeckApp.AUTHORITY, false);
+                                                ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
                                                 if (ContentResolver.isSyncActive(account, PeckApp.AUTHORITY) || ContentResolver.isSyncPending(account, PeckApp.AUTHORITY))
                                                     ContentResolver.cancelSync(account, PeckApp.AUTHORITY);
                                                 DatabaseManager.closeDB();

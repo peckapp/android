@@ -13,7 +13,7 @@ import com.peck.android.models.DBOperable;
 
 @Header(plural = "circle_members", singular = "circle_member")
 @UriPath("circle_members")
-public class CircleMembers extends DBOperable {
+public class CircleMember extends DBOperable {
     public static final transient String CIRCLE_ID = "circle_id";
     public static final transient String USER_ID = "user_id";
     public static final transient String INVITED_BY = "invited_by";
