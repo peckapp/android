@@ -11,6 +11,7 @@
         android:layout_height="180dp"
         android:id="@+id/et_announce"
         android:enabled="true"
-        android:inputType="textShortMessage|text|textMultiLine|textCapSentences|textLongMessage|textAutoCorrect" />
+        android:inputType="textShortMessage|text|textMultiLine|textCapSentences|textLongMessage|textAutoCorrect"
+        />
 
 </LinearLayout>

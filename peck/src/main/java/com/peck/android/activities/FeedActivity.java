@@ -236,7 +236,8 @@ public class FeedActivity extends PeckActivity {
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event})
                 .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
-                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL})
+                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT})
+                .orderedBy(Event.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
@@ -298,6 +299,17 @@ public class FeedActivity extends PeckActivity {
                                                     .load(R.drawable.ic_peck)
                                                     .into((ImageView)view);
                                         }
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            case Event.ANNOUNCEMENT:
+                                switch (view.getId()) {
+                                    case R.id.tv_title:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TITLE)));
+                                        return true;
+                                    case R.id.tv_text:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TEXT)));
                                         return true;
                                     default:
                                         return false;
