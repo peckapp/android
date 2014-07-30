@@ -54,10 +54,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                                 }
                             });
                         } catch (OperationCanceledException e) {
-                            LoginManager.cleanInvalid();
                             e.printStackTrace();
                         } catch (IOException e) {
-                            LoginManager.cleanInvalid();
                             e.printStackTrace();
                         }
                         return null;
@@ -66,7 +64,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     @Override
                     protected void onPostExecute(Void avoid) {
                         //todo: finish the activity
-                        LoginManager.cleanInvalid();
 
                     }
 

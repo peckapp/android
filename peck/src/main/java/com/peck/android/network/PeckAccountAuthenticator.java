@@ -10,7 +10,6 @@ import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.google.gson.JsonObject;
@@ -20,7 +19,6 @@ import com.peck.android.managers.LoginManager;
 import com.peck.android.models.User;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,6 +46,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
     public static final String EMAIL = "email";
     public static final String API_KEY = "api_key";
     public static final String INSTITUTION = "institution_id";
+    public static final String AUTH_TOKEN = "authentication_token";
     public static final String TOKEN_TYPE = "peck_internal";
 
     @Override
@@ -77,7 +76,6 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
         Bundle ret = new Bundle();
         ret.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
         ret.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-        ret.putString(AccountManager.KEY_AUTH_TOKEN_LABEL, TOKEN_TYPE);
 
         if (cachedToken != null) {
             ret.putString(AccountManager.KEY_AUTHTOKEN, cachedToken);
@@ -96,9 +94,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
 
                 JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
 
-                ret.putString(AccountManager.KEY_AUTHTOKEN, jsonRet.get("authentication_token").getAsString());
-
-                Log.e("Authenticator", new JSONObject(ret.toString()).toString(4));
+                ret.putString(AccountManager.KEY_AUTHTOKEN, ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString());
 
                 return ret;
             } catch (InterruptedException e) {

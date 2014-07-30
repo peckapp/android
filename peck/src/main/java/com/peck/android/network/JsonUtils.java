@@ -113,7 +113,7 @@ public class JsonUtils {
 
         String authToken = null;
         if (!account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
-            authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, true);
+            authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, false);
         }
 
         if (authToken != null) auth.put("authentication[authentication_token]", authToken);

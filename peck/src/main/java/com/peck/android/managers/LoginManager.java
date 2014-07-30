@@ -2,9 +2,14 @@ package com.peck.android.managers;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -94,22 +99,52 @@ public class LoginManager {
         String token = accountManager.peekAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE);
         if (token != null) accountManager.invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, token);
 
+        if (Looper.myLooper() == null) Looper.prepare();
+        Handler handler = new Handler();
+        Looper.loop();
+
+        final Account newTemp = temp;
+
+        accountManager.getAuthToken(newTemp, PeckAccountAuthenticator.TOKEN_TYPE, null, false, new AccountManagerCallback<Bundle>() {
+            @Override
+            public void run(AccountManagerFuture<Bundle> bundleAccountManagerFuture) {
+                try {
+                    String token = bundleAccountManagerFuture.getResult().getString(AccountManager.KEY_AUTHTOKEN, null);
+                    if (token == null) {
+                        accountManager.clearPassword(newTemp);
+                        accountManager.removeAccount(newTemp, null, null);
+                    } else {
+                        accountManager.setAuthToken(newTemp, PeckAccountAuthenticator.TOKEN_TYPE, token);
+                        setActiveAccount(newTemp);
+                    }
+
+
+                } catch (OperationCanceledException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (AuthenticatorException e) {
+                    e.printStackTrace();
+                } finally {
+                    cleanInvalid();
+                    Looper.myLooper().quit();
+                }
+
+            }
+        }, handler);
+
+
+
+/*
         token = null;
         try {
-            token = accountManager.blockingGetAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, true);
+            token = accountManager.blockingGetAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, false);
         } catch (AuthenticatorException e) {
             throw new OperationCanceledException("Authenticator failed to respond.");
         }
+*/
 
-        if (token == null) {
-            accountManager.clearPassword(temp);
-            accountManager.removeAccount(temp, null, null);
-            return false;
-        } else {
-            accountManager.setAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, token);
-            setActiveAccount(temp);
-            return true;
-        }
+        return true;
 
     }
 
@@ -151,25 +186,21 @@ public class LoginManager {
 
             if (errors.size() > 0) Log.e(LoginManager.class.getSimpleName(), errors.toString());
 
-            setActiveAccount(temp);
-
             accountManager.setUserData(temp, PeckAccountAuthenticator.EMAIL, user.get(User.EMAIL).getAsString());
             accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, user.get(User.LOCALE).getAsString());
             accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, accountManager.getUserData(authAccount, PeckAccountAuthenticator.API_KEY));
+            accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, user.get(User.SV_ID).getAsString());
             String token = user.get("authentication_token").getAsString();
             Log.v(LoginManager.class.getSimpleName(), token);
             accountManager.setAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, token);
             accountManager.setPassword(temp, password);
 
-            LoginManager.logAccount(temp);
-
+            setActiveAccount(temp);
             clearTemp();
 
             while (!hasTemp()) {
                 createTemp();
             }
-            Log.v(LoginManager.class.getSimpleName(), "temp account created");
-            logAccount(getTemp());
 
             return true;
         } catch (IOException e) {
@@ -206,7 +237,7 @@ public class LoginManager {
         int removed = 0;
         HashMap<String, Account> accounts = getAccounts();
         for (Account account : accounts.values()) {
-            if (!isValid(account) && !account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
+            if (!isValid(account) && !account.name.equals(PeckAccountAuthenticator.TEMP_NAME) || (account.name.equals(PeckAccountAuthenticator.TEMP_NAME) && !isValidTemp(account))) {
                 accountManager.removeAccount(account, null, null);
                 removed++;
             }
@@ -287,6 +318,8 @@ public class LoginManager {
         PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, name).apply();
         Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
         logAccount(getAccounts().get(name));
+
+
     }
 
     private static synchronized void setActiveAccount(Account account) {
