@@ -10,6 +10,7 @@ import com.android.volley.toolbox.RequestFuture;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
+import com.peck.android.managers.LoginManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,8 +44,20 @@ public class ServerCommunicator {
             }
         };
 
-        PeckApp.getRequestQueue().add(request);
-        return ((JsonObject)new JsonParser().parse(future.get().toString()));
+        try {
+            PeckApp.getRequestQueue().add(request);
+            return ((JsonObject) new JsonParser().parse(future.get().toString()));
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof VolleyError) {
+                VolleyError error = ((VolleyError) e.getCause());
+                if (error.networkResponse.statusCode == 401 && auth.containsKey(PeckAccountAuthenticator.AUTH_TOKEN)) {
+                    LoginManager.invalidateAuthToken(auth.get(PeckAccountAuthenticator.EMAIL));
+                }
+                throw error;
+            } else {
+                throw e;
+            }
+        }
     }
 
     public static JsonObject get(String url, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {

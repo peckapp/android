@@ -275,27 +275,54 @@ public class LoginManager {
     /**
      * invalidate the auth token for a given account
      * @param account the account to invalidate
+     * @return true if successful
      */
-    public static synchronized void invalidateAuthToken(Account account) {
-        accountManager.setUserData(account, PeckAccountAuthenticator.AUTH_TOKEN, null);
+    public static synchronized boolean invalidateAuthToken(@Nullable Account account) {
+        if (account != null) {
+            accountManager.setUserData(account, PeckAccountAuthenticator.AUTH_TOKEN, null);
+            return true;
+        }
+        return false;
     }
+
+    /**
+     * invalidate auth token for the account with the given name
+     * @param accountName the account's name
+     * @return true if successful
+     */
+    public static synchronized boolean invalidateAuthToken(@Nullable String accountName) {
+        if (accountName != null) {
+            Account invalidated = getAccounts().get(accountName);
+            if (invalidated != null) return invalidateAuthToken(invalidated);
+        }
+        return false;
+    }
+
 
     public static synchronized void setAuthToken(Account account, String token) {
         accountManager.setUserData(account, PeckAccountAuthenticator.AUTH_TOKEN, token);
     }
 
 
+    /**
+     * clears all data from the temporary account if it isn't the active account
+     * sets the account's locale to the currently active locale
+     */
     public static synchronized void clearTemp() {
         Account temp = getTemp();
-        if (temp != null) {
+        if (temp != null && !temp.equals(getActive())) {
             accountManager.setPassword(temp, null);
-            accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.EMAIL, null);
             accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, null);
             accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, null);
-            accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, null);
+            accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, getLocale());
+            if (accountManager.getUserData(temp, PeckAccountAuthenticator.AUTH_TOKEN) != null) throw new RuntimeException("Temporary account had an auth token.", new InvalidAccountException());
         }
     }
 
+    /**
+     * cleans out all invalid accounts from the {@link android.accounts.AccountManager}
+     */
     public static synchronized void cleanInvalid() {
         int removed = 0;
         HashMap<String, Account> accounts = getAccounts();
