@@ -9,8 +9,9 @@
 
     <ImageView
         android:src="@drawable/ic_peck"
-        android:layout_width="wrap_content"
-        android:id="@+id/riv_user"
+        android:layout_width="0dp"
+        android:layout_weight="2"
+        android:id="@+id/iv_event"
         android:scaleType="centerCrop"
         android:layout_height="match_parent"
         android:layout_gravity="center"/>

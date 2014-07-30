@@ -58,6 +58,8 @@ dependencies {
     compile 'com.squareup:otto:+'
     compile 'org.apache.commons:commons-lang3:+'
     compile 'commons-io:commons-io:+'
+    compile 'commons-validator:commons-validator:+'
+    compile 'joda-time:joda-time:+'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     

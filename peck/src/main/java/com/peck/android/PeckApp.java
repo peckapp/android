@@ -2,24 +2,28 @@ package com.peck.android;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.peck.android.annotations.Header;
-import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.Singleton;
-import com.peck.android.managers.PeckSessionHandler;
+import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
+import com.peck.android.models.Club;
 import com.peck.android.models.Comment;
+import com.peck.android.models.Department;
+import com.peck.android.models.DiningPlace;
 import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
+import com.peck.android.models.MenuItem;
 import com.peck.android.models.Peck;
+import com.peck.android.models.Subscription;
 import com.peck.android.models.User;
+import com.peck.android.models.joins.CircleMember;
+import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.impl.client.HttpClients;
@@ -37,27 +41,20 @@ public class PeckApp extends Application implements Singleton{
         return AppContext.mContext;
     }
 
-    private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class };
+    public static final String AUTHORITY = "com.peck.android.provider.all";
+
+    private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class, DiningPlace.class, Subscription.class,
+            CircleMember.class, EventAttendee.class, Department.class, MenuItem.class, Club.class};
+
 
     public static Class[] getModelArray() {
         return MODELS;
     }
 
-    public static Uri buildLocalUri(Class tClass) {
-        return Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(tClass)).build();
-    }
-
     public static String buildEndpointURL(Class tClass) {
         Header header = (Header)tClass.getAnnotation(Header.class);
         if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        return Constants.Network.ENDPOINT + header.plural() + "/";
-    }
-
-    public static String getJsonHeader(Class tClass, boolean plural) {
-        Header header = (Header)tClass.getAnnotation(Header.class);
-        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        if (plural) return header.plural();
-        else return header.singular();
+        return Constants.Network.API_ENDPOINT + header.plural() + "/";
     }
 
 
@@ -71,26 +68,21 @@ public class PeckApp extends Application implements Singleton{
 
     public void onCreate() {
 
+        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         AppContext.init(this);
         Crashlytics.start(this);
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
-            Picasso.with(getContext()).setLoggingEnabled(true);
+            //Picasso.with(getContext()).setLoggingEnabled(true);
 
-            /*synchronized (DatabaseManager.class) {
-                DatabaseManager.closeDB();
-                getContext().deleteDatabase(PeckApp.Constants.Database.DATABASE_NAME);
-            }
-*/
-            SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
+            /*SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
             edit.clear();
             edit.apply();
-            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");
+            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");*/
         }
 
-        PeckSessionHandler.init();
-
+        FacebookSessionHandler.init();
     }
 
 
@@ -100,19 +92,23 @@ public class PeckApp extends Application implements Singleton{
         public final static class Network {
 
             public final static int RETRY_INTERVAL = 200;
-            public final static int CONNECT_TIMEOUT = 5000;
+            public final static int CONNECT_TIMEOUT = 10000;
             public final static int READ_TIMEOUT = 6000;
+
+            public final static long POLL_FREQUENCY = 1000L*60L;
+
+            public final static long LOW_PRIORITY_POLL_FREQUENCY = 1000L*60L*5L;
 
             /**
              * API strings
              */
-            public final static String ENDPOINT = "http://thor.peckapp.com:3500/api/";
+            public final static String BASE_URL = "http://loki.peckapp.com:3500";
+            public final static String API_ENDPOINT = BASE_URL + "/api/";
 
         }
 
         public final static class Preferences {
             public final static String USER_PREFS = "user preferences";
-            public final static String USER_ID = "persistent user id";
             public final static String LOCALE_ID = "persistent locale id";
         }
 

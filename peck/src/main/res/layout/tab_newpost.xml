@@ -5,15 +5,12 @@
     style="@style/tab_ll">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/et_post_title"
-        android:singleLine="true"
-        android:hint="@string/newPost"
-        android:textSize="36sp"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:id="@+id/iv_select"
+        android:src="@drawable/ic_peck"
+        android:scaleType="centerCrop"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -36,17 +33,10 @@
             android:layout_weight="1"
             style="?android:attr/buttonBarButtonStyle" />
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="@dimen/bt_post_height"
-            android:text="@string/bt_photo"
-            android:id="@+id/bt_photo"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"

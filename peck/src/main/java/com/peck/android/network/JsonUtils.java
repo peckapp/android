@@ -1,17 +1,26 @@
-package com.peck.android.json;
+package com.peck.android.network;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.NetworkErrorException;
+import android.accounts.OperationCanceledException;
 import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
+import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
+import com.peck.android.managers.LoginManager;
 
-import org.json.JSONException;
-
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -85,9 +94,43 @@ public class JsonUtils {
         return object;
     }
 
-    public static JsonObject wrapJson(Class tClass, JsonObject object) throws JSONException {
-        JsonObject wrapper = new JsonObject();
-        wrapper.add(PeckApp.getJsonHeader(tClass, false), object);
-        return wrapper;
+    public static JsonObject wrapJson(String objHeader, JsonObject object) {
+        JsonObject ret = new JsonObject();
+        ret.add(objHeader, object);
+        return ret;
+    }
+
+    /**
+     * blocking method to build authentication parameters
+     *
+     * @param account the authenticating account
+     * @return the authentication map
+     */
+    public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
+        if (account == null) return new HashMap<String, String>();
+        else if (!LoginManager.isValid(account) && !LoginManager.isValidTemp(account)) throw new LoginManager.InvalidAccountException();
+        AccountManager accountManager = AccountManager.get(PeckApp.getContext());
+        Map<String, String> auth = new HashMap<String, String>();
+        String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
+        if (BuildConfig.DEBUG && apiKey == null) { throw new AuthenticatorException("API key can't be null"); }
+
+        String authToken = null;
+        if (!account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
+            authToken = LoginManager.getAuthToken(account);
+        }
+
+        if (authToken != null) auth.put("authentication[authentication_token]", authToken);
+        auth.put("authentication[user_id]", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
+        auth.put("authentication[institution_id]", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+        auth.put("authentication[api_key]", apiKey);
+
+        return auth;
+    }
+
+    public static String getJsonHeader(Class tClass, boolean plural) {
+        Header header = (Header)tClass.getAnnotation(Header.class);
+        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
+        if (plural) return header.plural();
+        else return header.singular();
     }
 }
