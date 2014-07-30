@@ -5,7 +5,9 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -114,7 +116,7 @@ public class LoginManager {
             } else {
                 accountManager.setUserData(temp, PeckAccountAuthenticator.EMAIL, user.get(User.EMAIL).getAsString());
                 accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, user.get(User.LOCALE).getAsString());
-                accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, accountManager.getUserData(authAccount, PeckAccountAuthenticator.API_KEY));
+                accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, user.get(PeckAccountAuthenticator.API_KEY).getAsString());
                 accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, user.get(User.SV_ID).getAsString());
                 setAuthToken(temp, token);
                 accountManager.setPassword(temp, password);
@@ -375,16 +377,24 @@ public class LoginManager {
         return account;
     }
 
-    private static synchronized void setActiveAccount(@Nullable String name) {
-        PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, name).apply();
-        Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
-        logAccount(getAccounts().get(name));
-
-
+    private static synchronized void setActiveAccount(@Nullable String name) throws InvalidAccountException {
+        setActiveAccount(getAccounts().get(name));
     }
 
-    private static synchronized void setActiveAccount(@Nullable Account account) {
-        setActiveAccount((account == null) ? null : account.name);
+    private static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
+        Account active = getActive();
+        if (account == null) {
+            ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
+            PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, null).apply();
+            Log.v(LoginManager.class.getSimpleName(), "Active account removed.");
+            ContentResolver.addPeriodicSync(getTemp(), PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
+        } else if (isValid(account)) {
+            ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
+            ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
+            PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, account.name).apply();
+            Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
+            logAccount(account);
+        }
     }
 
     /**
