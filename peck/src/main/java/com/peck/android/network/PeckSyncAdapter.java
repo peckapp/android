@@ -1,8 +1,8 @@
 package com.peck.android.network;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
+import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
 import com.peck.android.annotations.NoMod;
 import com.peck.android.database.DBUtils;
+import com.peck.android.managers.LoginManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 
@@ -59,7 +60,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         String urlToSync = bundle.getString(URL);
         int eventType = bundle.getInt(EVENT_TYPE, -1);
 
-        final String authToken = AccountManager.get(getContext()).peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
+        String authToken = null;
+        authToken = LoginManager.peekAuthToken(account);
 
         if (syncType != null) {
             try {
@@ -113,6 +115,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
             syncResult.stats.numAuthExceptions++;
+        } catch (NetworkErrorException e) {
+            syncResult.stats.numIoExceptions++;
+        } catch (LoginManager.InvalidAccountException e) {
+            e.printStackTrace();
         }
     }
 
@@ -147,7 +153,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException, VolleyError, IOException, OperationCanceledException, AuthenticatorException {
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException, VolleyError, IOException, OperationCanceledException, AuthenticatorException,
+            LoginManager.InvalidAccountException, NetworkErrorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
         final long sResultEntries = syncResult.stats.numEntries;
@@ -183,19 +190,19 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
             if (match == null && url == null) { //if the incoming data doesn't contain the item and this isn't an incremental sync
-                    if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID)) && mod) {
-                        //if ours was created since the last time we synced and we're allowed to modify the server's data
-                        svCreated++;
+                if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID)) && mod) {
+                    //if ours was created since the last time we synced and we're allowed to modify the server's data
+                    svCreated++;
 
-                        //post.add(JsonUtils.cursorToJson(cursor));
-                        ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    //post.add(JsonUtils.cursorToJson(cursor));
+                    ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
 
-                    } else {
-                        //if it's older and we haven't updated it, just delete it
-                        syncResult.stats.numDeletes++;
-                        batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
-                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
-                    }
+                } else {
+                    //if it's older and we haven't updated it, just delete it
+                    syncResult.stats.numDeletes++;
+                    batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
+                            Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
+                }
 
 
             } else {
@@ -261,7 +268,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     private void customSyncEvents(final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult,
                                   final int type, final boolean modServer, final String url)
             throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException,
-            VolleyError, IOException, OperationCanceledException, AuthenticatorException {
+            VolleyError, IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
 
         final String single = (type == Event.ANNOUNCEMENT) ? "announcement" : (type == Event.SIMPLE_EVENT) ? "simple_event" :
                 (type == Event.ATHLETIC_EVENT) ? "athletic_event" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunity" : null;

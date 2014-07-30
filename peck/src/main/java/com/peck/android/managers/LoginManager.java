@@ -2,14 +2,10 @@ package com.peck.android.managers;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
+import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -27,6 +23,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -63,6 +60,7 @@ public class LoginManager {
         }
     }
     public static class AccountAlreadyExistsException extends Exception {}
+    public static class InvalidAccountException extends Exception {}
 
     /**
      *
@@ -83,6 +81,7 @@ public class LoginManager {
         }
 
         Account temp;
+        final Account authAccount = getActive();
         HashMap<String, Account> accounts = getAccounts();
 
         if (!hasTemp()) throw new OperationCanceledException("temp account didn't exist");
@@ -96,54 +95,47 @@ public class LoginManager {
             if (!accountManager.addAccountExplicitly(temp, password, null)) throw new OperationCanceledException();
         }
 
-        String token = accountManager.peekAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE);
-        if (token != null) accountManager.invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, token);
+        invalidateAuthToken(temp);
 
-        if (Looper.myLooper() == null) Looper.prepare();
-        Handler handler = new Handler();
-        Looper.loop();
+        try {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("user[password]", accountManager.getPassword(temp));
+            map.put("user[email]", temp.name);
+            map.putAll(JsonUtils.auth(authAccount));
 
-        final Account newTemp = temp;
+            JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
+            JsonObject user = ((JsonObject) jsonRet.get("user"));
 
-        accountManager.getAuthToken(newTemp, PeckAccountAuthenticator.TOKEN_TYPE, null, false, new AccountManagerCallback<Bundle>() {
-            @Override
-            public void run(AccountManagerFuture<Bundle> bundleAccountManagerFuture) {
-                try {
-                    String token = bundleAccountManagerFuture.getResult().getString(AccountManager.KEY_AUTHTOKEN, null);
-                    if (token == null) {
-                        accountManager.clearPassword(newTemp);
-                        accountManager.removeAccount(newTemp, null, null);
-                    } else {
-                        accountManager.setAuthToken(newTemp, PeckAccountAuthenticator.TOKEN_TYPE, token);
-                        setActiveAccount(newTemp);
-                    }
+            String token = user.get(PeckAccountAuthenticator.AUTH_TOKEN).getAsString();
 
-
-                } catch (OperationCanceledException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (AuthenticatorException e) {
-                    e.printStackTrace();
-                } finally {
-                    cleanInvalid();
-                    Looper.myLooper().quit();
-                }
+            if (token == null) {
+                accountManager.clearPassword(temp);
+                accountManager.removeAccount(temp, null, null);
+            } else {
+                accountManager.setUserData(temp, PeckAccountAuthenticator.EMAIL, user.get(User.EMAIL).getAsString());
+                accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, user.get(User.LOCALE).getAsString());
+                accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, accountManager.getUserData(authAccount, PeckAccountAuthenticator.API_KEY));
+                accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, user.get(User.SV_ID).getAsString());
+                setAuthToken(temp, token);
+                accountManager.setPassword(temp, password);
+                setActiveAccount(temp);
 
             }
-        }, handler);
-
-
-
-/*
-        token = null;
-        try {
-            token = accountManager.blockingGetAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, false);
+        } catch (NetworkErrorException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (VolleyError e) {
+            e.printStackTrace();
         } catch (AuthenticatorException e) {
-            throw new OperationCanceledException("Authenticator failed to respond.");
+            e.printStackTrace();
+        } catch (InvalidAccountException e) {
+            e.printStackTrace();
         }
-*/
-
         return true;
 
     }
@@ -190,9 +182,7 @@ public class LoginManager {
             accountManager.setUserData(temp, PeckAccountAuthenticator.INSTITUTION, user.get(User.LOCALE).getAsString());
             accountManager.setUserData(temp, PeckAccountAuthenticator.API_KEY, accountManager.getUserData(authAccount, PeckAccountAuthenticator.API_KEY));
             accountManager.setUserData(temp, PeckAccountAuthenticator.USER_ID, user.get(User.SV_ID).getAsString());
-            String token = user.get("authentication_token").getAsString();
-            Log.v(LoginManager.class.getSimpleName(), token);
-            accountManager.setAuthToken(temp, PeckAccountAuthenticator.TOKEN_TYPE, token);
+            setAuthToken(temp, user.get(PeckAccountAuthenticator.AUTH_TOKEN).getAsString());
             accountManager.setPassword(temp, password);
 
             setActiveAccount(temp);
@@ -217,10 +207,81 @@ public class LoginManager {
             e.printStackTrace();
         } catch (VolleyError volleyError) {
             volleyError.printStackTrace();
+        } catch (InvalidAccountException e) {
+            e.printStackTrace();
+        } catch (NetworkErrorException e) {
+            e.printStackTrace();
         }
 
         return false;
     }
+
+    /**
+     * @param account the account to check
+     * @return the cached value for the account's auth token
+     */
+    public static synchronized String peekAuthToken(Account account) {
+        return accountManager.getUserData(account, PeckAccountAuthenticator.AUTH_TOKEN);
+    }
+
+    /**
+     * blocking method to get an auth token for the given account. if the cached token is valid, we return it immediately.
+     * do not call on the main thread.
+     *
+     * @param account the account
+     * @return the account's token, null on failure
+     */
+    public static synchronized String getAuthToken(Account account) throws NetworkErrorException {
+        if (peekAuthToken(account) != null) return peekAuthToken(account);
+        try {
+            Account authAccount = LoginManager.getTemp();
+            if (authAccount == null) throw new RuntimeException("LoginManager had null temp account");
+
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("user[password]", accountManager.getPassword(account));
+            map.put("user[email]", account.name);
+            try {
+                map.putAll(JsonUtils.auth(authAccount));
+            } catch (InvalidAccountException e) {
+                e.printStackTrace();
+            }
+
+            JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
+
+            String token = ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString();
+            setAuthToken(account, token);
+            return token;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (OperationCanceledException e) {
+            e.printStackTrace();
+        } catch (AuthenticatorException e) {
+            e.printStackTrace();
+        } catch (VolleyError e) {
+            throw new NetworkErrorException(e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof VolleyError) throw new NetworkErrorException(e);
+            else e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * invalidate the auth token for a given account
+     * @param account the account to invalidate
+     */
+    public static synchronized void invalidateAuthToken(Account account) {
+        accountManager.setUserData(account, PeckAccountAuthenticator.AUTH_TOKEN, null);
+    }
+
+    public static synchronized void setAuthToken(Account account, String token) {
+        accountManager.setUserData(account, PeckAccountAuthenticator.AUTH_TOKEN, token);
+    }
+
 
     public static synchronized void clearTemp() {
         Account temp = getTemp();
@@ -245,18 +306,16 @@ public class LoginManager {
         Log.v(LoginManager.class.getSimpleName(), removed + " invalid accounts removed.");
     }
 
-    public static synchronized void logout(Account account) {
+    public static synchronized void logout(Account account) throws InvalidAccountException {
+        if (!isValid(account)) throw new InvalidAccountException();
         logout(account.name);
     }
 
-    public static synchronized void logout(String email) {
-        HashMap<String, Account> accounts = getAccounts();
-        Account account = accounts.get(email);
-        if (account != null) {
-            String token = accountManager.peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE);
-            if (token != null) accountManager.invalidateAuthToken(PeckAccountAuthenticator.ACCOUNT_TYPE, token);
-        }
-        PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, null).apply();
+    public static synchronized void logout(String email) throws InvalidAccountException {
+        Account account = getAccounts().get(email);
+        if (!isValid(account)) throw new InvalidAccountException();
+        invalidateAuthToken(account);
+        setActiveAccount((Account)null);
     }
 
     public static synchronized boolean hasTemp() {
@@ -285,14 +344,13 @@ public class LoginManager {
      * checks the validity of a given account.
      *
      * @param account the account to check
-     * @return true if the account is registered in the account manager && it has an api key && it has an institution
+     * @return true if the account is registered in the account manager && it has an api key && it has an institution && it has a user id
      */
-
-    public static synchronized boolean isValid(Account account) {
+    public static synchronized boolean isValid(@Nullable Account account) {
         if (account == null) return false;
         HashMap<String, Account> accounts = getAccounts();
         return (accounts.containsKey(account.name) && accounts.get(account.name).equals(account) && accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) != null
-                && accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null);
+                && accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID) != null && accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION) != null);
     }
 
     private static synchronized HashMap<String, Account> getAccounts() {
@@ -303,18 +361,21 @@ public class LoginManager {
         return ret;
     }
 
+    /**
+     * method to get the currently active account.
+     * @return the valid account specified when setActive was last called, or the temp account if none is available. null if there is no temp account.
+     */
     public static synchronized Account getActive() {
         HashMap<String, Account> accounts = getAccounts();
         String active = PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getString(ACTIVE_ACCOUNT, PeckAccountAuthenticator.TEMP_NAME);
         Account account = accounts.get(active);
-        if (account != null && !account.name.equals(PeckAccountAuthenticator.TEMP_NAME) && !isValid(account)) account = null;
-
+        if (!isValid(account)) account = null;
         if (account == null && hasTemp()) account = getTemp();
 
         return account;
     }
 
-    private static synchronized void setActiveAccount(String name) {
+    private static synchronized void setActiveAccount(@Nullable String name) {
         PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, name).apply();
         Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
         logAccount(getAccounts().get(name));
@@ -322,8 +383,8 @@ public class LoginManager {
 
     }
 
-    private static synchronized void setActiveAccount(Account account) {
-        setActiveAccount(account.name);
+    private static synchronized void setActiveAccount(@Nullable Account account) {
+        setActiveAccount((account == null) ? null : account.name);
     }
 
     /**
@@ -391,7 +452,7 @@ public class LoginManager {
         String email = accountManager.getUserData(account, PeckAccountAuthenticator.EMAIL);
         String password = (accountManager.getPassword(account) == null) ? "null" : "set";
         String api_key = (accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) == null) ? "null" : "set";
-        String auth_token = (accountManager.peekAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE) == null) ? "null" : "set";
+        String auth_token = (peekAuthToken(account) == null) ? "null" : "set";
         Log.d("Account Log", String.format(" \nAccount %s \n" +
                 "type            %s\n" +
                 "user_id         %s\n" +

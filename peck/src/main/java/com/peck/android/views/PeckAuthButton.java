@@ -37,7 +37,7 @@ public class PeckAuthButton extends Button {
         String btnText;
         View.OnClickListener onClickListener;
         final Account account = LoginManager.getActive();
-        if (LoginManager.isValid(account)) {
+        if (!LoginManager.isValid(account) || LoginManager.isValidTemp(account)) {
             btnText = fragment.getActivity().getString(R.string.bt_peck_login);
             fragment.getActivity().findViewById(R.id.bt_fb_link).setVisibility(View.GONE);
             onClickListener = (new View.OnClickListener() {
@@ -58,7 +58,11 @@ public class PeckAuthButton extends Button {
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    LoginManager.logout(account);
+                                    try {
+                                        LoginManager.logout(account);
+                                    } catch (LoginManager.InvalidAccountException e) {
+                                        e.printStackTrace();
+                                    }
                                     update();
                                 }
                             }).create().show();

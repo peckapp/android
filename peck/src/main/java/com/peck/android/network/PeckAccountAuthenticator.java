@@ -4,26 +4,13 @@ import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
-import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.volley.VolleyError;
-import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
 import com.peck.android.activities.LoginActivity;
-import com.peck.android.managers.LoginManager;
-import com.peck.android.models.User;
-
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mammothbane on 7/15/2014.
@@ -71,51 +58,7 @@ public class PeckAccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String s, Bundle bundle) throws NetworkErrorException {
-        AccountManager actMgr = AccountManager.get(context);
-        String cachedToken = actMgr.peekAuthToken(account, TOKEN_TYPE);
-        Bundle ret = new Bundle();
-        ret.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
-        ret.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-
-        if (cachedToken != null) {
-            ret.putString(AccountManager.KEY_AUTHTOKEN, cachedToken);
-            return ret;
-        }
-
-        if (actMgr.getUserData(account, USER_ID) != null) {
-            try {
-                Account authAccount = LoginManager.getTemp();
-                if (authAccount == null) throw new RuntimeException("LoginManager had null temp account");
-
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("user[password]", actMgr.getPassword(account));
-                map.put("user[email]", actMgr.getUserData(account, PeckAccountAuthenticator.EMAIL));
-                map.putAll(JsonUtils.auth(authAccount));
-
-                JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
-
-                ret.putString(AccountManager.KEY_AUTHTOKEN, ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString());
-
-                return ret;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (OperationCanceledException e) {
-                e.printStackTrace();
-            } catch (AuthenticatorException e) {
-                e.printStackTrace();
-            } catch (VolleyError e) {
-                throw new NetworkErrorException(e);
-            } catch (ExecutionException e) {
-                if (e.getCause() instanceof VolleyError) throw new NetworkErrorException(e);
-                else e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public static synchronized String getUserId() {

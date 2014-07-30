@@ -3,6 +3,7 @@ package com.peck.android.network;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
+import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
+import com.peck.android.managers.LoginManager;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -104,8 +106,9 @@ public class JsonUtils {
      * @param account the authenticating account
      * @return the authentication map
      */
-    public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException {
+    public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
         if (account == null) return new HashMap<String, String>();
+        else if (!LoginManager.isValid(account) && !LoginManager.isValidTemp(account)) throw new LoginManager.InvalidAccountException();
         AccountManager accountManager = AccountManager.get(PeckApp.getContext());
         Map<String, String> auth = new HashMap<String, String>();
         String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
@@ -113,7 +116,7 @@ public class JsonUtils {
 
         String authToken = null;
         if (!account.name.equals(PeckAccountAuthenticator.TEMP_NAME)) {
-            authToken = accountManager.blockingGetAuthToken(account, PeckAccountAuthenticator.TOKEN_TYPE, false);
+            authToken = LoginManager.getAuthToken(account);
         }
 
         if (authToken != null) auth.put("authentication[authentication_token]", authToken);
