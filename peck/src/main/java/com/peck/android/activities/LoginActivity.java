@@ -62,9 +62,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     }
 
                     @Override
-                    protected void onPostExecute(Void avoid) {
+                    protected void onPostExecute(Void result) {
                         //todo: finish the activity
-
+                        if (!isFinishing() && !LoginManager.isValidTemp(LoginManager.getActive())) finish();
+                        else Toast.makeText(LoginActivity.this, "Login failed.", Toast.LENGTH_LONG).show();
                     }
 
                 }.execute();
@@ -120,8 +121,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         }
 
                         @Override
-                        protected void onPostExecute(Void aVoid) {
+                        protected void onPostExecute(Void result) {
                             LoginManager.cleanInvalid();
+                            if (!isFinishing() && !LoginManager.isValidTemp(LoginManager.getActive())) finish();
+                            else Toast.makeText(LoginActivity.this, "Account creation failed.", Toast.LENGTH_LONG).show();
                         }
                     }.execute();
                 }
