@@ -162,8 +162,8 @@ public class NewPostTab extends Fragment {
         view.findViewById(R.id.iv_select).setOnClickListener(new ImagePickerListener(this));
         bar = ((ProgressBar) view.findViewById(R.id.pb_network));
 
-        if (getChildFragmentManager().findFragmentByTag("start") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector()).commit();
-        if (getChildFragmentManager().findFragmentByTag("end") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector()).commit();
+        if (getChildFragmentManager().findFragmentByTag("start") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector(), "start").commit();
+        if (getChildFragmentManager().findFragmentByTag("end") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector(), "end").commit();
 
         view.findViewById(R.id.bt_post).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,8 +189,8 @@ public class NewPostTab extends Fragment {
                             //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
                             event.addProperty(Event.TEXT, text);
-                            event.addProperty(Event.START_DATE, (((DateSelector) getActivity().getSupportFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
-                            event.addProperty(Event.END_DATE, (((DateSelector) getActivity().getSupportFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
+                            event.addProperty(Event.START_DATE, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
+                            event.addProperty(Event.END_DATE, (((DateSelector)getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
                             event.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
                             event.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("simple_event", event));

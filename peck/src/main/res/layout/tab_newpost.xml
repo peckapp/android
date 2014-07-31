@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -104,18 +102,6 @@
             android:layout_gravity="center_horizontal"
             android:id="@+id/post_content"
             android:visibility="visible">
-
-            <fragment android:name="com.peck.android.fragments.DateSelector"
-                android:tag="start"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/frag_date_selector" />
-            <fragment android:name="com.peck.android.fragments.DateSelector"
-                android:layout_gravity="center_horizontal"
-                android:tag="end"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/frag_date_selector" />
 
         </LinearLayout>
 
