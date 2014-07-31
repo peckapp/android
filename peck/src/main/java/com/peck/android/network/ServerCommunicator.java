@@ -50,7 +50,7 @@ public class ServerCommunicator {
         } catch (ExecutionException e) {
             if (e.getCause() instanceof VolleyError) {
                 VolleyError error = ((VolleyError) e.getCause());
-                if (error.networkResponse.statusCode == 401 && auth.containsKey(PeckAccountAuthenticator.AUTH_TOKEN)) {
+                if (error.networkResponse != null && error.networkResponse.statusCode == 401 && auth.containsKey(PeckAccountAuthenticator.AUTH_TOKEN)) {
                     LoginManager.invalidateAuthToken(auth.get(PeckAccountAuthenticator.EMAIL));
                 }
                 throw error;

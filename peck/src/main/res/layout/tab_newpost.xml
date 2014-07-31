@@ -104,53 +104,45 @@
             android:visibility="visible">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="?android:buttonBarStyle"
+                android:orientation="horizontal"
                 android:layout_gravity="center_horizontal">
 
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/bt_time_from"
-                    android:textSize="20sp"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
+                <TimePicker
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tp_start" />
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/bt_date_from"
-                    android:textSize="20sp"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
+                <DatePicker
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/dp_start"
+                    android:calendarViewShown="false" />
 
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="?android:buttonBarStyle"
+                android:orientation="horizontal"
                 android:layout_gravity="center_horizontal">
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/bt_time_to"
-                    android:textSize="20sp"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/bt_date_to"
-                    android:textSize="20sp"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
-
+                <TimePicker
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tp_end" />
+                <DatePicker
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/dp_end"
+                    android:calendarViewShown="false" />
 
             </LinearLayout>
         </LinearLayout>

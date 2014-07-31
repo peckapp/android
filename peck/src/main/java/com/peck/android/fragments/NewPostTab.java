@@ -5,8 +5,6 @@ import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,7 +15,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,8 +53,6 @@ public class NewPostTab extends Fragment {
     private AsyncTask<JsonObject, Void, JsonArray> runningTask;
     private final static DecimalFormat doubleFormat = new DecimalFormat("#");
     private Bitmap imageBitmap;
-    private DateTime start;
-    private DateTime end;
 
     static {
         doubleFormat.setMaximumFractionDigits(1);
@@ -134,18 +129,52 @@ public class NewPostTab extends Fragment {
         }
     }
 
+    private class DateUpdaterListener implements TimePicker.OnTimeChangedListener {
+        DateTime time;
+        DatePicker picker;
+
+        private DateUpdaterListener(DatePicker picker, int startingHour) {
+            this.picker = picker;
+            time = new DateTime(picker.getYear(), picker.getMonth() + 1, picker.getDayOfMonth(), startingHour, 0);
+        }
+
+        private void updatePicker() {
+            picker.updateDate(time.getYear(), time.getMonthOfYear() - 1, time.getDayOfMonth());
+        }
+
+        @Override
+        public void onTimeChanged(TimePicker timePicker, int hour, int minute) {
+            time = time.withDate(picker.getYear(), picker.getMonth() + 1, picker.getDayOfMonth());
+            if (time.getHourOfDay() == 0 && hour == 23) {
+                time = time.minusDays(1);
+                updatePicker();
+            }
+            else if (time.getHourOfDay() == 23 && hour == 0) {
+                time = time.plusDays(1);
+                updatePicker();
+            }
+
+            time = time.withHourOfDay(hour);
+        }
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_newpost, container, false);
         view.findViewById(R.id.iv_select).setOnClickListener(new ImagePickerListener(this));
 
-        final Button btStartDate = (Button) view.findViewById(R.id.bt_date_from);
-        final Button btEndDate = (Button) view.findViewById(R.id.bt_date_to);
-        final Button btStartTime = (Button) view.findViewById(R.id.bt_time_from);
-        final Button btEndTime = (Button) view.findViewById(R.id.bt_time_to);
+        DateTime future = DateTime.now().plusHours(1);
+        final DatePicker dpStart = ((DatePicker) view.findViewById(R.id.dp_start));
+        final DatePicker dpEnd = ((DatePicker) view.findViewById(R.id.dp_end));
+        dpEnd.updateDate(future.getYear(), future.getMonthOfYear(), future.getDayOfMonth());
+        final TimePicker tpStart = ((TimePicker)view.findViewById(R.id.tp_start));
+        final TimePicker tpEnd = ((TimePicker)view.findViewById(R.id.tp_end));
+        tpEnd.setCurrentHour(future.getHourOfDay());
+        tpEnd.setCurrentMinute(future.getMinuteOfHour());
 
-        start = DateTime.now().plusHours(1);
-        end = DateTime.now().plusHours(3);
+        tpStart.setOnTimeChangedListener(new DateUpdaterListener(dpStart, tpStart.getCurrentHour()));
+        tpEnd.setOnTimeChangedListener(new DateUpdaterListener(dpEnd, tpEnd.getCurrentHour()));
 
         view.findViewById(R.id.bt_post).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -171,8 +200,8 @@ public class NewPostTab extends Fragment {
                             //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
                             event.addProperty(Event.TEXT, text);
-                            event.addProperty(Event.START_DATE, ((start.toInstant().getMillis())/1000));
-                            event.addProperty(Event.END_DATE, ((end.toInstant().getMillis())/1000));
+                            event.addProperty(Event.START_DATE, ((new DateTime(dpStart.getYear(), dpStart.getMonth(), dpStart.getDayOfMonth(), tpStart.getCurrentHour(), tpStart.getCurrentMinute()).toInstant().getMillis())/1000));
+                            event.addProperty(Event.END_DATE, ((new DateTime(dpEnd.getYear(), dpEnd.getMonth(), dpEnd.getDayOfMonth(), tpEnd.getCurrentHour(), tpEnd.getCurrentMinute()).toInstant().getMillis()) / 1000));
                             event.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
                             runningTask.execute(JsonUtils.wrapJson("simple_event", event));
                             break;
@@ -185,10 +214,6 @@ public class NewPostTab extends Fragment {
             @Override
             public void onClick(View t) {
                 bt_selected = EVENT;
-                updateButtonWithDate(btStartDate, start);
-                updateButtonWithDate(btEndDate, end);
-                updateButtonWithTime(btStartTime, start);
-                updateButtonWithTime(btEndTime, end);
                 view.findViewById(R.id.post_content).setVisibility(View.VISIBLE);
             }
         });
@@ -215,105 +240,14 @@ public class NewPostTab extends Fragment {
             }
         });
 
-        btStartDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        DateTime temp = start.withYear(year).withMonthOfYear(month + 1).withDayOfMonth(day);
-                        if (!temp.isAfter(end) && !temp.isBeforeNow()) {
-                            start = temp;
-                            updateButtonWithDate(btStartDate, start);
-                        } else Toast.makeText(getActivity(), "Invalid date.", Toast.LENGTH_LONG).show();
-                    }
-                }, start.getYear(), start.getMonthOfYear() - 1, start.getDayOfMonth()) {
-                    @Override
-                    public DatePicker getDatePicker() {
-                        DatePicker picker = super.getDatePicker();
-                        picker.setMaxDate(end.toInstant().getMillis());
-                        return picker;
-                    }
-                }.show();
-            }
-        });
-
-        btEndDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        DateTime temp = end.withYear(year).withMonthOfYear(month + 1).withDayOfMonth(day);
-                        if (temp.isAfter(start) && temp.isAfterNow()) {
-                            end = temp;
-                            updateButtonWithDate(btEndDate, end);
-                        } else Toast.makeText(getActivity(), "Invalid date.", Toast.LENGTH_LONG).show();
-                    }
-                }, end.getYear(), end.getMonthOfYear() - 1, end.getDayOfMonth()){
-                    @Override
-                    public DatePicker getDatePicker() {
-                        DatePicker picker = super.getDatePicker();
-                        picker.setMinDate(start.toInstant().getMillis());
-                        return picker;
-                    }
-                }.show();
-            }
-        });
-
-        btStartTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                        DateTime temp = start.withHourOfDay(hour).withMinuteOfHour(minute);
-                        if (temp.isBefore(end) && !temp.isBeforeNow()) {
-                            start = temp;
-                            updateButtonWithTime(btStartTime, start);
-                        } else Toast.makeText(getActivity(), "Invalid time.", Toast.LENGTH_LONG).show();
-                    }
-                }, start.getHourOfDay(), start.getMinuteOfHour(), false){
-
-
-                }.show();
-            }
-        });
-
-        btEndTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                        DateTime temp = end.withHourOfDay(hour).withMinuteOfHour(minute);
-                        if (temp.isAfter(start) && temp.isAfterNow()) {
-                            end = temp;
-                            updateButtonWithTime(btEndTime, end);
-                        } else Toast.makeText(getActivity(), "Invalid time.", Toast.LENGTH_LONG).show();
-                    }
-                }, end.getHourOfDay(), end.getMinuteOfHour(), false).show();
-            }
-        });
-
         view.findViewById(R.id.bt_event).performClick();
         return view;
-    }
-
-    private static void updateButtonWithDate(Button button, DateTime date) {
-        button.setText(date.toString("MMMM d YYYY"));
-    }
-
-    private static void updateButtonWithTime(Button button, DateTime time) {
-        button.setText(time.toString("hh:mm"));
     }
 
 
     @Override
     public void onStart() {
         super.onStart();
-        start = DateTime.now().plusHours(1);
-        end = DateTime.now().plusHours(3);
     }
 
     @Override

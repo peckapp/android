@@ -60,6 +60,7 @@ dependencies {
     compile 'commons-io:commons-io:+'
     compile 'commons-validator:commons-validator:+'
     compile 'joda-time:joda-time:+'
+    compile 'com.github.flavienlaurent.datetimepicker:library:+'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     
