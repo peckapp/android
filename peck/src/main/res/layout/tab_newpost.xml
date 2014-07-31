@@ -1,56 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/tab_ll">
-
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:id="@+id/iv_select"
-        android:src="@drawable/ic_peck"
-        android:scaleType="centerCrop"/>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="@dimen/bt_post_height"
-            android:text="@string/bt_event"
-            android:id="@+id/bt_event"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:id="@+id/iv_select"
+            android:src="@drawable/ic_peck"
+            android:scaleType="centerCrop"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="@dimen/bt_post_height"
+                android:text="@string/bt_event"
+                android:id="@+id/bt_event"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="@dimen/bt_post_height"
+                android:text="@string/bt_announcement"
+                android:id="@+id/bt_announce"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle" />
+
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true">
+
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sw_public"
+                    android:textOff="Private"
+                    android:textOn="Public"
+                    android:layout_marginRight="0dp"
+                    android:layout_gravity="center_vertical" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Share"
+                    android:id="@+id/bt_group_select"
+                    android:layout_gravity="center"
+                    android:visibility="visible"
+                    android:layout_marginLeft="16dp"
+                    android:enabled="false" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_title"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:hint="@string/ht_np_title" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_announce"
+            android:enabled="true"
+            android:inputType="textShortMessage|text|textMultiLine|textCapSentences|textLongMessage|textAutoCorrect"
+            android:layout_marginTop="16dp"
+            android:hint="description" />
+
+        <LinearLayout
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_content"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:buttonBarStyle"
+                android:layout_gravity="center_horizontal">
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/bt_time_from"
+                    android:textSize="20sp"
+                    style="?android:buttonBarButtonStyle"
+                    android:background="@android:color/transparent"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/bt_date_from"
+                    android:textSize="20sp"
+                    style="?android:buttonBarButtonStyle"
+                    android:background="@android:color/transparent"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:buttonBarStyle"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/bt_time_to"
+                    android:textSize="20sp"
+                    style="?android:buttonBarButtonStyle"
+                    android:background="@android:color/transparent"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/bt_date_to"
+                    android:textSize="20sp"
+                    style="?android:buttonBarButtonStyle"
+                    android:background="@android:color/transparent"/>
+
+
+            </LinearLayout>
+        </LinearLayout>
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="@dimen/bt_post_height"
-            android:text="@string/bt_announcement"
-            android:id="@+id/bt_announce"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle" />
-
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_post"
+            android:id="@+id/bt_post"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="8dp" />
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_marginTop="8dp"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:id="@+id/post_content"
-        android:layout_weight="1" />
-
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:text="@string/bt_post"
-        android:id="@+id/bt_post"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="8dp" />
-
-
-</LinearLayout>
+</ScrollView>

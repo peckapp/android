@@ -37,8 +37,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
  */
 public class PeckApp extends Application implements Singleton{
 
+    private static Context mContext;
+
+
     public static Context getContext() {
-        return AppContext.mContext;
+        return mContext;
     }
 
     public static final String AUTHORITY = "com.peck.android.provider.all";
@@ -57,20 +60,13 @@ public class PeckApp extends Application implements Singleton{
         return Constants.Network.API_ENDPOINT + header.plural() + "/";
     }
 
-
-    public static class AppContext {
-        private static Context mContext;
-        private AppContext() {}
-        protected static void init(Context context) {
-            mContext = context;
-        }
-    }
-
     public void onCreate() {
 
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
-        AppContext.init(this);
+        mContext = this;
         Crashlytics.start(this);
+        System.setProperty("org.joda.time.DateTimeZone.Provider",
+                "com.peck.android.FastDateTimeZoneProvider");
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
