@@ -121,7 +121,8 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:id="@+id/dp_start"
-                    android:calendarViewShown="false" />
+                    android:calendarViewShown="false"
+                    android:background="@android:color/transparent" />
 
 
             </LinearLayout>
