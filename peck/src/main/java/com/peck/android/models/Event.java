@@ -25,15 +25,20 @@ public class Event extends DBOperable {
     int type;
 
     /* shared fields */
-    //simple events and announcements
+    /*simple events and announcements*/
     @Expose
     @SerializedName(TITLE)
     String title;
 
-    //simple events and announcements
+
     @Expose
     @SerializedName(IMAGE_URL)
     String imageUrl;
+
+    @Expose
+    @DBType("boolean")
+    @SerializedName(PUBLIC)
+    boolean publc;
 
 
     /* simple event fields */
@@ -45,6 +50,7 @@ public class Event extends DBOperable {
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_IDS = "user_ids";
     public static final transient String TYPE = "type";
+    public static final transient String PUBLIC = "public";
 
     @Expose
     @DBType("real")

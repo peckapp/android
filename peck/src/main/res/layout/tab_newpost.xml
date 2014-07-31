@@ -2,6 +2,7 @@
 
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -98,63 +99,50 @@
         <LinearLayout
             android:layout_marginTop="8dp"
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:id="@+id/post_content"
             android:visibility="visible">
 
-            <LinearLayout
+            <fragment android:name="com.peck.android.fragments.DateSelector"
+                android:tag="start"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_horizontal">
-
-
-                <TimePicker
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/tp_start" />
-
-                <DatePicker
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/dp_start"
-                    android:calendarViewShown="false"
-                    android:background="@android:color/transparent" />
-
-
-            </LinearLayout>
-
-            <LinearLayout
+                android:layout_height="match_parent"
+                tools:layout="@layout/frag_date_selector" />
+            <fragment android:name="com.peck.android.fragments.DateSelector"
+                android:layout_gravity="center_horizontal"
+                android:tag="end"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_horizontal">
+                android:layout_height="match_parent"
+                tools:layout="@layout/frag_date_selector" />
 
-                <TimePicker
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/tp_end" />
-                <DatePicker
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/dp_end"
-                    android:calendarViewShown="false" />
-
-            </LinearLayout>
         </LinearLayout>
 
-        <Button
-            android:layout_width="100dp"
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/bt_post"
-            android:id="@+id/bt_post"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="16dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/bt_post"
+                android:id="@+id/bt_post"
+                android:layout_centerHorizontal="true" />
+
+            <ProgressBar
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/pb_network"
+                android:layout_gravity="center_vertical"
+                android:layout_toRightOf="@+id/bt_post"
+                android:visibility="gone"
+                android:layout_centerVertical="true" />
+            </RelativeLayout>
+
     </LinearLayout>
 </ScrollView>

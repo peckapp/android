@@ -28,7 +28,7 @@ public class DateSelector extends Fragment {
     Button btTime;
     Button btDate;
 
-    DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MMMM D YYYY");
+    DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MMMM d YYYY");
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class DateSelector extends Fragment {
                     public void onDateSet(DatePicker picker, int year, int month, int day) {
                         time = time.withYear(year).withMonthOfYear(month).withDayOfMonth(day);
                     }
-                }, time.getYear(), time.getMonthOfYear(), time.getDayOfMonth());
+                }, time.getYear(), time.getMonthOfYear(), time.getDayOfMonth()).show();
             }
         });
 
@@ -64,8 +64,13 @@ public class DateSelector extends Fragment {
         return v;
     }
 
+    public void with(DateTime time) {
+        this.time = time;
+        if (getView() != null) update();
+    }
+
     private void update() {
-        btTime.setText(time.toString("h:m"));
+        btTime.setText(time.toString("h:mm a"));
         btDate.setText(dateFormat.withLocale(Locale.getDefault()).print(time));
     }
 

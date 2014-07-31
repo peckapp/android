@@ -15,11 +15,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -34,7 +33,6 @@ import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
 
-import org.joda.time.DateTime;
 import org.json.JSONException;
 
 import java.io.FileNotFoundException;
@@ -53,12 +51,18 @@ public class NewPostTab extends Fragment {
     private AsyncTask<JsonObject, Void, JsonArray> runningTask;
     private final static DecimalFormat doubleFormat = new DecimalFormat("#");
     private Bitmap imageBitmap;
+    private ProgressBar bar;
 
     static {
         doubleFormat.setMaximumFractionDigits(1);
     }
 
     private class AnnouncementPostTask extends AsyncTask<JsonObject, Void, JsonArray> {
+        @Override
+        protected void onPreExecute() {
+            bar.setVisibility(View.VISIBLE);
+        }
+
         @Override
         protected JsonArray doInBackground(JsonObject... object) {
             try {
@@ -82,7 +86,15 @@ public class NewPostTab extends Fragment {
                 e.printStackTrace();
             } catch (NetworkErrorException e) {
                 e.printStackTrace();
+            }  finally {
+                bar.post( new Runnable() {
+                    @Override
+                    public void run() {
+                        bar.setVisibility(View.GONE);
+                    }
+                });
             }
+
             return null;
         }
 
@@ -91,9 +103,16 @@ public class NewPostTab extends Fragment {
             if (errors != null && errors.size() > 0) {
                 Toast.makeText(getActivity(), errors.toString(), Toast.LENGTH_LONG).show();
             } else { Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show(); }
+            bar.setVisibility(View.GONE);
         }
     }
     private class EventPostTask extends AsyncTask<JsonObject, Void, JsonArray> {
+
+        @Override
+        protected void onPreExecute() {
+            bar.setVisibility(View.VISIBLE);
+        }
+
         @Override
         protected JsonArray doInBackground(JsonObject... object) {
             try {
@@ -117,6 +136,13 @@ public class NewPostTab extends Fragment {
                 e.printStackTrace();
             } catch (NetworkErrorException e) {
                 e.printStackTrace();
+            } finally {
+                bar.post( new Runnable() {
+                    @Override
+                    public void run() {
+                        bar.setVisibility(View.GONE);
+                    }
+                });
             }
             return null;
         }
@@ -129,52 +155,15 @@ public class NewPostTab extends Fragment {
         }
     }
 
-    private class DateUpdaterListener implements TimePicker.OnTimeChangedListener {
-        DateTime time;
-        DatePicker picker;
-
-        private DateUpdaterListener(DatePicker picker, int startingHour) {
-            this.picker = picker;
-            time = new DateTime(picker.getYear(), picker.getMonth() + 1, picker.getDayOfMonth(), startingHour, 0);
-        }
-
-        private void updatePicker() {
-            picker.updateDate(time.getYear(), time.getMonthOfYear() - 1, time.getDayOfMonth());
-        }
-
-        @Override
-        public void onTimeChanged(TimePicker timePicker, int hour, int minute) {
-            time = time.withDate(picker.getYear(), picker.getMonth() + 1, picker.getDayOfMonth());
-            if (time.getHourOfDay() == 0 && hour == 23) {
-                time = time.minusDays(1);
-                updatePicker();
-            }
-            else if (time.getHourOfDay() == 23 && hour == 0) {
-                time = time.plusDays(1);
-                updatePicker();
-            }
-
-            time = time.withHourOfDay(hour);
-        }
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_newpost, container, false);
         view.findViewById(R.id.iv_select).setOnClickListener(new ImagePickerListener(this));
+        bar = ((ProgressBar) view.findViewById(R.id.pb_network));
 
-        DateTime future = DateTime.now().plusHours(1);
-        final DatePicker dpStart = ((DatePicker) view.findViewById(R.id.dp_start));
-        final DatePicker dpEnd = ((DatePicker) view.findViewById(R.id.dp_end));
-        dpEnd.updateDate(future.getYear(), future.getMonthOfYear(), future.getDayOfMonth());
-        final TimePicker tpStart = ((TimePicker)view.findViewById(R.id.tp_start));
-        final TimePicker tpEnd = ((TimePicker)view.findViewById(R.id.tp_end));
-        tpEnd.setCurrentHour(future.getHourOfDay());
-        tpEnd.setCurrentMinute(future.getMinuteOfHour());
-
-        tpStart.setOnTimeChangedListener(new DateUpdaterListener(dpStart, tpStart.getCurrentHour()));
-        tpEnd.setOnTimeChangedListener(new DateUpdaterListener(dpEnd, tpEnd.getCurrentHour()));
+        if (getChildFragmentManager().findFragmentByTag("start") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector()).commit();
+        if (getChildFragmentManager().findFragmentByTag("end") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector()).commit();
 
         view.findViewById(R.id.bt_post).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,13 +174,13 @@ public class NewPostTab extends Fragment {
                 if (runningTask == null || runningTask.getStatus() != AsyncTask.Status.PENDING || runningTask.getStatus() != AsyncTask.Status.RUNNING) {
                     switch (bt_selected) {
                         case ANNOUNCEMENT:
-
                             runningTask = new AnnouncementPostTask();
                             JsonObject announcement = new JsonObject();
                             announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
                             announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
                             announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             announcement.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
+                            announcement.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
                             break;
                         case EVENT:
@@ -200,9 +189,10 @@ public class NewPostTab extends Fragment {
                             //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
                             event.addProperty(Event.TEXT, text);
-                            event.addProperty(Event.START_DATE, ((new DateTime(dpStart.getYear(), dpStart.getMonth(), dpStart.getDayOfMonth(), tpStart.getCurrentHour(), tpStart.getCurrentMinute()).toInstant().getMillis())/1000));
-                            event.addProperty(Event.END_DATE, ((new DateTime(dpEnd.getYear(), dpEnd.getMonth(), dpEnd.getDayOfMonth(), tpEnd.getCurrentHour(), tpEnd.getCurrentMinute()).toInstant().getMillis()) / 1000));
+                            event.addProperty(Event.START_DATE, (((DateSelector) getActivity().getSupportFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
+                            event.addProperty(Event.END_DATE, (((DateSelector) getActivity().getSupportFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
                             event.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
+                            event.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("simple_event", event));
                             break;
                     }
