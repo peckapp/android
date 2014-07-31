@@ -33,6 +33,7 @@ import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
 
+import org.joda.time.DateTime;
 import org.json.JSONException;
 
 import java.io.FileNotFoundException;
@@ -57,56 +58,20 @@ public class NewPostTab extends Fragment {
         doubleFormat.setMaximumFractionDigits(1);
     }
 
-    private class AnnouncementPostTask extends AsyncTask<JsonObject, Void, JsonArray> {
-        @Override
-        protected void onPreExecute() {
-            bar.setVisibility(View.VISIBLE);
+    private class PostTask extends AsyncTask<JsonObject, Void, JsonArray> {
+        private String endpoint;
+        private Bitmap image;
+        private String fileName;
+
+        private PostTask(String endpoint) {
+            this.endpoint = endpoint;
         }
 
-        @Override
-        protected JsonArray doInBackground(JsonObject... object) {
-            try {
-                JsonObject ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "announcements", object[0], JsonUtils.auth(LoginManager.getActive()));
-                return ((JsonArray) ret.get("errors"));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (VolleyError volleyError) {
-                volleyError.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (OperationCanceledException e) {
-                e.printStackTrace();
-            } catch (AuthenticatorException e) {
-                e.printStackTrace();
-            } catch (LoginManager.InvalidAccountException e) {
-                e.printStackTrace();
-            } catch (NetworkErrorException e) {
-                e.printStackTrace();
-            }  finally {
-                bar.post( new Runnable() {
-                    @Override
-                    public void run() {
-                        bar.setVisibility(View.GONE);
-                    }
-                });
-            }
-
-            return null;
+        private PostTask(String endpoint, Bitmap image, String fileName) {
+            this.endpoint = endpoint;
+            this.image = image;
+            this.fileName = fileName;
         }
-
-        @Override
-        protected void onPostExecute(JsonArray errors) {
-            if (errors != null && errors.size() > 0) {
-                Toast.makeText(getActivity(), errors.toString(), Toast.LENGTH_LONG).show();
-            } else { Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show(); }
-            bar.setVisibility(View.GONE);
-        }
-    }
-    private class EventPostTask extends AsyncTask<JsonObject, Void, JsonArray> {
 
         @Override
         protected void onPreExecute() {
@@ -116,7 +81,12 @@ public class NewPostTab extends Fragment {
         @Override
         protected JsonArray doInBackground(JsonObject... object) {
             try {
-                JsonObject ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + "simple_events", object[0], JsonUtils.auth(LoginManager.getActive()));
+                JsonObject ret;
+                if (image != null) {
+                    ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + endpoint, object[0], image, fileName, JsonUtils.auth(LoginManager.getActive()));
+                } else {
+                    ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + endpoint, object[0], JsonUtils.auth(LoginManager.getActive()));
+                }
                 return ((JsonArray) ret.get("errors"));
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -170,11 +140,13 @@ public class NewPostTab extends Fragment {
             public void onClick(View v) {
                 String title = ((EditText)view.findViewById(R.id.et_title)).getText().toString();
                 String text = ((EditText)view.findViewById(R.id.et_announce)).getText().toString();
+                String userId = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
 
                 if (runningTask == null || runningTask.getStatus() != AsyncTask.Status.PENDING || runningTask.getStatus() != AsyncTask.Status.RUNNING) {
                     switch (bt_selected) {
                         case ANNOUNCEMENT:
-                            runningTask = new AnnouncementPostTask();
+                            runningTask = (imageBitmap == null) ? new PostTask("announcements") : new PostTask("announcements", imageBitmap,
+                                    "announcement_photo_" + userId + "_" + DateTime.now().toInstant().getMillis()/1000 + ".jpeg");
                             JsonObject announcement = new JsonObject();
                             announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
                             announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
@@ -184,7 +156,8 @@ public class NewPostTab extends Fragment {
                             runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
                             break;
                         case EVENT:
-                            runningTask = new EventPostTask();
+                            runningTask = (imageBitmap == null) ? new PostTask("simple_events") : new PostTask("simple_events", imageBitmap,
+                                    "event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis()/1000 + ".jpeg");
                             JsonObject event = new JsonObject();
                             //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
