@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
@@ -85,10 +86,14 @@ public class ServerCommunicator {
         for (String key : auth.keySet()) {
             stringBuilder.append(key).append("=").append((auth.get(key) == null) ? "" : auth.get(key)).append("&");
         }
+        String name = object.entrySet().iterator().next().getValue().toString();
+        for (Map.Entry<String, JsonElement> entry : ((JsonObject) object.get(name)).entrySet()) {
+            stringBuilder.append(name).append("[").append(entry.getKey()).append("]=").append(entry.getValue().getAsString()).append("&");
+        }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 
         Log.v("ServerCommunicator", stringBuilder.toString());
-        Request<JSONObject> request = new ImageJsonPost(stringBuilder.toString(), future, future, image, object, imageName);
+        Request<JSONObject> request = new ImageJsonPost(stringBuilder.toString(), future, future, image, imageName);
 
         try {
             PeckApp.getRequestQueue().add(request);
@@ -122,7 +127,7 @@ public class ServerCommunicator {
         Response.Listener<JSONObject> listener;
         String boundary = Integer.toString(Math.abs(new Random().nextInt()));
 
-        private ImageJsonPost(String url, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, JsonObject object, String imageFileName) {
+        private ImageJsonPost(String url, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, String imageFileName) {
             super(Method.POST, url, listener);
             this.listener = respListener;
 
