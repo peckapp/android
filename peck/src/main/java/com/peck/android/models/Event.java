@@ -51,6 +51,8 @@ public class Event extends DBOperable {
     public static final transient String USER_IDS = "user_ids";
     public static final transient String TYPE = "type";
     public static final transient String PUBLIC = "public";
+    public static final transient String START_TIMESTAMP = "start_ts";
+    public static final transient String END_TIMESTAMP = "end_ts";
 
     @Expose
     @DBType("real")

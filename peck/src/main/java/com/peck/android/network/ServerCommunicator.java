@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -118,19 +119,19 @@ public class ServerCommunicator {
     private static class ImageJsonPost extends Request<JSONObject> {
 
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        Bitmap image;
-        JsonObject object;
         Response.Listener<JSONObject> listener;
+        String boundary = Integer.toString(Math.abs(new Random().nextInt()));
 
         private ImageJsonPost(String url, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, JsonObject object, String imageFileName) {
             super(Method.POST, url, listener);
             this.listener = respListener;
 
+            builder.setBoundary(boundary);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.JPEG, 90, stream);
             try {
+                //builder.addTextBody("announcement", object.toString(), ContentType.APPLICATION_JSON);
                 builder.addBinaryBody("image", stream.toByteArray(), ContentType.create("image/jpeg"), imageFileName);
-                builder.addBinaryBody("json", object.toString().getBytes(), ContentType.APPLICATION_JSON, null);
             } finally {
                 try {
                     stream.flush();
@@ -172,7 +173,7 @@ public class ServerCommunicator {
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             Map<String, String> ret = new HashMap<String, String>();
-            ret.put("Content-Type", "multipart/form-data");
+            ret.put("Content-Type", "multipart/form-data; boundary=" + boundary);
             return ret;
         }
     }

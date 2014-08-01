@@ -162,8 +162,8 @@ public class NewPostTab extends Fragment {
                             //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
                             event.addProperty(Event.TEXT, text);
-                            event.addProperty(Event.START_DATE, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
-                            event.addProperty(Event.END_DATE, (((DateSelector)getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
+                            event.addProperty(Event.START_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
+                            event.addProperty(Event.END_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
                             event.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
                             event.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("simple_event", event));
