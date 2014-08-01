@@ -189,6 +189,17 @@ public class ServerCommunicator {
         }
 
         @Override
+        public String getUrl() {
+            String url = super.getUrl() + "?";
+            for (String value : params.keySet()) {
+                url += value + "=" + params.get(value) + "&";
+            }
+            url = url.substring(0, url.length() - 1);
+
+            return url;
+        }
+
+        @Override
         protected void deliverResponse(JSONObject response) {
             listener.onResponse(response);
         }
