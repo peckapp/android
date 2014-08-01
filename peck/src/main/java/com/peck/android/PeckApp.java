@@ -8,6 +8,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
+import com.newrelic.agent.android.NewRelic;
 import com.peck.android.annotations.Header;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
@@ -65,17 +66,16 @@ public class PeckApp extends Application implements Singleton{
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         mContext = this;
         Crashlytics.start(this);
+        NewRelic.withApplicationToken(
+                "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
+        ).start(this);
+
         System.setProperty("org.joda.time.DateTimeZone.Provider",
                 "com.peck.android.FastDateTimeZoneProvider");
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
             //Picasso.with(getContext()).setLoggingEnabled(true);
-
-            /*SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
-            edit.clear();
-            edit.apply();
-            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");*/
         }
 
         FacebookSessionHandler.init();
