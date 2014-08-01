@@ -188,11 +188,6 @@ public class Event extends DBOperable {
     long announceCircleId;
 
     @Expose
-    @DBType("boolean")
-    @SerializedName(ANNOUNCEMENT_PUBLIC)
-    boolean announcePublic;
-
-    @Expose
     @DBType("integer")
     @SerializedName(ANNOUNCEMENT_COMMENT_COUNT)
     int announceCommentCount;

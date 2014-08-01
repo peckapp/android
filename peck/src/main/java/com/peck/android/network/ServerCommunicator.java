@@ -82,18 +82,28 @@ public class ServerCommunicator {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
         if (auth == null) auth = new HashMap<String, String>();
 
-        StringBuilder stringBuilder = new StringBuilder(((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + "?");
+        Map<String, String> params = new HashMap<String, String>(auth);
+
+        String name = object.entrySet().iterator().next().getKey();
+        for (Map.Entry<String, JsonElement> entry : ((JsonObject) object.get(name)).entrySet()) {
+            JsonElement value = entry.getValue();
+            params.put(name + "[" + entry.getKey() + "]", (value != null) ? value.getAsString() : null);
+        }
+
+/*        StringBuilder stringBuilder = new StringBuilder(((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + "?");
         for (String key : auth.keySet()) {
             stringBuilder.append(key).append("=").append((auth.get(key) == null) ? "" : auth.get(key)).append("&");
         }
-        String name = object.entrySet().iterator().next().getValue().toString();
+        String name = object.entrySet().iterator().next().getKey();
         for (Map.Entry<String, JsonElement> entry : ((JsonObject) object.get(name)).entrySet()) {
-            stringBuilder.append(name).append("[").append(entry.getKey()).append("]=").append(entry.getValue().getAsString()).append("&");
+            JsonElement value = entry.getValue();
+            stringBuilder.append(name).append("[").append(entry.getKey()).append("]=").append((value != null) ? value.getAsString() : "").append("&");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 
-        Log.v("ServerCommunicator", stringBuilder.toString());
-        Request<JSONObject> request = new ImageJsonPost(stringBuilder.toString(), future, future, image, imageName);
+        Log.v("ServerCommunicator", stringBuilder.toString());*/
+
+        Request<JSONObject> request = new ImageJsonPost(url, params, future, future, image, imageName);
 
         try {
             PeckApp.getRequestQueue().add(request);
@@ -126,10 +136,13 @@ public class ServerCommunicator {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         Response.Listener<JSONObject> listener;
         String boundary = Integer.toString(Math.abs(new Random().nextInt()));
+        Map<String, String> params;
 
-        private ImageJsonPost(String url, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, String imageFileName) {
+        private ImageJsonPost(String url, Map<String, String> params, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, String imageFileName) {
             super(Method.POST, url, listener);
             this.listener = respListener;
+
+            this.params = params;
 
             builder.setBoundary(boundary);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -159,6 +172,11 @@ public class ServerCommunicator {
                 } catch (Throwable ignore) {}
             }
             return null;
+        }
+
+        @Override
+        protected Map<String, String> getParams() throws AuthFailureError {
+            return params;
         }
 
         @Override
