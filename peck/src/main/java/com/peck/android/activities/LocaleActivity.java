@@ -148,7 +148,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
         if (info != null && info.isConnectedOrConnecting()) {
 
             //tell the user we're loading in
-            final TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);
+            final TextView tv = (TextView) findViewById(R.id.rl_locale).findViewById(R.id.tv_progress);a
             tv.setVisibility(View.VISIBLE);
             tv.setText(R.string.pb_loc);
             findViewById(R.id.rl_locale).setVisibility(View.VISIBLE);
