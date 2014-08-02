@@ -68,6 +68,9 @@ dependencies {
     compile 'joda-time:joda-time:+'
     compile 'com.github.flavienlaurent.datetimepicker:library:+'
     compile 'com.newrelic.agent.android:android-agent:3.+'
+    compile 'com.squareup.retrofit:retrofit:+'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:+'
+    compile 'com.squareup.okhttp:okhttp:+'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     
