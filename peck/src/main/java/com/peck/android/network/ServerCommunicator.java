@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -24,15 +25,99 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
+import retrofit.converter.ConversionException;
+import retrofit.converter.Converter;
+import retrofit.http.Body;
+import retrofit.http.DELETE;
+import retrofit.http.FieldMap;
+import retrofit.http.FormUrlEncoded;
+import retrofit.http.GET;
+import retrofit.http.Multipart;
+import retrofit.http.PATCH;
+import retrofit.http.POST;
+import retrofit.http.Part;
+import retrofit.http.Path;
+import retrofit.http.QueryMap;
+import retrofit.mime.TypedByteArray;
+import retrofit.mime.TypedInput;
+import retrofit.mime.TypedOutput;
+
 /**
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
+    private static RestAdapter apiAdapter = new RestAdapter.Builder().setEndpoint(PeckApp.Constants.Network.BASE_URL).
+            setRequestInterceptor(new RequestInterceptor() {
+                @Override
+                public void intercept(RequestFacade request) {
+                    request.addHeader("User-Agent", "Peck Android, v. 1.0");
+                }
+            }).setConverter(new Converter() {
+        @Override
+        public Object fromBody(TypedInput body, Type type) throws ConversionException {
+            if (!body.mimeType().equals("application/json"))
+                throw new ConversionException("Data received from the server was not json.");
+            return (new JsonParser().parse(body.toString()));
+        }
+
+        @Override
+        public TypedOutput toBody(Object object) {
+            return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
+        }
+    }).build();
+
+    private class Jpeg extends TypedByteArray {
+        private Jpeg(String mimeType, String filename, Bitmap bitmap, byte[] bytes) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            super(mimeType, outputStream.);
+        }
+    }
+
+    private interface SimpleJsonHandler {
+        @FormUrlEncoded
+        @GET("/{type}/{id}")
+        JsonObject show(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
+
+        @FormUrlEncoded
+        @GET("/{type}")
+        JsonArray get(@Path("type") String type, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
+
+        @FormUrlEncoded
+        @POST("/{type}")
+        JsonArray post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication);
+
+        @FormUrlEncoded
+        @Multipart
+        @POST("/{type}")
+        JsonObject post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication, @Part("image") TypedOutput image);
+
+        @FormUrlEncoded
+        @PATCH("/{type}/{id}")
+        JsonObject patch(@Path("type") String type, @Path("id") String id, @Body JsonObject body, @FieldMap Map<String, String> authentication);
+
+        @FormUrlEncoded
+        @PATCH("/users/{id}/super_create")
+        JsonObject superCreate(@Path("id") String userId, @Body JsonObject user, @FieldMap Map<String, String> authentication);
+
+        @FormUrlEncoded
+        @PATCH("/{type}/{id}")
+        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part())
+
+        @FormUrlEncoded
+        @DELETE("/{type}/{id}")
+        JsonObject delete(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication);
+
+    }
+
     private static JsonObject sendJson(String url, int method, JsonObject data, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
         if (auth == null) auth = new HashMap<String, String>();
