@@ -89,13 +89,11 @@ public class ServerCommunicator {
     }
 
     public interface SimpleJsonHandler {
-        @FormUrlEncoded
         @GET("/api/{type}/{id}")
-        JsonObject show(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
+        JsonObject show(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> urlParams);
 
-        @FormUrlEncoded
         @GET("/api/{type}")
-        JsonObject get(@Path("type") String type, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
+        JsonObject get(@Path("type") String type, @QueryMap Map<String, String> urlParams);
 
         @FormUrlEncoded
         @POST("/api/{type}")

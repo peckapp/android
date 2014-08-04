@@ -160,7 +160,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.jsonService.get(JsonUtils.getJsonHeader(tClass, true), JsonUtils.auth(account), null);
+        JsonObject object = ServerCommunicator.jsonService.get(JsonUtils.getJsonHeader(tClass, true), JsonUtils.auth(account));
 
         /*JsonArray post = new JsonArray();
         JsonArray patch = new JsonArray();*/
@@ -281,7 +281,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.jsonService.get(plural, JsonUtils.auth(account), null);
+        JsonObject object = ServerCommunicator.jsonService.get(plural, JsonUtils.auth(account));
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = DBUtils.buildLocalUri(Event.class);
