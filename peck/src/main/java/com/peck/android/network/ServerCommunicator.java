@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -23,8 +24,7 @@ import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
-import retrofit.http.FieldMap;
-import retrofit.http.FormUrlEncoded;
+import retrofit.http.EncodedQueryMap;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.PATCH;
@@ -40,7 +40,8 @@ import retrofit.mime.TypedOutput;
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
-    private static RestAdapter apiAdapter = new RestAdapter.Builder().setEndpoint(PeckApp.Constants.Network.BASE_URL).
+    private static final boolean debug = true;
+    private static RestAdapter apiAdapter = new RestAdapter.Builder().setEndpoint(!debug ? PeckApp.Constants.Network.BASE_URL : "http://192.168.0.24").
             setRequestInterceptor(new RequestInterceptor() {
                 @Override
                 public void intercept(RequestFacade request) {
@@ -51,7 +52,7 @@ public class ServerCommunicator {
         public Object fromBody(TypedInput body, Type type) throws ConversionException {
             try {
                 String json = IOUtils.toString(body.in());
-                        Log.v(ServerCommunicator.class.getSimpleName(), new JSONObject(json).toString(2));
+                Log.v(ServerCommunicator.class.getSimpleName(), new JSONObject(json).toString(2));
                 if (!body.mimeType().contains("application/json"))
                     throw new ConversionException("Data received from the server was not json.");
                 return (new JsonParser().parse(json));
@@ -68,16 +69,33 @@ public class ServerCommunicator {
 
     public static SimpleJsonHandler jsonService = apiAdapter.create(SimpleJsonHandler.class);
 
-    public static class Jpeg extends TypedByteArray {
+    public static class Jpeg implements TypedOutput {
         TypedByteArray out;
         String fileName;
 
-        public Jpeg(String fileName, Bitmap bitmap) {
-            super("image/jpeg", null);
+        public Jpeg(String fileName, Bitmap bitmap, int maxSizeInBytes) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            int height = bitmap.getHeight();
+            int width = bitmap.getWidth();
+            double ratio = 1.d;
+            Bitmap temp = null;
+
+            do {
+                if (temp != null) temp.recycle();
+                outputStream.reset();
+                if (ratio != 1.d) temp = Bitmap.createScaledBitmap(bitmap, (int)(width*ratio), (int)(height*ratio), true);
+                else temp = bitmap;
+                temp.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
+                ratio *= 1/Math.sqrt(2);
+            } while (outputStream.size() > maxSizeInBytes);
+
             out = new TypedByteArray("image/jpeg", outputStream.toByteArray());
             this.fileName = fileName;
+
+            try {
+                outputStream.flush();
+                outputStream.close();
+            } catch (Throwable ignore) {}
         }
 
         @Override
@@ -85,7 +103,6 @@ public class ServerCommunicator {
             return fileName;
         }
 
-        @Override
         public byte[] getBytes() {
             return out.getBytes();
         }
@@ -95,6 +112,75 @@ public class ServerCommunicator {
             out.write(this.out.getBytes());
         }
 
+        @Override
+        public long length() {
+            return this.out.length();
+        }
+
+        public InputStream in() throws IOException {
+            return out.in();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (o instanceof TypedOutput && out.equals(o));
+        }
+
+        @Override
+        public int hashCode() {
+            return out.hashCode();
+        }
+
+        @Override
+        public String mimeType() {
+            return out.mimeType();
+        }
+    }
+
+    public static class TypedJsonBody implements TypedOutput {
+        TypedByteArray out;
+
+        public TypedJsonBody(JsonObject json) {
+            out = new TypedByteArray("application/json", json.toString().getBytes());
+        }
+
+        @Override
+        public String fileName() {
+            return null;
+        }
+
+        public byte[] getBytes() {
+            return out.getBytes();
+        }
+
+        @Override
+        public void writeTo(OutputStream out) throws IOException {
+            out.write(this.out.getBytes());
+        }
+
+        @Override
+        public long length() {
+            return this.out.length();
+        }
+
+        public InputStream in() throws IOException {
+            return out.in();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (o instanceof TypedOutput && out.equals(o));
+        }
+
+        @Override
+        public int hashCode() {
+            return out.hashCode();
+        }
+
+        @Override
+        public String mimeType() {
+            return out.mimeType();
+        }
 
     }
 
@@ -105,34 +191,27 @@ public class ServerCommunicator {
         @GET("/api/{type}")
         JsonObject get(@Path("type") String type, @QueryMap Map<String, String> urlParams);
 
-        @FormUrlEncoded
         @POST("/api/{type}")
-        JsonObject post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication);
+        JsonObject post(@Path("type") String type, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
 
-        @FormUrlEncoded
         @Multipart
         @POST("/api/{type}")
-        JsonObject post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication, @Part("image") Jpeg image);
+        JsonObject post(@Path("type") String type, @EncodedQueryMap Map<String, String> authentication, @Part("image") Jpeg image);
 
-        @FormUrlEncoded
         @POST("/api/access")
-        JsonObject login(@FieldMap Map<String, String> fields);
+        JsonObject login(@QueryMap Map<String, String> fields);
 
-        @FormUrlEncoded
         @PATCH("/api/{type}/{id}")
-        JsonObject patch(@Path("type") String type, @Path("id") String id, @Body JsonObject body, @FieldMap Map<String, String> authentication);
+        JsonObject patch(@Path("type") String type, @Path("id") String id, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
 
-        @FormUrlEncoded
         @PATCH("/api/users/{id}/super_create")
-        JsonObject superCreate(@Path("id") String userId, @Body JsonObject user, @FieldMap Map<String, String> authentication);
+        JsonObject superCreate(@Path("id") String userId, @Body TypedJsonBody user, @QueryMap Map<String, String> authentication);
 
-        @FormUrlEncoded
         @PATCH("/api/{type}/{id}")
-        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part("image") Jpeg image);
+        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part("image") Jpeg image, @QueryMap Map<String, String> authentication);
 
-        @FormUrlEncoded
         @DELETE("/api/{type}/{id}")
-        JsonObject delete(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication);
+        JsonObject delete(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> authentication);
 
     }
 

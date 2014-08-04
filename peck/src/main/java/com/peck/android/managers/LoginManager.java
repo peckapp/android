@@ -162,7 +162,7 @@ public class LoginManager {
 
         try {
             JsonObject ret = ServerCommunicator.jsonService.superCreate(accountManager.getUserData(authAccount, PeckAccountAuthenticator.USER_ID),
-                    JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(authAccount));
+                    new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object)), JsonUtils.auth(authAccount));
 
             JsonObject user = ((JsonObject) ret.get("user"));
             JsonArray errors = ((JsonArray) ret.get("errors"));
@@ -412,7 +412,7 @@ public class LoginManager {
             }
         }
 
-        final JsonObject ret = ServerCommunicator.jsonService.post("users", null, null);
+        final JsonObject ret = ServerCommunicator.jsonService.post("users", (ServerCommunicator.TypedJsonBody)null, null);
         accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
         accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
         if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());

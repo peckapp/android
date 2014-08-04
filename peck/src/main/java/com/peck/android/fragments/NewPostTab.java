@@ -35,7 +35,11 @@ import org.joda.time.DateTime;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.util.Map;
+
+import retrofit.RetrofitError;
 
 /**
  * Created by mammothbane on 6/16/2014.
@@ -79,11 +83,19 @@ public class NewPostTab extends Fragment {
             try {
                 JsonObject ret;
                 if (image != null) {
-                    ret = ServerCommunicator.jsonService.post(endpoint, object[0], JsonUtils.auth(LoginManager.getActive()), new ServerCommunicator.Jpeg(fileName, image));
+                    Map<String, String> jsonMap = JsonUtils.auth(LoginManager.getActive());
+                    jsonMap.putAll(JsonUtils.jsonToMap(object[0]));
+                    for (String s : jsonMap.keySet()) {
+                        jsonMap.put(s, URLEncoder.encode(jsonMap.get(s), "utf-8").replace("\"", ""));
+                    }
+
+                    ret = ServerCommunicator.jsonService.post(endpoint, jsonMap, new ServerCommunicator.Jpeg(fileName, image, 2 * 1024 * 1024));
                 } else {
-                    ret = ServerCommunicator.jsonService.post(endpoint, object[0], JsonUtils.auth(LoginManager.getActive()));
+                    ret = ServerCommunicator.jsonService.post(endpoint, new ServerCommunicator.TypedJsonBody(object[0]), JsonUtils.auth(LoginManager.getActive()));
                 }
                 return ((JsonArray) ret.get("errors"));
+            } catch (RetrofitError e) {
+                Log.e(NewPostTab.class.getSimpleName(), e.getMessage());
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (OperationCanceledException e) {

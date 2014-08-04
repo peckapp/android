@@ -127,6 +127,17 @@ public class JsonUtils {
         return auth;
     }
 
+    public static Map<String, String> jsonToMap(JsonObject root) {
+        Map<String, String> ret = new HashMap<String, String>();
+        String s = root.entrySet().iterator().next().getKey();
+        JsonObject jsonObject = ((JsonObject) root.get(s));
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+            ret.put(s + "[" + entry.getKey() + "]", entry.getValue().toString());
+        }
+        return ret;
+    }
+
+
     public static String getJsonHeader(Class tClass, boolean plural) {
         Header header = (Header)tClass.getAnnotation(Header.class);
         if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");

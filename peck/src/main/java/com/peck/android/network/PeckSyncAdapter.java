@@ -158,8 +158,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     svCreated++;
 
                     //post.add(JsonUtils.cursorToJson(cursor));
-                    ServerCommunicator.jsonService.post(JsonUtils.getJsonHeader(tClass, true), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false),
-                            JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account)); //post it to the server
+                    ServerCommunicator.jsonService.post(JsonUtils.getJsonHeader(tClass, true), new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false),
+                            JsonUtils.cursorToJson(cursor))), JsonUtils.auth(account)); //post it to the server
 
                 } else {
                     //if it's older and we haven't updated it, just delete it
@@ -181,7 +181,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     } else { //if it hasn't been
                         svUpdated++; //patch it
                         ServerCommunicator.jsonService.patch(JsonUtils.getJsonHeader(tClass, true), Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))),
-                                JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
+                                new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor))), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()) { //the server version is newer or we're not allowed to modify the server version
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
@@ -273,7 +273,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID)) && modServer) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    ServerCommunicator.jsonService.post(plural, JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
+                    ServerCommunicator.jsonService.post(plural, new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor))), JsonUtils.auth(account));
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -292,7 +292,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     } else { //if it hasn't been
                         svUpdated++; //patch it
                         ServerCommunicator.jsonService.patch(single, Long.toString(cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID))),
-                                JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
+                                new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor))), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()) { //the server version is newer
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //if ours was flagged for deletion, unflag it
