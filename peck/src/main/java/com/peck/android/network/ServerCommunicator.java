@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,46 +75,70 @@ public class ServerCommunicator {
         }
     }).build();
 
+    private static SimpleJsonHandler jsonService = apiAdapter.create(SimpleJsonHandler.class);
+
     private class Jpeg extends TypedByteArray {
-        private Jpeg(String mimeType, String filename, Bitmap bitmap, byte[] bytes) {
+        TypedByteArray out;
+        String fileName;
+
+        private Jpeg(String fileName, Bitmap bitmap) {
+            super("image/jpeg", null);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-            super(mimeType, outputStream.);
+            out = new TypedByteArray("image/jpeg", outputStream.toByteArray());
+            this.fileName = fileName;
         }
+
+        @Override
+        public String fileName() {
+            return fileName;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return out.getBytes();
+        }
+
+        @Override
+        public void writeTo(OutputStream out) throws IOException {
+            out.write(this.out.getBytes());
+        }
+
+
     }
 
     private interface SimpleJsonHandler {
         @FormUrlEncoded
-        @GET("/{type}/{id}")
+        @GET("/api/{type}/{id}")
         JsonObject show(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
 
         @FormUrlEncoded
-        @GET("/{type}")
+        @GET("/api/{type}")
         JsonArray get(@Path("type") String type, @FieldMap Map<String, String> authentication, @QueryMap Map<String, String> urlParams);
 
         @FormUrlEncoded
-        @POST("/{type}")
+        @POST("/api/{type}")
         JsonArray post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication);
 
         @FormUrlEncoded
         @Multipart
-        @POST("/{type}")
-        JsonObject post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication, @Part("image") TypedOutput image);
+        @POST("/api/{type}")
+        JsonObject post(@Path("type") String type, @Body JsonObject body, @FieldMap Map<String, String> authentication, @Part("image") Jpeg image);
 
         @FormUrlEncoded
-        @PATCH("/{type}/{id}")
+        @PATCH("/api/{type}/{id}")
         JsonObject patch(@Path("type") String type, @Path("id") String id, @Body JsonObject body, @FieldMap Map<String, String> authentication);
 
         @FormUrlEncoded
-        @PATCH("/users/{id}/super_create")
+        @PATCH("/api/users/{id}/super_create")
         JsonObject superCreate(@Path("id") String userId, @Body JsonObject user, @FieldMap Map<String, String> authentication);
 
         @FormUrlEncoded
-        @PATCH("/{type}/{id}")
-        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part())
+        @PATCH("/api/{type}/{id}")
+        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part("image") Jpeg image);
 
         @FormUrlEncoded
-        @DELETE("/{type}/{id}")
+        @DELETE("/api/{type}/{id}")
         JsonObject delete(@Path("type") String type, @Path("id") String id, @FieldMap Map<String, String> authentication);
 
     }
