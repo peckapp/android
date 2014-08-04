@@ -21,10 +21,8 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.LoginManager;
@@ -34,12 +32,10 @@ import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
 
 import org.joda.time.DateTime;
-import org.json.JSONException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mammothbane on 6/16/2014.
@@ -83,19 +79,11 @@ public class NewPostTab extends Fragment {
             try {
                 JsonObject ret;
                 if (image != null) {
-                    ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + endpoint, object[0], image, fileName, JsonUtils.auth(LoginManager.getActive()));
+                    ret = ServerCommunicator.jsonService.post(endpoint, object[0], JsonUtils.auth(LoginManager.getActive()), new ServerCommunicator.Jpeg(fileName, image));
                 } else {
-                    ret = ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + endpoint, object[0], JsonUtils.auth(LoginManager.getActive()));
+                    ret = ServerCommunicator.jsonService.post(endpoint, object[0], JsonUtils.auth(LoginManager.getActive()));
                 }
                 return ((JsonArray) ret.get("errors"));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (VolleyError volleyError) {
-                volleyError.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (OperationCanceledException e) {

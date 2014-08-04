@@ -30,7 +30,6 @@ import com.peck.android.models.Event;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,10 +90,6 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     customSyncEvents(account, authority, client, syncResult, eventType, (eventType == Event.SIMPLE_EVENT || eventType == Event.ANNOUNCEMENT), url);
                 }
             }
-        } catch (VolleyError volleyError) {
-            if (volleyError.networkResponse != null) {
-                Log.d(getClass().getSimpleName(), respondToStatusCode(volleyError.networkResponse.statusCode));
-            }
         } catch (ExecutionException e) {
             if (e.getCause() instanceof VolleyError) {
                 VolleyError error = ((VolleyError) e.getCause());
@@ -107,8 +102,6 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
         } catch (OperationApplicationException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            syncResult.stats.numParseExceptions++;
         } catch (IOException e) {
             syncResult.stats.numIoExceptions++;
         } catch (OperationCanceledException e) {
@@ -153,7 +146,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException, VolleyError, IOException, OperationCanceledException, AuthenticatorException,
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
             LoginManager.InvalidAccountException, NetworkErrorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
@@ -167,7 +160,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.get(PeckApp.buildEndpointURL(tClass), JsonUtils.auth(account));
+        JsonObject object = ServerCommunicator.jsonService.get(JsonUtils.getJsonHeader(tClass, true), JsonUtils.auth(account), null);
 
         /*JsonArray post = new JsonArray();
         JsonArray patch = new JsonArray();*/
@@ -195,7 +188,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     svCreated++;
 
                     //post.add(JsonUtils.cursorToJson(cursor));
-                    ServerCommunicator.post(PeckApp.buildEndpointURL(tClass), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    ServerCommunicator.jsonService.post(JsonUtils.getJsonHeader(tClass, true), JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false),
+                            JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account)); //post it to the server
 
                 } else {
                     //if it's older and we haven't updated it, just delete it
@@ -212,10 +206,11 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong() && mod) { //our version is newer and we're allowed to modify the server's version
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        ServerCommunicator.delete(PeckApp.buildEndpointURL(tClass) + "/" + cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(account)); //delete it from the server
+                        ServerCommunicator.jsonService.delete(JsonUtils.getJsonHeader(tClass, true),
+                                Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))), JsonUtils.auth(account));//delete it from the server
                     } else { //if it hasn't been
                         svUpdated++; //patch it
-                        ServerCommunicator.patch(PeckApp.buildEndpointURL(tClass) + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
+                        ServerCommunicator.jsonService.patch(JsonUtils.getJsonHeader(tClass, true), Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))),
                                 JsonUtils.wrapJson(JsonUtils.getJsonHeader(tClass, false), JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()) { //the server version is newer or we're not allowed to modify the server version
@@ -267,8 +262,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void customSyncEvents(final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult,
                                   final int type, final boolean modServer, final String url)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, JSONException,
-            VolleyError, IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException,
+            IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
 
         final String single = (type == Event.ANNOUNCEMENT) ? "announcement" : (type == Event.SIMPLE_EVENT) ? "simple_event" :
                 (type == Event.ATHLETIC_EVENT) ? "athletic_event" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunity" : null;
@@ -286,7 +281,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         int svCreated = 0;
         int svDeleted = 0;
 
-        JsonObject object = ServerCommunicator.get(PeckApp.Constants.Network.API_ENDPOINT + plural, JsonUtils.auth(account));
+        JsonObject object = ServerCommunicator.jsonService.get(plural, JsonUtils.auth(account), null);
 
         HashMap<Integer, JsonObject> incoming = new HashMap<Integer, JsonObject>(); //don't use a sparsearray; hashmap performance will be better when we have a lot of objects, and the data doesn't get reused
         Uri uri = DBUtils.buildLocalUri(Event.class);
@@ -308,7 +303,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.isNull(cursor.getColumnIndex(DBOperable.SV_ID)) && modServer) {
                     //if ours was created since the last time we synced
                     svCreated++;
-                    ServerCommunicator.post(PeckApp.Constants.Network.API_ENDPOINT + plural, JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));  //post it to the server
+                    ServerCommunicator.jsonService.post(plural, JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                 } else {
                     //if it's older and we haven't updated it, just delete it
                     syncResult.stats.numDeletes++;
@@ -323,11 +318,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) > match.get(DBOperable.UPDATED_AT).getAsLong() && modServer) { //our version is newer and we're allowed to modify server data
                     if (cursor.getInt(cursor.getColumnIndex(DBOperable.DELETED)) > 0) { //and it's been flagged for deletion
                         svDeleted++;
-                        ServerCommunicator.delete(PeckApp.Constants.Network.API_ENDPOINT + single + "/" +
-                                cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)), JsonUtils.auth(account)); //delete it from the server
+                        ServerCommunicator.jsonService.delete(single, Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID))), JsonUtils.auth(account)); //delete it from the server
                     } else { //if it hasn't been
                         svUpdated++; //patch it
-                        ServerCommunicator.patch(PeckApp.Constants.Network.API_ENDPOINT + single + "/" + cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID)),
+                        ServerCommunicator.jsonService.patch(single, Long.toString(cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID))),
                                 JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor)), JsonUtils.auth(account));
                     }
                 } else if (cursor.getLong(cursor.getColumnIndex(DBOperable.UPDATED_AT)) < match.get(DBOperable.UPDATED_AT).getAsLong()) { //the server version is newer
