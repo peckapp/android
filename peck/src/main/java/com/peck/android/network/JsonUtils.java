@@ -132,7 +132,7 @@ public class JsonUtils {
         String s = root.entrySet().iterator().next().getKey();
         JsonObject jsonObject = ((JsonObject) root.get(s));
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            ret.put(s + "[" + entry.getKey() + "]", entry.getValue().toString());
+            ret.put(s + "[" + entry.getKey() + "]", entry.getValue().getAsString());
         }
         return ret;
     }

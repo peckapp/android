@@ -24,7 +24,6 @@ import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
-import retrofit.http.EncodedQueryMap;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.PATCH;
@@ -58,14 +57,18 @@ public class ServerCommunicator {
                 return (new JsonParser().parse(json));
             } catch (IOException e) {
                 throw new ConversionException(e);
-            } catch (JSONException ignore) { throw new ConversionException(ignore); }
+            } catch (JSONException ignore) {
+                throw new ConversionException(ignore);
+            }
         }
 
         @Override
         public TypedOutput toBody(Object object) {
             return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
         }
-    }).build();
+    }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
+
+
 
     public static SimpleJsonHandler jsonService = apiAdapter.create(SimpleJsonHandler.class);
 
@@ -196,7 +199,7 @@ public class ServerCommunicator {
 
         @Multipart
         @POST("/api/{type}")
-        JsonObject post(@Path("type") String type, @EncodedQueryMap Map<String, String> authentication, @Part("image") Jpeg image);
+        JsonObject post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image);
 
         @POST("/api/access")
         JsonObject login(@QueryMap Map<String, String> fields);
