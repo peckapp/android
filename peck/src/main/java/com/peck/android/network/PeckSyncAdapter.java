@@ -114,35 +114,6 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    public static String respondToStatusCode(int code) {
-        String ret = "Error " + code + ": ";
-
-        switch (code) {
-            case 400:
-                ret += "Bad request. Most likely malformed syntax";
-                break;
-            case 401:
-                ret += "Unauthorized.";
-                break;
-            case 403:
-                ret += "Forbidden.";
-                break;
-            case 404:
-                ret += "Not found";
-                break;
-            case 500:
-                ret += "Internal server error.";
-                break;
-            case 502:
-                ret += "Bad gateway.";
-                break;
-            default:
-                ret += "Unknown.";
-                break;
-        }
-        return ret;
-    }
-
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
             throws RetrofitError, RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
