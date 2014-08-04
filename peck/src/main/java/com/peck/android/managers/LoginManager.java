@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.android.volley.VolleyError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
@@ -21,12 +20,10 @@ import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
 
 import org.apache.commons.validator.routines.EmailValidator;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mammothbane on 7/29/2014.
@@ -105,7 +102,7 @@ public class LoginManager {
             map.put("user[email]", temp.name);
             map.putAll(JsonUtils.auth(authAccount));
 
-            JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
             JsonObject user = ((JsonObject) jsonRet.get("user"));
 
             String token = user.get(PeckAccountAuthenticator.AUTH_TOKEN).getAsString();
@@ -124,14 +121,6 @@ public class LoginManager {
 
             }
         } catch (NetworkErrorException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (VolleyError e) {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
             e.printStackTrace();
@@ -172,8 +161,8 @@ public class LoginManager {
 
 
         try {
-            JsonObject ret = (ServerCommunicator.patch(PeckApp.buildEndpointURL(User.class) + accountManager.getUserData(authAccount, PeckAccountAuthenticator.USER_ID) + "/super_create",
-                    JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object), JsonUtils.auth(authAccount)));
+            JsonObject ret = ServerCommunicator.jsonService.superCreate(accountManager.getUserData(authAccount, PeckAccountAuthenticator.USER_ID),
+                    new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), object)), JsonUtils.auth(authAccount));
 
             JsonObject user = ((JsonObject) ret.get("user"));
             JsonArray errors = ((JsonArray) ret.get("errors"));
@@ -201,14 +190,6 @@ public class LoginManager {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (VolleyError volleyError) {
-            volleyError.printStackTrace();
         } catch (InvalidAccountException e) {
             e.printStackTrace();
         } catch (NetworkErrorException e) {
@@ -248,25 +229,16 @@ public class LoginManager {
                 e.printStackTrace();
             }
 
-            JsonObject jsonRet = ServerCommunicator.post(PeckApp.Constants.Network.BASE_URL + "/api/access", JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), map);
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
 
             String token = ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString();
             setAuthToken(account, token);
             return token;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (OperationCanceledException e) {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
-            e.printStackTrace();
-        } catch (VolleyError e) {
-            throw new NetworkErrorException(e);
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof VolleyError) throw new NetworkErrorException(e);
-            else e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
@@ -440,25 +412,14 @@ public class LoginManager {
             }
         }
 
-        try {
-            final JsonObject ret = ServerCommunicator.post(PeckApp.buildEndpointURL(User.class), JsonUtils.wrapJson(JsonUtils.getJsonHeader(User.class, false), null), null).get("user").getAsJsonObject();
-            accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
-            accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
-            if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());
-            Log.v(LoginManager.class.getSimpleName(), "Temp account created.");
-            logAccount(tmp);
-            return true;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (VolleyError volleyError) {
-            volleyError.printStackTrace();
-        }
+        final JsonObject ret = ServerCommunicator.jsonService.post("users", (ServerCommunicator.TypedJsonBody)null, null);
+        accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
+        accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
+        if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());
+        Log.v(LoginManager.class.getSimpleName(), "Temp account created.");
+        logAccount(tmp);
+        return true;
 
-        return false;
     }
 
     public static synchronized Account getTemp() {

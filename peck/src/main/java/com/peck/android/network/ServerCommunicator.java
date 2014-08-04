@@ -3,213 +3,219 @@ package com.peck.android.network;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.RequestFuture;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
-import com.peck.android.managers.LoginManager;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
+
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
+import retrofit.converter.ConversionException;
+import retrofit.converter.Converter;
+import retrofit.http.Body;
+import retrofit.http.DELETE;
+import retrofit.http.GET;
+import retrofit.http.Multipart;
+import retrofit.http.PATCH;
+import retrofit.http.POST;
+import retrofit.http.Part;
+import retrofit.http.Path;
+import retrofit.http.QueryMap;
+import retrofit.mime.TypedByteArray;
+import retrofit.mime.TypedInput;
+import retrofit.mime.TypedOutput;
 
 /**
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
-    private static JsonObject sendJson(String url, int method, JsonObject data, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        if (auth == null) auth = new HashMap<String, String>();
-
-        StringBuilder stringBuilder = new StringBuilder(((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + "?");
-        for (String key : auth.keySet()) {
-            stringBuilder.append(key).append("=").append((auth.get(key) == null) ? "" : auth.get(key)).append("&");
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-
-        Log.v("ServerCommunicator", stringBuilder.toString());
-        JsonObjectRequest request = new JsonObjectRequest(method, stringBuilder.toString(), (data != null) ? new JSONObject(data.toString()) : null, future, future) {
-
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("Content-Type", "application/json");
-                return map;
-            }
-        };
-
-        try {
-            PeckApp.getRequestQueue().add(request);
-            return ((JsonObject) new JsonParser().parse(future.get().toString()));
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof VolleyError) {
-                VolleyError error = ((VolleyError) e.getCause());
-                if (error.networkResponse != null && error.networkResponse.statusCode == 401 && auth.containsKey(PeckAccountAuthenticator.AUTH_TOKEN)) {
-                    LoginManager.invalidateAuthToken(auth.get(PeckAccountAuthenticator.EMAIL));
+    private static final boolean debug = false;
+    private static RestAdapter apiAdapter = new RestAdapter.Builder().setEndpoint(!debug ? PeckApp.Constants.Network.BASE_URL : "http://192.168.0.24").
+            setRequestInterceptor(new RequestInterceptor() {
+                @Override
+                public void intercept(RequestFacade request) {
+                    request.addHeader("User-Agent", "Peck Android, v. 1.0");
                 }
-                throw error;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    public static JsonObject get(String url, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return sendJson(url, Request.Method.GET, null, auth);
-    }
-
-    public static JsonObject post(String url, JsonObject object, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return sendJson(url, Request.Method.POST, object, auth);
-    }
-
-    public static JsonObject post(String url, JsonObject object, Bitmap image, String imageName, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        if (auth == null) auth = new HashMap<String, String>();
-
-        Map<String, String> params = new HashMap<String, String>(auth);
-
-        String name = object.entrySet().iterator().next().getKey();
-        for (Map.Entry<String, JsonElement> entry : ((JsonObject) object.get(name)).entrySet()) {
-            JsonElement value = entry.getValue();
-            params.put(name + "[" + entry.getKey() + "]", (value != null) ? value.getAsString() : null);
-        }
-
-/*        StringBuilder stringBuilder = new StringBuilder(((url.charAt(url.length() - 1) == '/') ? url.substring(0, url.length() - 1) : url) + "?");
-        for (String key : auth.keySet()) {
-            stringBuilder.append(key).append("=").append((auth.get(key) == null) ? "" : auth.get(key)).append("&");
-        }
-        String name = object.entrySet().iterator().next().getKey();
-        for (Map.Entry<String, JsonElement> entry : ((JsonObject) object.get(name)).entrySet()) {
-            JsonElement value = entry.getValue();
-            stringBuilder.append(name).append("[").append(entry.getKey()).append("]=").append((value != null) ? value.getAsString() : "").append("&");
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-
-        Log.v("ServerCommunicator", stringBuilder.toString());*/
-
-        Request<JSONObject> request = new ImageJsonPost(url, params, future, future, image, imageName);
-
-        try {
-            PeckApp.getRequestQueue().add(request);
-            return ((JsonObject) new JsonParser().parse(future.get().toString()));
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof VolleyError) {
-                VolleyError error = ((VolleyError) e.getCause());
-                if (error.networkResponse != null && error.networkResponse.statusCode == 401 && auth.containsKey(PeckAccountAuthenticator.AUTH_TOKEN)) {
-                    LoginManager.invalidateAuthToken(auth.get(PeckAccountAuthenticator.EMAIL));
-                }
-                throw error;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    public static JsonObject patch(String url, JsonObject object, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        return sendJson(url, Request.Method.PATCH, object, auth);
-    }
-
-    public static boolean delete(String url, Map<String, String> auth) throws InterruptedException, ExecutionException, JSONException, VolleyError {
-        sendJson(url, Request.Method.DELETE, null, auth);
-        //todo: what happens when we run a delete? how do we return?
-        return true;
-    }
-
-    private static class ImageJsonPost extends Request<JSONObject> {
-
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        Response.Listener<JSONObject> listener;
-        String boundary = Integer.toString(Math.abs(new Random().nextInt()));
-        Map<String, String> params;
-
-        private ImageJsonPost(String url, Map<String, String> params, Response.Listener<JSONObject> respListener, Response.ErrorListener listener, Bitmap image, String imageFileName) {
-            super(Method.POST, url, listener);
-            this.listener = respListener;
-
-            this.params = params;
-
-            builder.setBoundary(boundary);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+            }).setConverter(new Converter() {
+        @Override
+        public Object fromBody(TypedInput body, Type type) throws ConversionException {
             try {
-                //builder.addTextBody("announcement", object.toString(), ContentType.APPLICATION_JSON);
-                builder.addBinaryBody("image", stream.toByteArray(), ContentType.create("image/jpeg"), imageFileName);
-            } finally {
-                try {
-                    stream.flush();
-                    stream.close();
-                } catch (Throwable ignore) {}
+                String json = IOUtils.toString(body.in());
+                Log.v(ServerCommunicator.class.getSimpleName(), new JSONObject(json).toString(2));
+                if (!body.mimeType().contains("application/json"))
+                    throw new ConversionException("Data received from the server was not json.");
+                return (new JsonParser().parse(json));
+            } catch (IOException e) {
+                throw new ConversionException(e);
+            } catch (JSONException ignore) {
+                throw new ConversionException(ignore);
             }
         }
 
         @Override
-        public byte[] getBody() throws AuthFailureError {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        public TypedOutput toBody(Object object) {
+            return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
+        }
+    }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
+
+
+
+    public static SimpleJsonHandler jsonService = apiAdapter.create(SimpleJsonHandler.class);
+
+    public static class Jpeg implements TypedOutput {
+        TypedByteArray out;
+        String fileName;
+
+        public Jpeg(String fileName, Bitmap bitmap, int maxSizeInBytes) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            int height = bitmap.getHeight();
+            int width = bitmap.getWidth();
+            double ratio = 1.d;
+            Bitmap temp = null;
+
+            do {
+                if (temp != null) temp.recycle();
+                outputStream.reset();
+                if (ratio != 1.d) temp = Bitmap.createScaledBitmap(bitmap, (int)(width*ratio), (int)(height*ratio), true);
+                else temp = bitmap;
+                temp.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
+                ratio *= 1/Math.sqrt(2);
+            } while (outputStream.size() > maxSizeInBytes);
+
+            out = new TypedByteArray("image/jpeg", outputStream.toByteArray());
+            this.fileName = fileName;
+
             try {
-                builder.build().writeTo(stream);
-                return stream.toByteArray();
-            } catch (IOException e) {
-                VolleyLog.e("Failed to convert body to byte array.");
-            } finally {
-                try {
-                    stream.close();
-                } catch (Throwable ignore) {}
-            }
+                outputStream.flush();
+                outputStream.close();
+            } catch (Throwable ignore) {}
+        }
+
+        @Override
+        public String fileName() {
+            return fileName;
+        }
+
+        public byte[] getBytes() {
+            return out.getBytes();
+        }
+
+        @Override
+        public void writeTo(OutputStream out) throws IOException {
+            out.write(this.out.getBytes());
+        }
+
+        @Override
+        public long length() {
+            return this.out.length();
+        }
+
+        public InputStream in() throws IOException {
+            return out.in();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (o instanceof TypedOutput && out.equals(o));
+        }
+
+        @Override
+        public int hashCode() {
+            return out.hashCode();
+        }
+
+        @Override
+        public String mimeType() {
+            return out.mimeType();
+        }
+    }
+
+    public static class TypedJsonBody implements TypedOutput {
+        TypedByteArray out;
+
+        public TypedJsonBody(JsonObject json) {
+            out = new TypedByteArray("application/json", json.toString().getBytes());
+        }
+
+        @Override
+        public String fileName() {
             return null;
         }
 
-        @Override
-        protected Map<String, String> getParams() throws AuthFailureError {
-            return params;
+        public byte[] getBytes() {
+            return out.getBytes();
         }
 
         @Override
-        protected Response<JSONObject> parseNetworkResponse(final NetworkResponse response) {
-            return new JsonObjectRequest(null, null, null, null) {
-                public Response<JSONObject> parse(NetworkResponse response1) {
-                    return parseNetworkResponse(response);
-                }
-            }.parse(response);
+        public void writeTo(OutputStream out) throws IOException {
+            out.write(this.out.getBytes());
         }
 
         @Override
-        public String getUrl() {
-            String url = super.getUrl() + "?";
-            for (String value : params.keySet()) {
-                url += value + "=" + params.get(value) + "&";
-            }
-            url = url.substring(0, url.length() - 1);
+        public long length() {
+            return this.out.length();
+        }
 
-            return url;
+        public InputStream in() throws IOException {
+            return out.in();
         }
 
         @Override
-        protected void deliverResponse(JSONObject response) {
-            listener.onResponse(response);
+        public boolean equals(Object o) {
+            return (o instanceof TypedOutput && out.equals(o));
         }
 
         @Override
-        public Map<String, String> getHeaders() throws AuthFailureError {
-            Map<String, String> ret = new HashMap<String, String>();
-            ret.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-            return ret;
+        public int hashCode() {
+            return out.hashCode();
         }
+
+        @Override
+        public String mimeType() {
+            return out.mimeType();
+        }
+
+    }
+
+    public interface SimpleJsonHandler {
+        @GET("/api/{type}/{id}")
+        JsonObject show(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> urlParams);
+
+        @GET("/api/{type}")
+        JsonObject get(@Path("type") String type, @QueryMap Map<String, String> urlParams);
+
+        @POST("/api/{type}")
+        JsonObject post(@Path("type") String type, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
+
+        @Multipart
+        @POST("/api/{type}")
+        JsonObject post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image);
+
+        @POST("/api/access")
+        JsonObject login(@QueryMap Map<String, String> fields);
+
+        @PATCH("/api/{type}/{id}")
+        JsonObject patch(@Path("type") String type, @Path("id") String id, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
+
+        @PATCH("/api/users/{id}/super_create")
+        JsonObject superCreate(@Path("id") String userId, @Body TypedJsonBody user, @QueryMap Map<String, String> authentication);
+
+        @PATCH("/api/{type}/{id}")
+        JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part("image") Jpeg image, @QueryMap Map<String, String> authentication);
+
+        @DELETE("/api/{type}/{id}")
+        JsonObject delete(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> authentication);
+
     }
 
 }
