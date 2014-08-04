@@ -7,7 +7,6 @@ import android.net.Uri;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
-import com.crashlytics.android.Crashlytics;
 import com.newrelic.agent.android.NewRelic;
 import com.peck.android.annotations.Header;
 import com.peck.android.interfaces.Singleton;
@@ -65,7 +64,7 @@ public class PeckApp extends Application implements Singleton{
 
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         mContext = this;
-        Crashlytics.start(this);
+        //Crashlytics.start(this);
         NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
         ).start(this);

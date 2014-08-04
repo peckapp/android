@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.volley.VolleyError;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
@@ -35,6 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
+
+import retrofit.RetrofitError;
 
 /**
  * Created by mammothbane on 7/14/2014.
@@ -82,19 +83,17 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 sync(tClass, account, authority, client, syncResult, url);
             } else {
                 if (eventType == -1) {
-                    customSyncEvents(account, authority, client, syncResult, Event.SIMPLE_EVENT, true, url);
-                    customSyncEvents(account, authority, client, syncResult, Event.ATHLETIC_EVENT, false, url);
-                    customSyncEvents(account, authority, client, syncResult, Event.DINING_OPPORTUNITY, false, url);
-                    customSyncEvents(account, authority, client, syncResult, Event.ANNOUNCEMENT, true, url);
+                    customSyncEvents(account, authority, client, syncResult, Event.SIMPLE_EVENT, true);
+                    customSyncEvents(account, authority, client, syncResult, Event.ATHLETIC_EVENT, false);
+                    customSyncEvents(account, authority, client, syncResult, Event.DINING_OPPORTUNITY, false);
+                    customSyncEvents(account, authority, client, syncResult, Event.ANNOUNCEMENT, true);
                 } else {
-                    customSyncEvents(account, authority, client, syncResult, eventType, (eventType == Event.SIMPLE_EVENT || eventType == Event.ANNOUNCEMENT), url);
+                    customSyncEvents(account, authority, client, syncResult, eventType, (eventType == Event.SIMPLE_EVENT || eventType == Event.ANNOUNCEMENT));
                 }
             }
+        } catch (RetrofitError e) {
+            Log.e(PeckSyncAdapter.class.getSimpleName(), "[ " + "ERROR " + e.getMessage().substring(0, 3) + " ] " + e.getUrl());
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof VolleyError) {
-                VolleyError error = ((VolleyError) e.getCause());
-                if (error.networkResponse != null) Log.d(getClass().getSimpleName(), respondToStatusCode(error.networkResponse.statusCode));
-            }
             e.printStackTrace();
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -146,7 +145,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
+            throws RetrofitError, RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
             LoginManager.InvalidAccountException, NetworkErrorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
@@ -261,8 +260,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void customSyncEvents(final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult,
-                                  final int type, final boolean modServer, final String url)
-            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException,
+                                  final int type, final boolean modServer)
+            throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, RetrofitError,
             IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
 
         final String single = (type == Event.ANNOUNCEMENT) ? "announcement" : (type == Event.SIMPLE_EVENT) ? "simple_event" :

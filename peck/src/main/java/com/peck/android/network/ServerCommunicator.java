@@ -1,12 +1,16 @@
 package com.peck.android.network;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -45,9 +49,15 @@ public class ServerCommunicator {
             }).setConverter(new Converter() {
         @Override
         public Object fromBody(TypedInput body, Type type) throws ConversionException {
-            if (!body.mimeType().equals("application/json"))
-                throw new ConversionException("Data received from the server was not json.");
-            return (new JsonParser().parse(body.toString()));
+            try {
+                String json = IOUtils.toString(body.in());
+                        Log.v(ServerCommunicator.class.getSimpleName(), new JSONObject(json).toString(2));
+                if (!body.mimeType().contains("application/json"))
+                    throw new ConversionException("Data received from the server was not json.");
+                return (new JsonParser().parse(json));
+            } catch (IOException e) {
+                throw new ConversionException(e);
+            } catch (JSONException ignore) { throw new ConversionException(ignore); }
         }
 
         @Override
