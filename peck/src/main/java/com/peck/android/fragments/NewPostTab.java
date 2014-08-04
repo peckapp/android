@@ -86,7 +86,7 @@ public class NewPostTab extends Fragment {
                     Map<String, String> jsonMap = JsonUtils.auth(LoginManager.getActive());
                     jsonMap.putAll(JsonUtils.jsonToMap(object[0]));
                     for (String s : jsonMap.keySet()) {
-                        jsonMap.put(s, URLEncoder.encode(jsonMap.get(s), "utf-8").replace("\"", ""));
+                        jsonMap.put(s, URLEncoder.encode(jsonMap.get(s), "utf-8"));
                     }
 
                     ret = ServerCommunicator.jsonService.post(endpoint, jsonMap, new ServerCommunicator.Jpeg(fileName, image, 2 * 1024 * 1024));
@@ -95,7 +95,7 @@ public class NewPostTab extends Fragment {
                 }
                 return ((JsonArray) ret.get("errors"));
             } catch (RetrofitError e) {
-                Log.e(NewPostTab.class.getSimpleName(), e.getMessage());
+                Log.e(NewPostTab.class.getSimpleName(), (e.getMessage() != null) ? e.getMessage() : e.toString() );
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (OperationCanceledException e) {
@@ -150,8 +150,8 @@ public class NewPostTab extends Fragment {
                             JsonObject announcement = new JsonObject();
                             announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
                             announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
-                            announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
-                            announcement.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
+                            announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID)));
+                            announcement.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
                             announcement.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
                             break;
@@ -164,7 +164,7 @@ public class NewPostTab extends Fragment {
                             event.addProperty(Event.TEXT, text);
                             event.addProperty(Event.START_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
                             event.addProperty(Event.END_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
-                            event.addProperty(Event.LOCALE, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION));
+                            event.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
                             event.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
                             runningTask.execute(JsonUtils.wrapJson("simple_event", event));
                             break;

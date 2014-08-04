@@ -40,7 +40,7 @@ import retrofit.mime.TypedOutput;
  * Created by mammothbane on 7/22/2014.
  */
 public class ServerCommunicator {
-    private static final boolean debug = true;
+    private static final boolean debug = false;
     private static RestAdapter apiAdapter = new RestAdapter.Builder().setEndpoint(!debug ? PeckApp.Constants.Network.BASE_URL : "http://192.168.0.24").
             setRequestInterceptor(new RequestInterceptor() {
                 @Override
