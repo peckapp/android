@@ -4,12 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.Volley;
-import com.crashlytics.android.Crashlytics;
 import com.newrelic.agent.android.NewRelic;
-import com.peck.android.annotations.Header;
 import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
@@ -27,15 +22,13 @@ import com.peck.android.models.joins.CircleMember;
 import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
 
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-
 /**
  * Created by mammothbane on 5/28/2014.
  *
  * the base application, created when the app starts.
  *
  */
+
 public class PeckApp extends Application implements Singleton{
 
     private static Context mContext;
@@ -55,17 +48,10 @@ public class PeckApp extends Application implements Singleton{
         return MODELS;
     }
 
-    public static String buildEndpointURL(Class tClass) {
-        Header header = (Header)tClass.getAnnotation(Header.class);
-        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        return Constants.Network.API_ENDPOINT + header.plural() + "/";
-    }
-
     public void onCreate() {
 
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         mContext = this;
-        Crashlytics.start(this);
         NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
         ).start(this);
@@ -130,14 +116,5 @@ public class PeckApp extends Application implements Singleton{
 
         }
 
-    }
-
-
-    private static RequestQueue requestQueue;
-
-    public static RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext(),
-                new HttpClientStack(HttpClients.custom().setConnectionManager(new PoolingHttpClientConnectionManager()).build()));
-        return requestQueue;
     }
 }
