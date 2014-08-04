@@ -70,7 +70,6 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:+'
     compile 'com.squareup.okhttp:okhttp-urlconnection:+'
     compile 'com.squareup.okhttp:okhttp:+'
-    compile 'org.op4j:op4j:1.0-beta3'
 
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     
