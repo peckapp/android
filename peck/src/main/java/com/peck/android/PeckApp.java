@@ -4,9 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.Volley;
 import com.newrelic.agent.android.NewRelic;
 import com.peck.android.annotations.Header;
 import com.peck.android.interfaces.Singleton;
@@ -25,9 +22,6 @@ import com.peck.android.models.User;
 import com.peck.android.models.joins.CircleMember;
 import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
-
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 /**
  * Created by mammothbane on 5/28/2014.
@@ -129,14 +123,5 @@ public class PeckApp extends Application implements Singleton{
 
         }
 
-    }
-
-
-    private static RequestQueue requestQueue;
-
-    public static RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext(),
-                new HttpClientStack(HttpClients.custom().setConnectionManager(new PoolingHttpClientConnectionManager()).build()));
-        return requestQueue;
     }
 }
