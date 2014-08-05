@@ -214,13 +214,12 @@ public class FeedActivity extends PeckActivity {
                                         ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
 
                                         if (ret == null) {
-                                            DatabaseManager.openDB().rawQuery("select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
-                                                    + CircleMember.UPDATED_AT + ", cir." + Circle.SV_ID + ", cir." + Circle.LOCAL_ID + ", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
+                                            Cursor test = DatabaseManager.openDB().rawQuery("select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
+                                                    + CircleMember.UPDATED_AT +", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
                                                     + User.LOCAL_ID + ", lower(us." + User.FIRST_NAME + ") as lwr_index from " +
                                                     DBUtils.getTableName(CircleMember.class) +
-                                                    " cm inner join " + DBUtils.getTableName(Circle.class) + " cir on cm." + CircleMember.CIRCLE_ID + " = cir." + Circle.SV_ID +
-                                                    " inner join " + DBUtils.getTableName(User.class) + " us on cm." + CircleMember.USER_ID
-                                                    + " = us." + User.SV_ID + " where " + , null);
+                                                    " cm inner join " + DBUtils.getTableName(User.class) + " us on cm." + CircleMember.CIRCLE_ID + " = us." + User.SV_ID +
+                                                    " where cm." + CircleMember.USER_ID + " = ? order by cm." + CircleMember.UPDATED_AT + " desc", new String[] { Integer.toString(circle_id) });
 
                                             Cursor first = getContentResolver().query(DBUtils.buildLocalUri(CircleMember.class), new String[]{CircleMember.CIRCLE_ID, CircleMember.LOCAL_ID,
                                                     CircleMember.USER_ID, CircleMember.UPDATED_AT}, CircleMember.CIRCLE_ID + " = ?", new String[]{Integer.toString(circle_id)}, CircleMember.UPDATED_AT + " desc");
