@@ -248,10 +248,9 @@ public class FeedActivity extends PeckActivity {
                                         Cursor second = DatabaseManager.openDB().rawQuery(
                                                 "select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
                                                 + CircleMember.UPDATED_AT + ", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
-                                                + User.LOCAL_ID + ", lower(us." + User.FIRST_NAME + ") as lwr_index "
-                                                + "from " + DBUtils.getTableName(CircleMember.class) +
-                                                " cm inner join " + DBUtils.getTableName(User.class) + " us " +
-                                                "on cm." + CircleMember.CIRCLE_ID + " = us." + User.SV_ID +
+                                                + User.LOCAL_ID + " from " + DBUtils.getTableName(CircleMember.class) +
+                                                " as cm inner join " + DBUtils.getTableName(User.class) + " as us " +
+                                                "on cm." + CircleMember.USER_ID + " = us." + User.SV_ID +
                                                 " where cm." + CircleMember.CIRCLE_ID + " = ? " +
                                                 "order by cm." + CircleMember.UPDATED_AT + " desc", new String[]{Integer.toString(circle_id)});
 
