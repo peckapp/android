@@ -1,17 +1,12 @@
 package com.peck.android.fragments;
 
 import android.accounts.AccountManager;
-import android.accounts.AuthenticatorException;
-import android.accounts.NetworkErrorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +21,7 @@ import android.widget.Toast;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.peck.android.R;
+import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.FailureCallback;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.LoginManager;
@@ -37,7 +33,6 @@ import com.peck.android.network.ServerCommunicator;
 import org.joda.time.DateTime;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Map;
 
@@ -65,79 +60,32 @@ public class NewPostTab extends Fragment {
     private class PostCallback implements Callback<JsonObject> {
         @Override
         public void success(JsonObject jsonObject, Response response) {
-            Handler handler = new Handler(Looper.getMainLooper());
+            bar.setVisibility(View.GONE);
+            JsonObject object = jsonObject.getAsJsonObject("announcement");
+            if (object == null) {
+                object = jsonObject.getAsJsonObject("simple_event");
+                object.addProperty(Event.TYPE, Event.SIMPLE_EVENT);
+            } else {
+                object.addProperty(Event.TYPE, Event.ANNOUNCEMENT);
+            }
 
+            JsonArray errors = jsonObject.getAsJsonArray("errors");
+
+            if (errors != null && errors.size() > 0) {
+                Toast.makeText(getActivity(), errors.toString(), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show();
+                DBUtils.syncJson(DBUtils.buildLocalUri(Event.class), object, Event.class);
+            }
         }
 
         @Override
         public void failure(RetrofitError error) {
-
+            bar.setVisibility(View.GONE);
+            error.printStackTrace();
         }
+
     }
-
-    private class PostTask extends AsyncTask<JsonObject, Void, JsonArray> {
-        private String path;
-        private Bitmap image;
-        private String fileName;
-
-        private PostTask(String path) {
-            this.path = path;
-        }
-
-        private PostTask(String path, Bitmap image, String fileName) {
-            this.path = path;
-            this.image = image;
-            this.fileName = fileName;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            bar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected JsonArray doInBackground(JsonObject... object) {
-            try {
-                JsonObject ret;
-                if (image != null) {
-                    Map<String, String> jsonMap = JsonUtils.auth(LoginManager.getActive());
-                    jsonMap.putAll(JsonUtils.jsonToMap(object[0]));
-                    ret = ServerCommunicator.jsonService.post(path, jsonMap, new ServerCommunicator.Jpeg(fileName, image, 2 * 1024 * 1024));
-                } else {
-                    ret = ServerCommunicator.jsonService.post(path, new ServerCommunicator.TypedJsonBody(object[0]), JsonUtils.auth(LoginManager.getActive()));
-                }
-                return ((JsonArray) ret.get("errors"));
-            } catch (RetrofitError e) {
-                Log.e(NewPostTab.class.getSimpleName(), (e.getMessage() != null) ? e.getMessage() : e.toString() );
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (OperationCanceledException e) {
-                e.printStackTrace();
-            } catch (AuthenticatorException e) {
-                e.printStackTrace();
-            } catch (LoginManager.InvalidAccountException e) {
-                e.printStackTrace();
-            } catch (NetworkErrorException e) {
-                e.printStackTrace();
-            } finally {
-                bar.post( new Runnable() {
-                    @Override
-                    public void run() {
-                        bar.setVisibility(View.GONE);
-                    }
-                });
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JsonArray errors) {
-            if (errors != null && errors.size() > 0) {
-                Toast.makeText(getActivity(), errors.toString(), Toast.LENGTH_LONG).show();
-            } else { Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show(); }
-        }
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -156,24 +104,26 @@ public class NewPostTab extends Fragment {
                 final String text = ((EditText)view.findViewById(R.id.et_announce)).getText().toString();
                 final String userId = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
 
+                bar.setVisibility(View.VISIBLE);
                 JsonUtils.auth(LoginManager.getActive(), new FailureCallback<Map<String, String>>() {
                     @Override
                     public void success(Map<String, String> obj) {
                         switch (bt_selected) {
                             case ANNOUNCEMENT:
-                                runningTask = (imageBitmap == null) ? new PostTask("announcements") : new PostTask("announcements", imageBitmap,
-                                        "announcement_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg");
                                 JsonObject announcement = new JsonObject();
                                 announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
                                 announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
                                 announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID)));
                                 announcement.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
                                 announcement.addProperty(Event.PUBLIC, ((Switch) getView().findViewById(R.id.sw_public)).isChecked());
-                                runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
+                                if (imageBitmap == null) {
+                                    ServerCommunicator.jsonService.post("announcements", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("announcement", announcement)), obj, new PostCallback());
+                                } else {
+                                    obj.putAll(JsonUtils.jsonToMap(JsonUtils.wrapJson("announcement", announcement)));
+                                    ServerCommunicator.jsonService.post("announcements", obj, new ServerCommunicator.Jpeg("announcement_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg", imageBitmap, 2 * 1024 * 1024), new PostCallback());
+                                }
                                 break;
                             case EVENT:
-                                runningTask = (imageBitmap == null) ? new PostTask("simple_events") : new PostTask("simple_events", imageBitmap,
-                                        "event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg");
                                 final JsonObject event = new JsonObject();
                                 event.addProperty(Event.TITLE, title);
                                 event.addProperty(Event.TEXT, text);
@@ -184,11 +134,13 @@ public class NewPostTab extends Fragment {
                                 if (imageBitmap == null) {
                                     ServerCommunicator.jsonService.post("simple_events", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("simple_event", event)), obj, new PostCallback());
                                 } else {
+                                    obj.putAll(JsonUtils.jsonToMap(JsonUtils.wrapJson("simple_event", event)));
                                     ServerCommunicator.jsonService.post("simple_events", obj, new ServerCommunicator.Jpeg("event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg", imageBitmap, 2 * 1024 * 1024), new PostCallback());
                                 }
                         }
                     }
                     public void failure(Throwable t) {
+                        bar.setVisibility(View.GONE);
                         t.printStackTrace();
                     }
 

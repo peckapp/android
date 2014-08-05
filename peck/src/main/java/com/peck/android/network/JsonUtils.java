@@ -130,9 +130,9 @@ public class JsonUtils {
 
     public static void auth(Account account, FailureCallback<Map<String, String>> callback) {
         try {
-            callback.success(auth(account));
+            callback.succeed(auth(account));
         } catch (Throwable e) {
-            callback.failure(e);
+            callback.fail(e);
         }
     }
 

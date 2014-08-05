@@ -6,7 +6,7 @@ import android.os.Looper;
 /**
  * Created by mammothbane on 8/5/2014.
  *
- * a class to allow success and failure on a callback. failure handles any exceptions.
+ * a class to allow success and failure on a callback. failure takes all exceptions.
  * runs on the main thread by default.
  *
  */
@@ -17,12 +17,17 @@ public abstract class FailureCallback<T> {
     protected abstract void success(T item);
     protected abstract void failure(Throwable t);
 
-    public FailureCallback<T> onThisThread() {
+    public FailureCallback<T> onCurrentThread() {
         mainThread = false;
         return this;
     }
 
-    public void succeed(final T item) {
+    /**
+     * called by the method calling back if execution was successful.
+     *
+     * @param item the item returned
+     */
+    public final void succeed(final T item) {
         if (mainThread) myHanlder.post(new Runnable() {
             @Override
             public void run() {
@@ -31,12 +36,12 @@ public abstract class FailureCallback<T> {
         }); else success(item);
     }
 
-    public void fail(final Throwable t) {
+    public final void fail(final Throwable t) {
         if (mainThread) myHanlder.post(new Runnable() {
             @Override
             public void run() {
                 fail(t);
             }
-        }); else fail(t);
+        }); else failure(t);
     }
 }
