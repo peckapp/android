@@ -34,7 +34,6 @@ import com.makeramen.RoundedImageView;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
-import com.peck.android.database.DatabaseManager;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
@@ -45,7 +44,6 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
-import com.peck.android.models.joins.CircleMember;
 import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
@@ -245,14 +243,8 @@ public class FeedActivity extends PeckActivity {
 
                                     @Override
                                     protected Void doInBackground(Void... voids) {
-                                        Cursor second = DatabaseManager.openDB().rawQuery(
-                                                "select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
-                                                + CircleMember.UPDATED_AT + ", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
-                                                + User.LOCAL_ID + " from " + DBUtils.getTableName(CircleMember.class) +
-                                                " as cm inner join " + DBUtils.getTableName(User.class) + " as us " +
-                                                "on cm." + CircleMember.USER_ID + " = us." + User.SV_ID +
-                                                " where cm." + CircleMember.CIRCLE_ID + " = ? " +
-                                                "order by cm." + CircleMember.UPDATED_AT + " desc", new String[]{Integer.toString(circle_id)});
+                                        Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
+                                                new String[] { User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID }, null, null, null);
 
                                         ret = new ArrayList<Map<String, Object>>();
 

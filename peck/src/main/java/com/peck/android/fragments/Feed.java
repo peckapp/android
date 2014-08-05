@@ -137,6 +137,10 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
     }
 
+    public Cursor getAuxCursor() {
+        return null;
+    }
+
     public void addHeader(View header) {
         headers.add(header);
     }
