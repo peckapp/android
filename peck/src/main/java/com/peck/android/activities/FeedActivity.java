@@ -71,7 +71,7 @@ public class FeedActivity extends PeckActivity {
     private final static String TAG = "FeedActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    TimeZone tz = Calendar.getInstance().getTimeZone();
+    private TimeZone tz = Calendar.getInstance().getTimeZone();
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -125,57 +125,75 @@ public class FeedActivity extends PeckActivity {
             @Override
             public void onClick(final View view) {
                 final View dialogView = inflater.inflate(R.layout.alert_circlecreate, null, false);
-                new AlertDialog.Builder(FeedActivity.this).setView(dialogView).setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        final String circleName = ((EditText) dialogView.findViewById(R.id.et_name)).getText().toString();
-                        Account account = LoginManager.getActive();
-                        JsonObject jsonBody = new JsonObject();
-                        jsonBody.addProperty(Circle.NAME, circleName);
-                        jsonBody.addProperty(Circle.LOCALE, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.INSTITUTION));
-                        jsonBody.addProperty(Circle.USER_ID, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.USER_ID));
-
-                        try {
-                            Map<String, String> auth = JsonUtils.auth(account);
-                            ServerCommunicator.jsonService.post("circles", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle", jsonBody)), auth, new Callback<JsonObject>() {
-                                @Override
-                                public void success(JsonObject object, Response response) {
-                                    Toast.makeText(FeedActivity.this, "success", Toast.LENGTH_LONG).show();
-                                }
-
-                                @Override
-                                public void failure(RetrofitError error) {
-                                    Toast.makeText(FeedActivity.this, "Network error posting circle: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (OperationCanceledException e) {
-                            e.printStackTrace();
-                        } catch (AuthenticatorException e) {
-                            e.printStackTrace();
-                        } catch (LoginManager.InvalidAccountException e) {
-                            e.printStackTrace();
-                        } catch (NetworkErrorException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }).setCancelable(true).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                final AlertDialog dialog = new AlertDialog.Builder(FeedActivity.this).setView(dialogView).setPositiveButton("Create", null).setCancelable(true).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
                     }
-                }).show();
+                }).create();
+
+                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialogInterface) {
+                        Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View inner) {
+                                final String circleName = ((EditText) dialogView.findViewById(R.id.et_name)).getText().toString();
+                                Account account = LoginManager.getActive();
+                                JsonObject jsonBody = new JsonObject();
+                                jsonBody.addProperty(Circle.NAME, circleName);
+                                jsonBody.addProperty(Circle.LOCALE, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+                                jsonBody.addProperty(Circle.USER_ID, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.USER_ID));
+                                dialogView.findViewById(R.id.pb_network).setVisibility(View.VISIBLE);
+
+                                try {
+                                    Map<String, String> auth = JsonUtils.auth(account);
+                                    ServerCommunicator.jsonService.post("circles", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle", jsonBody)), auth, new Callback<JsonObject>() {
+                                        @Override
+                                        public void success(JsonObject object, Response response) {
+                                            if (object.get("errors").getAsJsonArray().size() > 0) {
+                                                Toast.makeText(FeedActivity.this, "failure: " + object.get("errors").toString(), Toast.LENGTH_LONG).show();
+                                            }
+                                            else {
+                                                Toast.makeText(FeedActivity.this, "success", Toast.LENGTH_LONG).show();
+                                                dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
+                                                dialog.dismiss();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void failure(RetrofitError error) {
+                                            Toast.makeText(FeedActivity.this, "Network error posting circle: " + error.getResponse().getStatus() + " - " + error.getResponse().getReason(), Toast.LENGTH_LONG).show();
+                                            dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
+                                        }
+                                    });
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (OperationCanceledException e) {
+                                    e.printStackTrace();
+                                } catch (AuthenticatorException e) {
+                                    e.printStackTrace();
+                                } catch (LoginManager.InvalidAccountException e) {
+                                    e.printStackTrace();
+                                } catch (NetworkErrorException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                });
+                dialog.show();
+
             }
         });
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS}, new int[]{R.id.tv_title, R.id.hlv_users})
+                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME}, new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add})
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
 
                     }
                 })
@@ -251,7 +269,15 @@ public class FeedActivity extends PeckActivity {
                                         }
                                     }
                                 }.execute();
+                                return true;
+                            case R.id.tv_add:
+                                view.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Log.d(FeedActivity.class.getSimpleName(), "clicked");
 
+                                    }
+                                });
                                 return true;
                             default:
                                 return false;

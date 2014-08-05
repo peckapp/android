@@ -8,9 +8,18 @@
         android:layout_width="match_parent"
         android:layout_margin="16dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/et_name"
         android:textColor="@android:color/secondary_text_light"
         android:hint="name"/>
+
+    <ProgressBar
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:id="@+id/pb_network"
+        android:visibility="gone"/>
 
 </LinearLayout>
