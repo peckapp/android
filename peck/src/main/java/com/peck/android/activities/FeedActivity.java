@@ -51,7 +51,6 @@ import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
 import com.squareup.picasso.Picasso;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -201,6 +200,7 @@ public class FeedActivity extends PeckActivity {
                 .withHeader(header)
                 .orderedBy(DBOperable.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+
                     final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
 
                     @Override
@@ -208,73 +208,71 @@ public class FeedActivity extends PeckActivity {
                         switch (view.getId()) {
                             case R.id.hlv_users:
                                 final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
-                                new AsyncTask<Void, Void, ArrayList<Map<String, Object>>>() {
+                                new AsyncTask<Void, Void, Void>() {
+                                    ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+                                    SimpleAdapter simpleAdapter;
+
                                     @Override
-                                    protected ArrayList<Map<String, Object>> doInBackground(Void... voids) {
-                                        ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
-
-                                        if (ret == null) {
-                                            Cursor test = DatabaseManager.openDB().rawQuery("select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
-                                                    + CircleMember.UPDATED_AT +", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
-                                                    + User.LOCAL_ID + ", lower(us." + User.FIRST_NAME + ") as lwr_index from " +
-                                                    DBUtils.getTableName(CircleMember.class) +
-                                                    " cm inner join " + DBUtils.getTableName(User.class) + " us on cm." + CircleMember.CIRCLE_ID + " = us." + User.SV_ID +
-                                                    " where cm." + CircleMember.USER_ID + " = ? order by cm." + CircleMember.UPDATED_AT + " desc", new String[] { Integer.toString(circle_id) });
-
-                                            Cursor first = getContentResolver().query(DBUtils.buildLocalUri(CircleMember.class), new String[]{CircleMember.CIRCLE_ID, CircleMember.LOCAL_ID,
-                                                    CircleMember.USER_ID, CircleMember.UPDATED_AT}, CircleMember.CIRCLE_ID + " = ?", new String[]{Integer.toString(circle_id)}, CircleMember.UPDATED_AT + " desc");
-
-                                            ArrayList<Integer> lst = new ArrayList<Integer>();
-                                            while (first.moveToNext()) {
-                                                lst.add(first.getInt(first.getColumnIndex(CircleMember.USER_ID)));
-                                            }
-                                            first.close();
-
-                                            Cursor second = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID,
-                                                    "lower(" + User.FIRST_NAME + ") as lwr_index"}, User.SV_ID + " IN (" + StringUtils.join(lst, ", ") + ")" , null, "lwr_index");
-                                            ret = new ArrayList<Map<String, Object>>();
-
-                                            if (second != null) {
-                                                while (second.moveToNext()) {
-                                                    Map<String, Object> map = new HashMap<String, Object>();
-                                                    map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
-                                                    map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
-                                                    ret.add(map);
-                                                }
-                                                second.close();
-                                            }
-                                            circleMembers.put(circle_id, ret);
+                                    protected void onPreExecute() {
+                                        synchronized (circleMembers) {
+                                            ArrayList<Map<String, Object>> objs = circleMembers.get(circle_id);
+                                            if (objs != null) ret.addAll(objs);
                                         }
 
-                                        return circleMembers.get(circle_id);
+                                        simpleAdapter = new SimpleAdapter(FeedActivity.this, ret, R.layout.hlvitem_user,
+                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
+
+                                        ((HListView) view).setAdapter(simpleAdapter);
+                                        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                                            @Override
+                                            public boolean setViewValue(View view, Object o, String s) {
+                                                switch (view.getId()) {
+                                                    case R.id.iv_event:
+                                                        if (o != null && o.toString().length() > 0) {
+                                                            Picasso.with(FeedActivity.this)
+                                                                    .load(PeckApp.Constants.Network.BASE_URL + o)
+                                                                    .fit()
+                                                                    .centerCrop()
+                                                                    .into((RoundedImageView) view);
+                                                        }
+                                                        return true;
+                                                }
+
+                                                return false;
+                                            }
+                                        });
                                     }
 
                                     @Override
-                                    protected void onPostExecute(
-                                            final ArrayList<Map<String, Object>> list) {
-                                        if (list != null) {
-                                            final SimpleAdapter simpleAdapter = new SimpleAdapter(FeedActivity.this, list, R.layout.hlvitem_user,
-                                                    new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
-                                            ((HListView) view).setAdapter(simpleAdapter);
-                                            simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                                @Override
-                                                public boolean setViewValue(View view, Object o, String s) {
-                                                    switch (view.getId()) {
-                                                        case R.id.iv_event:
-                                                            if (o != null && o.toString().length() > 0) {
-                                                                Picasso.with(FeedActivity.this)
-                                                                        .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                        .fit()
-                                                                        .centerCrop()
-                                                                        .into((RoundedImageView) view);
-                                                            }
-                                                            return true;
-                                                    }
+                                    protected Void doInBackground(Void... voids) {
+                                        Cursor second = DatabaseManager.openDB().rawQuery(
+                                                "select cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm."
+                                                + CircleMember.UPDATED_AT + ", us." + User.FIRST_NAME + ", us." + User.IMAGE_NAME + ", us."
+                                                + User.LOCAL_ID + ", lower(us." + User.FIRST_NAME + ") as lwr_index "
+                                                + "from " + DBUtils.getTableName(CircleMember.class) +
+                                                " cm inner join " + DBUtils.getTableName(User.class) + " us " +
+                                                "on cm." + CircleMember.CIRCLE_ID + " = us." + User.SV_ID +
+                                                " where cm." + CircleMember.CIRCLE_ID + " = ? " +
+                                                "order by cm." + CircleMember.UPDATED_AT + " desc", new String[]{Integer.toString(circle_id)});
 
-                                                    return false;
-                                                }
-                                            });
+                                        ret = new ArrayList<Map<String, Object>>();
+
+                                        while (second.moveToNext()) {
+                                            Map<String, Object> map = new HashMap<String, Object>();
+                                            map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
+                                            map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
+                                            ret.add(map);
                                         }
+                                        second.close();
+                                        synchronized (circleMembers) {
+                                            circleMembers.put(circle_id, ret);
+                                        }
+                                        return null;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(final Void avoid) {
+                                        simpleAdapter.notifyDataSetChanged();
                                     }
                                 }.execute();
                                 return true;
