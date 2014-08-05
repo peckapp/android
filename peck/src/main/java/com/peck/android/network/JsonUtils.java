@@ -15,6 +15,7 @@ import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.annotations.Header;
 import com.peck.android.database.DBUtils;
+import com.peck.android.interfaces.FailureCallback;
 import com.peck.android.managers.LoginManager;
 
 import java.io.IOException;
@@ -125,6 +126,14 @@ public class JsonUtils {
         auth.put("authentication[api_key]", apiKey);
 
         return auth;
+    }
+
+    public static void auth(Account account, FailureCallback<Map<String, String>> callback) {
+        try {
+            callback.success(auth(account));
+        } catch (Throwable e) {
+            callback.failure(e);
+        }
     }
 
     public static Map<String, String> jsonToMap(JsonObject root) {

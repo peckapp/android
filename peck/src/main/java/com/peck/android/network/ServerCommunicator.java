@@ -205,6 +205,10 @@ public class ServerCommunicator {
         @POST("/api/{type}")
         JsonObject post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image);
 
+        @Multipart
+        @POST("/api/{type}")
+        void post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image, Callback<JsonObject> callBack);
+
         @POST("/api/users")
         JsonObject createUser();
 

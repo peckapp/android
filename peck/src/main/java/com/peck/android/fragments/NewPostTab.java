@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +26,7 @@ import android.widget.Toast;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.peck.android.R;
+import com.peck.android.interfaces.FailureCallback;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Event;
@@ -38,7 +41,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Map;
 
+import retrofit.Callback;
 import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by mammothbane on 6/16/2014.
@@ -55,6 +60,19 @@ public class NewPostTab extends Fragment {
 
     static {
         doubleFormat.setMaximumFractionDigits(1);
+    }
+
+    private class PostCallback implements Callback<JsonObject> {
+        @Override
+        public void success(JsonObject jsonObject, Response response) {
+            Handler handler = new Handler(Looper.getMainLooper());
+
+        }
+
+        @Override
+        public void failure(RetrofitError error) {
+
+        }
     }
 
     private class PostTask extends AsyncTask<JsonObject, Void, JsonArray> {
@@ -134,73 +152,83 @@ public class NewPostTab extends Fragment {
         view.findViewById(R.id.bt_post).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String title = ((EditText)view.findViewById(R.id.et_title)).getText().toString();
-                String text = ((EditText)view.findViewById(R.id.et_announce)).getText().toString();
-                String userId = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
+                final String title = ((EditText)view.findViewById(R.id.et_title)).getText().toString();
+                final String text = ((EditText)view.findViewById(R.id.et_announce)).getText().toString();
+                final String userId = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
 
-                if (runningTask == null || runningTask.getStatus() != AsyncTask.Status.PENDING || runningTask.getStatus() != AsyncTask.Status.RUNNING) {
-                    switch (bt_selected) {
-                        case ANNOUNCEMENT:
-                            runningTask = (imageBitmap == null) ? new PostTask("announcements") : new PostTask("announcements", imageBitmap,
-                                    "announcement_photo_" + userId + "_" + DateTime.now().toInstant().getMillis()/1000 + ".jpeg");
-                            JsonObject announcement = new JsonObject();
-                            announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
-                            announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
-                            announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID)));
-                            announcement.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
-                            announcement.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
-                            runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
-                            break;
-                        case EVENT:
-                            runningTask = (imageBitmap == null) ? new PostTask("simple_events") : new PostTask("simple_events", imageBitmap,
-                                    "event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis()/1000 + ".jpeg");
-                            JsonObject event = new JsonObject();
-                            event.addProperty(Event.TITLE, title);
-                            event.addProperty(Event.TEXT, text);
-                            event.addProperty(Event.START_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
-                            event.addProperty(Event.END_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
-                            event.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
-                            event.addProperty(Event.PUBLIC, ((Switch)getView().findViewById(R.id.sw_public)).isChecked());
-                            runningTask.execute(JsonUtils.wrapJson("simple_event", event));
-                            break;
+                JsonUtils.auth(LoginManager.getActive(), new FailureCallback<Map<String, String>>() {
+                    @Override
+                    public void success(Map<String, String> obj) {
+                        switch (bt_selected) {
+                            case ANNOUNCEMENT:
+                                runningTask = (imageBitmap == null) ? new PostTask("announcements") : new PostTask("announcements", imageBitmap,
+                                        "announcement_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg");
+                                JsonObject announcement = new JsonObject();
+                                announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
+                                announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
+                                announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID)));
+                                announcement.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
+                                announcement.addProperty(Event.PUBLIC, ((Switch) getView().findViewById(R.id.sw_public)).isChecked());
+                                runningTask.execute(JsonUtils.wrapJson("announcement", announcement));
+                                break;
+                            case EVENT:
+                                runningTask = (imageBitmap == null) ? new PostTask("simple_events") : new PostTask("simple_events", imageBitmap,
+                                        "event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg");
+                                final JsonObject event = new JsonObject();
+                                event.addProperty(Event.TITLE, title);
+                                event.addProperty(Event.TEXT, text);
+                                event.addProperty(Event.START_TIMESTAMP, (((DateSelector) getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);
+                                event.addProperty(Event.END_TIMESTAMP, (((DateSelector) getChildFragmentManager().findFragmentByTag("end")).getDate().toInstant().getMillis()) / 1000);
+                                event.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
+                                event.addProperty(Event.PUBLIC, ((Switch) getView().findViewById(R.id.sw_public)).isChecked());
+                                if (imageBitmap == null) {
+                                    ServerCommunicator.jsonService.post("simple_events", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("simple_event", event)), obj, new PostCallback());
+                                } else {
+                                    ServerCommunicator.jsonService.post("simple_events", obj, new ServerCommunicator.Jpeg("event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis() / 1000 + ".jpeg", imageBitmap, 2 * 1024 * 1024), new PostCallback());
+                                }
+                        }
                     }
-                }
+                    public void failure(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                });
+        }
+    });
+
+    view.findViewById(R.id.bt_event).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View t) {
+            bt_selected = EVENT;
+            view.findViewById(R.id.post_content).setVisibility(View.VISIBLE);
+        }
+    });
+
+    view.findViewById(R.id.bt_announce).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View t) {
+            bt_selected = ANNOUNCEMENT;
+            view.findViewById(R.id.post_content).setVisibility(View.GONE);
+        }
+    });
+
+
+
+    view.findViewById(R.id.sw_public).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View t) {
+            Switch sw = ((Switch) t);
+            if (sw.isChecked()) {
+                view.findViewById(R.id.bt_group_select).setEnabled(true);
+            } else {
+                view.findViewById(R.id.bt_group_select).setEnabled(false);
             }
-        });
+        }
+    });
 
-        view.findViewById(R.id.bt_event).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View t) {
-                bt_selected = EVENT;
-                view.findViewById(R.id.post_content).setVisibility(View.VISIBLE);
-            }
-        });
-
-        view.findViewById(R.id.bt_announce).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View t) {
-                bt_selected = ANNOUNCEMENT;
-                view.findViewById(R.id.post_content).setVisibility(View.GONE);
-            }
-        });
-
-
-
-        view.findViewById(R.id.sw_public).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View t) {
-                Switch sw = ((Switch) t);
-                if (sw.isChecked()) {
-                    view.findViewById(R.id.bt_group_select).setEnabled(true);
-                } else {
-                    view.findViewById(R.id.bt_group_select).setEnabled(false);
-                }
-            }
-        });
-
-        view.findViewById(R.id.bt_event).performClick();
-        return view;
-    }
+    view.findViewById(R.id.bt_event).performClick();
+    return view;
+}
 
 
     @Override
