@@ -1,17 +1,22 @@
 package com.peck.android.database;
 
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.PeckApp;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.UriPath;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
+import com.peck.android.network.JsonUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -84,4 +89,35 @@ public class DBUtils {
     public static Uri buildLocalUri(Class tClass) {
         return PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(getTableName(tClass)).build();
     }
+
+
+    /**
+     * receive a contentvalues and asynchronously synchronize it to the database
+     *
+     * @param uri the uri to query
+     * @param unwrappedJsonObject the object to put
+     * @param parseClass the class to parse it with
+     */
+    public static void syncJson(final Uri uri, final JsonObject unwrappedJsonObject, final Class parseClass) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Cursor cursor = PeckApp.getContext().getContentResolver().query(uri, new String[] {DBOperable.SV_ID, DBOperable.UPDATED_AT}, DBOperable.SV_ID + " = ?", new String[] { unwrappedJsonObject.get(DBOperable.SV_ID).getAsString() }, DBOperable.UPDATED_AT);
+
+                if (cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    double date = cursor.getDouble(cursor.getColumnIndex(DBOperable.UPDATED_AT));
+                    if (unwrappedJsonObject.get(DBOperable.UPDATED_AT).getAsDouble() >= date) {
+                        PeckApp.getContext().getContentResolver().update(uri, JsonUtils.jsonToContentValues(unwrappedJsonObject, parseClass), DBOperable.SV_ID + "= ?", new String[] { Long.toString(unwrappedJsonObject.get(DBOperable.SV_ID).getAsLong())});
+                    } else Log.v(DBUtils.class.getSimpleName(), "Json sync cancelled: local version is newer");
+                } else {
+                    PeckApp.getContext().getContentResolver().insert(uri, JsonUtils.jsonToContentValues(unwrappedJsonObject, parseClass));
+                }
+
+                cursor.close();
+                return null;
+            }
+        }.execute();
+    }
+
 }

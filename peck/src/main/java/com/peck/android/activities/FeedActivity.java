@@ -150,11 +150,13 @@ public class FeedActivity extends PeckActivity {
                                     ServerCommunicator.jsonService.post("circles", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle", jsonBody)), auth, new Callback<JsonObject>() {
                                         @Override
                                         public void success(JsonObject object, Response response) {
+                                            dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
                                             if (object.get("errors").getAsJsonArray().size() > 0) {
                                                 Toast.makeText(FeedActivity.this, "failure: " + object.get("errors").toString(), Toast.LENGTH_LONG).show();
                                             }
                                             else {
                                                 Toast.makeText(FeedActivity.this, "success", Toast.LENGTH_LONG).show();
+                                                DBUtils.syncJson(DBUtils.buildLocalUri(Circle.class), object.getAsJsonObject("circle"), Circle.class);
                                                 dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
                                                 dialog.dismiss();
                                             }
@@ -162,7 +164,7 @@ public class FeedActivity extends PeckActivity {
 
                                         @Override
                                         public void failure(RetrofitError error) {
-                                            Toast.makeText(FeedActivity.this, "Network error posting circle: " + error.getResponse().getStatus() + " - " + error.getResponse().getReason(), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(FeedActivity.this, "Network error posting circle: " + ((error.getResponse() != null) ? (error.getResponse().getStatus() + " - " + error.getResponse().getReason()) : error.getMessage()), Toast.LENGTH_LONG).show();
                                             dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
                                         }
                                     });
