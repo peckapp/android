@@ -19,6 +19,8 @@ import android.widget.ListView;
 import com.peck.android.BuildConfig;
 import com.peck.android.R;
 
+import java.util.ArrayList;
+
 /**
  * Created by mammothbane on 6/9/2014.
  *
@@ -56,11 +58,16 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private static int loader_static = 0;
     private final int URL_LOADER = loader_static++;
 
+    private ArrayList<View> footers = new ArrayList<View>();
+    private ArrayList<View> headers = new ArrayList<View>();
+
     public static class Builder {
         private Bundle loaderBundle = new Bundle();
         private Bundle feedBundle = new Bundle();
         private AdapterView.OnItemClickListener listener;
         private SimpleCursorAdapter.ViewBinder viewBinder;
+        private View[] header;
+        private View[] footer;
 
         public Builder(@NonNull Uri loaderUri, int itemLayout) {
             feedBundle.putInt(FEED_ITEM_LAYOUT, itemLayout);
@@ -105,17 +112,37 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             return this;
         }
 
+        public Builder withHeader(@NonNull View... header) {
+            this.header = header;
+            return this;
+        }
+
+        public Builder withFooter(@NonNull View... footer) {
+            this.footer = footer;
+            return this;
+        }
+
         public Feed build() {
             Feed ret = new Feed();
 
             feedBundle.putBundle(LOADER_BUNDLE, loaderBundle);
             ret.setArguments(feedBundle);
+            if (header != null) for (View view : header) ret.addHeader(view);
+            if (footer != null) for (View view : footer) ret.addFooter(view);
             if (viewBinder != null) ret.setViewBinder(viewBinder);
             if (listener != null) ret.setOnItemClickListener(listener);
 
             return ret;
         }
 
+    }
+
+    public void addHeader(View header) {
+        headers.add(header);
+    }
+
+    public void addFooter(View footer) {
+        footers.add(footer);
     }
 
     public void bindToAdapterView(ListView adapterView) {
@@ -170,8 +197,10 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
-        bindToAdapterView((ListView)view.findViewById(listViewRes));
-
+        ListView lv = ((ListView) view.findViewById(listViewRes));
+        for (View header : headers) lv.addHeaderView(header);
+        for (View footer : footers) lv.addFooterView(footer);
+        bindToAdapterView(lv);
         return view;
     }
 

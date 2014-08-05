@@ -125,6 +125,7 @@ public class NewPostTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_newpost, container, false);
         view.findViewById(R.id.iv_select).setOnClickListener(new ImagePickerListener(this));
+        if (imageBitmap != null) ((ImageView) view.findViewById(R.id.iv_select)).setImageBitmap(imageBitmap);
         bar = ((ProgressBar) view.findViewById(R.id.pb_network));
 
         if (getChildFragmentManager().findFragmentByTag("start") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector(), "start").commit();
@@ -154,7 +155,6 @@ public class NewPostTab extends Fragment {
                             runningTask = (imageBitmap == null) ? new PostTask("simple_events") : new PostTask("simple_events", imageBitmap,
                                     "event_photo_" + userId + "_" + DateTime.now().toInstant().getMillis()/1000 + ".jpeg");
                             JsonObject event = new JsonObject();
-                            //event.addProperty(Event.ANNOUNCEMENT_USER_ID, AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                             event.addProperty(Event.TITLE, title);
                             event.addProperty(Event.TEXT, text);
                             event.addProperty(Event.START_TIMESTAMP, (((DateSelector)getChildFragmentManager().findFragmentByTag("start")).getDate().toInstant().getMillis()) / 1000);

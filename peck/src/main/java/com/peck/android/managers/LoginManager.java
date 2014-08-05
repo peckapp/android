@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import retrofit.RetrofitError;
+
 /**
  * Created by mammothbane on 7/29/2014.
  */
@@ -400,7 +402,7 @@ public class LoginManager {
      * blocking method to create a temporary account with the server and add to accounts stored on device.
      * @return true if created, false if not
      */
-    public static synchronized boolean createTemp() {
+    public static synchronized boolean createTemp() throws RetrofitError {
         Account tmp;
         HashMap<String, Account> accounts = getAccounts();
         if (accounts.containsKey(PeckAccountAuthenticator.TEMP_NAME)) tmp = accounts.get(PeckAccountAuthenticator.TEMP_NAME);
@@ -412,7 +414,7 @@ public class LoginManager {
             }
         }
 
-        final JsonObject ret = ServerCommunicator.jsonService.post("users", (ServerCommunicator.TypedJsonBody)null, null);
+        final JsonObject ret = ((JsonObject) ServerCommunicator.jsonService.createUser().get("user"));
         accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
         accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
         if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());

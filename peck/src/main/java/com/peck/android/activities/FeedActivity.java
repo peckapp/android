@@ -1,7 +1,13 @@
 package com.peck.android.activities;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.NetworkErrorException;
+import android.accounts.OperationCanceledException;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -11,15 +17,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.gson.JsonObject;
 import com.makeramen.RoundedImageView;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
@@ -35,12 +45,16 @@ import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
 import com.peck.android.models.joins.CircleMember;
+import com.peck.android.network.JsonUtils;
+import com.peck.android.network.PeckAccountAuthenticator;
+import com.peck.android.network.ServerCommunicator;
 import com.squareup.picasso.Picasso;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -48,6 +62,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import it.sephiroth.android.library.widget.HListView;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class FeedActivity extends PeckActivity {
 
@@ -102,6 +119,57 @@ public class FeedActivity extends PeckActivity {
                 }).build();
         buttons.put(R.id.bt_explore, feed);
 
+        final LayoutInflater inflater = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE));
+        View header = inflater.inflate(R.layout.circles_header, null, false);
+        header.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                final View dialogView = inflater.inflate(R.layout.alert_circlecreate, null, false);
+                new AlertDialog.Builder(FeedActivity.this).setView(dialogView).setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final String circleName = ((EditText) dialogView.findViewById(R.id.et_name)).getText().toString();
+                        Account account = LoginManager.getActive();
+                        JsonObject jsonBody = new JsonObject();
+                        jsonBody.addProperty(Circle.NAME, circleName);
+                        jsonBody.addProperty(Circle.LOCALE, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+                        jsonBody.addProperty(Circle.USER_ID, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.USER_ID));
+
+                        try {
+                            Map<String, String> auth = JsonUtils.auth(account);
+                            ServerCommunicator.jsonService.post("circles", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle", jsonBody)), auth, new Callback<JsonObject>() {
+                                @Override
+                                public void success(JsonObject object, Response response) {
+                                    Toast.makeText(FeedActivity.this, "success", Toast.LENGTH_LONG).show();
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    Toast.makeText(FeedActivity.this, "Network error posting circle: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (OperationCanceledException e) {
+                            e.printStackTrace();
+                        } catch (AuthenticatorException e) {
+                            e.printStackTrace();
+                        } catch (LoginManager.InvalidAccountException e) {
+                            e.printStackTrace();
+                        } catch (NetworkErrorException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }).setCancelable(true).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                }).show();
+            }
+        });
+
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
                 .withBindings(new String[]{Circle.NAME, Circle.MEMBERS}, new int[]{R.id.tv_title, R.id.hlv_users})
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -111,6 +179,7 @@ public class FeedActivity extends PeckActivity {
 
                     }
                 })
+                .withHeader(header)
                 .orderedBy(DBOperable.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();

@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.converter.ConversionException;
@@ -144,7 +145,7 @@ public class ServerCommunicator {
         TypedByteArray out;
 
         public TypedJsonBody(JsonObject json) {
-            out = new TypedByteArray("application/json", json.toString().getBytes());
+            out = new TypedByteArray("application/json", (json != null) ? json.toString().getBytes() : new byte[0]);
         }
 
         @Override
@@ -197,9 +198,15 @@ public class ServerCommunicator {
         @POST("/api/{type}")
         JsonObject post(@Path("type") String type, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
 
+        @POST("/api/{type}")
+        void post(@Path("type") String type, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication, Callback<JsonObject> callback);
+
         @Multipart
         @POST("/api/{type}")
         JsonObject post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image);
+
+        @POST("/api/users")
+        JsonObject createUser();
 
         @POST("/api/access")
         JsonObject login(@QueryMap Map<String, String> fields);

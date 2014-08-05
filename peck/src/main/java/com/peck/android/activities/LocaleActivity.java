@@ -30,6 +30,8 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
 import com.peck.android.network.PeckSyncAdapter;
 
+import retrofit.RetrofitError;
+
 
 public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
     private Location location;
@@ -160,7 +162,11 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 protected Boolean doInBackground(Void... voids) {
                     int counter = 1;
                     while (!LoginManager.hasTemp() && counter < 30) {
-                        LoginManager.createTemp();
+                        try {
+                            LoginManager.createTemp();
+                        } catch (RetrofitError retrofitError) {
+                            Log.e(LoginManager.class.getSimpleName(), "temp account creation failed.");
+                        }
                         Log.v(LocaleActivity.class.getSimpleName(), "try #" + counter++);
                         try {
                             Thread.sleep(400L);
