@@ -38,7 +38,8 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="@dimen/feed_vert_margin"
             android:layout_marginLeft="@dimen/feed_horz_margin"
-            android:layout_marginRight="@dimen/feed_horz_margin"/>
+            android:layout_marginRight="@dimen/feed_horz_margin"
+            android:singleLine="true" />
 
 
     </LinearLayout>

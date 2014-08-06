@@ -76,6 +76,7 @@ public class NewPostTab extends Fragment {
                 DBUtils.syncJson(DBUtils.buildLocalUri(Event.class), object, Event.class);
                 imageView.setImageBitmap(null);
                 imageBitmap.recycle();
+                imageBitmap = null;
                 getActivity().findViewById(R.id.bt_add).performClick();
             }
         }
