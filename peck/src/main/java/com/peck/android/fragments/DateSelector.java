@@ -54,9 +54,10 @@ public class DateSelector extends Fragment {
                 new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker picker, int year, int month, int day) {
-                        time = time.withYear(year).withMonthOfYear(month).withDayOfMonth(day);
+                        time = time.withYear(year).withMonthOfYear(month + 1).withDayOfMonth(day);
+                        update();
                     }
-                }, time.getYear(), time.getMonthOfYear(), time.getDayOfMonth()).show();
+                }, time.getYear(), time.getMonthOfYear() - 1, time.getDayOfMonth()).show();
             }
         });
 
