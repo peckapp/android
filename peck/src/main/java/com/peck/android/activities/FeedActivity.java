@@ -289,6 +289,10 @@ public class FeedActivity extends PeckActivity {
                                 return true;
                             case R.id.et_search:
                                 ((EditText) view).addTextChangedListener(new TextWatcher() {
+                                    {
+
+                                    }
+
                                     @Override
                                     public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
@@ -297,6 +301,9 @@ public class FeedActivity extends PeckActivity {
                                     @Override
                                     public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                                         Log.d(FeedActivity.class.getSimpleName(), "text changed.");
+
+
+
                                     }
 
                                     @Override
