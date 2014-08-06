@@ -15,10 +15,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -246,7 +249,7 @@ public class FeedActivity extends PeckActivity {
                                     @Override
                                     protected Void doInBackground(Void... voids) {
                                         Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
-                                                new String[] { User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID }, null, null, null);
+                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID}, null, null, null);
 
                                         ret = new ArrayList<Map<String, Object>>();
 
@@ -273,6 +276,27 @@ public class FeedActivity extends PeckActivity {
                                 view.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
+                                        InputMethodManager imManager = ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE));
+                                        EditText test = new EditText(FeedActivity.this);
+                                        test.addTextChangedListener(new TextWatcher() {
+                                            @Override
+                                            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+                                            }
+
+                                            @Override
+                                            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+
+
+                                            }
+
+                                            @Override
+                                            public void afterTextChanged(Editable editable) {
+
+                                            }
+                                        });
+
                                         Log.d(FeedActivity.class.getSimpleName(), "clicked");
 
                                     }
