@@ -84,7 +84,7 @@ public class PeckApp extends Application implements Singleton{
             public final static int CONNECT_TIMEOUT = 10000;
             public final static int READ_TIMEOUT = 6000;
 
-            public final static long POLL_FREQUENCY = 1000L*60L;
+            public final static long POLL_FREQUENCY = 60L;
 
             public final static long LOW_PRIORITY_POLL_FREQUENCY = 1000L*60L*5L;
 

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -44,13 +43,12 @@ import retrofit.client.Response;
  * Created by mammothbane on 6/16/2014.
  */
 public class NewPostTab extends Fragment {
-
     private final static int ANNOUNCEMENT = 0;
     private final static int EVENT = 1;
     private int bt_selected = EVENT;
-    private AsyncTask<JsonObject, Void, JsonArray> runningTask;
     private final static DecimalFormat doubleFormat = new DecimalFormat("#");
     private Bitmap imageBitmap;
+    private ImageView imageView;
     private ProgressBar bar;
 
     static {
@@ -76,6 +74,9 @@ public class NewPostTab extends Fragment {
             } else {
                 Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show();
                 DBUtils.syncJson(DBUtils.buildLocalUri(Event.class), object, Event.class);
+                imageView.setImageBitmap(null);
+                imageBitmap.recycle();
+                getActivity().findViewById(R.id.bt_add).performClick();
             }
         }
 
@@ -91,7 +92,8 @@ public class NewPostTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_newpost, container, false);
         view.findViewById(R.id.iv_select).setOnClickListener(new ImagePickerListener(this));
-        if (imageBitmap != null) ((ImageView) view.findViewById(R.id.iv_select)).setImageBitmap(imageBitmap);
+        imageView = ((ImageView) view.findViewById(R.id.iv_select));
+        if (imageBitmap != null) imageView.setImageBitmap(imageBitmap);
         bar = ((ProgressBar) view.findViewById(R.id.pb_network));
 
         if (getChildFragmentManager().findFragmentByTag("start") == null) getChildFragmentManager().beginTransaction().add(R.id.post_content, new DateSelector(), "start").commit();
