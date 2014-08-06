@@ -19,6 +19,11 @@ repositories {
 
 
 android {
+    dexOptions {
+        jumboMode = true
+        multiDex = true
+    }
+
     compileSdkVersion 19
     buildToolsVersion '20'
     defaultConfig {
@@ -70,4 +75,6 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:+'
     //compile 'com.github.jeremiemartinez:refreshlistview:+'
     compile 'com.crashlytics.android:crashlytics:1.+'
+    compile 'org.apache.lucene:lucene-core:+'
+    compile 'org.apache.lucene:lucene-analyzers-common:+'
 }

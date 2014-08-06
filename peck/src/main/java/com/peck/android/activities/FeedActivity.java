@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -193,11 +194,10 @@ public class FeedActivity extends PeckActivity {
         });
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME}, new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add})
+                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME, Circle.NAME}, new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add, R.id.et_search})
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
                     }
                 })
                 .withHeader(header)
@@ -276,28 +276,31 @@ public class FeedActivity extends PeckActivity {
                                 view.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
+                                        ViewGroup parent = ((ViewGroup) view.getParent().getParent());
+                                        parent.findViewById(R.id.ll_expandable).setVisibility(View.VISIBLE);
+
+                                        EditText search = ((EditText) parent.findViewById(R.id.et_search));
                                         InputMethodManager imManager = ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE));
-                                        EditText test = new EditText(FeedActivity.this);
-                                        test.addTextChangedListener(new TextWatcher() {
-                                            @Override
-                                            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-
-                                            }
-
-                                            @Override
-                                            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-
-
-
-                                            }
-
-                                            @Override
-                                            public void afterTextChanged(Editable editable) {
-
-                                            }
-                                        });
+                                        imManager.showSoftInput(search, InputMethodManager.SHOW_FORCED);
 
                                         Log.d(FeedActivity.class.getSimpleName(), "clicked");
+                                    }
+                                });
+                                return true;
+                            case R.id.et_search:
+                                ((EditText) view).addTextChangedListener(new TextWatcher() {
+                                    @Override
+                                    public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+                                    }
+
+                                    @Override
+                                    public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                                        Log.d(FeedActivity.class.getSimpleName(), "text changed.");
+                                    }
+
+                                    @Override
+                                    public void afterTextChanged(Editable editable) {
 
                                     }
                                 });

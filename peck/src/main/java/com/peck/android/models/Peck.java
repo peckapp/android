@@ -9,7 +9,7 @@ import com.peck.android.annotations.UriPath;
 /**
  * Created by mammothbane on 6/16/2014.
  */
-@Header(plural = "push_notifications", singular = "push_notification")
+@Header(plural = "pecks", singular = "peck")
 @UriPath("notifications")
 public class Peck extends DBOperable {
 
