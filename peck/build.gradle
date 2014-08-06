@@ -4,13 +4,13 @@ buildscript {
         maven { url 'http://download.crashlytics.com/maven' }
     }
 
-    dependencies {
+    /*dependencies {
         classpath 'com.newrelic.agent.android:agent-gradle-plugin:3.+'
-    }
+    }*/
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'newrelic'
+/*apply plugin: 'newrelic'*/
 
 repositories {
     mavenCentral()
@@ -64,7 +64,7 @@ dependencies {
     compile 'commons-validator:commons-validator:+'
     compile 'joda-time:joda-time:+'
     compile 'com.github.flavienlaurent.datetimepicker:library:+'
-    compile 'com.newrelic.agent.android:android-agent:3.+'
+    //compile 'com.newrelic.agent.android:android-agent:3.+'
     compile 'com.squareup.retrofit:retrofit:+'
 /*    compile 'com.squareup.okhttp:okhttp-urlconnection:+'
     compile 'com.squareup.okhttp:okhttp:+'*/
