@@ -66,4 +66,5 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:+'
     compile 'com.squareup.okhttp:okhttp-urlconnection:+'
     compile 'com.squareup.okhttp:okhttp:+'
+    compile 'org.apache.commons:commons-io:+'
 }
