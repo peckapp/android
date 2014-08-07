@@ -16,20 +16,19 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +43,7 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
+import com.peck.android.fragments.SearchFragment;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Circle;
@@ -78,6 +78,9 @@ public class FeedActivity extends PeckActivity {
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private TimeZone tz = Calendar.getInstance().getTimeZone();
+    private Feed searcherFeed;
+    private final LinearLayout searcherParent = new LinearLayout(PeckApp.getContext());
+    private SearchFragment searchFragment;
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -85,6 +88,9 @@ public class FeedActivity extends PeckActivity {
     private Button lastPressed;
 
     {
+        searcherParent.setOrientation(LinearLayout.VERTICAL);
+        searcherParent.setId(R.id.ll_roaming);
+
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
@@ -197,9 +203,9 @@ public class FeedActivity extends PeckActivity {
             }
         });
 
-        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME, Circle.NAME, Circle.NAME},
-                        new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add, R.id.et_search, R.id.sp_search })
+        searcherFeed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
+                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME},
+                        new int[]{R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm})
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -209,167 +215,189 @@ public class FeedActivity extends PeckActivity {
                 .orderedBy(DBOperable.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
 
-                    final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
-
-                    @Override
-                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
-                        switch (view.getId()) {
-                            case R.id.hlv_users:
-                                final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
-                                new AsyncTask<Void, Void, Void>() {
-                                    ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
-                                    SimpleAdapter simpleAdapter;
+                                    final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
 
                                     @Override
-                                    protected void onPreExecute() {
-                                        setUpCell();
-                                    }
+                                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                                        switch (view.getId()) {
+                                            case R.id.hlv_users:
+                                                final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
+                                                new AsyncTask<Void, Void, Void>() {
+                                                    ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
+                                                    SimpleAdapter simpleAdapter;
 
-                                    private void setUpCell() {
-                                        synchronized (circleMembers) {
-                                            if (ret == null) ret = new ArrayList<Map<String, Object>>();
-                                        }
+                                                    @Override
+                                                    protected void onPreExecute() {
+                                                        setUpCell();
+                                                    }
 
-                                        simpleAdapter = new SimpleAdapter(FeedActivity.this, ret, R.layout.hlvitem_user,
-                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
-
-                                        ((HListView) view).setAdapter(simpleAdapter);
-                                        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                            @Override
-                                            public boolean setViewValue(View view, Object o, String s) {
-                                                switch (view.getId()) {
-                                                    case R.id.iv_event:
-                                                        if (o != null && o.toString().length() > 0) {
-                                                            Picasso.with(FeedActivity.this)
-                                                                    .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                    .fit()
-                                                                    .centerCrop()
-                                                                    .into((RoundedImageView) view);
+                                                    private void setUpCell() {
+                                                        synchronized (circleMembers) {
+                                                            if (ret == null)
+                                                                ret = new ArrayList<Map<String, Object>>();
                                                         }
-                                                        return true;
-                                                }
 
+                                                        simpleAdapter = new SimpleAdapter(FeedActivity.this, ret, R.layout.hlvitem_user,
+                                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
+
+                                                        ((HListView) view).setAdapter(simpleAdapter);
+                                                        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                                                            @Override
+                                                            public boolean setViewValue(View view, Object o, String s) {
+                                                                switch (view.getId()) {
+                                                                    case R.id.iv_event:
+                                                                        if (o != null && o.toString().length() > 0) {
+                                                                            Picasso.with(FeedActivity.this)
+                                                                                    .load(PeckApp.Constants.Network.BASE_URL + o)
+                                                                                    .fit()
+                                                                                    .centerCrop()
+                                                                                    .into((RoundedImageView) view);
+                                                                        }
+                                                                        return true;
+                                                                }
+
+                                                                return false;
+                                                            }
+                                                        });
+                                                    }
+
+                                                    @Override
+                                                    protected Void doInBackground(Void... voids) {
+                                                        Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
+                                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID}, null, null, null);
+
+                                                        ret = new ArrayList<Map<String, Object>>();
+
+                                                        while (second.moveToNext()) {
+                                                            Map<String, Object> map = new HashMap<String, Object>();
+                                                            map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
+                                                            map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
+                                                            ret.add(map);
+                                                        }
+                                                        second.close();
+                                                        synchronized (circleMembers) {
+                                                            circleMembers.put(circle_id, ret);
+                                                        }
+                                                        return null;
+                                                    }
+
+                                                    @Override
+                                                    protected void onPostExecute(final Void avoid) {
+                                                        setUpCell();
+                                                    }
+                                                }.execute();
+                                                return true;
+                                            case R.id.bt_add_cm:
+                                                view.setOnClickListener(new View.OnClickListener() {
+                                                                            @Override
+                                                                            public void onClick(View view) {
+                                                                                synchronized (searcherParent) {
+                                                                                    if (searcherParent.getParent() != null) {
+                                                                                        if (searcherParent.getParent().equals(view.getParent())) {
+                                                                                            ((ViewGroup) view.getParent()).removeView(searcherParent);
+                                                                                            return;
+                                                                                        }
+                                                                                        ((ViewGroup) view.getParent()).removeView(searcherParent);
+                                                                                    }
+
+                                                                                    ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                                                                    ((ViewGroup) view.getParent()).addView(searcherParent, params);
+                                                                                }
+
+                                                                                FragmentManager fragmentManager = getSupportFragmentManager();
+                                                                                if (searchFragment == null) {
+                                                                                    searchFragment = new SearchFragment();
+                                                                                    Bundle args = new Bundle();
+                                                                                    args.putInt(SearchFragment.SEARCH_TYPE, SearchFragment.TYPE.USER.ordinal());
+                                                                                    searchFragment.setArguments(args);
+                                                                                }
+
+                                                                                if (!searchFragment.isAdded()) {
+                                                                                    fragmentManager.beginTransaction().add(R.id.ll_roaming, searchFragment).commit();
+                                                                                }
+
+                                                                                searchFragment.reset();
+
+
+                                                                                Log.d(FeedActivity.class.getSimpleName(), "clicked");
+                                                                            }
+                                                                        }
+
+                                                );
+                                                return true;
+                                            default:
                                                 return false;
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    protected Void doInBackground(Void... voids) {
-                                        Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
-                                                new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID}, null, null, null);
-
-                                        ret = new ArrayList<Map<String, Object>>();
-
-                                        while (second.moveToNext()) {
-                                            Map<String, Object> map = new HashMap<String, Object>();
-                                            map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
-                                            map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
-                                            ret.add(map);
                                         }
-                                        second.close();
-                                        synchronized (circleMembers) {
-                                            circleMembers.put(circle_id, ret);
-                                        }
-                                        return null;
                                     }
-
-                                    @Override
-                                    protected void onPostExecute(final Void avoid) {
-                                        setUpCell();
-                                    }
-                                }.execute();
-                                return true;
-                            case R.id.tv_add:
-                                view.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        ViewGroup parent = ((ViewGroup) view.getParent().getParent());
-                                        parent.findViewById(R.id.ll_expandable).setVisibility(View.VISIBLE);
-
-                                        EditText search = ((EditText) parent.findViewById(R.id.et_search));
-                                        InputMethodManager imManager = ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE));
-                                        imManager.showSoftInput(search, InputMethodManager.SHOW_FORCED);
-
-                                        Log.d(FeedActivity.class.getSimpleName(), "clicked");
-                                    }
-                                });
-                                return true;
-                            case R.id.et_search:
-                                ((EditText) view).addTextChangedListener(new TextWatcher() {
-                                    @Override
-                                    public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-
-                                    }
-
-                                    @Override
-                                    public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                                        Log.d(FeedActivity.class.getSimpleName(), "text changed.");
-
-
-
-                                    }
-
-                                    @Override
-                                    public void afterTextChanged(Editable editable) {
-
-                                    }
-                                });
-                                return true;
-                            case R.id.sp_search:
-
-
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                }).build();
-
-        buttons.put(R.id.bt_circles,feed);
-
-        feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class), R.layout.lvitem_peck)
-                .withBindings(new String[]{Peck.TEXT, Peck.INVITED_BY}, new int[]{R.id.tv_title, R.id.iv_def})
-                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                    @Override
-                    public boolean setViewValue(final View view, Cursor cursor, int i) {
-                        switch (view.getId()) {
-                            case R.id.iv_def:
-                                final long userId = cursor.getLong(i);
-                                if (userId > 0) {
-                                    new AsyncTask<Void, Void, String>() {
-                                        @Override
-                                        protected String doInBackground(Void... voids) {
-                                            String url = null;
-                                            Cursor user = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
-                                                    User.SV_ID + "= ?", new String[]{Long.toString(userId)}, null);
-                                            if (user.getCount() > 0) {
-                                                user.moveToFirst();
-                                                url = user.getString(user.getColumnIndex(User.IMAGE_NAME));
-                                            }
-                                            user.close();
-                                            return url;
-                                        }
-
-                                        @Override
-                                        protected void onPostExecute(String url) {
-                                            if (url != null) {
-                                                Picasso.with(FeedActivity.this)
-                                                        .load(PeckApp.Constants.Network.BASE_URL + url)
-                                                        .centerCrop()
-                                                        .fit()
-                                                        .into(((RoundedImageView) view));
-                                            }
-
-                                        }
-                                    }.execute();
                                 }
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                }).build();
+
+                ).
+
+                        build();
+
+        buttons.put(R.id.bt_circles,searcherFeed);
+
+        feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class),R.layout.lvitem_peck)
+                .
+
+                        withBindings(new String[] {
+                                        Peck.TEXT, Peck.INVITED_BY
+                                }
+
+                                ,new int[]
+
+                                        {
+                                                R.id.tv_title, R.id.iv_def
+                                        }
+
+                        )
+                .
+
+                        withViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                                           @Override
+                                           public boolean setViewValue ( final View view, Cursor cursor,int i){
+                                               switch (view.getId()) {
+                                                   case R.id.iv_def:
+                                                       final long userId = cursor.getLong(i);
+                                                       if (userId > 0) {
+                                                           new AsyncTask<Void, Void, String>() {
+                                                               @Override
+                                                               protected String doInBackground(Void... voids) {
+                                                                   String url = null;
+                                                                   Cursor user = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                                           User.SV_ID + "= ?", new String[]{Long.toString(userId)}, null);
+                                                                   if (user.getCount() > 0) {
+                                                                       user.moveToFirst();
+                                                                       url = user.getString(user.getColumnIndex(User.IMAGE_NAME));
+                                                                   }
+                                                                   user.close();
+                                                                   return url;
+                                                               }
+
+                                                               @Override
+                                                               protected void onPostExecute(String url) {
+                                                                   if (url != null) {
+                                                                       Picasso.with(FeedActivity.this)
+                                                                               .load(PeckApp.Constants.Network.BASE_URL + url)
+                                                                               .centerCrop()
+                                                                               .fit()
+                                                                               .into(((RoundedImageView) view));
+                                                                   }
+
+                                                               }
+                                                           }.execute();
+                                                       }
+                                                       return true;
+                                                   default:
+                                                       return false;
+                                               }
+                                           }
+                                       }
+
+                        ).
+
+                        build();
+
         buttons.put(R.id.bt_peck,feed);
 
     }

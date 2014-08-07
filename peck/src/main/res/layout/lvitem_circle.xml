@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:id="@+id/ll_root">
 
     <TextView
         android:layout_width="match_parent"
@@ -19,14 +20,14 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:orientation="horizontal">
-        <TextView
+        <Button
+            android:background="@android:color/transparent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="16dp"
             android:text="add"
             android:textAllCaps="true"
-            android:id="@+id/tv_add"/>
+            android:id="@+id/bt_add_cm"/>
 
         <it.sephiroth.android.library.widget.HListView
             android:id="@+id/hlv_users"
@@ -35,29 +36,6 @@
             android:layout_gravity="center_vertical" />
     </LinearLayout>
 
-    <LinearLayout
-        android:animateLayoutChanges="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/ll_expandable"
-        android:visibility="gone">
 
-        <EditText
-            android:layout_marginTop="2dp"
-            android:layout_margin="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="search"
-            android:id="@+id/et_search" />
-
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/sp_search"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="48dp"/>
-
-    </LinearLayout>
 
 </LinearLayout>
