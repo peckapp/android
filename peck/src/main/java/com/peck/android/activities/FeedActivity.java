@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -60,6 +63,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -194,7 +198,8 @@ public class FeedActivity extends PeckActivity {
         });
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME, Circle.NAME}, new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add, R.id.et_search})
+                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME, Circle.NAME, Circle.NAME},
+                        new int[]{R.id.tv_title, R.id.hlv_users, R.id.tv_add, R.id.et_search, R.id.sp_search })
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -292,10 +297,6 @@ public class FeedActivity extends PeckActivity {
                                 return true;
                             case R.id.et_search:
                                 ((EditText) view).addTextChangedListener(new TextWatcher() {
-                                    {
-
-                                    }
-
                                     @Override
                                     public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
@@ -315,6 +316,10 @@ public class FeedActivity extends PeckActivity {
                                     }
                                 });
                                 return true;
+                            case R.id.sp_search:
+
+
+                                return true;
                             default:
                                 return false;
                         }
@@ -323,15 +328,46 @@ public class FeedActivity extends PeckActivity {
 
         buttons.put(R.id.bt_circles,feed);
 
-        feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().
-                appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
-                .withBindings(new String[]{Peck.TEXT}, new int[]{R.id.tv_title})
+        feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class), R.layout.lvitem_peck)
+                .withBindings(new String[]{Peck.TEXT, Peck.INVITED_BY}, new int[]{R.id.tv_title, R.id.iv_def})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
-                    public boolean setViewValue(View view, Cursor cursor, int i) {
+                    public boolean setViewValue(final View view, Cursor cursor, int i) {
                         switch (view.getId()) {
+                            case R.id.iv_def:
+                                final long userId = cursor.getLong(i);
+                                if (userId > 0) {
+                                    new AsyncTask<Void, Void, String>() {
+                                        @Override
+                                        protected String doInBackground(Void... voids) {
+                                            String url = null;
+                                            Cursor user = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                    User.SV_ID + "= ?", new String[]{Long.toString(userId)}, null);
+                                            if (user.getCount() > 0) {
+                                                user.moveToFirst();
+                                                url = user.getString(user.getColumnIndex(User.IMAGE_NAME));
+                                            }
+                                            user.close();
+                                            return url;
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(String url) {
+                                            if (url != null) {
+                                                Picasso.with(FeedActivity.this)
+                                                        .load(PeckApp.Constants.Network.BASE_URL + url)
+                                                        .centerCrop()
+                                                        .fit()
+                                                        .into(((RoundedImageView) view));
+                                            }
+
+                                        }
+                                    }.execute();
+                                }
+                                return true;
+                            default:
+                                return false;
                         }
-                        return false;
                     }
                 }).build();
         buttons.put(R.id.bt_peck,feed);
@@ -501,6 +537,75 @@ public class FeedActivity extends PeckActivity {
     private void toggleVisibility() {
         View view = findViewById(R.id.ll_feed_content);
         view.setVisibility((view.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * an attempt to make a thread-safe adapter for a spinner
+     */
+    private class SearchSpinnerAdapter extends BaseAdapter {
+        private Handler handler = new Handler(Looper.getMainLooper());
+        private LinkedHashMap<String, Long> data = new LinkedHashMap<String, Long>();
+
+        private SearchSpinnerAdapter() {
+
+        }
+
+
+        private SearchSpinnerAdapter(LinkedHashMap<String, Long> data) {
+            this.data = data;
+        }
+
+        public synchronized void setData(LinkedHashMap<String, Long> data) {
+            this.data = data;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public synchronized int getCount() {
+            return data.size();
+        }
+
+        /**
+         * @param i position position to check
+         * @return the string at position i
+         */
+        @Override
+        public synchronized String getItem(int i) {
+            return ((String) data.keySet().toArray()[i]);
+        }
+
+        /**
+         * @param i position to check
+         * @return the id of the item at position i
+         */
+        @Override
+        public synchronized long getItemId(int i) {
+            return data.get(getItem(i));
+        }
+
+        @Override
+        public synchronized View getView(int i, View convertView, ViewGroup viewGroup) {
+            if (convertView == null) {
+                convertView = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.sp_search_item, viewGroup);
+            }
+
+            ((TextView) convertView.findViewById(R.id.tv_title)).setText(getItem(i));
+            return convertView;
+        }
+
+
+        /**
+         * execute on main thread. we'll get errors if we call from an async thread.
+         */
+        @Override
+        public synchronized void notifyDataSetChanged() {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    SearchSpinnerAdapter.super.notifyDataSetChanged();
+                }
+            });
+        }
     }
 
 

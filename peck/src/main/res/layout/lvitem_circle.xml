@@ -15,42 +15,49 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="20dp"/>
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="80dp"
-    android:orientation="horizontal">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="16dp"
-        android:text="add"
-        android:textAllCaps="true"
-        android:id="@+id/tv_add"/>
-
-    <it.sephiroth.android.library.widget.HListView
-        android:id="@+id/hlv_users"
-        android:layout_height="80dp"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_gravity="center_vertical" />
+        android:layout_height="80dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            android:text="add"
+            android:textAllCaps="true"
+            android:id="@+id/tv_add"/>
+
+        <it.sephiroth.android.library.widget.HListView
+            android:id="@+id/hlv_users"
+            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_gravity="center_vertical" />
     </LinearLayout>
 
-<LinearLayout
-    android:animateLayoutChanges="true"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:id="@+id/ll_expandable"
-    android:visibility="gone">
-
-    <EditText
-        android:layout_marginTop="4dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+    <LinearLayout
+        android:animateLayoutChanges="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="search"
-        android:id="@+id/et_search" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/ll_expandable"
+        android:visibility="gone">
+
+        <EditText
+            android:layout_marginTop="2dp"
+            android:layout_margin="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="search"
+            android:id="@+id/et_search" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sp_search"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="48dp"/>
+
     </LinearLayout>
 
 </LinearLayout>
