@@ -212,14 +212,17 @@ public class FeedActivity extends PeckActivity {
                             case R.id.hlv_users:
                                 final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
                                 new AsyncTask<Void, Void, Void>() {
-                                    ArrayList<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+                                    ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
                                     SimpleAdapter simpleAdapter;
 
                                     @Override
                                     protected void onPreExecute() {
+                                        setUpCell();
+                                    }
+
+                                    private void setUpCell() {
                                         synchronized (circleMembers) {
-                                            ArrayList<Map<String, Object>> objs = circleMembers.get(circle_id);
-                                            if (objs != null) ret.addAll(objs);
+                                            if (ret == null) ret = new ArrayList<Map<String, Object>>();
                                         }
 
                                         simpleAdapter = new SimpleAdapter(FeedActivity.this, ret, R.layout.hlvitem_user,
@@ -268,7 +271,7 @@ public class FeedActivity extends PeckActivity {
 
                                     @Override
                                     protected void onPostExecute(final Void avoid) {
-                                        simpleAdapter.notifyDataSetChanged();
+                                        setUpCell();
                                     }
                                 }.execute();
                                 return true;

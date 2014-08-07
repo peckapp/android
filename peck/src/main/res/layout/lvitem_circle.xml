@@ -43,9 +43,6 @@
     android:id="@+id/ll_expandable"
     android:visibility="gone">
 
-    <View style="@style/div"
-        android:layout_marginBottom="0dp"
-        />
     <EditText
         android:layout_marginTop="4dp"
         android:layout_marginLeft="8dp"
