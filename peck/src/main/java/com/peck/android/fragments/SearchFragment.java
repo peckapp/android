@@ -20,8 +20,10 @@ import com.peck.android.R;
 public class SearchFragment extends Fragment {
     public enum TYPE { USER, CIRCLE }
     public static final String SEARCH_TYPE = "search type";
+    public static final String CIRCLE_ID = "circle_id";
 
     private TYPE type;
+    private long circleId;
 
     private Thread searchThread = new Thread(new Runnable() {
         public Looper mine = Looper.myLooper();
@@ -38,6 +40,7 @@ public class SearchFragment extends Fragment {
     public void setArguments(Bundle args) {
         super.setArguments(args);
 
+        circleId = args.getLong(CIRCLE_ID);
         type = TYPE.values()[args.getInt(SEARCH_TYPE)];
     }
 

@@ -61,6 +61,13 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private ArrayList<View> footers = new ArrayList<View>();
     private ArrayList<View> headers = new ArrayList<View>();
 
+    private RecycleRunnable runnable;
+
+    public abstract static class RecycleRunnable implements Runnable {
+        protected View recycledView;
+        private void setRecycledView(@NonNull View recycledView) { this.recycledView = recycledView; }
+    }
+
     public static class Builder {
         private Bundle loaderBundle = new Bundle();
         private Bundle feedBundle = new Bundle();
@@ -68,6 +75,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         private SimpleCursorAdapter.ViewBinder viewBinder;
         private View[] header;
         private View[] footer;
+        private RecycleRunnable runnable;
 
         public Builder(@NonNull Uri loaderUri, int itemLayout) {
             feedBundle.putInt(FEED_ITEM_LAYOUT, itemLayout);
@@ -102,6 +110,11 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             return this;
         }
 
+        public Builder withRecycleRunnable(@NonNull RecycleRunnable runnable) {
+            this.runnable = runnable;
+            return this;
+        }
+
         public Builder withViewBinder(@NonNull SimpleCursorAdapter.ViewBinder viewBinder) {
             this.viewBinder = viewBinder;
             return this;
@@ -131,6 +144,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             if (footer != null) for (View view : footer) ret.addFooter(view);
             if (viewBinder != null) ret.setViewBinder(viewBinder);
             if (listener != null) ret.setOnItemClickListener(listener);
+            if (runnable != null) ret.setRunnable(runnable);
 
             return ret;
         }
@@ -149,8 +163,20 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         footers.add(footer);
     }
 
+    public void setRunnable(RecycleRunnable runnable) { this.runnable = runnable; }
+
     public void bindToAdapterView(ListView adapterView) {
-        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0);
+        mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                if (runnable != null) {
+                    runnable.setRecycledView(view);
+                    runnable.run();}
+
+                return view;
+            }
+        };
         if (viewBinder != null) mAdapter.setViewBinder(viewBinder);
 
         adapterView.setAdapter(mAdapter);
@@ -162,7 +188,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         if (i == URL_LOADER) return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
-                        bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
+                bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
         else return null;
     }
 
@@ -206,6 +232,10 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         for (View footer : footers) lv.addFooterView(footer);
         bindToAdapterView(lv);
         return view;
+    }
+
+    public int getListViewRes() {
+        return listViewRes;
     }
 
     public void setViewBinder(SimpleCursorAdapter.ViewBinder binder) {
