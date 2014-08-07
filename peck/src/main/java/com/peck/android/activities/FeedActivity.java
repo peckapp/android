@@ -322,7 +322,7 @@ public class FeedActivity extends PeckActivity {
 
         feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().
                 appendPath(DBUtils.getTableName(Peck.class)).build(), R.layout.lvitem_peck)
-                .withBindings(new String[]{Peck.NAME, Peck.TEXT}, new int[]{R.id.tv_title, R.id.tv_text})
+                .withBindings(new String[]{Peck.TEXT}, new int[]{R.id.tv_title})
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(View view, Cursor cursor, int i) {
@@ -330,8 +330,7 @@ public class FeedActivity extends PeckActivity {
                         }
                         return false;
                     }
-                }).
-                        build();
+                }).build();
         buttons.put(R.id.bt_peck,feed);
 
     }
