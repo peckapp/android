@@ -47,12 +47,17 @@ public class Event extends DBOperable {
     public static final transient String TITLE = "title";
     public static final transient String TEXT = "event_description";
     public static final transient String IMAGE_URL = "image";
+    public static final transient String BLURRED_URL = "blurred_image";
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_IDS = "user_ids";
     public static final transient String TYPE = "type";
     public static final transient String PUBLIC = "public";
     public static final transient String START_TIMESTAMP = "start_ts";
     public static final transient String END_TIMESTAMP = "end_ts";
+
+    @Expose
+    @SerializedName(BLURRED_URL)
+    String blurImage;
 
     @Expose
     @DBType("real")

@@ -36,6 +36,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private static final String LOADER_BUNDLE = "loader bundle";
     private static final String BINDS_FROM = "bindings from";
     private static final String BINDS_TO = "bindings to";
+    private static final String DIVIDERS = "dividers";
 
     //query arguments
     private static final String LOADER_URI = "uri"; //necessary
@@ -50,6 +51,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private String[] binds_from;
     private int[] binds_to;
     private SimpleCursorAdapter mAdapter;
+    private boolean dividers;
 
     private AdapterView.OnItemClickListener listener;
 
@@ -107,6 +109,11 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             //if (BuildConfig.DEBUG && bindsFrom.length < bindsTo.length) throw new IllegalArgumentException("too few fields to bind from");
             feedBundle.putStringArray(BINDS_FROM, bindsFrom);
             feedBundle.putIntArray(BINDS_TO, bindsTo);
+            return this;
+        }
+
+        public Builder withoutDividers() {
+            feedBundle.putBoolean(DIVIDERS, false);
             return this;
         }
 
@@ -210,6 +217,8 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         binds_from = args.getStringArray(BINDS_FROM);
         binds_to = args.getIntArray(BINDS_TO);
 
+        dividers = args.getBoolean(DIVIDERS, true);
+
         int res = args.getInt(LV_RES, -1);
         if (res != -1) listViewRes = res;
 
@@ -230,6 +239,11 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         ListView lv = ((ListView) view.findViewById(listViewRes));
         for (View header : headers) lv.addHeaderView(header);
         for (View footer : footers) lv.addFooterView(footer);
+        if (!dividers) {
+            lv.setDividerHeight(0);
+            lv.setDivider(null);
+        }
+
         bindToAdapterView(lv);
         return view;
     }
