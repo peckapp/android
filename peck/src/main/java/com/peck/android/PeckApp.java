@@ -30,6 +30,9 @@ import com.squareup.picasso.Picasso;
  */
 public class PeckApp extends Application implements Singleton{
 
+    public static final int version = 1;
+    public static final String GCM_SENDER_ID = "651374007309";
+
     private static Context mContext;
 
 

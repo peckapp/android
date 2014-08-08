@@ -26,6 +26,7 @@ import retrofit.converter.Converter;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
 import retrofit.http.Field;
+import retrofit.http.FieldMap;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
@@ -214,8 +215,9 @@ public class ServerCommunicator {
         @POST("/api/users")
         JsonObject createUser();
 
+        @FormUrlEncoded
         @POST("/api/access")
-        JsonObject login(@QueryMap Map<String, String> fields);
+        JsonObject login(@FieldMap Map<String, String> fields, @Field("user[device_token]") String deviceToken);
 
         @PATCH("/api/{type}/{id}")
         JsonObject patch(@Path("type") String type, @Path("id") String id, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
@@ -231,7 +233,8 @@ public class ServerCommunicator {
 
         @FormUrlEncoded
         @POST("/api/users/user_for_udid")
-        JsonObject userForUdid(@Field("udid") String udid);
+        JsonObject userForUdid(@Field("udid") String udid, @Field("device_type") String deviceType);
+
 
     }
 

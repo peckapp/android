@@ -5,7 +5,6 @@ import android.accounts.OperationCanceledException;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -104,7 +103,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         @Override
                         protected Void doInBackground(Void... voids) {
                             try {
-                                LoginManager.create(email, password, name[0], name[1], Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+                                LoginManager.create(email, password, name[0], name[1]);
                             } catch (LoginManager.InvalidEmailException e) {
                                 view.post(new Runnable() {
                                     @Override

@@ -35,8 +35,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.gson.JsonObject;
 import com.makeramen.RoundedImageView;
 import com.peck.android.PeckApp;
@@ -46,6 +44,7 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
 import com.peck.android.listeners.FragmentSwitcherListener;
+import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
@@ -76,13 +75,13 @@ import retrofit.client.Response;
 public class FeedActivity extends PeckActivity {
 
     private final static String TAG = "FeedActivity";
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private TimeZone tz = Calendar.getInstance().getTimeZone();
     private View tView;
     private View tFloating;
     private Feed tFeed = null;
     private int currentCircleAddPos = -1;
+
 
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
@@ -519,16 +518,15 @@ public class FeedActivity extends PeckActivity {
                 .build();
         getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
 
-        if (!checkPlayServices()) {
-            //todo: prompt for valid play services download
-        }
     }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        checkPlayServices();
+        GcmRegistrar.checkPlayServices(this);
 
         Account account = LoginManager.getActive();
         if (account == null || !LoginManager.isValid(account)) {
@@ -544,20 +542,7 @@ public class FeedActivity extends PeckActivity {
         }
     }
 
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
+
 
 
 

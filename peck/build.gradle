@@ -46,8 +46,25 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
     }
-
 }
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/res'
+        }
+    }
+    test {
+        java {
+            srcDir 'test/java'
+        }
+
+    }
+}
+
+
 
 dependencies {
     compile 'com.android.support:appcompat-v7:20.+'

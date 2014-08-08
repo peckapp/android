@@ -182,7 +182,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
             }
 
             private void updateVisibility() {
-                View mView = Feed.this.getView();
+                /*View mView = Feed.this.getView();
                 if (mView != null) {
                     if (isEmpty()) {
                             wasEmpty = true;
@@ -193,7 +193,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
                         mView.findViewById(getListViewRes()).setVisibility(View.GONE);
                         mView.findViewById(R.id.tv_nothing_here).setVisibility(View.VISIBLE);
                     }
-                }
+                }*/
             }
 
             @Override

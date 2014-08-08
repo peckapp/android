@@ -105,9 +105,10 @@ public class LoginManager {
             map.put("user[password]", password);
             map.put("user[email]", temp.name);
             map.put("user[udid]", Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+            map.put("user[device_type]", "android");
             map.putAll(JsonUtils.auth(authAccount, false));
 
-            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map, GcmRegistrar.register());
             JsonObject user = ((JsonObject) jsonRet.get("user"));
 
             String token = user.get(PeckAccountAuthenticator.AUTH_TOKEN).getAsString();
@@ -136,7 +137,7 @@ public class LoginManager {
 
     }
 
-    public static synchronized boolean create(String email, String password, String firstName, String lastName, String udid)
+    public static synchronized boolean create(String email, String password, String firstName, String lastName)
             throws InvalidEmailException, InvalidPasswordException, AccountAlreadyExistsException, OperationCanceledException {
 
         if (!EmailValidator.getInstance().isValid(email)) {
@@ -160,6 +161,7 @@ public class LoginManager {
         object.addProperty(User.LAST_NAME, lastName);
         object.addProperty(User.LOCALE, accountManager.getUserData(authAccount, PeckAccountAuthenticator.INSTITUTION));
         object.addProperty(User.UDID, Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+        object.addProperty("device_type", "android");
 
         Account temp = new Account(email, PeckAccountAuthenticator.ACCOUNT_TYPE);
 
@@ -235,7 +237,7 @@ public class LoginManager {
                 e.printStackTrace();
             }
 
-            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map, GcmRegistrar.register());
 
             String token = ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString();
             setAuthToken(account, token);
@@ -417,9 +419,9 @@ public class LoginManager {
     public static synchronized boolean createUserWithUdid() throws RetrofitError {
         Account tmp;
 
-        JsonObject retUser = ServerCommunicator.jsonService.userForUdid(Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID)).getAsJsonObject("user");
+        JsonObject retUser = ServerCommunicator.jsonService.userForUdid(Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID), "android").getAsJsonObject("user");
 
-        if (retUser.get("new_user").getAsBoolean()) {
+        if (retUser.get("new_user").getAsBoolean() || retUser.get(User.EMAIL).isJsonNull()) {
             HashMap<String, Account> accounts = getAccounts();
             if (accounts.containsKey(PeckAccountAuthenticator.TEMP_NAME)) tmp = accounts.get(PeckAccountAuthenticator.TEMP_NAME);
             else {
