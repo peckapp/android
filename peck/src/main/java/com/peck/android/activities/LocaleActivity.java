@@ -1,8 +1,8 @@
 package com.peck.android.activities;
 
-import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
@@ -33,7 +33,6 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
-import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.PeckSyncAdapter;
 
 import retrofit.RetrofitError;
@@ -188,12 +187,36 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                new AlertDialog.Builder(LocaleActivity.this).setMessage("A user was found to be logged in to this device previously. Would you like to log in as " + AccountManager.get(LocaleActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.EMAIL) + "?").show();
+                                new AlertDialog.Builder(LocaleActivity.this).setMessage("A user was found to be logged in to this device previously. Would you like to log in as " + LoginManager.getActive().name + "?")
+                                        .setCancelable(true)
+                                        .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Intent intent = new Intent(LocaleActivity.this, LoginActivity.class);
+                                                intent.putExtra(LoginActivity.USER_EMAIL, LoginManager.getActive().name);
+                                                intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
+                                                startActivity(intent);
+                                            }
+                                        })
+                                        .setNeutralButton("No\n(other user)", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Intent intent = new Intent(LocaleActivity.this, LoginActivity.class);
+                                                try {
+                                                    LoginManager.logout(LoginManager.getActive());
+                                                } catch (LoginManager.InvalidAccountException ignore) {}
+                                                intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
+                                                startActivity(intent);
+                                            }
+                                        })
+                                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                dialogInterface.cancel();
+                                            }
+                                        })
+                                        .show();
 
-                                Intent intent = new Intent(LocaleActivity.this, LoginActivity.class);
-                                intent.putExtra(LoginActivity.USER_EMAIL, AccountManager.get(LocaleActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.EMAIL));
-                                intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
-                                startActivity(intent);
                             }
                         });
                     }

@@ -7,6 +7,7 @@ import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -391,7 +392,19 @@ public class LoginManager {
             ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
             PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, null).apply();
             Log.v(LoginManager.class.getSimpleName(), "Active account removed.");
-            ContentResolver.addPeriodicSync(getTemp(), PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
+            if (getTemp() == null) new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    while (!createTemp()) {}
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    ContentResolver.addPeriodicSync(getTemp(), PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
+                }
+            }.execute();
+            else ContentResolver.addPeriodicSync(getTemp(), PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
         } else if (isValid(account)) {
             if (active != null) ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
             ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
@@ -500,7 +513,7 @@ public class LoginManager {
         String type = account.type;
         String id = accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID);
         String inst = accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION);
-        String email = accountManager.getUserData(account, PeckAccountAuthenticator.EMAIL);
+        String email = account.name;
         String password = (accountManager.getPassword(account) == null) ? "null" : "set";
         String api_key = (accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) == null) ? "null" : "set";
         String auth_token = (peekAuthToken(account) == null) ? "null" : "set";
