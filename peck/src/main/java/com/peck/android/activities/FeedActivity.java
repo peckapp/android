@@ -234,7 +234,7 @@ public class FeedActivity extends PeckActivity {
                     @Override
                     public void run() {
                         View mView = tFeed.getView();
-                        if (mView != null && recycledView != null &&  ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
+                        if (mView != null && recycledView != null && recycledView.isFocusable() && ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
                             ((LinearLayout)recycledView).addView(tView);
                         }
                         else if (recycledView != null && recycledView.findViewById(R.id.ll_roaming) != null)
