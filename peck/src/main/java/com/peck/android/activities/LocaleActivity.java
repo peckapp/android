@@ -1,5 +1,6 @@
 package com.peck.android.activities;
 
+import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -10,6 +11,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +32,7 @@ import com.peck.android.fragments.Feed;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Locale;
+import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.PeckSyncAdapter;
 
 import retrofit.RetrofitError;
@@ -132,7 +137,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                             .orderedBy("dist asc, " + Locale.NAME)
                             .layout(R.layout.localeselectionfeed)
                             .build(), fragmentTag);
-                    ft.commit();
+                    ft.commitAllowingStateLoss();
                 }
             }.execute();
         }
@@ -161,9 +166,10 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     int counter = 1;
-                    while (!LoginManager.hasTemp() && counter < 30) {
+                    while (LoginManager.getActive() == null && counter < 30) {
                         try {
-                            LoginManager.createTemp();
+                            String id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                            LoginManager.createUserWithUdid(id);
                         } catch (RetrofitError retrofitError) {
                             Log.e(LoginManager.class.getSimpleName(), "temp account creation failed.");
                         }
@@ -173,11 +179,24 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         } catch (InterruptedException e) { e.printStackTrace(); }
                     }
 
+                    if (LoginManager.getActive() != null && !LoginManager.isValidTemp(LoginManager.getActive())) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Intent intent = new Intent(LocaleActivity.this, LoginActivity.class);
+                                intent.putExtra(LoginActivity.USER_EMAIL, AccountManager.get(LocaleActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.EMAIL));
+                                intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
+                    }
+
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
                     bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
                     bundle.putString(PeckSyncAdapter.SYNC_TYPE, "com.peck.android.models.Locale");
-                    ContentResolver.requestSync(LoginManager.getTemp(), PeckApp.AUTHORITY, bundle);
+                    ContentResolver.requestSync(LoginManager.getActive(), PeckApp.AUTHORITY, bundle);
 
 
                     long startTime = System.currentTimeMillis();

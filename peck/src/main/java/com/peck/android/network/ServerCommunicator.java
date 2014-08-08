@@ -227,6 +227,9 @@ public class ServerCommunicator {
         @DELETE("/api/{type}/{id}")
         JsonObject delete(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> authentication);
 
+        @POST("/api/users/user_for_udid")
+        JsonObject userForUdid(@Body TypedJsonBody body);
+
     }
 
 }

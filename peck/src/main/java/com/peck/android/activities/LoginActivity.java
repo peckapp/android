@@ -4,7 +4,9 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.OperationCanceledException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -16,17 +18,33 @@ import java.io.IOException;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
+    public static final String USER_EMAIL = "user_email";
+    public static final String REDIRECT_TO_FEEDACTIVITY = "redirect";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        findViewById(R.id.bt_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        boolean redirect = getIntent().getBooleanExtra(REDIRECT_TO_FEEDACTIVITY, false);
+
+        String userEmail = getIntent().getStringExtra(USER_EMAIL);
+
+        if (userEmail != null) {
+            ((EditText) findViewById(R.id.et_email)).setText(userEmail);
+        }
+
+        Button button = ((Button) findViewById(R.id.bt_back));
+        if (redirect) {
+            button.setVisibility(View.GONE);
+        } else {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    finish();
+                }
+            });
+        }
 
         findViewById(R.id.bt_login).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +105,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         @Override
                         protected Void doInBackground(Void... voids) {
                             try {
-                                LoginManager.create(email, password, name[0], name[1]);
+                                LoginManager.create(email, password, name[0], name[1], Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
                             } catch (LoginManager.InvalidEmailException e) {
                                 view.post(new Runnable() {
                                     @Override

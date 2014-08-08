@@ -128,6 +128,27 @@ public class JsonUtils {
         return auth;
     }
 
+    public static Map<String, String> auth(Account account, boolean askForAuthToken) throws IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
+        if (account == null) return new HashMap<String, String>();
+        else if (!LoginManager.isValid(account) && !LoginManager.isValidTemp(account)) throw new LoginManager.InvalidAccountException();
+        AccountManager accountManager = AccountManager.get(PeckApp.getContext());
+        Map<String, String> auth = new HashMap<String, String>();
+        String apiKey = accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY);
+        if (BuildConfig.DEBUG && apiKey == null) { throw new AuthenticatorException("API key can't be null"); }
+
+        String authToken = null;
+        if (!account.name.equals(PeckAccountAuthenticator.TEMP_NAME) && askForAuthToken) {
+            authToken = LoginManager.getAuthToken(account);
+        }
+
+        if (authToken != null) auth.put("authentication[authentication_token]", authToken);
+        auth.put("authentication[user_id]", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
+        auth.put("authentication[institution_id]", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
+        auth.put("authentication[api_key]", apiKey);
+
+        return auth;
+    }
+
     public static void auth(Account account, FailureCallback<Map<String, String>> callback) {
         try {
             callback.succeed(auth(account));

@@ -142,9 +142,9 @@ public class NewPostTab extends Fragment {
                                 }
                         }
                     }
-                    public void failure(Throwable t) {
+                    public void failure(Throwable cause) {
                         bar.setVisibility(View.GONE);
-                        t.printStackTrace();
+                        cause.printStackTrace();
                     }
 
                 });

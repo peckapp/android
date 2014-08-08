@@ -15,7 +15,7 @@ public abstract class FailureCallback<T> {
     private boolean mainThread = true;
 
     protected abstract void success(T item);
-    protected abstract void failure(Throwable t);
+    protected abstract void failure(Throwable cause);
 
     public FailureCallback<T> onCurrentThread() {
         mainThread = false;

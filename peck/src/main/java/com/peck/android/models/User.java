@@ -18,6 +18,7 @@ public class User extends DBOperable {
     public static final transient String BIO = "blurb";
     public static final transient String IMAGE_NAME = "image";
     public static final transient String THUMBNAIL = "thumb_image";
+    public static final transient String UDID = "udid";
 
     @Expose
     @SerializedName(IMAGE_NAME)

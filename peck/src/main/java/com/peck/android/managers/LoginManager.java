@@ -8,6 +8,7 @@ import android.accounts.OperationCanceledException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -133,7 +134,7 @@ public class LoginManager {
 
     }
 
-    public static synchronized boolean create(String email, String password, String firstName, String lastName)
+    public static synchronized boolean create(String email, String password, String firstName, String lastName, String udid)
             throws InvalidEmailException, InvalidPasswordException, AccountAlreadyExistsException, OperationCanceledException {
 
         if (!EmailValidator.getInstance().isValid(email)) {
@@ -156,6 +157,7 @@ public class LoginManager {
         object.addProperty(User.FIRST_NAME, firstName);
         object.addProperty(User.LAST_NAME, lastName);
         object.addProperty(User.LOCALE, accountManager.getUserData(authAccount, PeckAccountAuthenticator.INSTITUTION));
+        object.addProperty(User.UDID, Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
 
         Account temp = new Account(email, PeckAccountAuthenticator.ACCOUNT_TYPE);
 
@@ -219,14 +221,14 @@ public class LoginManager {
     public static synchronized String getAuthToken(Account account) throws NetworkErrorException {
         if (peekAuthToken(account) != null) return peekAuthToken(account);
         try {
-            Account authAccount = LoginManager.getTemp();
-            if (authAccount == null) throw new RuntimeException("LoginManager had null temp account");
+            Account authAccount = LoginManager.getActive();
+            if (authAccount == null) throw new RuntimeException("LoginManager had null account");
 
             Map<String, String> map = new HashMap<String, String>();
             map.put("user[password]", accountManager.getPassword(account));
             map.put("user[email]", account.name);
             try {
-                map.putAll(JsonUtils.auth(authAccount));
+                map.putAll(JsonUtils.auth(authAccount, false));
             } catch (InvalidAccountException e) {
                 e.printStackTrace();
             }
@@ -390,13 +392,61 @@ public class LoginManager {
             Log.v(LoginManager.class.getSimpleName(), "Active account removed.");
             ContentResolver.addPeriodicSync(getTemp(), PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
         } else if (isValid(account)) {
-            ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
+            if (active != null) ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
             ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
             PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, account.name).apply();
             Log.v(LoginManager.class.getSimpleName(), "Active account changed.");
             logAccount(account);
         }
     }
+
+    public static synchronized boolean createUserWithUdid(String udid) throws RetrofitError {
+        Account tmp;
+        JsonObject object = new JsonObject();
+        object.addProperty("the_udid", udid);
+
+        JsonObject retUser = ServerCommunicator.jsonService.userForUdid(new ServerCommunicator.TypedJsonBody(object)).getAsJsonObject("user");
+
+        if (retUser.get("new_user").getAsBoolean()) {
+            HashMap<String, Account> accounts = getAccounts();
+            if (accounts.containsKey(PeckAccountAuthenticator.TEMP_NAME)) tmp = accounts.get(PeckAccountAuthenticator.TEMP_NAME);
+            else {
+                tmp = new Account(PeckAccountAuthenticator.TEMP_NAME, PeckAccountAuthenticator.ACCOUNT_TYPE);
+                if (!accountManager.addAccountExplicitly(tmp, null, null)) {
+                    Log.e(LoginManager.class.getSimpleName(), "AccountManager failed to create a temporary account.");
+                    return false;
+                }
+                Log.v(LoginManager.class.getSimpleName(), "Temp account created.");
+            }
+            if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());
+        } else {
+            if (LoginManager.getAccounts().containsKey(retUser.get(User.EMAIL).getAsString())) {
+                tmp = LoginManager.getAccounts().get(retUser.get(User.EMAIL).getAsString());
+            } else {
+                tmp = new Account(retUser.get(User.EMAIL).getAsString(), PeckAccountAuthenticator.ACCOUNT_TYPE);
+                if (!accountManager.addAccountExplicitly(tmp, null, null)) {
+                    Log.e(LoginManager.class.getSimpleName(), "AccountManager failed to create an account for " + retUser.get(User.FIRST_NAME));
+                    return false;
+                }
+            }
+            accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, retUser.get(User.LOCALE).getAsString());
+
+        }
+
+
+        accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, retUser.get("api_key").getAsString());
+        accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, retUser.get("id").getAsString());
+        logAccount(tmp);
+
+        try {
+            LoginManager.setActiveAccount(tmp);
+        } catch (InvalidAccountException e) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * blocking method to create a temporary account with the server and add to accounts stored on device.
