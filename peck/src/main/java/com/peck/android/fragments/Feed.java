@@ -174,6 +174,34 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
     public void bindToAdapterView(ListView adapterView) {
         mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0) {
+            public boolean wasEmpty = false;
+            @Override
+            public void notifyDataSetChanged() {
+                super.notifyDataSetChanged();
+                updateVisibility();
+            }
+
+            private void updateVisibility() {
+                View mView = Feed.this.getView();
+                if (mView != null) {
+                    if (isEmpty()) {
+                            wasEmpty = true;
+                            mView.findViewById(getListViewRes()).setVisibility(View.GONE);
+                            mView.findViewById(R.id.tv_nothing_here).setVisibility(View.VISIBLE);
+                    } else if (wasEmpty) {
+                        wasEmpty = false;
+                        mView.findViewById(getListViewRes()).setVisibility(View.GONE);
+                        mView.findViewById(R.id.tv_nothing_here).setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void notifyDataSetInvalidated() {
+                super.notifyDataSetInvalidated();
+                updateVisibility();
+            }
+
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);

@@ -80,6 +80,7 @@ public class FeedActivity extends PeckActivity {
 
     private TimeZone tz = Calendar.getInstance().getTimeZone();
     private View tView;
+    private View tFloating;
     private Feed tFeed = null;
     private int currentCircleAddPos = -1;
 
@@ -432,7 +433,7 @@ public class FeedActivity extends PeckActivity {
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event})
                 .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
-                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT })
+                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL })
                 .orderedBy(Event.UPDATED_AT + " desc")
                 .withoutDividers()
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {

@@ -31,11 +31,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10:48"
                 android:id="@+id/tv_time"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:textSize="40sp" />
+                android:textSize="40sp"
+                android:singleLine="true" />
         </FrameLayout>
 
         <RelativeLayout
@@ -55,8 +55,9 @@
                     android:id="@+id/tv_title"
                     android:layout_gravity="center_vertical"
                     android:text="test text"
-                    android:textSize="28sp"
-                    android:layout_centerHorizontal="true" />
+                    android:textSize="24sp"
+                    android:layout_centerHorizontal="true"
+                    android:singleLine="true" />
 
                 <TextView
                     android:layout_width="wrap_content"
