@@ -2,6 +2,7 @@ package com.peck.android.activities;
 
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.OperationCanceledException;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -26,7 +27,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        boolean redirect = getIntent().getBooleanExtra(REDIRECT_TO_FEEDACTIVITY, false);
+        final boolean redirect = getIntent().getBooleanExtra(REDIRECT_TO_FEEDACTIVITY, false);
 
         String userEmail = getIntent().getStringExtra(USER_EMAIL);
 
@@ -35,16 +36,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
 
         Button button = ((Button) findViewById(R.id.bt_back));
-        if (redirect) {
-            button.setVisibility(View.GONE);
-        } else {
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    finish();
-                }
-            });
-        }
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         findViewById(R.id.bt_login).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,8 +78,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                     @Override
                     protected void onPostExecute(Void result) {
-                        //todo: finish the activity
-                        if (!isFinishing() && !LoginManager.isValidTemp(LoginManager.getActive())) finish();
+                        if (!isFinishing() && !LoginManager.isValidTemp(LoginManager.getActive())) {
+                            if (redirect) startActivity(new Intent(LoginActivity.this, FeedActivity.class));
+                            finish();
+                        }
                         else Toast.makeText(LoginActivity.this, "Login failed.", Toast.LENGTH_LONG).show();
                     }
 

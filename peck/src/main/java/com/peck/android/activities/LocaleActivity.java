@@ -1,6 +1,7 @@
 package com.peck.android.activities;
 
 import android.accounts.AccountManager;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -110,34 +111,38 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                 @Override
                 protected void onPostExecute(Boolean bool) {
 
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
-                            .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
-                            .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                        @Override
-                                                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                            if (LoginManager.getActive() != null) {
-                                                                Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
-                                                                        new String[] { DBOperable.SV_ID, DBOperable.LOCAL_ID }, DBOperable.LOCAL_ID + " = ?", new String[] {Long.toString(l)}, null);
-                                                                cursor.moveToFirst();
-                                                                long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
+                    if (!LocaleActivity.this.isDestroyed() && !LocaleActivity.this.isFinishing()) {
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
+                                .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
+                                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                            @Override
+                                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                                                if (LoginManager.getActive() != null) {
+                                                                    Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
+                                                                            new String[]{DBOperable.SV_ID, DBOperable.LOCAL_ID}, DBOperable.LOCAL_ID + " = ?", new String[]{Long.toString(l)}, null);
+                                                                    cursor.moveToFirst();
+                                                                    long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
 
-                                                                LoginManager.setLocale(LoginManager.getActive().name, id);
+                                                                    LoginManager.setLocale(LoginManager.getActive().name, id);
 
-                                                                Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                                                                startActivity(intent);
-                                                                finish();
-                                                            } else Log.e(LocaleActivity.class.getSimpleName(), "LoginManager didn't have an active account to assign a locale to");
+                                                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                } else
+                                                                    Log.e(LocaleActivity.class.getSimpleName(), "LoginManager didn't have an active account to assign a locale to");
+                                                            }
                                                         }
-                                                    }
-                            )
-                            .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
-                                    ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
-                                    "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
-                            .orderedBy("dist asc, " + Locale.NAME)
-                            .layout(R.layout.localeselectionfeed)
-                            .build(), fragmentTag);
-                    ft.commitAllowingStateLoss();
+                                )
+                                .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
+                                        ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
+                                        "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})
+                                .orderedBy("dist asc, " + Locale.NAME)
+                                .layout(R.layout.localeselectionfeed)
+                                .build(), fragmentTag);
+
+                        ft.commitAllowingStateLoss();
+                    }
                 }
             }.execute();
         }
@@ -183,11 +188,12 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
+                                new AlertDialog.Builder(LocaleActivity.this).setMessage("A user was found to be logged in to this device previously. Would you like to log in as " + AccountManager.get(LocaleActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.EMAIL) + "?").show();
+
                                 Intent intent = new Intent(LocaleActivity.this, LoginActivity.class);
                                 intent.putExtra(LoginActivity.USER_EMAIL, AccountManager.get(LocaleActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.EMAIL));
                                 intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
                                 startActivity(intent);
-                                finish();
                             }
                         });
                     }

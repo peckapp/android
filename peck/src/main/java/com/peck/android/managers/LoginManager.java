@@ -86,7 +86,7 @@ public class LoginManager {
         final Account authAccount = getActive();
         HashMap<String, Account> accounts = getAccounts();
 
-        if (!hasTemp()) throw new OperationCanceledException("temp account didn't exist");
+        if (authAccount == null) throw new OperationCanceledException("authentication account didn't exist");
 
         if (email.equals(PeckAccountAuthenticator.TEMP_NAME)) throw new InvalidEmailException("Email can't be the same as the temporary account name");
         if (accounts.keySet().contains(email)) {
@@ -101,9 +101,10 @@ public class LoginManager {
 
         try {
             Map<String, String> map = new HashMap<String, String>();
-            map.put("user[password]", accountManager.getPassword(temp));
+            map.put("user[password]", password);
             map.put("user[email]", temp.name);
-            map.putAll(JsonUtils.auth(authAccount));
+            map.put("user[udid]", Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+            map.putAll(JsonUtils.auth(authAccount, false));
 
             JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
             JsonObject user = ((JsonObject) jsonRet.get("user"));
