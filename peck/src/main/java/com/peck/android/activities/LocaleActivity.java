@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
@@ -172,8 +171,7 @@ public class LocaleActivity extends PeckActivity implements GooglePlayServicesCl
                     int counter = 1;
                     while (LoginManager.getActive() == null && counter < 30) {
                         try {
-                            String id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-                            LoginManager.createUserWithUdid(id);
+                            LoginManager.createUserWithUdid();
                         } catch (RetrofitError retrofitError) {
                             Log.e(LoginManager.class.getSimpleName(), "temp account creation failed.");
                         }

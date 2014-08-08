@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -198,8 +200,28 @@ public class NewPostTab extends Fragment {
             case Activity.RESULT_OK:
                 switch (requestCode) {
                     case ImagePickerListener.REQUEST_CODE:
+                        final boolean isCamera;
+                        if (data == null) {
+                            isCamera = true;
+                        } else {
+                            final String action = data.getAction();
+                            if (action == null) {
+                                isCamera = false;
+                            } else {
+                                isCamera = action.equals(MediaStore.ACTION_IMAGE_CAPTURE);
+                            }
+                        }
+
+                        Uri imageUri;
+                        if (isCamera) {
+                            imageUri = data.getParcelableExtra(ImagePickerListener.URI);
+                        } else {
+                            imageUri = data == null ? null : data.getData();
+                        }
+
+
                         try {
-                            Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(data.getData()));
+                            Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
                             ((ImageView)getView().findViewById(R.id.iv_select)).setImageBitmap(bmp);
                             this.imageBitmap = bmp;
                             Log.d(NewPostTab.class.getSimpleName(), "i have a bitmap");

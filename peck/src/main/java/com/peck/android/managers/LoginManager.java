@@ -414,12 +414,10 @@ public class LoginManager {
         }
     }
 
-    public static synchronized boolean createUserWithUdid(String udid) throws RetrofitError {
+    public static synchronized boolean createUserWithUdid() throws RetrofitError {
         Account tmp;
-        JsonObject object = new JsonObject();
-        object.addProperty("the_udid", udid);
 
-        JsonObject retUser = ServerCommunicator.jsonService.userForUdid(new ServerCommunicator.TypedJsonBody(object)).getAsJsonObject("user");
+        JsonObject retUser = ServerCommunicator.jsonService.userForUdid(Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID)).getAsJsonObject("user");
 
         if (retUser.get("new_user").getAsBoolean()) {
             HashMap<String, Account> accounts = getAccounts();

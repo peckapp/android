@@ -25,6 +25,8 @@ import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
+import retrofit.http.Field;
+import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.PATCH;
@@ -227,8 +229,9 @@ public class ServerCommunicator {
         @DELETE("/api/{type}/{id}")
         JsonObject delete(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> authentication);
 
+        @FormUrlEncoded
         @POST("/api/users/user_for_udid")
-        JsonObject userForUdid(@Body TypedJsonBody body);
+        JsonObject userForUdid(@Field("udid") String udid);
 
     }
 
