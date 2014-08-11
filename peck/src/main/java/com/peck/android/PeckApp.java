@@ -36,9 +36,13 @@ public class PeckApp extends Application implements Singleton{
     private static Context mContext;
 
 
+    /**
+     * the global application context
+     */
     public static Context getContext() {
         return mContext;
     }
+
 
     public static final String AUTHORITY = "com.peck.android.provider.all";
 
@@ -61,7 +65,9 @@ public class PeckApp extends Application implements Singleton{
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         mContext = this;
         //Crashlytics.start(this);
-       /* NewRelic.withApplicationToken(
+        //fixme: newrelic. can't use it at the moment. removal of other libraries while newrelic was installed completely
+        //fixme: broke the app with problems in dalvik, and i could only fix it without a workspace reset (re-cloning the app into a new directory)
+        /* NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
         ).start(this);*/
 
@@ -107,22 +113,6 @@ public class PeckApp extends Application implements Singleton{
         public final static class Database {
             public static final Uri BASE_AUTHORITY_URI = Uri.parse("content://com.peck.android.provider.all");
             public static final String DATABASE_NAME = "peck.db";
-        }
-
-        public final static class Location {
-
-            public final static int INTERVAL = 300;
-            public final static int RETRY = 33;
-
-        }
-
-        public final static class Graphics {
-
-            public final static int FILLER = R.drawable.ic_peck;
-            public final static int CACHE_SIZE = 5*1024*1024; //5MB cache maximum
-            public final static int INT_CACHE_SIZE = 50;
-            public final static int PNG_COMPRESSION = 90;
-
         }
 
     }

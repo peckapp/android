@@ -27,33 +27,57 @@ import java.util.HashMap;
 
 /**
  * Created by mammothbane on 7/15/2014.
+ *
+ * general database utils class.
  */
 public class DBUtils {
     private static final String DELIM = ", ";
     private static final HashMap<Class, String[]> columnMap = new HashMap<Class, String[]>();
     public static Gson gson = new GsonBuilder().serializeNulls().create();
 
+    /**
+     * build a database creation string for the specified class
+     *
+     * @param tClass the class to build for
+     * @return the database creation string
+     */
     public static <T extends DBOperable> String getDatabaseCreate(Class<T> tClass) {
         //todo: remove "on conflict replace". we don't want any conflicts going into the db
-        return "create table " + getTableName(tClass) + " (" + StringUtils.join(fieldToCreatorString(tClass), DELIM) +
+        return "create table " + getTableName(tClass) + " (" + StringUtils.join(fieldsToCreatorString(tClass), DELIM) +
                 DELIM + "unique (" + DBOperable.SV_ID +
                 ((tClass.equals(Event.class)) ? ", " + Event.TYPE : "")
                 + ") on conflict replace);";
     }
 
+    /**
+     * get and return the {@link com.peck.android.annotations.UriPath} annotation for the given class.
+     *
+     * @param tClass the class to evaluate.
+     * @return the {@link com.peck.android.annotations.UriPath} for tClass if it exists. if not, return the class' name.
+     */
     @Nullable
     public static <T extends DBOperable> String getTableName(Class<T> tClass) {
         UriPath uriPath = tClass.getAnnotation(UriPath.class);
-        return (uriPath != null) ? uriPath.value() : null;
+        return (uriPath != null) ? uriPath.value() : tClass.getSimpleName();
     }
 
+    /**
+     * get the gson-serialized name of the given field.
+     * @param field the field to evaluate
+     * @return the {@link com.google.gson.annotations.SerializedName} of the given field, if it exists, the field's name if not.
+     */
     public static String getSerializedFieldName(Field field) {
         SerializedName name = field.getAnnotation(SerializedName.class);
         return name == null ? field.getName() : name.value();
     }
 
-
-    public static ArrayList<String> fieldToCreatorString(Class tClass) {
+    /**
+     * build a creation string for a single class
+     *
+     * @param tClass the class to build for
+     * @return the creation string
+     */
+    public static ArrayList<String> fieldsToCreatorString(Class tClass) {
         ArrayList<String> ret = new ArrayList<String>();
         for (Field objField : getAllFields(tClass)) {  //this block can cause issues if we have fields with the same names as other fields' serializations. don't do that.
             DBType type = objField.getAnnotation(DBType.class);
@@ -62,6 +86,12 @@ public class DBUtils {
         return ret;
     }
 
+
+    /**
+     * traverse the class hierarchy and return all fields (including inherited) for a given class
+     * @param clss the class to check
+     * @return a list of fields
+     */
     @NonNull
     public static ArrayList<Field> getAllFields(@NonNull Class clss){
         ArrayList<Field> ret = new ArrayList<Field>();
@@ -74,6 +104,11 @@ public class DBUtils {
         return ret;
     }
 
+    /**
+     * return a string array of columns for the specified class. cached in a static map in this class.
+     * @param tClass the class to check
+     * @return the array
+     */
     public static <T extends DBOperable> String[] getColumns(Class<T> tClass) {
         if (columnMap.get(tClass) == null) {
             ArrayList<String> columns = new ArrayList<String>();
@@ -86,10 +121,14 @@ public class DBUtils {
         return columnMap.get(tClass);
     }
 
+    /**
+     * build a uri for the specified class.
+     * @param tClass the class to build for
+     * @return the uri
+     */
     public static Uri buildLocalUri(Class tClass) {
         return PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(getTableName(tClass)).build();
     }
-
 
     /**
      * receive a contentvalues and asynchronously synchronize it to the database

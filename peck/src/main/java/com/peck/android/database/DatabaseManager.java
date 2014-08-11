@@ -8,6 +8,8 @@ import com.peck.android.PeckApp;
 
 /**
  * Created by mammothbane on 6/10/2014.
+ *
+ * handles database creation and access.
  */
 public class DatabaseManager {
     private static final int version = 1;

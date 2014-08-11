@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Created by mammothbane on 7/1/2014.
+ * database type for a given model field
  */
 
 @Retention(RetentionPolicy.RUNTIME)

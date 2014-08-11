@@ -14,6 +14,8 @@ import java.io.IOException;
 
 /**
  * Created by mammothbane on 8/8/2014.
+ *
+ * a class to register with gcm.
  */
 public class GcmRegistrar {
     static GoogleCloudMessaging gcm;
