@@ -5,7 +5,6 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.peck.android.annotations.Header;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Club;
@@ -28,7 +27,7 @@ import com.squareup.picasso.Picasso;
  * the base application, created when the app starts.
  *
  */
-public class PeckApp extends Application implements Singleton{
+public class PeckApp extends Application {
 
     //the app version
     public static final double version = 1.0;

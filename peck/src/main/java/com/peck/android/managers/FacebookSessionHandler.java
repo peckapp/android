@@ -10,12 +10,11 @@ import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.peck.android.PeckApp;
 import com.peck.android.interfaces.Callback;
-import com.peck.android.interfaces.Singleton;
 
 /**
  * Created by mammothbane on 6/19/2014.
  */
-public class FacebookSessionHandler implements Singleton {
+public class FacebookSessionHandler {
 
     private final static String TAG = "FacebookSessionManager";
     private FacebookSessionHandler() {}

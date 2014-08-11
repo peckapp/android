@@ -15,12 +15,14 @@ import com.peck.android.views.PeckAuthButton;
 
 /**
  * Created by mammothbane on 6/10/2014.
+ * a fragment for the profile page. has a member {@link com.peck.android.views.PeckAuthButton} that updates based on login state.
  */
 public class ProfileTab extends Fragment {
 
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.tab_profile;
     private UiLifecycleHelper lifecycleHelper;
+    private PeckAuthButton peckAuthButton;
 
 
     @Override
@@ -37,7 +39,7 @@ public class ProfileTab extends Fragment {
 
     @Override
     public void onResume() {
-        ((PeckAuthButton)getView().findViewById(R.id.bt_peck_login)).update();
+        if (peckAuthButton != null) peckAuthButton.update();
         super.onResume();
         lifecycleHelper.onResume();
     }
@@ -73,7 +75,7 @@ public class ProfileTab extends Fragment {
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
 
-        PeckAuthButton peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
+        peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
         peckAuthButton.setFragment(this);
 
         return view;
