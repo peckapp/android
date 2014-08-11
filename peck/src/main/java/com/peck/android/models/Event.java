@@ -1,13 +1,9 @@
 package com.peck.android.models;
 
-import android.support.annotation.NonNull;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.UriPath;
-
-import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 7/22/2014.
@@ -40,6 +36,11 @@ public class Event extends DBOperable {
     @SerializedName(PUBLIC)
     boolean publc;
 
+    @Expose
+    @DBType("integer")
+    @SerializedName(USER_ID)
+    long userId;
+
 
     /* simple event fields */
     public static final transient String START_DATE = "start_date";
@@ -49,7 +50,7 @@ public class Event extends DBOperable {
     public static final transient String IMAGE_URL = "image";
     public static final transient String BLURRED_URL = "blurred_image";
     public static final transient String EVENT_URL = "event_url";
-    public static final transient String USER_IDS = "user_ids";
+    public static final transient String USER_ID = "user_id";
     public static final transient String TYPE = "type";
     public static final transient String PUBLIC = "public";
     public static final transient String START_TIMESTAMP = "start_ts";
@@ -77,10 +78,7 @@ public class Event extends DBOperable {
     @SerializedName(EVENT_URL)
     String eventUrl;
 
-    @NonNull
-    @Expose
-    @SerializedName(USER_IDS)
-    ArrayList<Integer> users = new ArrayList<Integer>();
+
 
 
     /* athletic event fields */
@@ -171,11 +169,6 @@ public class Event extends DBOperable {
     @Expose
     @SerializedName(ANNOUNCEMENT_TEXT)
     String announceText;
-
-    @Expose
-    @DBType("integer")
-    @SerializedName(ANNOUNCEMENT_USER_ID)
-    long announceUserId;
 
     @Expose
     @DBType("integer")

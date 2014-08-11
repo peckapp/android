@@ -132,12 +132,15 @@ public class FeedActivity extends FragmentActivity {
 
         //add the explore feed
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
-                .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.iv_event})
-                .withProjection(new String[]{ Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID })
+                .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID},
+                        new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo})
+                .withProjection(new String[]{Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID, Event.USER_ID, Event.TEXT, Event.START_DATE})
                 .withSelection(Event.TYPE + " = ?", new String[]{Integer.toString(Event.SIMPLE_EVENT)})
+                .orderedBy(Event.UPDATED_AT + " desc")
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
-                    public boolean setViewValue(View view, Cursor cursor, int i) {
+                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                        final long user_id = cursor.getLong(cursor.getColumnIndex(Event.USER_ID));
                         switch (view.getId()) {
                             case R.id.iv_event:
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
@@ -160,6 +163,76 @@ public class FeedActivity extends FragmentActivity {
                                             .centerCrop()
                                             .into(((ImageView) view));
                                 }
+                                return true;
+                            case R.id.rl_image:
+                                String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
+                                    view.setVisibility(View.GONE);
+                                } else view.setVisibility(View.VISIBLE);
+                                return true;
+                            case R.id.riv_user:
+                                if (user_id > 0)
+                                    new AsyncTask<Void, Void, String>() {
+                                        @Override
+                                        protected String doInBackground(Void... voids) {
+                                            Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                    User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                            if (c.getCount() == 0) return null;
+                                            c.moveToFirst();
+                                            String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                            c.close();
+                                            return ret;
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(String s) {
+                                            if (s != null && !s.isEmpty()) {
+                                                Picasso.with(FeedActivity.this)
+                                                        .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                        .fit()
+                                                        .centerCrop()
+                                                        .into(((ImageView) view));
+                                            }
+                                        }
+                                    }.execute();
+                                return true;
+                            case R.id.tv_text:
+                                String s = cursor.getString(cursor.getColumnIndex(Event.TEXT));
+                                ((TextView) view).setText(s);
+                                return true;
+                            case R.id.tv_time:
+                                long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE));
+                                if (l > 0)
+                                    ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(tz)).toString("MMM d"));
+                                else ((TextView) view).setText("");
+                                return true;
+                            case R.id.tv_name:
+                                new AsyncTask<Void, Void, String>() {
+                                    @Override
+                                    protected String doInBackground(Void... voids) {
+                                        if (user_id < 1) return "Someone";
+                                        Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
+                                                User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                        if (c.getCount() == 0) return "Someone";
+                                        c.moveToFirst();
+                                        String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
+                                        c.close();
+                                        return ret;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(String s) {
+                                        ((TextView) view).setText(s);
+                                    }
+                                }.execute();
+                                return true;
+                            case R.id.tv_action:
+                                if (user_id > 0) ((TextView) view).setText("posted an event");
+                                else ((TextView) view).setText("");
+                                return true;
+                            case R.id.rl_photo:
+                                if (user_id > 0) view.setVisibility(View.VISIBLE);
+                                else view.setVisibility(View.GONE);
                                 return true;
                             default:
                                 return false;
@@ -498,6 +571,8 @@ public class FeedActivity extends FragmentActivity {
                                     case R.id.iv_event:
                                         Picasso.with(FeedActivity.this)
                                                 .load(R.drawable.ic_peck)
+                                                .fit()
+                                                .centerCrop()
                                                 .into((ImageView) view);
                                         return true;
                                     case R.id.tv_time:
@@ -519,6 +594,8 @@ public class FeedActivity extends FragmentActivity {
                                     case R.id.iv_event:
                                         Picasso.with(FeedActivity.this)
                                                 .load(R.drawable.ic_peck)
+                                                .fit()
+                                                .centerCrop()
                                                 .into((ImageView) view);
                                         return true;
                                     case R.id.tv_time:
@@ -548,6 +625,8 @@ public class FeedActivity extends FragmentActivity {
                                         } else {
                                             Picasso.with(FeedActivity.this)
                                                     .load(R.drawable.ic_peck)
+                                                    .fit()
+                                                    .centerCrop()
                                                     .into((ImageView) view);
                                         }
                                         return true;
@@ -573,6 +652,8 @@ public class FeedActivity extends FragmentActivity {
                                     case R.id.iv_event:
                                         Picasso.with(FeedActivity.this)
                                                 .load(R.drawable.ic_peck)
+                                                .fit()
+                                                .centerCrop()
                                                 .into(((ImageView) view));
                                         return true;
                                     default:

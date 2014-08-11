@@ -16,7 +16,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="160">
+            android:layout_weight="160"
+            android:id="@+id/rl_image">
 
             <ImageView
                 android:src="@drawable/ic_peck"
@@ -87,7 +88,9 @@
                     android:layout_width="50dp"
                     android:layout_gravity="center"
                     android:layout_alignWithParentIfMissing="false"
-                    android:layout_centerInParent="true" />
+                    android:layout_centerInParent="true"
+                    android:focusableInTouchMode="false"
+                    android:id="@+id/riv_user" />
             </RelativeLayout>
 
             <LinearLayout
@@ -101,7 +104,7 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -109,7 +112,9 @@
                         android:textSize="18sp"
                         android:id="@+id/tv_title"
                         android:singleLine="true"
-                        android:layout_marginTop="0dp" />
+                        android:layout_marginTop="0dp"
+                        android:layout_toLeftOf="@+id/tv_time"
+                        android:layout_alignParentLeft="true" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -129,10 +134,63 @@
                     android:id="@+id/tv_text"
                     android:password="false"
                     android:layout_marginTop="12dp"
-                    android:layout_marginRight="4dp" />
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="6dp" />
+
             </LinearLayout>
 
         </LinearLayout>
+
+        <RelativeLayout
+            android:background="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:id="@+id/bt_attend"
+                android:textAllCaps="true"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_centerVertical="true"
+                android:text="attend"
+                android:layout_marginLeft="40dp"
+                android:textSize="15sp"
+                android:singleLine="true" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp">
+
+                <Button
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/ic_action_share"
+                    android:id="@+id/bt_share"
+                    android:layout_toLeftOf="@+id/bt_flag"
+                    android:layout_alignWithParentIfMissing="false"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="16dp" />
+
+                <Button
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:id="@+id/bt_flag"
+                    android:background="@drawable/ic_action_ic_flag"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignWithParentIfMissing="false"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+
+        </RelativeLayout>
 
 
     </LinearLayout>
