@@ -48,7 +48,7 @@ public class ServerCommunicator {
             setRequestInterceptor(new RequestInterceptor() {
                 @Override
                 public void intercept(RequestFacade request) {
-                    request.addHeader("User-Agent", "Peck Android, v. 1.0");
+                    request.addHeader("User-Agent", "Peck Android, v. " + PeckApp.version);
                 }
             }).setConverter(new Converter() {
         @Override
@@ -74,8 +74,12 @@ public class ServerCommunicator {
 
 
 
+    //the retrofit service used to handle all network traffic in the app
     public static SimpleJsonHandler jsonService = apiAdapter.create(SimpleJsonHandler.class);
 
+    /**
+     * for retrofit. if you hand a retrofit adapter a jsonobject directly, it'll try to serialize it. typedoutput/input are intended to handle their own serialization.
+     */
     public static class Jpeg implements TypedOutput {
         TypedByteArray out;
         String fileName;
@@ -144,6 +148,9 @@ public class ServerCommunicator {
         }
     }
 
+    /**
+     * for retrofit. if you hand it json directly, it'll try to serialize it. typedoutput/input are intended to handle their own serialization.
+     */
     public static class TypedJsonBody implements TypedOutput {
         TypedByteArray out;
 
@@ -191,6 +198,10 @@ public class ServerCommunicator {
 
     }
 
+    /**
+     * the retrofit interface that handles server communication.
+     * methods are defined here, and retrofit builds an adapter (above) that will handle them.
+     */
     public interface SimpleJsonHandler {
         @GET("/api/{type}/{id}")
         JsonObject show(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> urlParams);

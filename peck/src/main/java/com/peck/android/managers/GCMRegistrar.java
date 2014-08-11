@@ -18,6 +18,7 @@ import java.io.IOException;
  * a class to register with gcm.
  */
 public class GcmRegistrar {
+    public static final String GCM_SENDER_ID = "651374007309";
     static GoogleCloudMessaging gcm;
     private final static String PROPERTY_REG_ID = "registration_id";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -44,7 +45,7 @@ public class GcmRegistrar {
             gcm = GoogleCloudMessaging.getInstance(PeckApp.getContext());
             if (getRegistrationId().isEmpty()) {
                 try {
-                    String token = gcm.register(PeckApp.GCM_SENDER_ID);
+                    String token = gcm.register(GCM_SENDER_ID);
                     getGCMPreferences().edit().putString(PROPERTY_REG_ID, token).putInt("version", PeckApp.version).apply();
                     return token;
                 } catch (IOException e) {

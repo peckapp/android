@@ -19,6 +19,10 @@ import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Created by mammothbane on 7/14/2014.
+ *
+ * the internal {@link android.content.ContentProvider} implementation for peck. should handle all database access in the app.
+ * all methods are synchronized.
+ *
  */
 public class InternalContentProvider extends ContentProvider {
 

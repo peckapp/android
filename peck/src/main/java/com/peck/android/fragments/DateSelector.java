@@ -22,6 +22,7 @@ import java.util.Locale;
 
 /**
  * Created by mammothbane on 7/31/2014.
+ * date selector fragment with methods to hand back and set JodaTime {@link org.joda.time.DateTime}s
  */
 public class DateSelector extends Fragment {
     DateTime time = DateTime.now();
