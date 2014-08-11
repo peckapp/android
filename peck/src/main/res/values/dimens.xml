@@ -16,5 +16,6 @@
     <item name="alpha_unauth" format="float" type="dimen">0.5</item>
     <dimen name="share_height">40dp</dimen>
     <dimen name="circle_item_height">100dp</dimen>
+    <dimen name="explore_message_bar_height">22dp</dimen>
 
 </resources>
