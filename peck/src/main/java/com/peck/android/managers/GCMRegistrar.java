@@ -46,7 +46,7 @@ public class GcmRegistrar {
             if (getRegistrationId().isEmpty()) {
                 try {
                     String token = gcm.register(GCM_SENDER_ID);
-                    getGCMPreferences().edit().putString(PROPERTY_REG_ID, token).putInt("version", PeckApp.version).apply();
+                    getGCMPreferences().edit().putString(PROPERTY_REG_ID, token).putFloat("version", (float)PeckApp.version).apply();
                     return token;
                 } catch (IOException e) {
                     Log.e(GcmRegistrar.class.getSimpleName(), "couldn't register.");

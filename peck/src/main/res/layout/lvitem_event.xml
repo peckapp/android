@@ -24,55 +24,48 @@
         android:layout_centerVertical="true">
 
         <FrameLayout
-            android:layout_width="0dp"
+            android:layout_width="108dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_marginLeft="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_time"
-                android:layout_weight="1"
                 android:layout_gravity="center"
+                android:textColor="@android:color/primary_text_dark_nodisable"
                 android:textSize="40sp"
                 android:singleLine="true" />
         </FrameLayout>
 
-        <RelativeLayout
-            android:layout_width="0dp"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2">
+            android:layout_marginLeft="24dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginRight="16dp">
 
-            <LinearLayout
-                android:orientation="vertical"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
+                android:id="@+id/tv_title"
+                android:layout_gravity="center_vertical|start"
+                android:text="test text"
+                android:textSize="24sp"
+                android:textColor="@android:color/primary_text_dark_nodisable"
+                android:singleLine="true" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/tv_title"
-                    android:layout_gravity="center_vertical"
-                    android:text="test text"
-                    android:textSize="24sp"
-                    android:layout_centerHorizontal="true"
-                    android:singleLine="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/tv_text"
-                    android:singleLine="true"
-                    android:layout_gravity="center_vertical"
-                    android:layout_below="@+id/tv_title"
-                    android:text="test text"
-                    android:textSize="20sp"
-                    android:layout_centerHorizontal="true" />
-            </LinearLayout>
-
-
-        </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_text"
+                android:singleLine="true"
+                android:layout_gravity="center_vertical|start"
+                android:text="test text"
+                android:textColor="@android:color/secondary_text_dark_nodisable"
+                android:textSize="20sp" />
+        </LinearLayout>
 
     </LinearLayout>
 

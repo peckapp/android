@@ -7,6 +7,7 @@ import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.PeriodicSync;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -110,6 +111,8 @@ public class LoginManager {
             map.put("user[device_type]", "android");
             map.putAll(JsonUtils.auth(authAccount, false));
 
+            Log.d(LoginManager.class.getSimpleName(), map.toString());
+            Log.d(LoginManager.class.getSimpleName(), GcmRegistrar.register());
             JsonObject jsonRet = ServerCommunicator.jsonService.login(map, GcmRegistrar.register());
             JsonObject user = ((JsonObject) jsonRet.get("user"));
 
@@ -404,14 +407,14 @@ public class LoginManager {
     }
 
     /**
-     * set the active account in sharedprefs. cancels any old syncs and initates a new one for the newly active account.
+     * set the active account in sharedprefs. cancels any old syncs and initiates a new one for the newly active account.
      * @param account the account to activate
      * @throws InvalidAccountException
      */
     private static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
         Account active = getActive();
         if (account == null) {
-            ContentResolver.removePeriodicSync(active, PeckApp.AUTHORITY, new Bundle());
+            for (PeriodicSync sync : ContentResolver.getPeriodicSyncs(active, PeckApp.AUTHORITY)) ContentResolver.removePeriodicSync(active, sync.authority, sync.extras);
             PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE_ACCOUNT, null).apply();
             Log.v(LoginManager.class.getSimpleName(), "Active account removed.");
             if (getTemp() == null) new AsyncTask<Void, Void, Void>() {

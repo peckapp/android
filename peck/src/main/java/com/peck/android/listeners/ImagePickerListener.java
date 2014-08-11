@@ -61,7 +61,7 @@ public class ImagePickerListener implements View.OnClickListener {
         galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
 
         final Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
         chooserIntent.putExtra(URI, outputFileUri);
 
         fragment.startActivityForResult(chooserIntent, REQUEST_CODE);

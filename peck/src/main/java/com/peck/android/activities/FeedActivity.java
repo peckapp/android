@@ -461,15 +461,32 @@ public class FeedActivity extends FragmentActivity {
 
         //build the event feed
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event})
+                .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time})
                 .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
-                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL })
+                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
+                        Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME})
                 .orderedBy(Event.UPDATED_AT + " desc")
                 .withoutDividers()
+                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, final long l) {
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(Event.class), new String[] { Event.LOCAL_ID, Event.TYPE }, Event.LOCAL_ID + " = ?", new String[] { Long.toString(l) }, null);
+                                temp.moveToFirst();
+                                String type = temp.getString(temp.getColumnIndex(Event.TYPE));
+                                Log.d(FeedActivity.class.getSimpleName(), type.equals("0") ? "simple" : type.equals("3") ? "announcement" : type.equals("1") ? "athletic" : "dining op");
+                                temp.close();
+                                return null;
+                            }
+                        }.execute();
+                    }
+                })
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
-                        switch (cursor.getInt(i)) {
+                        switch (cursor.getInt(cursor.getColumnIndex(Event.TYPE))) {
                             case Event.ATHLETIC_EVENT:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
@@ -483,6 +500,11 @@ public class FeedActivity extends FragmentActivity {
                                                 .load(R.drawable.ic_peck)
                                                 .into((ImageView) view);
                                         return true;
+                                    case R.id.tv_time:
+                                        long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME));
+                                        if (date > 0)
+                                            ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(tz)).toString("K:mm"));
+                                        return true;
                                     default:
                                         return false;
                                 }
@@ -493,14 +515,15 @@ public class FeedActivity extends FragmentActivity {
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                         return true;
                                     case R.id.tv_text:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
-                                        DateTime end = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_END_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
-                                        ((TextView) view).setText(start.toString("K:mm") + " - " + end.toString("K:mm"));
                                         return true;
                                     case R.id.iv_event:
                                         Picasso.with(FeedActivity.this)
                                                 .load(R.drawable.ic_peck)
                                                 .into((ImageView) view);
+                                        return true;
+                                    case R.id.tv_time:
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        ((TextView) view).setText(start.toString("K:mm"));
                                         return true;
                                     default:
                                         return false;
@@ -525,8 +548,13 @@ public class FeedActivity extends FragmentActivity {
                                         } else {
                                             Picasso.with(FeedActivity.this)
                                                     .load(R.drawable.ic_peck)
-                                                    .into((ImageView)view);
+                                                    .into((ImageView) view);
                                         }
+                                        return true;
+                                    case R.id.tv_time:
+                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        Log.d(FeedActivity.class.getSimpleName(), stTemp.toString("K:mm"));
+                                        ((TextView) view).setText(stTemp.toString("K:mm"));
                                         return true;
                                     default:
                                         return false;
@@ -538,6 +566,14 @@ public class FeedActivity extends FragmentActivity {
                                         return true;
                                     case R.id.tv_text:
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TEXT)));
+                                        return true;
+                                    case R.id.tv_time:
+                                        ((TextView) view).setText("");
+                                        return true;
+                                    case R.id.iv_event:
+                                        Picasso.with(FeedActivity.this)
+                                                .load(R.drawable.ic_peck)
+                                                .into(((ImageView) view));
                                         return true;
                                     default:
                                         return false;
@@ -568,7 +604,6 @@ public class FeedActivity extends FragmentActivity {
             startActivity(intent);
             finish();
         } else {
-            //fixme: we can't have periodic syncs being added here. doesn't make sense.
             ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
             Bundle bundle = new Bundle();
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -576,10 +611,6 @@ public class FeedActivity extends FragmentActivity {
             ContentResolver.requestSync(account, PeckApp.AUTHORITY, bundle);
         }
     }
-
-
-
-
 
     @Override
     public void onBackPressed() {

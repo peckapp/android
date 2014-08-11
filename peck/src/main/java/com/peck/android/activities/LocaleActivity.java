@@ -174,7 +174,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                         try {
                             LoginManager.createUserWithUdid();
                         } catch (RetrofitError retrofitError) {
-                            Log.e(LoginManager.class.getSimpleName(), "temp account creation failed.");
+                            Log.e(LoginManager.class.getSimpleName(), "temp account creation failed. error " + (retrofitError.isNetworkError() ? "is a network error" : retrofitError.getMessage()));
                         }
                         Log.v(LocaleActivity.class.getSimpleName(), "try #" + counter++);
                         try {
