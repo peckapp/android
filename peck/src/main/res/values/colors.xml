@@ -3,5 +3,6 @@
     <color name="main_purple">#AA66CC</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="backgr_gray">#E0E0E0</color>
 
 </resources>

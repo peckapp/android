@@ -1,25 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:layout_marginBottom="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/backgr_gray">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:src="@drawable/ic_peck"
-        android:id="@+id/iv_event"
-        android:scaleType="centerCrop"
-        android:layout_height="0dp"
-        android:layout_weight="4"/>
+    <LinearLayout
+        android:background="@drawable/black"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="330dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:padding="8dp">
+        <ImageView
+            android:layout_width="match_parent"
+            android:src="@drawable/ic_peck"
+            android:id="@+id/iv_event"
+            android:scaleType="centerCrop"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:textSize="18sp"
-        android:id="@+id/tv_title"
-        android:singleLine="true" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:layout_weight="1">
 
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <com.makeramen.RoundedImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    app:oval="true"
+                    style="@style/riv_default"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:padding="8dp"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:id="@+id/tv_title"
+                    android:singleLine="true"
+                    android:layout_marginTop="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_text"
+                    android:password="false"
+                    android:layout_marginTop="12dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
 
 </LinearLayout>
