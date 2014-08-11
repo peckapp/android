@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.makeramen.RoundedImageView;
+import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
@@ -72,23 +74,39 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class FeedActivity extends PeckActivity {
+
+/**
+ *
+ * The main activity for the app.
+ *
+ */
+public class FeedActivity extends FragmentActivity {
 
     private final static String TAG = "FeedActivity";
 
     private TimeZone tz = Calendar.getInstance().getTimeZone();
+
+    //traveling search view
     private View tView;
+
+    //traveling, floating spinner view
     private View tFloating;
+
+    //we use this to get access to the circles feed in its own builder
     private Feed tFeed = null;
+
+    //the circlefeed's current add position
     private int currentCircleAddPos = -1;
 
-
+    //hashmap of button resource ids to feeds
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
 
     @Nullable
+    //we keep the last pressed button so we know whether to cancel or open
     private Button lastPressed;
 
     {
+        //set up the circle member search view
         tView = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.frag_search, null, false);
         tView.setId(R.id.ll_roaming);
         ((EditText) tView.findViewById(R.id.et_search)).addTextChangedListener(new TextWatcher() {
@@ -108,9 +126,11 @@ public class FeedActivity extends PeckActivity {
             }
         });
 
+        //add the simple tabs
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
 
+        //add the explore feed
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
                 .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.iv_event})
                 .withProjection(new String[]{ Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID })
@@ -149,7 +169,11 @@ public class FeedActivity extends PeckActivity {
         buttons.put(R.id.bt_explore, feed);
 
         final LayoutInflater inflater = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE));
+
+        //inflate the header for the circles feed
         View header = inflater.inflate(R.layout.circles_header, null, false);
+
+        //with circle-adding functionality
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -220,6 +244,8 @@ public class FeedActivity extends PeckActivity {
             }
         });
 
+
+        //use the instance tFeed field so we can access it in the builder. *do not* reassign this field.
         tFeed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
                 .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME},
                         new int[]{R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm})
@@ -233,6 +259,7 @@ public class FeedActivity extends PeckActivity {
                 .withRecycleRunnable(new Feed.RecycleRunnable() {
                     @Override
                     public void run() {
+                        //set/clear the search view as necessary
                         View mView = tFeed.getView();
                         if (mView != null && recycledView != null && recycledView.isFocusable() && ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
                             ((LinearLayout)recycledView).addView(tView);
@@ -355,7 +382,8 @@ public class FeedActivity extends PeckActivity {
 
         buttons.put(R.id.bt_circles, tFeed);
 
-        feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class),R.layout.lvitem_peck)
+        //set up the peck feed
+        feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class), R.layout.lvitem_peck)
                 .withBindings(new String[] {Peck.TEXT, Peck.INVITED_BY}, new int[] { R.id.tv_title, R.id.iv_def } )
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                                     @Override
@@ -410,8 +438,10 @@ public class FeedActivity extends PeckActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_root);
 
-        Picasso.with(this).setIndicatorsEnabled(true);
+        //add red/yellow/green indicators to picasso for debugging (red is loaded over network, yellow is loaded from disk, green is loaded from memory)
+        if (BuildConfig.DEBUG) Picasso.with(this).setIndicatorsEnabled(true);
 
+        //associate feeds with buttons
         for (final int i : buttons.keySet()) {
             final String tag = "btn " + i;
             FragmentSwitcherListener fragmentSwitcherListener = new FragmentSwitcherListener(getSupportFragmentManager(), buttons.get(i), tag, R.id.ll_feed_content){
@@ -429,6 +459,7 @@ public class FeedActivity extends PeckActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
+        //build the event feed
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event})
                 .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
@@ -526,14 +557,18 @@ public class FeedActivity extends PeckActivity {
     protected void onResume() {
         super.onResume();
 
+        //make sure google play services are enabled
         GcmRegistrar.checkPlayServices(this);
 
+        //check the active account and make sure it's valid
         Account account = LoginManager.getActive();
         if (account == null || !LoginManager.isValid(account)) {
+            //if it's not, open a locale selection activity, which will create a new account
             Intent intent = new Intent(FeedActivity.this, LocaleActivity.class);
             startActivity(intent);
             finish();
         } else {
+            //fixme: we can't have periodic syncs being added here. doesn't make sense.
             ContentResolver.addPeriodicSync(account, PeckApp.AUTHORITY, new Bundle(), PeckApp.Constants.Network.POLL_FREQUENCY);
             Bundle bundle = new Bundle();
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -557,7 +592,8 @@ public class FeedActivity extends PeckActivity {
     }
 
     /**
-     * an attempt to make a thread-safe adapter for a spinner
+     * an attempt to make a thread-safe adapter for a spinner.
+     * built for search view.
      */
     private class SearchSpinnerAdapter extends BaseAdapter {
         private Handler handler = new Handler(Looper.getMainLooper());

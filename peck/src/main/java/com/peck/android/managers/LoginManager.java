@@ -31,6 +31,8 @@ import retrofit.RetrofitError;
 
 /**
  * Created by mammothbane on 7/29/2014.
+ *
+ * class that handles all login/logout operations. most methods are synchronized to this class and are blocking.
  */
 public class LoginManager {
     private static AccountManager accountManager = AccountManager.get(PeckApp.getContext());
@@ -137,6 +139,19 @@ public class LoginManager {
 
     }
 
+    /**
+     * blocking method to create a new account with the specified parameters.
+     *
+     * @param email user's email
+     * @param password user's password
+     * @param firstName user's first name
+     * @param lastName user's last name
+     * @return true if successful, false if not
+     * @throws InvalidEmailException
+     * @throws InvalidPasswordException
+     * @throws AccountAlreadyExistsException
+     * @throws OperationCanceledException
+     */
     public static synchronized boolean create(String email, String password, String firstName, String lastName)
             throws InvalidEmailException, InvalidPasswordException, AccountAlreadyExistsException, OperationCanceledException {
 
@@ -388,6 +403,11 @@ public class LoginManager {
         setActiveAccount(getAccounts().get(name));
     }
 
+    /**
+     * set the active account in sharedprefs. cancels any old syncs and initates a new one for the newly active account.
+     * @param account the account to activate
+     * @throws InvalidAccountException
+     */
     private static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
         Account active = getActive();
         if (account == null) {
@@ -397,6 +417,7 @@ public class LoginManager {
             if (getTemp() == null) new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... voids) {
+                    //todo: fix this. we loop until we create an account, even though there might not be network access. we also don't need a temp account anymore
                     while (!createTemp()) {}
                     return null;
                 }
@@ -416,6 +437,12 @@ public class LoginManager {
         }
     }
 
+    /**
+     * send server current UDID. server hands back last active account on the device, if there was any, a new account if not.
+     *
+     * @return true if successful, false if not
+     * @throws RetrofitError
+     */
     public static synchronized boolean createUserWithUdid() throws RetrofitError {
         Account tmp;
 
@@ -464,6 +491,7 @@ public class LoginManager {
 
     /**
      * blocking method to create a temporary account with the server and add to accounts stored on device.
+     * should *only* be used if the user requests a new account.
      * @return true if created, false if not
      */
     public static synchronized boolean createTemp() throws RetrofitError {
@@ -488,21 +516,41 @@ public class LoginManager {
 
     }
 
+    /**
+     * @return get the current temp account. may return null.
+     * @deprecated we're no longer using the temp pattern in the same way. should figure out how to drop it.
+     */
+    @Nullable
+    @Deprecated
     public static synchronized Account getTemp() {
         return getAccounts().get(PeckAccountAuthenticator.TEMP_NAME);
     }
 
     @Nullable
+    /**
+     * retrieve the current locale
+     */
     public static synchronized String getLocale() {
         return PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getString(PeckApp.Constants.Preferences.LOCALE_ID, null);
     }
 
+    /**
+     * set the current locale for the logged-in account and through shared preferences.
+     * todo: needs a rework. we shouldn't be setting both at the same time
+     * @param name the name of the account to set the locale for
+     * @param id the locale id to set.
+     */
     public static synchronized void setLocale(String name, long id) {
         accountManager.setUserData(getAccounts().get(name), PeckAccountAuthenticator.INSTITUTION, Long.toString(id));
         PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit().putString(PeckApp.Constants.Preferences.LOCALE_ID, Long.toString(id)).apply();
     }
 
 
+    /**
+     * log the current status of the account in question
+     *
+     * @param account the account to log
+     */
     public static void logAccount(@Nullable Account account) {
         if (account == null) {
             Log.d("Account Log", "Account is null");

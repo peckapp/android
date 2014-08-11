@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +38,7 @@ import com.peck.android.network.PeckSyncAdapter;
 import retrofit.RetrofitError;
 
 
-public class LocaleActivity extends PeckActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+public class LocaleActivity extends FragmentActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
     private Location location;
     private static final String fragmentTag = "locale selection feed";
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;

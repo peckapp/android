@@ -15,6 +15,10 @@ import com.peck.android.managers.LoginManager;
 
 import java.io.IOException;
 
+/**
+ * activity used to login to peck. hands back account authenticated in return intent/bundle.
+ *
+ */
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
