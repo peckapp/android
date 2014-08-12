@@ -1,1 +1,6 @@
+/*
+ * Copyright (c) 2014 Peck LLC.
+ * All rights reserved.
+ */
+
 include ':peck'

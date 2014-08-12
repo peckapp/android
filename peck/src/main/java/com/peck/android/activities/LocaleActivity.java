@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 Peck LLC.
+ * All rights reserved.
+ */
+
 package com.peck.android.activities;
 
 import android.app.AlertDialog;
@@ -146,6 +151,11 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
     }
 
 
+    /**
+     * initiate load into locale selection feed
+     *
+     * @since 1.0
+     */
     private void loadLocales() {
 
         synchronized (this) {

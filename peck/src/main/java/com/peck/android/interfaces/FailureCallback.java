@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 Peck LLC.
+ * All rights reserved.
+ */
+
 package com.peck.android.interfaces;
 
 import android.os.Handler;

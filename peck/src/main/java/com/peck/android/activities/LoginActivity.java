@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 Peck LLC.
+ * All rights reserved.
+ */
+
 package com.peck.android.activities;
 
 import android.accounts.AccountAuthenticatorActivity;

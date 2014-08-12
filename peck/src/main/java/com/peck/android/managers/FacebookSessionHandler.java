@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 Peck LLC.
+ * All rights reserved.
+ */
+
 package com.peck.android.managers;
 
 import android.os.AsyncTask;
