@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -115,12 +116,19 @@ public class FeedActivity extends FragmentActivity {
     private Button lastPressed;
 
     {
-
         //set up the circle member search view
-        tView = new AutoCompleteTextView(PeckApp.getContext());
-        tView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        tView = new AutoCompleteTextView(PeckApp.getContext()) {
+
+
+        };
+
+        ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(16, 16, 16, 16);
+        tView.setLayoutParams(params);
         tView.setTextColor(PeckApp.getContext().getResources().getColor(android.R.color.primary_text_light_nodisable));
         tView.setBackgroundColor(PeckApp.getContext().getResources().getColor(R.color.white));
+        tView.setDropDownBackgroundDrawable(new ColorDrawable(R.color.white));
+        tView.setDropDownVerticalOffset(8);
         final SimpleCursorAdapter adapter = new SimpleCursorAdapter(PeckApp.getContext(), R.layout.frag_search, null, new String[] { User.FIRST_NAME }, new int[] {R.id.tv_title}, 0);
         tView.setAdapter(adapter);
         //return the first 10 results
@@ -161,7 +169,7 @@ public class FeedActivity extends FragmentActivity {
                         object.addProperty(CircleMember.USER_ID, l);
                         object.addProperty(CircleMember.INVITED_BY, AccountManager.get(FeedActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                         if (currentCircleAddPos < 0)
-                            throw new IllegalArgumentException("*must* set currentcircle before calling this method");
+                            throw new IllegalArgumentException("must set currentcircle before calling this method");
                         try {
                             ServerCommunicator.jsonService.post("circle_members", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle_member", object)), JsonUtils.auth(LoginManager.getActive()), new Callback<JsonObject>() {
                                 @Override
@@ -680,12 +688,17 @@ public class FeedActivity extends FragmentActivity {
                                                                         //tView.requestFocus();
                                                                         View feedView = tFeed.getView();
                                                                         if (feedView != null) {
-                                                                            ListView listView = ((ListView) feedView.findViewById(tFeed.getListViewRes()));
-                                                                            int lvPos = listView.getPositionForView(tView);
+                                                                            final ListView listView = ((ListView) feedView.findViewById(tFeed.getListViewRes()));
+                                                                            final int lvPos = listView.getPositionForView(tView);
                                                                             currentCircleAddPos = lvPos;
-                                                                            int pos = lvPos - listView.getFirstVisiblePosition();
-                                                                            int offset = listView.getChildAt(pos).getMeasuredHeight() - tView.getMeasuredHeight();
-                                                                            listView.smoothScrollToPositionFromTop(lvPos, -offset);
+                                                                            listView.post(new Runnable() { //we post the movement as a runnable so the cell gets resized before it happens
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    final int pos = lvPos - listView.getFirstVisiblePosition();
+                                                                                    final int offset = listView.getChildAt(pos).getMeasuredHeight() - tView.getMeasuredHeight();
+                                                                                    listView.smoothScrollToPositionFromTop(lvPos, -offset);
+                                                                                }
+                                                                            });
                                                                             currentCircleId = listView.getAdapter().getItemId(currentCircleAddPos);
                                                                             new AsyncTask<Void, Void, Void>() {
                                                                                 @Override
