@@ -251,7 +251,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
      * initializes the {@link android.support.v4.content.CursorLoader}
      * @param adapterView the view to bind to
      */
-    public void bindToAdapterView(ListView adapterView) {
+    public void bindToAdapterView(AdapterView adapterView) {
         mAdapter = new SimpleCursorAdapter(getActivity(), listItemRes, null, (binds_from == null) ? new String[] {} : binds_from, (binds_to == null) ? new int[] {} : binds_to, 0) {
             public boolean wasEmpty = false;
             @Override
@@ -357,12 +357,14 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
-        ListView lv = ((ListView) view.findViewById(listViewRes));
-        for (View header : headers) lv.addHeaderView(header);
-        for (View footer : footers) lv.addFooterView(footer);
-        if (!dividers) {
-            lv.setDividerHeight(0);
-            lv.setDivider(null);
+        AdapterView lv = ((AdapterView) view.findViewById(listViewRes));
+        if (lv instanceof ListView) {
+            for (View header : headers) ((ListView) lv).addHeaderView(header);
+            for (View footer : footers) ((ListView) lv).addFooterView(footer);
+            if (!dividers) {
+                ((ListView) lv).setDividerHeight(0);
+                ((ListView) lv).setDivider(null);
+            }
         }
 
         bindToAdapterView(lv);
