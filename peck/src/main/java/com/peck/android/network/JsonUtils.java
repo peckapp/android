@@ -30,7 +30,8 @@ import java.util.Map;
  *
  * prepares model objects for insertion into the database
  * and restores them from database query cursors.
- *
+ * @since 1.0
+ * @author mammothbane
  */
 
 
@@ -70,6 +71,12 @@ public class JsonUtils {
         return ret;
     }
 
+    /**
+     * converts the current row of the given cursor to json
+     * @param cursor the cursor to convert
+     * @return a jsonobject with fields corresponding to the cursor's columns
+     * @since 1.0
+     */
     public static JsonObject cursorToJson(Cursor cursor) {
         JsonObject object = new JsonObject();
         for (int i = 0; i < cursor.getColumnCount(); i++) {
@@ -95,6 +102,13 @@ public class JsonUtils {
         return object;
     }
 
+    /**
+     * wrap a {@link com.google.gson.JsonObject} with another
+     * @param objHeader the name of the wrapping object
+     * @param object the object to wrap
+     * @return the wrapped object
+     * @since 1.0
+     */
     public static JsonObject wrapJson(String objHeader, JsonObject object) {
         JsonObject ret = new JsonObject();
         ret.add(objHeader, object);
@@ -105,7 +119,8 @@ public class JsonUtils {
      * blocking method to build authentication parameters
      *
      * @param account the authenticating account
-     * @return the authentication map
+     * @return an authentication map, consisting of api key, institution, userid, and authtoken (if it exists)
+     * @since 1.0
      */
     public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
         return auth(account, true);
