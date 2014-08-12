@@ -93,13 +93,13 @@ public class InternalContentProvider extends ContentProvider {
             String projStr = "";
 
             for (String s : projection) {
-                projStr += "us." + s + ",";
+                projStr += "us." + s + ", ";
             }
-            projStr += " cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm." + CircleMember.UPDATED_AT +
+            projStr += "cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm." + CircleMember.UPDATED_AT +
                     " from " + DBUtils.getTableName(User.class) + " as us, " + DBUtils.getTableName(CircleMember.class) + " as cm";
 
             query += projStr + " on cm." + CircleMember.USER_ID + " = us." + User.SV_ID + (selection == null ? "" : " where" + selection) + " except select " + projStr + " on cm." + CircleMember.USER_ID
-                    + " = us." + User.SV_ID + " where cm." + CircleMember.CIRCLE_ID + " = ? order by " + ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : sortOrder);
+                    + " = us." + User.SV_ID + " where cm." + CircleMember.CIRCLE_ID + " = ? order by " + ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : "us." + sortOrder);
 
 
             cursor = DatabaseManager.openDB().rawQuery(query, ArrayUtils.addAll(selectionArgs, circle_id));

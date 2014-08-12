@@ -646,7 +646,7 @@ public class FeedActivity extends FragmentActivity {
                                             @Override
                                             protected Void doInBackground(Void... voids) {
                                                 Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
-                                                        new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID}, null, null, null);
+                                                        new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID}, null, null, null);
 
                                                 ret = new ArrayList<Map<String, Object>>();
 
