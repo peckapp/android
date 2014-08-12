@@ -10,6 +10,7 @@ import java.io.Serializable;
  * Created by mammothbane on 5/28/2014.
  *
  * base model. strategy is as follows: define public static final transient {@link java.lang.String}s matching serverside field names.
+ * transience is to ensure that fields don't get serialized.
  * add fields with any level of security (though my convention has been private) and annotate them with {@link com.google.gson.annotations.SerializedName}.
  * if received from the server, field needs to be annotated {@link com.google.gson.annotations.Expose}.
  * if not a String value, field needs to be annotated {@link com.peck.android.annotations.DBType} with the appropriate SQLite3 type.
