@@ -15,6 +15,7 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,17 +24,17 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -58,6 +59,7 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
+import com.peck.android.models.joins.CircleMember;
 import com.peck.android.network.JsonUtils;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.network.ServerCommunicator;
@@ -73,6 +75,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import it.sephiroth.android.library.widget.HListView;
 import retrofit.Callback;
@@ -92,16 +95,16 @@ public class FeedActivity extends FragmentActivity {
     private TimeZone tz = Calendar.getInstance().getTimeZone();
 
     //traveling search view
-    private View tView;
-
-    //traveling, floating spinner view
-    private View tFloating;
+    private AutoCompleteTextView tView;
 
     //we use this to get access to the circles feed in its own builder
     private Feed tFeed = null;
 
     //the circlefeed's current add position
     private int currentCircleAddPos = -1;
+
+    //the current circle
+    private long currentCircleId = -1;
 
     //hashmap of button resource ids to feeds
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
@@ -111,23 +114,79 @@ public class FeedActivity extends FragmentActivity {
     private Button lastPressed;
 
     {
+
         //set up the circle member search view
-        tView = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.frag_search, null, false);
-        tView.setId(R.id.ll_roaming);
-        ((EditText) tView.findViewById(R.id.et_search)).addTextChangedListener(new TextWatcher() {
+        tView = new AutoCompleteTextView(PeckApp.getContext());
+        tView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        tView.setTextColor(PeckApp.getContext().getResources().getColor(android.R.color.primary_text_light_nodisable));
+        final SimpleCursorAdapter adapter = new SimpleCursorAdapter(PeckApp.getContext(), R.layout.frag_search, null, new String[] { User.SV_ID }, new int[] {R.id.tv_title}, 0);
+        tView.setAdapter(adapter);
+        //return the first 10 results
+        FilterQueryProvider queryProvider = new FilterQueryProvider() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
+            public Cursor runQuery(CharSequence charSequence) {
+                Cursor src = adapter.getCursor();
+                if (src == null || src.getCount() == 0 || charSequence == null || charSequence.length() == 0) return src;
+                MatrixCursor cursor = new MatrixCursor(new String[]{User.SV_ID, User.FIRST_NAME});
+                String regex = "";
+                for (char cha : charSequence.toString().toCharArray()) {
+                    regex += cha;
+                    regex += "[a-zA-Z]*";
+                }
+                Pattern pattern = Pattern.compile(regex);
+                while (src.moveToNext() && cursor.getCount() < 10) {
+                    if (pattern.matcher(src.getString(src.getColumnIndex(User.FIRST_NAME))).matches()) cursor.addRow(
+                            new Object[] { src.getLong(src.getColumnIndex(User.SV_ID)), src.getString(src.getColumnIndex(User.FIRST_NAME)) });
+                }
+                return src;
             }
+        };
 
+        adapter.setFilterQueryProvider(queryProvider);
+
+        tView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-                Log.d(FeedActivity.class.getSimpleName(), "text changed.");
-            }
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, final long l) {
 
-            @Override
-            public void afterTextChanged(Editable editable) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        tView.setText("");
+                        JsonObject object = new JsonObject();
+                        object.addProperty(CircleMember.LOCALE, LoginManager.getLocale());
+                        object.addProperty(CircleMember.CIRCLE_ID, currentCircleId);
+                        object.addProperty(CircleMember.USER_ID, l);
+                        if (currentCircleAddPos < 0)
+                            throw new IllegalArgumentException("*must* set currentcircle immediately.");
 
+                        try {
+                            ServerCommunicator.jsonService.post("circle_members", new ServerCommunicator.TypedJsonBody(object), JsonUtils.auth(LoginManager.getActive()), new Callback<JsonObject>() {
+                                @Override
+                                public void success(JsonObject jsonObject, Response response) {
+                                    DBUtils.syncJson(DBUtils.buildLocalUri(CircleMember.class), jsonObject.getAsJsonObject("circle_member"), CircleMember.class);
+                                    Log.d(FeedActivity.class.getSimpleName(), "success adding user " + jsonObject.getAsJsonObject("circle_member").get(CircleMember.USER_ID).getAsLong());
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    Log.e(FeedActivity.class.getSimpleName(), "failure adding circle member");
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (OperationCanceledException e) {
+                            e.printStackTrace();
+                        } catch (AuthenticatorException e) {
+                            e.printStackTrace();
+                        } catch (LoginManager.InvalidAccountException e) {
+                            e.printStackTrace();
+                        } catch (NetworkErrorException e) {
+                            e.printStackTrace();
+                        }
+
+                        return null;
+                    }
+                }.execute();
             }
         });
 
@@ -514,9 +573,8 @@ public class FeedActivity extends FragmentActivity {
                         //set/clear the search view as necessary
                         View mView = tFeed.getView();
                         if (mView != null && recycledView != null && recycledView.isFocusable() && ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
-                            ((LinearLayout)recycledView).addView(tView);
-                        }
-                        else if (recycledView != null && recycledView.findViewById(R.id.ll_roaming) != null)
+                            ((LinearLayout) recycledView).addView(tView);
+                        } else if (recycledView != null && recycledView.findViewById(R.id.ll_roaming) != null)
                             ((LinearLayout) recycledView).removeView(recycledView.findViewById(R.id.ll_roaming));
                     }
                 })
@@ -525,7 +583,8 @@ public class FeedActivity extends FragmentActivity {
                             final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
 
                             @Override
-                            public boolean setViewValue(final View view, final Cursor cursor, int i) {
+                            public boolean setViewValue(final View view, final Cursor cursor,
+                                    int i) {
                                 switch (view.getId()) {
                                     case R.id.hlv_users:
                                         final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
@@ -550,7 +609,8 @@ public class FeedActivity extends FragmentActivity {
                                                 ((HListView) view).setAdapter(simpleAdapter);
                                                 simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                                                     @Override
-                                                    public boolean setViewValue(View view, Object o, String s) {
+                                                    public boolean setViewValue(View view, Object o,
+                                                            String s) {
                                                         switch (view.getId()) {
                                                             case R.id.iv_event:
                                                                 if (o != null && o.toString().length() > 0) {
@@ -603,9 +663,13 @@ public class FeedActivity extends FragmentActivity {
                                                                             if (parent.equals(view.getParent().getParent()))
                                                                                 return;
                                                                         }
-                                                                        ((EditText) tView.findViewById(R.id.et_search)).setText("");
+
+                                                                        tView.clearListSelection();
+                                                                        ((SimpleCursorAdapter) tView.getAdapter()).changeCursor(null);
+                                                                        tView.setText("");
+
                                                                         ((LinearLayout) view.getParent().getParent()).addView(tView);
-                                                                        tView.findViewById(R.id.et_search).requestFocus();
+                                                                        //tView.requestFocus();
                                                                         View feedView = tFeed.getView();
                                                                         if (feedView != null) {
                                                                             ListView listView = ((ListView) feedView.findViewById(tFeed.getListViewRes()));
@@ -614,9 +678,22 @@ public class FeedActivity extends FragmentActivity {
                                                                             int pos = lvPos - listView.getFirstVisiblePosition();
                                                                             int offset = listView.getChildAt(pos).getMeasuredHeight() - tView.getMeasuredHeight();
                                                                             listView.smoothScrollToPositionFromTop(lvPos, -offset);
+                                                                            currentCircleId = listView.getAdapter().getItemId(currentCircleAddPos);
+                                                                            new AsyncTask<Void, Void, Void>() {
+                                                                                @Override
+                                                                                protected Void doInBackground(
+                                                                                        Void... voids) {
+                                                                                    ((SimpleCursorAdapter) tView.getAdapter()).changeCursor(FeedActivity.this.getContentResolver().query(DBUtils.buildLocalUri(Circle.class)
+                                                                                            .buildUpon().appendPath(Long.toString(currentCircleId)).appendPath("nonmembers").build(),
+                                                                                            new String[]{ User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.IMAGE_NAME, User.THUMBNAIL}, null, null, User.FIRST_NAME ));
+                                                                                    return null;
+                                                                                }
+                                                                            }.execute();
                                                                         } else {
                                                                             throw new IllegalStateException("onclick was called when fragment was unavailable.");
                                                                         }
+
+
 
                                                                         Log.d(FeedActivity.class.getSimpleName(), "clicked");
                                                                     }

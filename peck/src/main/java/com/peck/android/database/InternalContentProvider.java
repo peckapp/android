@@ -11,6 +11,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -46,6 +47,7 @@ public class InternalContentProvider extends ContentProvider {
             uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(PeckApp.getModelArray()[i]) + "/#", PARTITION + i);      //operate on a model by local id
         }
         uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Circle.class) + "/#/users", 1001);
+        uriMatcher.addURI(AUTHORITY, DBUtils.getTableName(Circle.class) + "/#/nonmembers", 1002);
     }
 
 
@@ -63,7 +65,7 @@ public class InternalContentProvider extends ContentProvider {
     }
 
     @Override
-    public synchronized Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public synchronized Cursor query(Uri uri, String[] projection, String selection, @NonNull String[] selectionArgs, String sortOrder) {
         int uriType = uriMatcher.match(uri);
         Cursor cursor = null;
 
@@ -72,15 +74,31 @@ public class InternalContentProvider extends ContentProvider {
         if (uriType == 1001) {
             String circle_id = uri.getPathSegments().get(1);
             String query = "select ";
+
             for (String s : projection) {
                 query += "us." + s + ",";
             }
             query += "cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm." + CircleMember.UPDATED_AT
-                    +" from " + DBUtils.getTableName(CircleMember.class) +
+                    + " from " + DBUtils.getTableName(CircleMember.class) +
                     " as cm inner join " + DBUtils.getTableName(User.class) + " as us " +
                     "on cm." + CircleMember.USER_ID + " = us." + User.SV_ID +
                     " where " + extendSelection(selection, "cm." + CircleMember.CIRCLE_ID + " = ? ") + "order by " +
-            ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : sortOrder);
+                    ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : sortOrder);
+
+            cursor = DatabaseManager.openDB().rawQuery(query, ArrayUtils.addAll(selectionArgs, circle_id));
+        } else if (uriType == 1002) {
+            String circle_id = uri.getPathSegments().get(1);
+            String query = "select ";
+
+            for (String s : projection) {
+                query += "us." + s + ",";
+            }
+            query += "cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm." + CircleMember.UPDATED_AT
+                    + " from " + DBUtils.getTableName(CircleMember.class) +
+                    " as cm inner join " + DBUtils.getTableName(User.class) + " as us " +
+                    "on cm." + CircleMember.USER_ID + " = us." + User.SV_ID +
+                    " where " + extendSelection(selection, "cm." + CircleMember.CIRCLE_ID + " <> ? ") + "order by " +
+                    ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : sortOrder);
 
             cursor = DatabaseManager.openDB().rawQuery(query, ArrayUtils.addAll(selectionArgs, circle_id));
 
