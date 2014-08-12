@@ -32,7 +32,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -174,12 +173,22 @@ public class FeedActivity extends FragmentActivity {
                                 return true;
                             case R.id.rl_image:
                                 String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                final View ninePatch = ((ViewGroup) view.getParent().getParent()).findViewById(R.id.iv_9patch);
                                 if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
                                     view.setVisibility(View.GONE);
-                                    View ninePatch = ((RelativeLayout) view.getParent().getParent()).findViewById(R.id.ll_main);
-                                    ninePatch.setBackgroundResource(0);
-                                    ninePatch.setBackgroundResource(R.drawable.black);
-                                } else view.setVisibility(View.VISIBLE);
+                                } else {
+                                    view.setVisibility(View.VISIBLE);
+                                }
+                                ninePatch.setBackgroundResource(0);
+                                ninePatch.setVisibility(View.GONE);
+                                ninePatch.postInvalidate();
+                                ninePatch.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ninePatch.setBackgroundResource(R.drawable.black);
+                                        ninePatch.setVisibility(View.VISIBLE);
+                                    }
+                                });
                                 return true;
                             case R.id.riv_user:
                                 if (user_id > 0)
