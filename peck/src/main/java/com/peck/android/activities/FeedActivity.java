@@ -42,6 +42,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.makeramen.RoundedImageView;
 import com.peck.android.BuildConfig;
@@ -119,7 +120,8 @@ public class FeedActivity extends FragmentActivity {
         tView = new AutoCompleteTextView(PeckApp.getContext());
         tView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         tView.setTextColor(PeckApp.getContext().getResources().getColor(android.R.color.primary_text_light_nodisable));
-        final SimpleCursorAdapter adapter = new SimpleCursorAdapter(PeckApp.getContext(), R.layout.frag_search, null, new String[] { User.SV_ID }, new int[] {R.id.tv_title}, 0);
+        tView.setBackgroundColor(PeckApp.getContext().getResources().getColor(R.color.white));
+        final SimpleCursorAdapter adapter = new SimpleCursorAdapter(PeckApp.getContext(), R.layout.frag_search, null, new String[] { User.FIRST_NAME }, new int[] {R.id.tv_title}, 0);
         tView.setAdapter(adapter);
         //return the first 10 results
         FilterQueryProvider queryProvider = new FilterQueryProvider() {
@@ -135,8 +137,9 @@ public class FeedActivity extends FragmentActivity {
                 }
                 Pattern pattern = Pattern.compile(regex);
                 while (src.moveToNext() && cursor.getCount() < 10) {
-                    if (pattern.matcher(src.getString(src.getColumnIndex(User.FIRST_NAME))).matches()) cursor.addRow(
-                            new Object[] { src.getLong(src.getColumnIndex(User.SV_ID)), src.getString(src.getColumnIndex(User.FIRST_NAME)) });
+                    if (pattern.matcher(src.getString(src.getColumnIndex(User.FIRST_NAME))).matches()) {
+                        cursor.addRow(new Object[]{src.getLong(src.getColumnIndex(User.SV_ID)), src.getString(src.getColumnIndex(User.FIRST_NAME))});
+                    }
                 }
                 return src;
             }
@@ -147,24 +150,29 @@ public class FeedActivity extends FragmentActivity {
         tView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, final long l) {
+                tView.setText("");
 
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        tView.setText("");
                         JsonObject object = new JsonObject();
-                        object.addProperty(CircleMember.LOCALE, LoginManager.getLocale());
+                        object.addProperty(CircleMember.LOCALE, Integer.parseInt(AccountManager.get(FeedActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
                         object.addProperty(CircleMember.CIRCLE_ID, currentCircleId);
                         object.addProperty(CircleMember.USER_ID, l);
+                        object.addProperty(CircleMember.INVITED_BY, AccountManager.get(FeedActivity.this).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID));
                         if (currentCircleAddPos < 0)
-                            throw new IllegalArgumentException("*must* set currentcircle immediately.");
-
+                            throw new IllegalArgumentException("*must* set currentcircle before calling this method");
                         try {
-                            ServerCommunicator.jsonService.post("circle_members", new ServerCommunicator.TypedJsonBody(object), JsonUtils.auth(LoginManager.getActive()), new Callback<JsonObject>() {
+                            ServerCommunicator.jsonService.post("circle_members", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle_member", object)), JsonUtils.auth(LoginManager.getActive()), new Callback<JsonObject>() {
                                 @Override
                                 public void success(JsonObject jsonObject, Response response) {
-                                    DBUtils.syncJson(DBUtils.buildLocalUri(CircleMember.class), jsonObject.getAsJsonObject("circle_member"), CircleMember.class);
-                                    Log.d(FeedActivity.class.getSimpleName(), "success adding user " + jsonObject.getAsJsonObject("circle_member").get(CircleMember.USER_ID).getAsLong());
+                                    JsonArray errors = jsonObject.getAsJsonArray("errors");
+                                    if (errors.size() > 0) {
+                                        Toast.makeText(FeedActivity.this, errors.toString(), Toast.LENGTH_LONG).show();
+                                    } else {
+                                        DBUtils.syncJson(DBUtils.buildLocalUri(CircleMember.class), jsonObject.getAsJsonObject("circle_member"), CircleMember.class);
+                                        Log.d(FeedActivity.class.getSimpleName(), "success adding user " + jsonObject.getAsJsonObject("circle_member").get(CircleMember.USER_ID).getAsLong());
+                                    }
                                 }
 
                                 @Override
@@ -574,8 +582,8 @@ public class FeedActivity extends FragmentActivity {
                         View mView = tFeed.getView();
                         if (mView != null && recycledView != null && recycledView.isFocusable() && ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
                             ((LinearLayout) recycledView).addView(tView);
-                        } else if (recycledView != null && recycledView.findViewById(R.id.ll_roaming) != null)
-                            ((LinearLayout) recycledView).removeView(recycledView.findViewById(R.id.ll_roaming));
+                        } else if (recycledView != null && tView != null)
+                            ((LinearLayout) recycledView).removeView(tView);
                     }
                 })
                 .withViewBinder(
