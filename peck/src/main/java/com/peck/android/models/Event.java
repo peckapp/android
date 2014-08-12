@@ -1,13 +1,9 @@
 package com.peck.android.models;
 
-import android.support.annotation.NonNull;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.UriPath;
-
-import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 7/22/2014.
@@ -25,15 +21,25 @@ public class Event extends DBOperable {
     int type;
 
     /* shared fields */
-    //simple events and announcements
+    /*simple events and announcements*/
     @Expose
     @SerializedName(TITLE)
     String title;
 
-    //simple events and announcements
+
     @Expose
     @SerializedName(IMAGE_URL)
     String imageUrl;
+
+    @Expose
+    @DBType("boolean")
+    @SerializedName(PUBLIC)
+    boolean publc;
+
+    @Expose
+    @DBType("integer")
+    @SerializedName(USER_ID)
+    long userId;
 
 
     /* simple event fields */
@@ -42,9 +48,18 @@ public class Event extends DBOperable {
     public static final transient String TITLE = "title";
     public static final transient String TEXT = "event_description";
     public static final transient String IMAGE_URL = "image";
+    public static final transient String BLURRED_URL = "blurred_image";
     public static final transient String EVENT_URL = "event_url";
-    public static final transient String USER_IDS = "user_ids";
+    public static final transient String USER_ID = "user_id";
     public static final transient String TYPE = "type";
+    public static final transient String PUBLIC = "public";
+    public static final transient String START_TIMESTAMP = "start_ts";
+    public static final transient String END_TIMESTAMP = "end_ts";
+    public static final transient String SR_ID = "scrape_resource_id";
+
+    @Expose
+    @SerializedName(BLURRED_URL)
+    String blurImage;
 
     @Expose
     @DBType("real")
@@ -64,10 +79,11 @@ public class Event extends DBOperable {
     @SerializedName(EVENT_URL)
     String eventUrl;
 
-    @NonNull
     @Expose
-    @SerializedName(USER_IDS)
-    ArrayList<Integer> users = new ArrayList<Integer>();
+    @DBType("integer")
+    @SerializedName(SR_ID)
+    int sRId;
+
 
 
     /* athletic event fields */
@@ -142,7 +158,6 @@ public class Event extends DBOperable {
     double endTime;
 
     /* announcement fields */
-    public static final transient String ANNOUNCEMENT_TITLE = "title";
     public static final transient String ANNOUNCEMENT_TEXT = "announcement_description";
     public static final transient String ANNOUNCEMENT_USER_ID = "user_id";
     public static final transient String ANNOUNCEMENT_DEPARTMENT_ID = "department_id";
@@ -150,7 +165,6 @@ public class Event extends DBOperable {
     public static final transient String ANNOUNCEMENT_CIRCLE_ID = "circle_id";
     public static final transient String ANNOUNCEMENT_PUBLIC = "public";
     public static final transient String ANNOUNCEMENT_COMMENT_COUNT = "comment_count";
-    public static final transient String ANNOUNCEMENT_IMAGE_FILE_NAME = "image_file_name";
     public static final transient String ANNOUNCEMENT_IMAGE_CONTENT_TYPE = "image_content_type";
     public static final transient String ANNOUNCEMENT_IMAGE_FILE_SIZE = "image_file_size";
     public static final transient String ANNOUNCEMENT_IMAGE_UPDATED_AT = "image_updated_at";
@@ -158,11 +172,6 @@ public class Event extends DBOperable {
     @Expose
     @SerializedName(ANNOUNCEMENT_TEXT)
     String announceText;
-
-    @Expose
-    @DBType("integer")
-    @SerializedName(ANNOUNCEMENT_USER_ID)
-    long announceUserId;
 
     @Expose
     @DBType("integer")
@@ -178,11 +187,6 @@ public class Event extends DBOperable {
     @DBType("integer")
     @SerializedName(ANNOUNCEMENT_CIRCLE_ID)
     long announceCircleId;
-
-    @Expose
-    @DBType("boolean")
-    @SerializedName(ANNOUNCEMENT_PUBLIC)
-    boolean announcePublic;
 
     @Expose
     @DBType("integer")

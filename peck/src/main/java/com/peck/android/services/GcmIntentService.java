@@ -17,6 +17,8 @@ import com.peck.android.receivers.GcmBroadcastReceiver;
 
 /**
  * Created by mammothbane on 7/7/2014.
+ *
+ * handles incoming notifications passed by the {@link com.peck.android.receivers.GcmBroadcastReceiver}
  */
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
@@ -35,6 +37,8 @@ public class GcmIntentService extends IntentService {
         // The getMessageType() intent parameter must be the intent you received
         // in your BroadcastReceiver.
         String messageType = gcm.getMessageType(intent);
+        Log.e(GcmIntentService.class.getSimpleName(), "received notification. type: " + messageType + ". extras = " + extras.toString());
+
 
         if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
             /*

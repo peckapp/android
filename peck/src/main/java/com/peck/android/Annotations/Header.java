@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Created by mammothbane on 7/16/2014.
+ * singular/plural for show/index/url paths
  */
 
 @Retention(RetentionPolicy.RUNTIME)

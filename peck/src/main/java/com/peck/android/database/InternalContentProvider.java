@@ -9,21 +9,20 @@ import android.net.Uri;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.peck.android.PeckApp;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.User;
-import com.peck.android.network.JsonUtils;
+import com.peck.android.models.joins.CircleMember;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
 
 /**
  * Created by mammothbane on 7/14/2014.
+ *
+ * the internal {@link android.content.ContentProvider} implementation for peck. should handle all database access in the app.
+ * all methods are synchronized.
+ *
  */
 public class InternalContentProvider extends ContentProvider {
 
@@ -66,19 +65,20 @@ public class InternalContentProvider extends ContentProvider {
         SQLiteDatabase database = DatabaseManager.openDB();
 
         if (uriType == 1001) {
-            Cursor temp = database.query(DBUtils.getTableName(Circle.class), new String[] { DBOperable.LOCAL_ID, Circle.MEMBERS },
-                    DBOperable.LOCAL_ID + " = ?", new String[] { uri.getPathSegments().get(1) }, null, null, null);
-            if (temp.moveToFirst()) {
-                ArrayList<Integer> ints = new Gson().fromJson(JsonUtils.cursorToJson(temp).getAsJsonArray(Circle.MEMBERS), new TypeToken<ArrayList<Integer>>() {
-                }.getType());
-
-                if (ints.size() > 0) {
-                    String s = "(" + StringUtils.join(ints, ",") + ")";
-
-                    cursor = database.query(DBUtils.getTableName(User.class), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ? AND " + DBOperable.SV_ID + (" IN " + s)),
-                            ArrayUtils.addAll(selectionArgs, "0"), null, null, sortOrder);
-                }
+            String circle_id = uri.getPathSegments().get(1);
+            String query = "select ";
+            for (String s : projection) {
+                query += "us." + s + ",";
             }
+            query += "cm." + CircleMember.USER_ID + ", cm." + CircleMember.CIRCLE_ID + ", cm." + CircleMember.LOCAL_ID + ", cm." + CircleMember.UPDATED_AT
+                    +" from " + DBUtils.getTableName(CircleMember.class) +
+                    " as cm inner join " + DBUtils.getTableName(User.class) + " as us " +
+                    "on cm." + CircleMember.USER_ID + " = us." + User.SV_ID +
+                    " where " + extendSelection(selection, "cm." + CircleMember.CIRCLE_ID + " = ? ") + "order by " +
+            ((sortOrder == null) ? "cm." + CircleMember.UPDATED_AT + " desc" : sortOrder);
+
+            cursor = DatabaseManager.openDB().rawQuery(query, ArrayUtils.addAll(selectionArgs, circle_id));
+
         } else if (uriType < PARTITION) {
             cursor = database.query(DBUtils.getTableName(URIs_ALL.get(uriType)), projection, extendSelection(selection, DBOperable.DELETED + " IS NOT ?"), ArrayUtils.add(selectionArgs, "0"), null, null, sortOrder);
         } else if (uriType >= PARTITION) {

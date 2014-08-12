@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by mammothbane on 7/22/2014.
+ * the local uri path for the annotated model path
+ * e.g. "events", "circles", etc.
  */
 
 @Retention(RetentionPolicy.RUNTIME)

@@ -4,12 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.Volley;
-import com.crashlytics.android.Crashlytics;
 import com.peck.android.annotations.Header;
-import com.peck.android.interfaces.Singleton;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Club;
@@ -26,20 +21,27 @@ import com.peck.android.models.joins.CircleMember;
 import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
 
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-
 /**
  * Created by mammothbane on 5/28/2014.
  *
  * the base application, created when the app starts.
  *
  */
-public class PeckApp extends Application implements Singleton{
+public class PeckApp extends Application {
 
+    //the app version
+    public static final double version = 1.0;
+
+    private static Context mContext;
+
+
+    /**
+     * the global application context
+     */
     public static Context getContext() {
-        return AppContext.mContext;
+        return mContext;
     }
+
 
     public static final String AUTHORITY = "com.peck.android.provider.all";
 
@@ -57,29 +59,23 @@ public class PeckApp extends Application implements Singleton{
         return Constants.Network.API_ENDPOINT + header.plural() + "/";
     }
 
-
-    public static class AppContext {
-        private static Context mContext;
-        private AppContext() {}
-        protected static void init(Context context) {
-            mContext = context;
-        }
-    }
-
     public void onCreate() {
 
         //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
-        AppContext.init(this);
-        Crashlytics.start(this);
+        mContext = this;
+        //Crashlytics.start(this);
+        //fixme: newrelic. can't use it at the moment. removal of other libraries while newrelic was installed completely
+        //fixme: broke the app with problems in dalvik, and i could only fix it without a workspace reset (re-cloning the app into a new directory)
+        /* NewRelic.withApplicationToken(
+                "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
+        ).start(this);*/
+
+        System.setProperty("org.joda.time.DateTimeZone.Provider",
+                "com.peck.android.FastDateTimeZoneProvider");
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
             //Picasso.with(getContext()).setLoggingEnabled(true);
-
-            /*SharedPreferences.Editor edit = getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).edit();
-            edit.clear();
-            edit.apply();
-            Log.d("PeckApp", "cleared USER_PREFS SharedPreferences");*/
         }
 
         FacebookSessionHandler.init();
@@ -95,7 +91,7 @@ public class PeckApp extends Application implements Singleton{
             public final static int CONNECT_TIMEOUT = 10000;
             public final static int READ_TIMEOUT = 6000;
 
-            public final static long POLL_FREQUENCY = 1000L*60L;
+            public final static long POLL_FREQUENCY = 60L;
 
             public final static long LOW_PRIORITY_POLL_FREQUENCY = 1000L*60L*5L;
 
@@ -118,30 +114,5 @@ public class PeckApp extends Application implements Singleton{
             public static final String DATABASE_NAME = "peck.db";
         }
 
-        public final static class Location {
-
-            public final static int INTERVAL = 300;
-            public final static int RETRY = 33;
-
-        }
-
-        public final static class Graphics {
-
-            public final static int FILLER = R.drawable.ic_peck;
-            public final static int CACHE_SIZE = 5*1024*1024; //5MB cache maximum
-            public final static int INT_CACHE_SIZE = 50;
-            public final static int PNG_COMPRESSION = 90;
-
-        }
-
-    }
-
-
-    private static RequestQueue requestQueue;
-
-    public static RequestQueue getRequestQueue() {
-        if (requestQueue == null) requestQueue = Volley.newRequestQueue(getContext(),
-                new HttpClientStack(HttpClients.custom().setConnectionManager(new PoolingHttpClientConnectionManager()).build()));
-        return requestQueue;
     }
 }

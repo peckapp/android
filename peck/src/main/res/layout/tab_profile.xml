@@ -25,6 +25,8 @@
                 android:layout_alignTop="@+id/iv_event"
                 android:layout_alignBottom="@+id/iv_event"
                 android:layout_alignRight="@+id/iv_event"
+                android:layout_alignEnd="@+id/iv_event"
+                android:layout_alignStart="@+id/iv_event"
                 android:layout_alignLeft="@+id/iv_event"
                 android:visibility="invisible"/>
 

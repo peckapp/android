@@ -28,6 +28,7 @@
     <string name="tb_newpost">New Post</string>
     <string name="tb_pecks">Pecks</string>
     <string name="newPost">New Post</string>
+    <string name="newCircle">New Circle</string>
 
     <string name="bt_announcement">Announcement</string>
     <string name="bt_photo">Photo</string>
