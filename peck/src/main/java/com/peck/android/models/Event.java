@@ -7,6 +7,12 @@ import com.peck.android.annotations.UriPath;
 
 /**
  * Created by mammothbane on 7/22/2014.
+ *
+ * event model. handles simple events, athletic events, announcements, and dining opportunities because this is how they come down from the server.
+ *
+ * @see com.peck.android.models.DBOperable
+ * @since 1.0
+ * @author mammothbane
  */
 
 @UriPath("events")
@@ -163,7 +169,6 @@ public class Event extends DBOperable {
     public static final transient String ANNOUNCEMENT_DEPARTMENT_ID = "department_id";
     public static final transient String ANNOUNCEMENT_CLUB_ID = "club_id";
     public static final transient String ANNOUNCEMENT_CIRCLE_ID = "circle_id";
-    public static final transient String ANNOUNCEMENT_PUBLIC = "public";
     public static final transient String ANNOUNCEMENT_COMMENT_COUNT = "comment_count";
     public static final transient String ANNOUNCEMENT_IMAGE_CONTENT_TYPE = "image_content_type";
     public static final transient String ANNOUNCEMENT_IMAGE_FILE_SIZE = "image_file_size";
