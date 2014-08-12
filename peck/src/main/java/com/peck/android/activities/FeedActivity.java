@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -132,11 +133,18 @@ public class FeedActivity extends FragmentActivity {
 
         //add the explore feed
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_explore)
-                .withBindings(new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID},
+                .withBindings(
+                        new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID },
                         new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo})
                 .withProjection(new String[]{Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID, Event.USER_ID, Event.TEXT, Event.START_DATE})
                 .withSelection(Event.TYPE + " = ?", new String[]{Integer.toString(Event.SIMPLE_EVENT)})
                 .orderedBy(Event.UPDATED_AT + " desc")
+                .withRecycleRunnable(new Feed.RecycleRunnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                })
                 .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
@@ -168,6 +176,9 @@ public class FeedActivity extends FragmentActivity {
                                 String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                 if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
                                     view.setVisibility(View.GONE);
+                                    View ninePatch = ((RelativeLayout) view.getParent().getParent()).findViewById(R.id.ll_main);
+                                    ninePatch.setBackgroundResource(0);
+                                    ninePatch.setBackgroundResource(R.drawable.black);
                                 } else view.setVisibility(View.VISIBLE);
                                 return true;
                             case R.id.riv_user:
@@ -200,6 +211,10 @@ public class FeedActivity extends FragmentActivity {
                                 String s = cursor.getString(cursor.getColumnIndex(Event.TEXT));
                                 ((TextView) view).setText(s);
                                 return true;
+                            case R.id.tv_title:
+                                String s2 = cursor.getString(cursor.getColumnIndex(Event.TITLE));
+                                ((TextView) view).setText(s2);
+                                return true;
                             case R.id.tv_time:
                                 long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE));
                                 if (l > 0)
@@ -231,8 +246,11 @@ public class FeedActivity extends FragmentActivity {
                                 else ((TextView) view).setText("");
                                 return true;
                             case R.id.rl_photo:
-                                if (user_id > 0) view.setVisibility(View.VISIBLE);
-                                else view.setVisibility(View.GONE);
+                                if (user_id > 0) {
+                                    view.setVisibility(View.VISIBLE);
+                                } else {
+                                    view.setVisibility(View.GONE);
+                                }
                                 return true;
                             default:
                                 return false;

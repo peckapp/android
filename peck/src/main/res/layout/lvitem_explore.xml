@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/backgr_gray">
 
-    <LinearLayout
+
+    <View
+        android:id="@+id/iv_9patch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@drawable/black"
+        android:layout_alignTop="@+id/ll_main"
+        android:layout_alignLeft="@+id/ll_main"
+        android:layout_alignBottom="@+id/ll_main"
+        android:layout_alignRight="@+id/ll_main" />
+
+    <LinearLayout
         android:orientation="vertical" android:layout_width="match_parent"
+        android:id="@+id/ll_main"
         android:layout_height="330dp"
         android:layout_marginRight="8dp"
         android:layout_marginLeft="8dp"
@@ -144,7 +155,7 @@
         <RelativeLayout
             android:background="@color/white"
             android:layout_width="match_parent"
-            android:layout_height="40dp">
+            android:layout_height="48dp">
 
 
             <Button
@@ -157,7 +168,7 @@
                 android:layout_centerVertical="true"
                 android:text="attend"
                 android:layout_marginLeft="40dp"
-                android:textSize="15sp"
+                android:textSize="17sp"
                 android:singleLine="true" />
 
             <LinearLayout
@@ -195,4 +206,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

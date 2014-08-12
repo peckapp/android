@@ -234,6 +234,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
     /**
      * set a runnable to execute on every listview item load. it will have the view passed to it as an argument.
+     * runs after view is generated.
      * @param runnable the runnable
      */
     public void setRunnable(RecycleRunnable runnable) { this.runnable = runnable; }
