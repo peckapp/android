@@ -8,6 +8,15 @@ import java.io.Serializable;
 
 /**
  * Created by mammothbane on 5/28/2014.
+ *
+ * base model. strategy is as follows: define public static final transient {@link java.lang.String}s matching serverside field names.
+ * add fields with any level of security (though my convention has been private) and annotate them with {@link com.google.gson.annotations.SerializedName}.
+ * if received from the server, field needs to be annotated {@link com.google.gson.annotations.Expose}.
+ * if not a String value, field needs to be annotated {@link com.peck.android.annotations.DBType} with the appropriate SQLite3 type.
+ * all models should conform to this pattern and extend this class.
+ *
+ * @author mammothbane
+ * @since 1.0
  */
 public class DBOperable implements Serializable {
 
@@ -20,33 +29,31 @@ public class DBOperable implements Serializable {
 
     @SerializedName(DELETED)
     @DBType("boolean")
-    public boolean pendingDeletion = false;
+    private boolean pendingDeletion = false;
 
     @DBType("integer primary key autoincrement")
     @SerializedName(LOCAL_ID)
-    public long localId;
+    private long localId;
 
     @Expose
     @DBType("integer")
     @SerializedName(SV_ID)
-    public long serverId;
+    private long serverId;
 
 
     @Expose
     @SerializedName(CREATED_AT)
     @DBType("real")
-    public double created;
+    private double created;
 
     @Expose
     @SerializedName(UPDATED_AT)
     @DBType("real")
-    public double updated;
+    private double updated;
 
     @Expose
     @SerializedName(LOCALE)
     @DBType("integer")
-    public long locale;
-
-
+    private long locale;
 
 }

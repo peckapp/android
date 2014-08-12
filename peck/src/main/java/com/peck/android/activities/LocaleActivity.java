@@ -89,9 +89,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
             loadLocales();
 
 
-            /**
-             * wait for location from location client, then build the selection fragment
-             */
+            //wait for location from location client, then build the selection fragment
             new AsyncTask<Void, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Void... voids) {

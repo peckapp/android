@@ -82,16 +82,12 @@ public class LoginManager {
     public synchronized static boolean login(String email, String password) throws OperationCanceledException, InvalidEmailException, InvalidPasswordException, IOException {
         if (!EmailValidator.getInstance().isValid(email)) {
             throw new InvalidEmailException();
-        } else if (password.length() < 4 || password.length() > 20) {
+        } else if (password.length() < 5 || password.length() > 20) {
             throw new InvalidPasswordException();
         }
 
         Account temp;
-        final Account authAccount = getActive();
         HashMap<String, Account> accounts = getAccounts();
-
-        if (authAccount == null) throw new OperationCanceledException("authentication account didn't exist");
-
         if (email.equals(PeckAccountAuthenticator.TEMP_NAME)) throw new InvalidEmailException("Email can't be the same as the temporary account name");
         if (accounts.keySet().contains(email)) {
             temp = accounts.get(email);
@@ -102,6 +98,18 @@ public class LoginManager {
         }
 
         invalidateAuthToken(temp);
+
+        Account authAccount = getActive();
+        if (authAccount == null) {
+            int counter = 0;
+            while (getActive() == null && counter++ < 15) {
+                createTemp();
+                authAccount = getActive();
+            }
+            if (authAccount == null) throw new OperationCanceledException("authentication account couldn't be created");
+        }
+
+
 
         try {
             Map<String, String> map = new HashMap<String, String>();
@@ -168,8 +176,15 @@ public class LoginManager {
         HashMap<String, Account> accounts = getAccounts();
         if (accounts.containsKey(email)) throw new AccountAlreadyExistsException();
 
-        Account authAccount = getTemp();
-        if (authAccount == null) throw new IllegalArgumentException();
+        Account authAccount = getActive();
+        if (authAccount == null) {
+            int counter = 0;
+            while (getActive() == null && counter++ < 15) {
+                createTemp();
+                authAccount = getActive();
+            }
+            if (authAccount == null) throw new OperationCanceledException("authentication account couldn't be created");
+        }
 
         JsonObject object = new JsonObject();
         object.addProperty(User.EMAIL, email);
@@ -305,7 +320,9 @@ public class LoginManager {
     /**
      * clears all data from the temporary account if it isn't the active account
      * sets the account's locale to the currently active locale
+     * @deprecated we shouldn't be relying on temp accounts anymore, in theory
      */
+    @Deprecated
     public static synchronized void clearTemp() {
         Account temp = getTemp();
         if (temp != null && !temp.equals(getActive())) {
@@ -345,6 +362,11 @@ public class LoginManager {
         setActiveAccount((Account)null);
     }
 
+    /**
+     * @return true if there is a temp account registered on the device
+     * @deprecated preferable not to rely on temp accounts. no solution at the moment, but we should try not to rely on these methods.
+     */
+    @Deprecated
     public static synchronized boolean hasTemp() {
         HashMap<String, Account> accounts = getAccounts();
         return (accounts.containsKey(PeckAccountAuthenticator.TEMP_NAME) && accountManager.getUserData(accounts.get(PeckAccountAuthenticator.TEMP_NAME),
@@ -359,7 +381,9 @@ public class LoginManager {
      * @param account the account to check
      * @return true if the account's name is the same as the temp account name defined in {@link com.peck.android.network.PeckAccountAuthenticator},
      * it has a user id, and it has an api key. false otherwise.
+     * @deprecated see {@link #hasTemp()}}
      */
+    @Deprecated
     public static synchronized boolean isValidTemp(Account account) {
         return (account != null && account.name.equals(PeckAccountAuthenticator.TEMP_NAME) &&
                 accountManager.getUserData(account, PeckAccountAuthenticator.API_KEY) != null && accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID) != null);
@@ -371,7 +395,7 @@ public class LoginManager {
      * checks the validity of a given account.
      *
      * @param account the account to check
-     * @return true if the account is registered in the account manager && it has an api key && it has an institution && it has a user id
+     * @return true if the account is registered in the account manager && it has an api key && it has an institution && it has a user id. temp accounts are *not* valid if they haven't chosen an institution.
      */
     public static synchronized boolean isValid(@Nullable Account account) {
         if (account == null) return false;
@@ -389,9 +413,10 @@ public class LoginManager {
     }
 
     /**
-     * method to get the currently active account.
+     * method to get the currently active account. performs no network access; can be called from the main thread.
      * @return the valid account specified when setActive was last called, or the temp account if none is available. null if there is no temp account.
      */
+    @Nullable
     public static synchronized Account getActive() {
         HashMap<String, Account> accounts = getAccounts();
         String active = PeckApp.getContext().getSharedPreferences(PeckApp.Constants.Preferences.USER_PREFS, Context.MODE_PRIVATE).getString(ACTIVE_ACCOUNT, PeckAccountAuthenticator.TEMP_NAME);
@@ -409,7 +434,7 @@ public class LoginManager {
     /**
      * set the active account in sharedprefs. cancels any old syncs and initiates a new one for the newly active account.
      * @param account the account to activate
-     * @throws InvalidAccountException
+     * @throws InvalidAccountException when the account can't be validated (returns false from {@link #isValid(android.accounts.Account)})
      */
     private static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
         Account active = getActive();
@@ -444,7 +469,7 @@ public class LoginManager {
      * send server current UDID. server hands back last active account on the device, if there was any, a new account if not.
      *
      * @return true if successful, false if not
-     * @throws RetrofitError
+     * @throws RetrofitError on network errors
      */
     public static synchronized boolean createUserWithUdid() throws RetrofitError {
         Account tmp;
