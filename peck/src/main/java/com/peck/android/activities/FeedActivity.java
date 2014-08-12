@@ -135,8 +135,10 @@ public class FeedActivity extends FragmentActivity {
                 .withBindings(
                         new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID },
                         new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo})
-                .withProjection(new String[]{Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID, Event.USER_ID, Event.TEXT, Event.START_DATE})
-                .withSelection(Event.TYPE + " = ?", new String[]{Integer.toString(Event.SIMPLE_EVENT)})
+                .withProjection(new String[]{Event.TITLE, Event.TYPE, Event.IMAGE_URL, DBOperable.LOCAL_ID, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.SR_ID,
+                        Event.ANNOUNCEMENT_TEXT, Event.ANNOUNCEMENT_COMMENT_COUNT,
+                        Event.ATHLETIC_OPPONENT, Event.ATHLETIC_DATE_AND_TIME, Event.ATHLETIC_NOTE, Event.ATHLETIC_HOME_SCORE, Event.ATHLETIC_HOME_AWAY, Event.ATHLETIC_AWAY_SCORE, Event.ATHLETIC_LOCATION})
+                .withSelection(Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ?", new String[]{Integer.toString(Event.SIMPLE_EVENT), Integer.toString(Event.ATHLETIC_EVENT), Integer.toString(Event.ANNOUNCEMENT)})
                 .orderedBy(Event.UPDATED_AT + " desc")
                 .withRecycleRunnable(new Feed.RecycleRunnable() {
                     @Override
@@ -148,9 +150,11 @@ public class FeedActivity extends FragmentActivity {
                     @Override
                     public boolean setViewValue(final View view, final Cursor cursor, int i) {
                         final long user_id = cursor.getLong(cursor.getColumnIndex(Event.USER_ID));
-                        switch (view.getId()) {
-                            case R.id.iv_event:
-                                String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                        int type = cursor.getInt(cursor.getColumnIndex(Event.TYPE));
+                        switch (type) {
+                            case Event.SIMPLE_EVENT:
+                                switch (view.getId()) {
+                                    case R.id.iv_event:
                                 /*if (Build.VERSION.SDK_INT >= 17) {
                                     RenderScript renderScript = RenderScript.create(FeedActivity.this);
                                     final Allocation input = Allocation.createFromBitmap(renderScript, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
@@ -163,107 +167,262 @@ public class FeedActivity extends FragmentActivity {
                                     output.copyTo(ret);
                                     ((ImageView) view).setImageBitmap(ret);
                                 }*/
-                                if (url != null && url.length() > 0) {
-                                    Picasso.with(FeedActivity.this)
-                                            .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
-                                            .fit()
-                                            .centerCrop()
-                                            .into(((ImageView) view));
-                                }
-                                return true;
-                            case R.id.rl_image:
-                                String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
-                                final View ninePatch = ((ViewGroup) view.getParent().getParent()).findViewById(R.id.iv_9patch);
-                                if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
-                                    view.setVisibility(View.GONE);
-                                } else {
-                                    view.setVisibility(View.VISIBLE);
-                                }
-                                ninePatch.setBackgroundResource(0);
-                                ninePatch.setVisibility(View.GONE);
-                                ninePatch.postInvalidate();
-                                ninePatch.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ninePatch.setBackgroundResource(R.drawable.black);
-                                        ninePatch.setVisibility(View.VISIBLE);
-                                    }
-                                });
-                                return true;
-                            case R.id.riv_user:
-                                if (user_id > 0)
-                                    new AsyncTask<Void, Void, String>() {
-                                        @Override
-                                        protected String doInBackground(Void... voids) {
-                                            Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
-                                                    User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
-                                            if (c.getCount() == 0) return null;
-                                            c.moveToFirst();
-                                            String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
-                                            c.close();
-                                            return ret;
+                                        String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                        if (url != null && !url.isEmpty()) {
+                                            Picasso.with(FeedActivity.this)
+                                                    .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
+                                                    .fit()
+                                                    .centerCrop()
+                                                    .into(((ImageView) view));
                                         }
-
-                                        @Override
-                                        protected void onPostExecute(String s) {
-                                            if (s != null && !s.isEmpty()) {
-                                                Picasso.with(FeedActivity.this)
-                                                        .load(PeckApp.Constants.Network.BASE_URL + s)
-                                                        .fit()
-                                                        .centerCrop()
-                                                        .into(((ImageView) view));
-                                            }
+                                        return true;
+                                    case R.id.rl_image:
+                                        String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                        if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
+                                            view.setVisibility(View.GONE);
+                                        } else {
+                                            view.setVisibility(View.VISIBLE);
                                         }
-                                    }.execute();
-                                return true;
-                            case R.id.tv_text:
-                                String s = cursor.getString(cursor.getColumnIndex(Event.TEXT));
-                                ((TextView) view).setText(s);
-                                return true;
-                            case R.id.tv_title:
-                                String s2 = cursor.getString(cursor.getColumnIndex(Event.TITLE));
-                                ((TextView) view).setText(s2);
-                                return true;
-                            case R.id.tv_time:
-                                long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE));
-                                if (l > 0)
-                                    ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(tz)).toString("MMM d"));
-                                else ((TextView) view).setText("");
-                                return true;
-                            case R.id.tv_name:
-                                new AsyncTask<Void, Void, String>() {
-                                    @Override
-                                    protected String doInBackground(Void... voids) {
-                                        if (user_id < 1) return "Someone";
-                                        Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
-                                                User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
-                                        if (c.getCount() == 0) return "Someone";
-                                        c.moveToFirst();
-                                        String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
-                                        c.close();
-                                        return ret;
-                                    }
+                                        return true;
+                                    case R.id.riv_user:
+                                        if (user_id > 0)
+                                            new AsyncTask<Void, Void, String>() {
+                                                @Override
+                                                protected String doInBackground(Void... voids) {
+                                                    Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                            User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                    if (c.getCount() == 0) return null;
+                                                    c.moveToFirst();
+                                                    String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                                    c.close();
+                                                    return ret;
+                                                }
 
-                                    @Override
-                                    protected void onPostExecute(String s) {
+                                                @Override
+                                                protected void onPostExecute(String s) {
+                                                    if (s != null && !s.isEmpty()) {
+                                                        Picasso.with(FeedActivity.this)
+                                                                .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                                .fit()
+                                                                .centerCrop()
+                                                                .into(((ImageView) view));
+                                                    }
+                                                }
+                                            }.execute();
+                                        return true;
+                                    case R.id.tv_text:
+                                        String s = cursor.getString(cursor.getColumnIndex(Event.TEXT));
                                         ((TextView) view).setText(s);
-                                    }
-                                }.execute();
-                                return true;
-                            case R.id.tv_action:
-                                if (user_id > 0) ((TextView) view).setText("posted an event");
-                                else ((TextView) view).setText("");
-                                return true;
-                            case R.id.rl_photo:
-                                if (user_id > 0) {
-                                    view.setVisibility(View.VISIBLE);
-                                } else {
-                                    view.setVisibility(View.GONE);
+                                        return true;
+                                    case R.id.tv_title:
+                                        String s2 = cursor.getString(cursor.getColumnIndex(Event.TITLE));
+                                        ((TextView) view).setText(s2);
+                                        return true;
+                                    case R.id.tv_time:
+                                        long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE));
+                                        if (l > 0)
+                                            ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(tz)).toString("MMM d"));
+                                        else ((TextView) view).setText("");
+                                        return true;
+                                    case R.id.tv_name:
+                                        new AsyncTask<Void, Void, String>() {
+                                            @Override
+                                            protected String doInBackground(Void... voids) {
+                                                if (user_id < 1) return "Someone";
+                                                Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
+                                                        User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                if (c.getCount() == 0) return "Someone";
+                                                c.moveToFirst();
+                                                String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
+                                                c.close();
+                                                return ret;
+                                            }
+
+                                            @Override
+                                            protected void onPostExecute(String s) {
+                                                ((TextView) view).setText(s);
+                                            }
+                                        }.execute();
+                                        return true;
+                                    case R.id.tv_action:
+                                        if (user_id > 0 || cursor.getInt(cursor.getColumnIndex(Event.SR_ID)) < 1)
+                                            ((TextView) view).setText("posted an event");
+                                        else ((TextView) view).setText("");
+                                        return true;
+                                    case R.id.rl_photo:
+                                        if (user_id > 0) {
+                                            view.setVisibility(View.VISIBLE);
+                                        } else {
+                                            view.setVisibility(View.GONE);
+                                        }
+                                        return true;
+                                    default:
+                                        return false;
                                 }
-                                return true;
+                            case Event.ANNOUNCEMENT:
+                                switch (view.getId()) {
+                                    case R.id.rl_photo:
+                                        if (user_id > 0) {
+                                            view.setVisibility(View.VISIBLE);
+                                        } else {
+                                            view.setVisibility(View.GONE);
+                                        }
+                                        return true;
+                                    case R.id.tv_title:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
+                                        return true;
+                                    case R.id.tv_text:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TEXT)));
+                                        return true;
+                                    case R.id.tv_name:
+                                        new AsyncTask<Void, Void, String>() {
+                                            @Override
+                                            protected String doInBackground(Void... voids) {
+                                                if (user_id < 1) return "Someone";
+                                                Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
+                                                        User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                if (c.getCount() == 0) return "Someone";
+                                                c.moveToFirst();
+                                                String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
+                                                c.close();
+                                                return ret;
+                                            }
+
+                                            @Override
+                                            protected void onPostExecute(String s) {
+                                                ((TextView) view).setText(s);
+                                            }
+                                        }.execute();
+                                        return true;
+                                    case R.id.tv_action:
+                                        ((TextView) view).setText("made an announcement");
+                                        return true;
+                                    case R.id.riv_user:
+                                        if (user_id > 0)
+                                            new AsyncTask<Void, Void, String>() {
+                                                @Override
+                                                protected String doInBackground(Void... voids) {
+                                                    Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                            User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                    if (c.getCount() == 0) return null;
+                                                    c.moveToFirst();
+                                                    String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                                    c.close();
+                                                    return ret;
+                                                }
+
+                                                @Override
+                                                protected void onPostExecute(String s) {
+                                                    if (s != null && !s.isEmpty()) {
+                                                        Picasso.with(FeedActivity.this)
+                                                                .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                                .fit()
+                                                                .centerCrop()
+                                                                .into(((ImageView) view));
+                                                    }
+                                                }
+                                            }.execute();
+                                        return true;
+
+                                    case R.id.rl_image:
+                                        String nUrl = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                        if (nUrl == null || nUrl.isEmpty() || nUrl.equals("/images/missing.png")) {
+                                            view.setVisibility(View.GONE);
+                                        } else {
+                                            view.setVisibility(View.VISIBLE);
+                                        }
+                                        return true;
+
+                                    case R.id.iv_event:
+                                        String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                        if (url != null && !url.isEmpty()) {
+                                            Picasso.with(FeedActivity.this)
+                                                    .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
+                                                    .fit()
+                                                    .centerCrop()
+                                                    .into(((ImageView) view));
+                                        }
+                                        return true;
+                                    default:
+                                        return false;
+
+                                }
+                            case Event.ATHLETIC_EVENT:
+                                switch (view.getId()) {
+                                    case R.id.rl_photo:
+                                        view.setVisibility(View.GONE);
+                                        return true;
+                                    case R.id.tv_title:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
+                                        return true;
+                                    case R.id.tv_text:
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
+                                        return true;
+                                    case R.id.tv_name:
+                                        new AsyncTask<Void, Void, String>() {
+                                            @Override
+                                            protected String doInBackground(Void... voids) {
+                                                if (user_id < 1) return "Someone";
+                                                Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
+                                                        User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                if (c.getCount() == 0) return "Someone";
+                                                c.moveToFirst();
+                                                String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
+                                                c.close();
+                                                return ret;
+                                            }
+
+                                            @Override
+                                            protected void onPostExecute(String s) {
+                                                ((TextView) view).setText(s);
+                                            }
+                                        }.execute();
+
+                                        return true;
+                                    case R.id.tv_action:
+                                        //todo: this is going to want to be a query. it'll only return an id at the moment.
+                                        ((TextView) view).setText("is going to the game against " + cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
+                                        return true;
+                                    case R.id.riv_user:
+                                        if (user_id > 0)
+                                            new AsyncTask<Void, Void, String>() {
+                                                @Override
+                                                protected String doInBackground(Void... voids) {
+                                                    Cursor c = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
+                                                            User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                                    if (c.getCount() == 0) return null;
+                                                    c.moveToFirst();
+                                                    String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                                    c.close();
+                                                    return ret;
+                                                }
+
+                                                @Override
+                                                protected void onPostExecute(String s) {
+                                                    if (s != null && !s.isEmpty()) {
+                                                        Picasso.with(FeedActivity.this)
+                                                                .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                                .fit()
+                                                                .centerCrop()
+                                                                .into(((ImageView) view));
+                                                    }
+                                                }
+                                            }.execute();
+                                        return true;
+
+                                    case R.id.rl_image:
+                                        view.setVisibility(View.GONE);
+                                        return true;
+
+                                    case R.id.iv_event:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
                             default:
                                 return false;
                         }
+
                     }
                 }).build();
         buttons.put(R.id.bt_explore, feed);
@@ -563,7 +722,7 @@ public class FeedActivity extends FragmentActivity {
         Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
                 .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time})
                 .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
-                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TITLE, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
+                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
                         Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME})
                 .orderedBy(Event.UPDATED_AT + " desc")
                 .withoutDividers()
@@ -659,7 +818,6 @@ public class FeedActivity extends FragmentActivity {
                                         return true;
                                     case R.id.tv_time:
                                         DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))).toDateTime(DateTimeZone.forTimeZone(tz));
-                                        Log.d(FeedActivity.class.getSimpleName(), stTemp.toString("K:mm"));
                                         ((TextView) view).setText(stTemp.toString("K:mm"));
                                         return true;
                                     default:
@@ -668,7 +826,7 @@ public class FeedActivity extends FragmentActivity {
                             case Event.ANNOUNCEMENT:
                                 switch (view.getId()) {
                                     case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TITLE)));
+                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
                                         return true;
                                     case R.id.tv_text:
                                         ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TEXT)));

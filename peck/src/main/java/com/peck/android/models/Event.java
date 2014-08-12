@@ -55,6 +55,7 @@ public class Event extends DBOperable {
     public static final transient String PUBLIC = "public";
     public static final transient String START_TIMESTAMP = "start_ts";
     public static final transient String END_TIMESTAMP = "end_ts";
+    public static final transient String SR_ID = "scrape_resource_id";
 
     @Expose
     @SerializedName(BLURRED_URL)
@@ -78,6 +79,10 @@ public class Event extends DBOperable {
     @SerializedName(EVENT_URL)
     String eventUrl;
 
+    @Expose
+    @DBType("integer")
+    @SerializedName(SR_ID)
+    int sRId;
 
 
 
@@ -153,7 +158,6 @@ public class Event extends DBOperable {
     double endTime;
 
     /* announcement fields */
-    public static final transient String ANNOUNCEMENT_TITLE = "title";
     public static final transient String ANNOUNCEMENT_TEXT = "announcement_description";
     public static final transient String ANNOUNCEMENT_USER_ID = "user_id";
     public static final transient String ANNOUNCEMENT_DEPARTMENT_ID = "department_id";
@@ -161,7 +165,6 @@ public class Event extends DBOperable {
     public static final transient String ANNOUNCEMENT_CIRCLE_ID = "circle_id";
     public static final transient String ANNOUNCEMENT_PUBLIC = "public";
     public static final transient String ANNOUNCEMENT_COMMENT_COUNT = "comment_count";
-    public static final transient String ANNOUNCEMENT_IMAGE_FILE_NAME = "image_file_name";
     public static final transient String ANNOUNCEMENT_IMAGE_CONTENT_TYPE = "image_content_type";
     public static final transient String ANNOUNCEMENT_IMAGE_FILE_SIZE = "image_file_size";
     public static final transient String ANNOUNCEMENT_IMAGE_UPDATED_AT = "image_updated_at";

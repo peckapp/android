@@ -39,7 +39,8 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/explore_message_bar_height"
-                android:layout_alignParentBottom="true">
+                android:layout_alignParentBottom="true"
+                android:id="@+id/rl_action">
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

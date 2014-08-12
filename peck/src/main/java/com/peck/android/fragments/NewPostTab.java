@@ -116,7 +116,7 @@ public class NewPostTab extends Fragment {
                         switch (bt_selected) {
                             case ANNOUNCEMENT:
                                 JsonObject announcement = new JsonObject();
-                                announcement.addProperty(Event.ANNOUNCEMENT_TITLE, title);
+                                announcement.addProperty(Event.TITLE, title);
                                 announcement.addProperty(Event.ANNOUNCEMENT_TEXT, text);
                                 announcement.addProperty(Event.ANNOUNCEMENT_USER_ID, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID)));
                                 announcement.addProperty(Event.LOCALE, Integer.parseInt(AccountManager.get(NewPostTab.this.getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.INSTITUTION)));
