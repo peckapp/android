@@ -10,6 +10,7 @@ import android.database.Cursor;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
@@ -87,8 +88,7 @@ public class JsonUtils {
                     object.addProperty(colName, cursor.getDouble(i));
                     break;
                 default:
-                    //todo: throw an exception that the column couldn't be added
-                    break;
+                    throw new JsonParseException("couldn't parse column " + colName + "of cursor: " + cursor.toString());
             }
 
         }

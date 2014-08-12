@@ -155,18 +155,6 @@ public class FeedActivity extends FragmentActivity {
                             case Event.SIMPLE_EVENT:
                                 switch (view.getId()) {
                                     case R.id.iv_event:
-                                /*if (Build.VERSION.SDK_INT >= 17) {
-                                    RenderScript renderScript = RenderScript.create(FeedActivity.this);
-                                    final Allocation input = Allocation.createFromBitmap(renderScript, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
-                                    final Allocation output = Allocation.createTyped(renderScript, input.getType());
-                                    final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-                                    script.setRadius(10.f);
-                                    script.setInput(input);
-                                    script.forEach(output);
-                                    Bitmap ret = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
-                                    output.copyTo(ret);
-                                    ((ImageView) view).setImageBitmap(ret);
-                                }*/
                                         String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                         if (url != null && !url.isEmpty()) {
                                             Picasso.with(FeedActivity.this)
@@ -219,7 +207,7 @@ public class FeedActivity extends FragmentActivity {
                                         ((TextView) view).setText(s2);
                                         return true;
                                     case R.id.tv_time:
-                                        long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE));
+                                        long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l;
                                         if (l > 0)
                                             ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(tz)).toString("MMM d"));
                                         else ((TextView) view).setText("");
@@ -762,7 +750,7 @@ public class FeedActivity extends FragmentActivity {
                                                 .into((ImageView) view);
                                         return true;
                                     case R.id.tv_time:
-                                        long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME));
+                                        long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME))*1000l;
                                         if (date > 0)
                                             ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(tz)).toString("K:mm"));
                                         return true;
@@ -785,7 +773,7 @@ public class FeedActivity extends FragmentActivity {
                                                 .into((ImageView) view);
                                         return true;
                                     case R.id.tv_time:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(tz));
                                         ((TextView) view).setText(start.toString("K:mm"));
                                         return true;
                                     default:
@@ -817,7 +805,7 @@ public class FeedActivity extends FragmentActivity {
                                         }
                                         return true;
                                     case R.id.tv_time:
-                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(tz));
                                         ((TextView) view).setText(stTemp.toString("K:mm"));
                                         return true;
                                     default:
