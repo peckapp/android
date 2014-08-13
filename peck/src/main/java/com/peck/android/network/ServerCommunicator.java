@@ -233,7 +233,7 @@ public class ServerCommunicator {
 
         @FormUrlEncoded
         @POST("/api/access")
-        JsonObject login(@FieldMap Map<String, String> fields, @Field("user[device_token]") String deviceToken);
+        JsonObject login(@FieldMap Map<String, String> fields);
 
         @PATCH("/api/{type}/{id}")
         JsonObject patch(@Path("type") String type, @Path("id") String id, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);

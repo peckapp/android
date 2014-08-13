@@ -6,14 +6,21 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="130dp"
-    android:baselineAligned="false">
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:background="@color/event_bg_purple"
+                android:layout_height="130dp"
+                android:baselineAligned="false">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/div_purple"
+        android:id="@+id/view"/>
 
 
     <ImageView
-        android:src="@drawable/ic_peck"
         android:layout_width="match_parent"
         android:id="@+id/iv_event"
         android:scaleType="centerCrop"
@@ -25,7 +32,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="130dp"
         android:layout_centerVertical="true">
 
         <FrameLayout
@@ -48,8 +55,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="24dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginRight="16dp">
+            android:layout_marginStart="24dp"
+            android:layout_marginRight="16dp"
+            android:layout_gravity="center_vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -57,9 +65,12 @@
                 android:id="@+id/tv_title"
                 android:layout_gravity="center_vertical|start"
                 android:text="test text"
-                android:textSize="24sp"
+                android:textAllCaps="true"
+                android:textSize="20sp"
                 android:textColor="@android:color/primary_text_dark_nodisable"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -67,7 +78,7 @@
                 android:id="@+id/tv_text"
                 android:singleLine="true"
                 android:layout_gravity="center_vertical|start"
-                android:text="test text"
+                android:text="Test Text"
                 android:textColor="@android:color/secondary_text_dark_nodisable"
                 android:textSize="20sp" />
         </LinearLayout>

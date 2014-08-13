@@ -9,5 +9,7 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="backgr_gray">#E0E0E0</color>
+    <color name="div_purple">#5c4b94</color>
+    <color name="event_bg_purple">#221b29</color>
 
 </resources>

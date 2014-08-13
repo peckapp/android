@@ -123,10 +123,10 @@ public class LoginManager {
             map.put("user[udid]", Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
             map.put("user[device_type]", "android");
             map.putAll(JsonUtils.auth(authAccount, false));
+            map.put("user[device_token]", GcmRegistrar.register());
 
             Log.d(LoginManager.class.getSimpleName(), map.toString());
-            Log.d(LoginManager.class.getSimpleName(), GcmRegistrar.register());
-            JsonObject jsonRet = ServerCommunicator.jsonService.login(map, GcmRegistrar.register());
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
             JsonObject user = ((JsonObject) jsonRet.get("user"));
 
             String token = user.get(PeckAccountAuthenticator.AUTH_TOKEN).getAsString();
@@ -269,13 +269,14 @@ public class LoginManager {
             Map<String, String> map = new HashMap<String, String>();
             map.put("user[password]", accountManager.getPassword(account));
             map.put("user[email]", account.name);
+            map.put("user[device_token]", GcmRegistrar.register());
             try {
                 map.putAll(JsonUtils.auth(authAccount, false));
             } catch (InvalidAccountException e) {
                 e.printStackTrace();
             }
 
-            JsonObject jsonRet = ServerCommunicator.jsonService.login(map, GcmRegistrar.register());
+            JsonObject jsonRet = ServerCommunicator.jsonService.login(map);
 
             String token = ((JsonObject) jsonRet.get("user")).get("authentication_token").getAsString();
             setAuthToken(account, token);

@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:id="@+id/iv_select"
-            android:src="@drawable/ic_peck"
-            android:scaleType="centerCrop"/>
+            android:scaleType="center"
+            android:src="@drawable/img_since1988"/>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -88,7 +88,10 @@
             android:id="@+id/et_title"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:hint="@string/ht_np_title" />
+            android:hint="@string/ht_np_title"
+            android:background="@android:color/transparent"
+            android:layout_margin="8dp"
+            />
 
         <EditText
             android:layout_width="match_parent"
@@ -97,7 +100,9 @@
             android:enabled="true"
             android:inputType="textShortMessage|text|textMultiLine|textCapSentences|textLongMessage|textAutoCorrect"
             android:layout_marginTop="16dp"
-            android:hint="description" />
+            android:hint="Description"
+            android:background="@android:color/transparent"
+            android:layout_margin="8dp"/>
 
         <LinearLayout
             android:layout_marginTop="8dp"

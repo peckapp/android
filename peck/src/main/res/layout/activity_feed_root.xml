@@ -11,7 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/bar_height"
-        android:background="@color/main_purple"
+        android:background="@color/white"
         android:orientation="vertical"
         android:id="@+id/ll_mainbar">
 
@@ -29,7 +29,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
-                android:textColor="@color/primary_text_dark_focused"
+                android:textColor="@android:color/primary_text_light_nodisable"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/bt_explore"
                 android:layout_weight="1" />
@@ -40,7 +40,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
-                android:textColor="@color/primary_text_dark_focused"
+                android:textColor="@android:color/primary_text_light_nodisable"
                 android:layout_toLeftOf="@+id/bt_add"
                 android:layout_weight="1" />
 
@@ -50,7 +50,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
-                android:textColor="@color/primary_text_dark_focused"
+                android:textColor="@android:color/primary_text_light_nodisable"
                 android:layout_toLeftOf="@+id/bt_circles"
                 android:layout_weight="1" />
 
@@ -60,7 +60,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:textColor="@color/primary_text_dark_focused"
+                android:textColor="@android:color/primary_text_light_nodisable"
                 android:layout_toLeftOf="@+id/bt_profile"
                 android:layout_weight="1" />
 
@@ -70,7 +70,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
-                android:textColor="@color/primary_text_dark_focused"
+                android:textColor="@android:color/primary_text_light_nodisable"
                 android:layout_alignParentRight="true"
                 android:layout_weight="1" />
 
@@ -92,12 +92,29 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/ll_mainbar"/>
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:id="@+id/iv_dropshadow"
+        android:alpha="0.6"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/dropshadow_feed"
+        android:layout_below="@+id/iv_div"/>
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/ll_feed_content"
         android:layout_below="@+id/ll_mainbar" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@android:color/darker_gray"
+        android:layout_below="@+id/ll_mainbar"
+        android:id="@+id/iv_div"/>
 
 
 </RelativeLayout>
