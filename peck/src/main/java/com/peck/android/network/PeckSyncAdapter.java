@@ -47,10 +47,12 @@ import retrofit.RetrofitError;
  */
 public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
+    private static final int OVERFLOW = 200;
     public static final String SYNC_TYPE = "sync type";
     public static final String URL = "url";
     public static final String EVENT_TYPE = "event_type";
     final ContentResolver contentResolver;
+    final Object syncResultLock = new Object();
 
     public PeckSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -135,16 +137,24 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (OperationApplicationException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            syncResult.stats.numIoExceptions++;
+            synchronized (syncResultLock) { syncResult.stats.numIoExceptions++; }
         } catch (OperationCanceledException e) {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
-            syncResult.stats.numAuthExceptions++;
+            synchronized (syncResultLock) { syncResult.stats.numAuthExceptions++; }
         } catch (NetworkErrorException e) {
-            syncResult.stats.numIoExceptions++;
+            synchronized (syncResultLock) { syncResult.stats.numIoExceptions++; }
         } catch (LoginManager.InvalidAccountException e) {
             e.printStackTrace();
         }
+    }
+
+    private static ArrayList<ContentProviderOperation> checkForOverflow(ArrayList<ContentProviderOperation> batch, ArrayList<ArrayList<ContentProviderOperation>> parent) {
+        if (batch.size() >= OVERFLOW) {
+            ArrayList<ContentProviderOperation> newBatch = new ArrayList<ContentProviderOperation>(OVERFLOW);
+            parent.add(newBatch);
+            return newBatch;
+        } else return batch;
     }
 
 
@@ -152,12 +162,14 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             throws RetrofitError, RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
                    LoginManager.InvalidAccountException, NetworkErrorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
-        final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
-        final long sResultEntries = syncResult.stats.numEntries;
-        final long sResultSkipped = syncResult.stats.numSkippedEntries;
-        final long sResultUpdated = syncResult.stats.numUpdates;
-        final long sResultDeleted = syncResult.stats.numDeletes;
-        final long sResultInserts = syncResult.stats.numInserts;
+        final ArrayList<ArrayList<ContentProviderOperation>> batchBatch = new ArrayList<ArrayList<ContentProviderOperation>>();
+        ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>(OVERFLOW);
+        batchBatch.add(batch);
+        long sResultEntries = 0;
+        long sResultSkipped = 0;
+        long sResultUpdated = 0;
+        long sResultInserts = 0;
+        long sResultDeleted = 0;
         int svGet = 0;
         int svUpdated = 0;
         int svCreated = 0;
@@ -182,7 +194,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = client.query(uri, DBUtils.getColumns(DBOperable.class), null, null, null);
 
         while (cursor.moveToNext()) { //iterate through every item in the relevant table
-            syncResult.stats.numEntries++;
+            batch = checkForOverflow(batch, batchBatch);
+            sResultEntries++;
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
             if (match == null && url == null) { //if the incoming data doesn't contain the item and this isn't an incremental sync
@@ -196,7 +209,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 } else {
                     //if it's older and we haven't updated it, just delete it
-                    syncResult.stats.numDeletes++;
+                    sResultDeleted++;
                     batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
                             Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
                 }
@@ -225,7 +238,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     }
 
                     //update our item
-                    syncResult.stats.numUpdates++;
+                    sResultUpdated++;
                     batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
                             appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
                             .withValues(JsonUtils.jsonToContentValues(match, tClass))
@@ -233,7 +246,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
                 } else {
-                    syncResult.stats.numSkippedEntries++; //if it's the same age as the server's, do nothing.
+                    sResultSkipped++; //if it's the same age as the server's, do nothing.
                 }
             }
         }
@@ -241,23 +254,36 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         cursor.close();
 
         for (JsonObject json : incoming.values()) { //add all the items that weren't matched to our database
+            batch = checkForOverflow(batch, batchBatch);
             batch.add(ContentProviderOperation.newInsert(uri).withValues(JsonUtils.jsonToContentValues(json, tClass)).build());
-            syncResult.stats.numInserts++;
+            sResultInserts++;
+        }
+
+        synchronized (syncResultLock) {
+            syncResult.stats.numEntries += sResultEntries;
+            syncResult.stats.numInserts += sResultInserts;
+            syncResult.stats.numUpdates += sResultUpdated;
+            syncResult.stats.numDeletes += sResultDeleted;
+            syncResult.stats.numSkippedEntries += sResultSkipped;
         }
 
 
 
-        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(syncResult.stats.numEntries - sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) +"]" +
-                " no Δ: " + StringUtils.rightPad(Long.toString((syncResult.stats.numSkippedEntries - sResultSkipped)), 5) +
-                " add: " + StringUtils.leftPad(Long.toString((syncResult.stats.numInserts - sResultInserts)), 5)  +
+        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) +"]" +
+                " no Δ: " + StringUtils.rightPad(Long.toString(sResultSkipped), 5) +
+                " add: " + StringUtils.leftPad(Long.toString(sResultInserts), 5)  +
                 "|" + StringUtils.rightPad(Long.toString(svCreated), 4) +
-                " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
+                " upd: " + StringUtils.leftPad(Long.toString(sResultUpdated), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svUpdated), 4) +
-                " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
+                " del: " + StringUtils.leftPad(Long.toString(sResultDeleted), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + tClass.getSimpleName().toLowerCase());
 
-        contentResolver.applyBatch(authority, batch);
-        contentResolver.notifyChange(uri, null, false);
+        for (ArrayList<ContentProviderOperation> mBatch : batchBatch) {
+            contentResolver.applyBatch(authority, mBatch);
+            contentResolver.notifyChange(uri, null, false);
+            Log.v(PeckSyncAdapter.class.getSimpleName(), "applying batch of " + mBatch.size());
+            Thread.sleep(50L);
+        }
 
         client.delete(uri, null, null);
 
@@ -274,11 +300,11 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 (type == Event.ATHLETIC_EVENT) ? "athletic_events" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunities" : null;
 
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
-        final long sResultEntries = syncResult.stats.numEntries;
-        final long sResultSkipped = syncResult.stats.numSkippedEntries;
-        final long sResultUpdated = syncResult.stats.numUpdates;
-        final long sResultDeleted = syncResult.stats.numDeletes;
-        final long sResultInserts = syncResult.stats.numInserts;
+        long sResultEntries = 0;
+        long sResultSkipped = 0;
+        long sResultUpdated = 0;
+        long sResultDeleted = 0;
+        long sResultInserts = 0;
         int svGet = 0;
         int svUpdated = 0;
         int svCreated = 0;
@@ -299,7 +325,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = client.query(uri, ArrayUtils.add(DBUtils.getColumns(DBOperable.class), Event.TYPE), Event.TYPE + " = ?", new String[]{Integer.toString(type)}, null);
 
         while (cursor.moveToNext()) { //iterate through every item in the relevant table
-            syncResult.stats.numEntries++;
+            sResultEntries++;
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
             if (match == null) { //if the incoming data doesn't contain the item
@@ -309,7 +335,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     ServerCommunicator.jsonService.post(plural, new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson(single, JsonUtils.cursorToJson(cursor))), JsonUtils.auth(account));
                 } else {
                     //if it's older and we haven't updated it, just delete it
-                    syncResult.stats.numDeletes++;
+                    sResultDeleted++;
                     batch.add(ContentProviderOperation.newDelete(uri.buildUpon().appendPath(
                             Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()).build());
                 }
@@ -336,7 +362,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     }
 
                     //update our item
-                    syncResult.stats.numUpdates++;
+                    sResultUpdated++;
                     batch.add(ContentProviderOperation.newUpdate(uri.buildUpon().
                             appendPath(Integer.toString(cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID)))).build()) //schedule an update
                             .withValues(JsonUtils.jsonToContentValues(match, Event.class))
@@ -344,7 +370,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
                 } else {
-                    syncResult.stats.numSkippedEntries++; //if it's the same age as the server's, do nothing.
+                    sResultSkipped++; //if it's the same age as the server's, do nothing.
                 }
             }
         }
@@ -355,17 +381,24 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
             ContentValues contentValues = JsonUtils.jsonToContentValues(json, Event.class);
             contentValues.put(Event.TYPE, type);
             batch.add(ContentProviderOperation.newInsert(uri).withValues(contentValues).build());
-            syncResult.stats.numInserts++;
+            sResultInserts++;
         }
 
+        synchronized (syncResultLock) {
+            syncResult.stats.numEntries += sResultEntries;
+            syncResult.stats.numInserts += sResultInserts;
+            syncResult.stats.numUpdates += sResultUpdated;
+            syncResult.stats.numDeletes += sResultDeleted;
+            syncResult.stats.numSkippedEntries += sResultSkipped;
+        }
 
-        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(syncResult.stats.numEntries - sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) + "]" +
-                " no Δ: " + StringUtils.rightPad(Long.toString((syncResult.stats.numSkippedEntries - sResultSkipped)), 5) +
-                " add: " + StringUtils.leftPad(Long.toString((syncResult.stats.numInserts - sResultInserts)), 5) +
+        Log.d(getClass().getSimpleName(), "[" + StringUtils.leftPad(Long.toString(sResultEntries), 5) + "|" + StringUtils.rightPad(Long.toString(svGet), 5) + "]" +
+                " no Δ: " + StringUtils.rightPad(Long.toString(sResultSkipped), 5) +
+                " add: " + StringUtils.leftPad(Long.toString(sResultInserts), 5) +
                 "|" + StringUtils.rightPad(Long.toString(svCreated), 4) +
-                " upd: " + StringUtils.leftPad(Long.toString(syncResult.stats.numUpdates - sResultUpdated), 4) + "|" +
+                " upd: " + StringUtils.leftPad(Long.toString(sResultUpdated), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svUpdated), 4) +
-                " del: " + StringUtils.leftPad(Long.toString(syncResult.stats.numDeletes - sResultDeleted), 4) + "|" +
+                " del: " + StringUtils.leftPad(Long.toString(sResultDeleted), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svDeleted), 4) + "   " + StringUtils.split(plural, "_")[0]);
 
         contentResolver.applyBatch(authority, batch);
