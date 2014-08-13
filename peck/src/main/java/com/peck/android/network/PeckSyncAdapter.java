@@ -58,25 +58,53 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
-    public void onPerformSync(Account account, Bundle bundle, String authority, ContentProviderClient client, SyncResult syncResult) {
+    public void onPerformSync(final Account account, final Bundle bundle, final String authority, final ContentProviderClient client, final SyncResult syncResult) {
         Log.v(PeckSyncAdapter.class.getSimpleName(), "syncing");
 
-        String syncType = bundle.getString(SYNC_TYPE);
-        String urlToSync = bundle.getString(URL);
-        int eventType = bundle.getInt(EVENT_TYPE, -1);
+        final String syncType = bundle.getString(SYNC_TYPE);
+        final String urlToSync = bundle.getString(URL);
+        final int eventType = bundle.getInt(EVENT_TYPE, -1);
 
-        String authToken = null;
-        authToken = LoginManager.peekAuthToken(account);
+        ArrayList<Thread> syncThreads = new ArrayList<Thread>();
+
+        final String authToken = LoginManager.peekAuthToken(account);
 
         if (syncType != null) {
-            try {
-                runSync(Class.forName(syncType), account, authority, client, syncResult, urlToSync, eventType, authToken);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Class not resolvable from name " + syncType);
-            }
-        } else for (Class clzz : PeckApp.getModelArray()) {
-            runSync(clzz, account, authority, client, syncResult, urlToSync, eventType, authToken);
+
+            Thread mine = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        runSync(Class.forName(syncType), account, authority, client, syncResult, urlToSync, eventType, authToken);
+                    } catch (ClassNotFoundException e) {
+                        throw new IllegalArgumentException("Class not resolvable from name " + syncType);
+                    }
+                }
+            }, syncType);
+            mine.start();
+            syncThreads.add(mine);
+
+
+        } else for (final Class clzz : PeckApp.getModelArray()) {
+            Thread mine = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    runSync(clzz, account, authority, client, syncResult, urlToSync, eventType, authToken);
+                }
+            }, clzz.getSimpleName());
+            mine.start();
+            syncThreads.add(mine);
         }
+
+        for (Thread thread : syncThreads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Log.e(PeckSyncAdapter.class.getSimpleName(), "Sync thread " + thread.getName() + " crashed.");
+            }
+        }
+
+
     }
 
     private void runSync(Class tClass, Account account, String authority, ContentProviderClient client, SyncResult syncResult, String url, int eventType, String authToken) {
@@ -122,7 +150,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private <T extends DBOperable> void sync(final Class<T> tClass, final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult, final String url)
             throws RetrofitError, RemoteException, InterruptedException, ExecutionException, OperationApplicationException, IOException, OperationCanceledException, AuthenticatorException,
-            LoginManager.InvalidAccountException, NetworkErrorException {
+                   LoginManager.InvalidAccountException, NetworkErrorException {
         final boolean mod = tClass.getAnnotation(NoMod.class) == null;
         final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
         final long sResultEntries = syncResult.stats.numEntries;
@@ -236,9 +264,9 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void customSyncEvents(final Account account, final String authority, final ContentProviderClient client, final SyncResult syncResult,
-                                  final int type, final boolean modServer)
+            final int type, final boolean modServer)
             throws RemoteException, InterruptedException, ExecutionException, OperationApplicationException, RetrofitError,
-            IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
+                   IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
 
         final String single = (type == Event.ANNOUNCEMENT) ? "announcement" : (type == Event.SIMPLE_EVENT) ? "simple_event" :
                 (type == Event.ATHLETIC_EVENT) ? "athletic_event" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunity" : null;

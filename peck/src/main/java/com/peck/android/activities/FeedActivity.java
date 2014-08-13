@@ -92,7 +92,12 @@ import retrofit.client.Response;
  */
 public class FeedActivity extends FragmentActivity {
 
-    private final static String TAG = "FeedActivity";
+    public final static String SELECTION = "sel";
+    public final static String TAB_PECKS = "tb_pecks";
+    public final static String TAB_EXPLORE = "tb_explore";
+    public final static String TAB_POST = "tb_post";
+    public final static String TAB_CIRCLES = "tb_circles";
+    public final static String TAB_PROFILE = "tb_profile";
 
     private TimeZone tz = Calendar.getInstance().getTimeZone();
 
