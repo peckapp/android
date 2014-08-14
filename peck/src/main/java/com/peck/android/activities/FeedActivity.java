@@ -146,8 +146,6 @@ public class FeedActivity extends FragmentActivity {
 
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
