@@ -8,32 +8,25 @@ package com.peck.android.activities;
 import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.Button;
 
-import com.makeramen.RoundedImageView;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.database.DBUtils;
-import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
 import com.peck.android.fragments.feeds.CircleFeed;
 import com.peck.android.fragments.feeds.ExploreFeed;
 import com.peck.android.fragments.feeds.HomeFeed;
+import com.peck.android.fragments.feeds.PeckFeed;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
-import com.peck.android.models.Peck;
-import com.peck.android.models.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.Deque;
@@ -65,64 +58,11 @@ public class FeedActivity extends FragmentActivity {
     private Button lastPressed;
 
     {
-
-        //add the simple tabs
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
-
-        //add the explore feed
         buttons.put(R.id.bt_explore, new ExploreFeed());
-
-
         buttons.put(R.id.bt_circles, new CircleFeed());
-
-        //set up the peck feed
-        Feed feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class), R.layout.lvitem_peck)
-                .withBindings(new String[] {Peck.TEXT, Peck.INVITED_BY}, new int[] { R.id.tv_title, R.id.iv_def } )
-                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                                    @Override
-                                    public boolean setViewValue ( final View view, Cursor cursor,int i){
-                                        switch (view.getId()) {
-                                            case R.id.iv_def:
-                                                final long userId = cursor.getLong(i);
-                                                if (userId > 0) {
-                                                    new AsyncTask<Void, Void, String>() {
-                                                        @Override
-                                                        protected String doInBackground(Void... voids) {
-                                                            String url = null;
-                                                            Cursor user = getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
-                                                                    User.SV_ID + "= ?", new String[]{Long.toString(userId)}, null);
-                                                            if (user.getCount() > 0) {
-                                                                user.moveToFirst();
-                                                                url = user.getString(user.getColumnIndex(User.IMAGE_NAME));
-                                                            }
-                                                            user.close();
-                                                            return url;
-                                                        }
-
-                                                        @Override
-                                                        protected void onPostExecute(String url) {
-                                                            if (url != null) {
-                                                                Picasso.with(FeedActivity.this)
-                                                                        .load(PeckApp.Constants.Network.BASE_URL + url)
-                                                                        .centerCrop()
-                                                                        .fit()
-                                                                        .into(((RoundedImageView) view));
-                                                            }
-
-                                                        }
-                                                    }.execute();
-                                                }
-                                                return true;
-                                            default:
-                                                return false;
-                                        }
-                                    }
-                                }
-
-                ).build();
-
-        buttons.put(R.id.bt_peck,feed);
+        buttons.put(R.id.bt_peck, new PeckFeed());
 
     }
 

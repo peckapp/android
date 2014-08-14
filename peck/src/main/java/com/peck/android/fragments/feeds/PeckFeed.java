@@ -31,7 +31,7 @@ public class PeckFeed extends Feed {
     {
         binds_from = new String[] {};
         binds_to = new int[] {};
-
+        listItemRes = R.layout.lvitem_peck;
         loaderBundle = new Bundle();
         loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Peck.class));
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{ Peck.LOCAL_ID, Peck.TEXT, Peck.INVITED_BY, Peck.USER_ID, Peck.UPDATED_AT});

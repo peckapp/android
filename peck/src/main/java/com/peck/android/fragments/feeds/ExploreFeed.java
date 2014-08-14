@@ -357,7 +357,7 @@ public class ExploreFeed extends Feed {
     @Override
     public void onResume() {
         super.onResume();
-        refresh();
+        //refresh();
     }
 
     public void refresh() {
