@@ -72,11 +72,9 @@ import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import it.sephiroth.android.library.widget.HListView;
@@ -98,8 +96,6 @@ public class FeedActivity extends FragmentActivity {
     public final static String TAB_POST = "tb_post";
     public final static String TAB_CIRCLES = "tb_circles";
     public final static String TAB_PROFILE = "tb_profile";
-
-    private TimeZone tz = Calendar.getInstance().getTimeZone();
 
     //traveling search view
     private AutoCompleteTextView tView;
@@ -294,7 +290,7 @@ public class FeedActivity extends FragmentActivity {
                                     case R.id.tv_time:
                                         long l = cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l;
                                         if (l > 0)
-                                            ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(tz)).toString("MMM d"));
+                                            ((TextView) view).setText(new DateTime(l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz)).toString("MMM d"));
                                         else ((TextView) view).setText("");
                                         return true;
                                     case R.id.tv_name:
@@ -860,7 +856,7 @@ public class FeedActivity extends FragmentActivity {
                                     case R.id.tv_time:
                                         long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME))*1000l;
                                         if (date > 0)
-                                            ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(tz)).toString("K:mm"));
+                                            ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz)).toString("K:mm"));
                                         return true;
                                     default:
                                         return false;
@@ -881,7 +877,7 @@ public class FeedActivity extends FragmentActivity {
                                                 .into((ImageView) view);
                                         return true;
                                     case R.id.tv_time:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
                                         ((TextView) view).setText(start.toString("K:mm"));
                                         return true;
                                     default:
@@ -913,7 +909,7 @@ public class FeedActivity extends FragmentActivity {
                                         }
                                         return true;
                                     case R.id.tv_time:
-                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(tz));
+                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
                                         ((TextView) view).setText(stTemp.toString("K:mm"));
                                         return true;
                                     default:

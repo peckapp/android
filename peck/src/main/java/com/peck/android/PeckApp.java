@@ -26,6 +26,9 @@ import com.peck.android.models.joins.CircleMember;
 import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 /**
  * Created by mammothbane on 5/28/2014.
  *
@@ -38,6 +41,7 @@ public class PeckApp extends Application {
     public static final double version = 1.0;
 
     private static Context mContext;
+    public static TimeZone tz = Calendar.getInstance().getTimeZone();
 
 
     /**

@@ -36,44 +36,44 @@ import java.util.ArrayList;
 
 public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String LV_RES = "list view resource identifier";
-    private static final String LAYOUT_RES = "layout identifier";
-    private static final String FEED_ITEM_LAYOUT = "feed item layout identifier";
-    private static final String LOADER_BUNDLE = "loader bundle";
-    private static final String BINDS_FROM = "bindings from";
-    private static final String BINDS_TO = "bindings to";
-    private static final String DIVIDERS = "dividers";
+    protected static final String LV_RES = "list view resource identifier";
+    protected static final String LAYOUT_RES = "layout identifier";
+    protected static final String FEED_ITEM_LAYOUT = "feed item layout identifier";
+    protected static final String LOADER_BUNDLE = "loader bundle";
+    protected static final String BINDS_FROM = "bindings from";
+    protected static final String BINDS_TO = "bindings to";
+    protected static final String DIVIDERS = "dividers";
 
     //query arguments
-    private static final String LOADER_URI = "uri"; //necessary
-    private static final String LOADER_SELECTION = "selection";
-    private static final String LOADER_PROJECTION = "projection";
-    private static final String LOADER_SELECT_ARGS = "selection arguments";
-    private static final String LOADER_SORT_ORDER = "sort order";
+    protected static final String LOADER_URI = "uri"; //necessary
+    protected static final String LOADER_SELECTION = "selection";
+    protected static final String LOADER_PROJECTION = "projection";
+    protected static final String LOADER_SELECT_ARGS = "selection arguments";
+    protected static final String LOADER_SORT_ORDER = "sort order";
 
-    private int listViewRes = R.id.lv_content;
-    private int layoutRes = R.layout.feed;
-    private int listItemRes;
-    private String[] binds_from;
-    private int[] binds_to;
-    private SimpleCursorAdapter mAdapter;
-    private boolean dividers;
+    protected int listViewRes = R.id.lv_content;
+    protected int layoutRes = R.layout.feed;
+    protected int listItemRes;
+    protected String[] binds_from;
+    protected int[] binds_to;
+    protected SimpleCursorAdapter mAdapter;
+    protected boolean dividers;
 
-    private AdapterView.OnItemClickListener listener;
-    private AdapterView mAdapterView;
+    protected AdapterView.OnItemClickListener listener;
+    protected AdapterView mAdapterView;
 
-    private SimpleCursorAdapter.ViewBinder viewBinder;
-    private Bundle loaderBundle;
-    private static final int LOADER_ID = 0;
+    protected SimpleCursorAdapter.ViewBinder viewBinder;
+    protected Bundle loaderBundle;
+    protected static final int LOADER_ID = 0;
 
-    private ArrayList<View> footers = new ArrayList<View>();
-    private ArrayList<View> headers = new ArrayList<View>();
+    protected ArrayList<View> footers = new ArrayList<View>();
+    protected ArrayList<View> headers = new ArrayList<View>();
 
-    private RecycleRunnable runnable;
+    protected RecycleRunnable runnable;
 
     public abstract static class RecycleRunnable implements Runnable {
         protected View recycledView;
-        private void setRecycledView(@NonNull View recycledView) { this.recycledView = recycledView; }
+        void setRecycledView(@NonNull View recycledView) { this.recycledView = recycledView; }
     }
 
     public static class Builder {
