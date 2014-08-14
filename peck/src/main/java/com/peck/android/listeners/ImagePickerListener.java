@@ -31,6 +31,8 @@ public class ImagePickerListener implements View.OnClickListener {
     public final static int REQUEST_CODE = 5;
     public final static String URI = "image picker uri";
 
+    public interface ImageCallbacks {}
+
     @NonNull
     private Fragment fragment;
 
@@ -63,7 +65,7 @@ public class ImagePickerListener implements View.OnClickListener {
 
         final Intent galleryIntent = new Intent();
         galleryIntent.setType("image/*");
-        galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setAction(Intent.ACTION_PICK);
 
         final Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));

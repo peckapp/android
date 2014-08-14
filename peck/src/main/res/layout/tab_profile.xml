@@ -8,20 +8,20 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/tab_ll">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="20dp"
         android:orientation="vertical"
         android:fadingEdge="none"
-        android:weightSum="1"
         android:id="@+id/ll_profile">
 
         <RelativeLayout
             android:layout_width="@dimen/prof_picture_bound"
             android:layout_height="@dimen/prof_picture_bound"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/rl_photo">
 
             <ProgressBar
                 android:layout_width="wrap_content"
@@ -42,7 +42,8 @@
                 android:layout_width="match_parent"
                 android:id="@+id/iv_event"
                 style="@style/riv_default"
-                android:alpha="@dimen/alpha_unauth" />
+                android:alpha="@dimen/alpha_unauth"
+                android:layout_centerHorizontal="true"/>
 
         </RelativeLayout>
 
@@ -55,26 +56,71 @@
             android:layout_marginTop="16dp"
             android:text="@string/ht_yourname"
             android:alpha="@dimen/alpha_unauth"
-            android:singleLine="false" />
+            android:singleLine="false"
+            android:layout_below="@+id/rl_photo"
+            android:layout_centerHorizontal="true"/>
 
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/tv_email"
+            android:text="your@email.com"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/secondary_text_light_nodisable"
+            android:textSize="20sp"
+            android:singleLine="true"
+            android:layout_marginTop="6dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/tv_realname"/>
 
         <EditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="unix"
-            android:id="@+id/et_unix"
-            android:inputType="textEmailAddress"
-            android:singleLine="true"
+            android:layout_height="wrap_content"
+            android:maxLines="5"
+            android:background="@android:color/transparent"
+            android:lineSpacingExtra="4dp"
+            android:hint="who are you?"
             android:layout_marginTop="24dp"
-            android:enabled="false"
-            android:editable="false" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:drawablePadding="8dp"
+            android:id="@+id/et_blurb"
+            android:inputType="textMultiLine"
+            android:layout_below="@+id/tv_email"/>
+
+        <View android:layout_marginTop="12dp"
+            style="@style/div"
+            android:id="@+id/v_div1"
+            android:layout_below="@+id/et_blurb"
+            android:layout_centerHorizontal="true"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ll_subscriptions"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_below="@+id/v_div1">
+            <TextView
+                android:background="@android:color/transparent"
+                android:layout_width="match_parent"
+                android:text="Subscriptions"
+                android:layout_marginLeft="8dp"
+                android:textSize="18sp"
+                android:layout_height="wrap_content"/>
+
+
+            </LinearLayout>
+
 
         <com.peck.android.views.PeckAuthButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_peck_login"
             android:layout_marginTop="300dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_below="@+id/ll_subscriptions"
+            android:layout_centerHorizontal="true"/>
 
         <com.facebook.widget.LoginButton
             android:layout_width="wrap_content"
@@ -82,10 +128,12 @@
             android:id="@+id/bt_fb_link"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:layout_below="@+id/bt_peck_login"
+            android:layout_centerHorizontal="true"/>
 
 
-    </LinearLayout>
+    </RelativeLayout>
 
 
 </ScrollView>

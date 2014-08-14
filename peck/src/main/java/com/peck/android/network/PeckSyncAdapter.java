@@ -51,8 +51,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String SYNC_TYPE = "sync type";
     public static final String URL = "url";
     public static final String EVENT_TYPE = "event_type";
+    public static int batchCount = 0;
     final ContentResolver contentResolver;
     final Object syncResultLock = new Object();
+    final Object batchLock = new Object();
 
     public PeckSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -279,10 +281,13 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 StringUtils.rightPad(Long.toString(svDeleted), 4)+ "   " + tClass.getSimpleName().toLowerCase());
 
         for (ArrayList<ContentProviderOperation> mBatch : batchBatch) {
-            contentResolver.applyBatch(authority, mBatch);
+            final int batchCt = batchCount++;
+            synchronized (batchLock) {
+                Log.v(PeckSyncAdapter.class.getSimpleName(), "[" + batchCt + "] " + mBatch.size() + " - " + tClass.getSimpleName());
+                contentResolver.applyBatch(authority, mBatch);
+                Log.v(PeckSyncAdapter.class.getSimpleName(), "[" + batchCt + "] complete");
+            }
             contentResolver.notifyChange(uri, null, false);
-            Log.v(PeckSyncAdapter.class.getSimpleName(), "applying batch of " + mBatch.size());
-            Thread.sleep(50L);
         }
 
         client.delete(uri, null, null);
@@ -299,7 +304,10 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         final String plural = (type == Event.ANNOUNCEMENT) ? "announcements" : (type == Event.SIMPLE_EVENT) ? "simple_events" :
                 (type == Event.ATHLETIC_EVENT) ? "athletic_events" : (type == Event.DINING_OPPORTUNITY) ? "dining_opportunities" : null;
 
-        final ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+        final ArrayList<ArrayList<ContentProviderOperation>> batchBatch = new ArrayList<ArrayList<ContentProviderOperation>>();
+        ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>(OVERFLOW);
+        batchBatch.add(batch);
+
         long sResultEntries = 0;
         long sResultSkipped = 0;
         long sResultUpdated = 0;
@@ -325,6 +333,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = client.query(uri, ArrayUtils.add(DBUtils.getColumns(DBOperable.class), Event.TYPE), Event.TYPE + " = ?", new String[]{Integer.toString(type)}, null);
 
         while (cursor.moveToNext()) { //iterate through every item in the relevant table
+            checkForOverflow(batch, batchBatch);
             sResultEntries++;
             JsonObject match = incoming.get(cursor.getInt(cursor.getColumnIndex(DBOperable.SV_ID)));
 
@@ -378,6 +387,7 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
         cursor.close();
 
         for (JsonObject json : incoming.values()) { //add all the items that weren't matched to our database
+            checkForOverflow(batch, batchBatch);
             ContentValues contentValues = JsonUtils.jsonToContentValues(json, Event.class);
             contentValues.put(Event.TYPE, type);
             batch.add(ContentProviderOperation.newInsert(uri).withValues(contentValues).build());
@@ -401,8 +411,15 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 " del: " + StringUtils.leftPad(Long.toString(sResultDeleted), 4) + "|" +
                 StringUtils.rightPad(Long.toString(svDeleted), 4) + "   " + StringUtils.split(plural, "_")[0]);
 
-        contentResolver.applyBatch(authority, batch);
-        contentResolver.notifyChange(uri, null, false);
+        for (ArrayList<ContentProviderOperation> tBatch : batchBatch) {
+            final int batchCt = batchCount++;
+            synchronized (batchLock) {
+                Log.v(PeckSyncAdapter.class.getSimpleName(), "[" + batchCt + "] " + tBatch.size() + " - Event");
+                contentResolver.applyBatch(authority, batch);
+                Log.v(PeckSyncAdapter.class.getSimpleName(), "[" + batchCt + "]" + " complete");
+            }
+            contentResolver.notifyChange(uri, null, false);
+        }
 
         client.delete(uri, null, null);
     }
