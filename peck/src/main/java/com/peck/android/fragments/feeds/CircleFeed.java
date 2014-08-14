@@ -76,10 +76,7 @@ public class CircleFeed extends Feed {
 
     {
         //set up the circle member search view
-        tView = new AutoCompleteTextView(PeckApp.getContext()) {
-
-
-        };
+        tView = new AutoCompleteTextView(PeckApp.getContext());
 
         ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(16, 16, 16, 16);
@@ -165,11 +162,13 @@ public class CircleFeed extends Feed {
             }
         });
 
+        loaderBundle = new Bundle();
 
         listItemRes = R.layout.lvitem_circle;
         binds_from = new String[] { Circle.NAME, Circle.NAME, Circle.NAME};
         binds_to = new int[] { R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm};
         loaderBundle.putString(LOADER_SORT_ORDER, Circle.UPDATED_AT + " desc");
+        loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Circle.class));
         runnable = new RecycleRunnable() {
             @Override
             public void run() {

@@ -32,7 +32,6 @@ import org.joda.time.DateTimeZone;
 public class HomeFeed extends Feed {
     public static final String DATE_ORDER = "date_order";
     public static final String SEL_BY_DATE = DATE_ORDER + " > ? and " + DATE_ORDER + " < ?";
-    private String baseSelection;
 
 
     public int curOffset = -1;
@@ -41,7 +40,7 @@ public class HomeFeed extends Feed {
         binds_from = new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE};
         binds_to = new int[] {R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time};
         loaderBundle = new Bundle();
-        loaderBundle.putString(LOADER_SORT_ORDER, Event.START_DATE + " desc");
+        loaderBundle.putString(LOADER_SORT_ORDER, DATE_ORDER + " asc");
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
                 Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
                 Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME,
@@ -158,12 +157,6 @@ public class HomeFeed extends Feed {
             }
         };
         withRelativeDate(0);
-    }
-
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-        baseSelection = loaderBundle.getString(LOADER_SELECTION);
     }
 
     /**

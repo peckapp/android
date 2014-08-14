@@ -22,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -30,9 +29,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,11 +42,11 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
+import com.peck.android.fragments.feeds.CircleFeed;
 import com.peck.android.fragments.feeds.HomeFeed;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
-import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.Peck;
@@ -65,14 +61,11 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Pattern;
 
-import it.sephiroth.android.library.widget.HListView;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -494,167 +487,7 @@ public class FeedActivity extends FragmentActivity {
         buttons.put(R.id.bt_explore, feed);
 
 
-
-
-        //use the instance tFeed field so we can access it in the builder. *do not* reassign this field.
-        tFeed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Circle.class)).build(), R.layout.lvitem_circle)
-                .withBindings(new String[]{Circle.NAME, Circle.MEMBERS, Circle.NAME},
-                        new int[]{R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm})
-                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    }
-                })
-                .withHeader(header)
-                .orderedBy(DBOperable.UPDATED_AT + " desc")
-                .withRecycleRunnable(new Feed.RecycleRunnable() {
-                    @Override
-                    public void run() {
-                        //set/clear the search view as necessary
-                        View mView = tFeed.getView();
-                        if (mView != null && recycledView != null && recycledView.isFocusable() && (tFeed.getListView()).getPositionForView(recycledView) != currentCircleAddPos) {
-                            ((LinearLayout) recycledView).addView(tView);
-                        } else if (recycledView != null && tView != null)
-                            ((LinearLayout) recycledView).removeView(tView);
-                    }
-                })
-                .withViewBinder(
-                        new SimpleCursorAdapter.ViewBinder() {
-                            final SparseArray<ArrayList<Map<String, Object>>> circleMembers = new SparseArray<ArrayList<Map<String, Object>>>();
-
-                            @Override
-                            public boolean setViewValue(final View view, final Cursor cursor,
-                                    int i) {
-                                switch (view.getId()) {
-                                    case R.id.hlv_users:
-                                        final int circle_id = cursor.getInt(cursor.getColumnIndex(DBOperable.LOCAL_ID));
-                                        new AsyncTask<Void, Void, Void>() {
-                                            ArrayList<Map<String, Object>> ret = circleMembers.get(circle_id);
-                                            SimpleAdapter simpleAdapter;
-
-                                            @Override
-                                            protected void onPreExecute() {
-                                                setUpCell();
-                                            }
-
-                                            private void setUpCell() {
-                                                synchronized (circleMembers) {
-                                                    if (ret == null)
-                                                        ret = new ArrayList<Map<String, Object>>();
-                                                }
-
-                                                simpleAdapter = new SimpleAdapter(FeedActivity.this, ret, R.layout.hlvitem_user,
-                                                        new String[]{User.FIRST_NAME, User.IMAGE_NAME}, new int[]{R.id.tv_title, R.id.iv_event});
-
-                                                ((HListView) view).setAdapter(simpleAdapter);
-                                                simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                                    @Override
-                                                    public boolean setViewValue(View view, Object o,
-                                                            String s) {
-                                                        switch (view.getId()) {
-                                                            case R.id.iv_event:
-                                                                if (o != null && o.toString().length() > 0) {
-                                                                    Picasso.with(FeedActivity.this)
-                                                                            .load(PeckApp.Constants.Network.BASE_URL + o)
-                                                                            .fit()
-                                                                            .centerCrop()
-                                                                            .into((RoundedImageView) view);
-                                                                }
-                                                                return true;
-                                                        }
-                                                        return false;
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            protected Void doInBackground(Void... voids) {
-                                                Cursor second = getContentResolver().query(DBUtils.buildLocalUri(Circle.class).buildUpon().appendPath(Integer.toString(circle_id)).appendPath("users").build(),
-                                                        new String[]{User.FIRST_NAME, User.IMAGE_NAME, User.LOCAL_ID, User.SV_ID}, null, null, null);
-
-                                                ret = new ArrayList<Map<String, Object>>();
-
-                                                while (second.moveToNext()) {
-                                                    Map<String, Object> map = new HashMap<String, Object>();
-                                                    map.put(User.FIRST_NAME, second.getString(second.getColumnIndex(User.FIRST_NAME)));
-                                                    map.put(User.IMAGE_NAME, second.getString(second.getColumnIndex(User.IMAGE_NAME)));
-                                                    ret.add(map);
-                                                }
-                                                second.close();
-                                                synchronized (circleMembers) {
-                                                    circleMembers.put(circle_id, ret);
-                                                }
-                                                return null;
-                                            }
-
-                                            @Override
-                                            protected void onPostExecute(final Void avoid) {
-                                                setUpCell();
-                                            }
-                                        }.execute();
-                                        return true;
-                                    case R.id.bt_add_cm:
-                                        view.setOnClickListener(new View.OnClickListener() {
-                                                                    @Override
-                                                                    public void onClick(View view) {
-                                                                        LinearLayout parent = ((LinearLayout) tView.getParent());
-                                                                        if (parent != null) {
-                                                                            parent.removeView(tView);
-                                                                            if (parent.equals(view.getParent().getParent()))
-                                                                                return;
-                                                                        }
-
-                                                                        tView.clearListSelection();
-                                                                        ((SimpleCursorAdapter) tView.getAdapter()).changeCursor(null);
-                                                                        tView.setText("");
-
-                                                                        ((LinearLayout) view.getParent().getParent()).addView(tView);
-                                                                        //tView.requestFocus();
-                                                                        View feedView = tFeed.getView();
-                                                                        if (feedView != null) {
-                                                                            final ListView listView = ((ListView) tFeed.getListView());
-                                                                            final int lvPos = listView.getPositionForView(tView);
-                                                                            currentCircleAddPos = lvPos;
-                                                                            listView.post(new Runnable() { //we post the movement as a runnable so the cell gets resized before it happens
-                                                                                @Override
-                                                                                public void run() {
-                                                                                    final int pos = lvPos - listView.getFirstVisiblePosition();
-                                                                                    final int offset = listView.getChildAt(pos).getMeasuredHeight() - tView.getMeasuredHeight();
-                                                                                    listView.smoothScrollToPositionFromTop(lvPos, -offset);
-                                                                                }
-                                                                            });
-                                                                            currentCircleId = listView.getAdapter().getItemId(currentCircleAddPos);
-                                                                            new AsyncTask<Void, Void, Void>() {
-                                                                                @Override
-                                                                                protected Void doInBackground(
-                                                                                        Void... voids) {
-                                                                                    ((SimpleCursorAdapter) tView.getAdapter()).changeCursor(FeedActivity.this.getContentResolver().query(DBUtils.buildLocalUri(Circle.class)
-                                                                                            .buildUpon().appendPath(Long.toString(currentCircleId)).appendPath("nonmembers").build(),
-                                                                                            new String[]{ User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.IMAGE_NAME, User.THUMBNAIL}, null, null, User.FIRST_NAME ));
-                                                                                    return null;
-                                                                                }
-                                                                            }.execute();
-                                                                        } else {
-                                                                            throw new IllegalStateException("onclick was called when fragment was unavailable.");
-                                                                        }
-
-
-
-                                                                        Log.d(FeedActivity.class.getSimpleName(), "clicked");
-                                                                    }
-                                                                }
-
-                                        );
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                            }
-                        }
-
-                ).build();
-
-        buttons.put(R.id.bt_circles, tFeed);
+        buttons.put(R.id.bt_circles, new CircleFeed());
 
         //set up the peck feed
         feed = new Feed.Builder(DBUtils.buildLocalUri(Peck.class), R.layout.lvitem_peck)
