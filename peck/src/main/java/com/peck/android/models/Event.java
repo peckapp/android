@@ -27,11 +27,25 @@ public class Event extends DBOperable {
     public static final transient int DINING_OPPORTUNITY = 2;
     public static final transient int ANNOUNCEMENT = 3;
 
-    @SerializedName("type")
+    public static final transient String SCORE = "score";
+    public static final transient String SCORE_UPDATED = "score_updated";
+    public static final transient String TYPE = "type";
+
+    /* shared fields */
+    /* all */
+    @SerializedName(TYPE)
     @DBType("integer")
     int type;
 
-    /* shared fields */
+    @SerializedName(SCORE_UPDATED)
+    @DBType("real")
+    double scoreUpdated;
+
+    @Expose
+    @SerializedName(SCORE)
+    @DBType("real")
+    double score;
+
     /*simple events and announcements*/
     @Expose
     @SerializedName(TITLE)
@@ -62,7 +76,6 @@ public class Event extends DBOperable {
     public static final transient String BLURRED_URL = "blurred_image";
     public static final transient String EVENT_URL = "event_url";
     public static final transient String USER_ID = "user_id";
-    public static final transient String TYPE = "type";
     public static final transient String PUBLIC = "public";
     public static final transient String START_TIMESTAMP = "start_ts";
     public static final transient String END_TIMESTAMP = "end_ts";

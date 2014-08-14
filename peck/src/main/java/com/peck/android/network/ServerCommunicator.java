@@ -248,7 +248,8 @@ public class ServerCommunicator {
         @POST("/api/users/user_for_udid")
         JsonObject userForUdid(@Field("udid") String udid, @Field("device_type") String deviceType);
 
-
+        @GET("/api/explore")
+        void updateExplore(@QueryMap Map<String, String> authentication, Callback<JsonObject> callback);
     }
 
 }
