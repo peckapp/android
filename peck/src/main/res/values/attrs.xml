@@ -4,21 +4,5 @@
   -->
 
 <resources>
-    <declare-styleable name="EventView">
-        <attr name="eventType" format="enum">
-            <enum name="simple_event" value="0"/>
-            <enum name="athletic_event" value="1"/>
-            <enum name="announcement" value="2"/>
-            <enum name="dining_opportunity" value="3"/>
-        </attr>
-        <attr name="image_url" format="string"/>
-        <attr name="event_id" format="integer"/>
 
-        <attr name="user_image_url" format="string"/>
-    </declare-styleable>
-
-    <declare-styleable name="CircleView">
-        <attr name="circle_id" format="string"/>
-        <attr name="circle_name" format="string"/>
-    </declare-styleable>
 </resources>
