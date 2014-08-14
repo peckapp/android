@@ -60,11 +60,11 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     private boolean dividers;
 
     private AdapterView.OnItemClickListener listener;
+    private AdapterView mAdapterView;
 
     private SimpleCursorAdapter.ViewBinder viewBinder;
     private Bundle loaderBundle;
-    private static int loader_static = 0;
-    private final int URL_LOADER = loader_static++;
+    private static final int LOADER_ID = 0;
 
     private ArrayList<View> footers = new ArrayList<View>();
     private ArrayList<View> headers = new ArrayList<View>();
@@ -296,7 +296,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
         adapterView.setAdapter(mAdapter);
         if (listener != null) (adapterView).setOnItemClickListener(listener);
 
-        getLoaderManager().initLoader(URL_LOADER, loaderBundle, this);
+        getLoaderManager().initLoader(LOADER_ID, loaderBundle, this);
     }
 
     /**
@@ -304,7 +304,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
      */
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        if (i == URL_LOADER) return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
+        if (i == LOADER_ID) return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
                 bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
         else return null;
     }
@@ -357,22 +357,33 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
-        AdapterView lv = ((AdapterView) view.findViewById(listViewRes));
-        if (lv instanceof ListView) {
-            for (View header : headers) ((ListView) lv).addHeaderView(header);
-            for (View footer : footers) ((ListView) lv).addFooterView(footer);
+        mAdapterView = ((AdapterView) view.findViewById(listViewRes));
+        if (mAdapterView instanceof ListView) {
+            for (View header : headers) ((ListView) mAdapterView).addHeaderView(header);
+            for (View footer : footers) ((ListView) mAdapterView).addFooterView(footer);
             if (!dividers) {
-                ((ListView) lv).setDividerHeight(0);
-                ((ListView) lv).setDivider(null);
+                ((ListView) mAdapterView).setDividerHeight(0);
+                ((ListView) mAdapterView).setDivider(null);
             }
         }
 
-        bindToAdapterView(lv);
+        bindToAdapterView(mAdapterView);
         return view;
     }
 
+    public void setSelection(String selection, String[] args) {
+        loaderBundle.putString(LOADER_SELECTION, selection);
+        loaderBundle.putStringArray(LOADER_SELECT_ARGS, args);
+        getLoaderManager().initLoader(LOADER_ID, loaderBundle, this);
+    }
+
+
     public int getListViewRes() {
         return listViewRes;
+    }
+
+    public AdapterView getListView() {
+        return mAdapterView;
     }
 
     public void setViewBinder(SimpleCursorAdapter.ViewBinder binder) {

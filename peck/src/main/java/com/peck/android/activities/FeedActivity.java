@@ -593,7 +593,7 @@ public class FeedActivity extends FragmentActivity {
                     public void run() {
                         //set/clear the search view as necessary
                         View mView = tFeed.getView();
-                        if (mView != null && recycledView != null && recycledView.isFocusable() && ((ListView) mView.findViewById(tFeed.getListViewRes())).getPositionForView(recycledView) != currentCircleAddPos) {
+                        if (mView != null && recycledView != null && recycledView.isFocusable() && (tFeed.getListView()).getPositionForView(recycledView) != currentCircleAddPos) {
                             ((LinearLayout) recycledView).addView(tView);
                         } else if (recycledView != null && tView != null)
                             ((LinearLayout) recycledView).removeView(tView);
@@ -693,7 +693,7 @@ public class FeedActivity extends FragmentActivity {
                                                                         //tView.requestFocus();
                                                                         View feedView = tFeed.getView();
                                                                         if (feedView != null) {
-                                                                            final ListView listView = ((ListView) feedView.findViewById(tFeed.getListViewRes()));
+                                                                            final ListView listView = ((ListView) tFeed.getListView());
                                                                             final int lvPos = listView.getPositionForView(tView);
                                                                             currentCircleAddPos = lvPos;
                                                                             listView.post(new Runnable() { //we post the movement as a runnable so the cell gets resized before it happens
