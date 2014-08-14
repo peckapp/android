@@ -166,6 +166,11 @@ public class HomeFeed extends Feed {
         baseSelection = loaderBundle.getString(LOADER_SELECTION);
     }
 
+    /**
+     * {@link #setSelection(String, String[])} to filter to the specified day only
+     *
+     * @param offset the offset in days from today to filter
+     */
     public void withRelativeDate(int offset) {
         if (curOffset != offset) {
             String sel = SEL_BY_DATE;

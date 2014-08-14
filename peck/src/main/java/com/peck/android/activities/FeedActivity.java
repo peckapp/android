@@ -10,9 +10,7 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -25,13 +23,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -497,81 +493,7 @@ public class FeedActivity extends FragmentActivity {
                 }).build();
         buttons.put(R.id.bt_explore, feed);
 
-        final LayoutInflater inflater = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE));
 
-        //inflate the header for the circles feed
-        View header = inflater.inflate(R.layout.circles_header, null, false);
-
-        //with circle-adding functionality
-        header.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                final View dialogView = inflater.inflate(R.layout.alert_circlecreate, null, false);
-                final AlertDialog dialog = new AlertDialog.Builder(FeedActivity.this).setView(dialogView).setPositiveButton("Create", null).setCancelable(true).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                }).create();
-
-                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                    @Override
-                    public void onShow(DialogInterface dialogInterface) {
-                        Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                        button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View inner) {
-                                final String circleName = ((EditText) dialogView.findViewById(R.id.et_name)).getText().toString();
-                                Account account = LoginManager.getActive();
-                                JsonObject jsonBody = new JsonObject();
-                                jsonBody.addProperty(Circle.NAME, circleName);
-                                jsonBody.addProperty(Circle.LOCALE, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.INSTITUTION));
-                                jsonBody.addProperty(Circle.USER_ID, AccountManager.get(FeedActivity.this).getUserData(account, PeckAccountAuthenticator.USER_ID));
-                                dialogView.findViewById(R.id.pb_network).setVisibility(View.VISIBLE);
-
-                                try {
-                                    Map<String, String> auth = JsonUtils.auth(account);
-                                    ServerCommunicator.jsonService.post("circles", new ServerCommunicator.TypedJsonBody(JsonUtils.wrapJson("circle", jsonBody)), auth, new Callback<JsonObject>() {
-                                        @Override
-                                        public void success(JsonObject object, Response response) {
-                                            dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
-                                            if (object.get("errors").getAsJsonArray().size() > 0) {
-                                                Toast.makeText(FeedActivity.this, "failure: " + object.get("errors").toString(), Toast.LENGTH_LONG).show();
-                                            }
-                                            else {
-                                                Toast.makeText(FeedActivity.this, "success", Toast.LENGTH_LONG).show();
-                                                DBUtils.syncJson(DBUtils.buildLocalUri(Circle.class), object.getAsJsonObject("circle"), Circle.class);
-                                                dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
-                                                dialog.dismiss();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void failure(RetrofitError error) {
-                                            Toast.makeText(FeedActivity.this, "Network error posting circle: " + ((error.getResponse() != null) ? (error.getResponse().getStatus() + " - " + error.getResponse().getReason()) : error.getMessage()), Toast.LENGTH_LONG).show();
-                                            dialogView.findViewById(R.id.pb_network).setVisibility(View.GONE);
-                                        }
-                                    });
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                } catch (OperationCanceledException e) {
-                                    e.printStackTrace();
-                                } catch (AuthenticatorException e) {
-                                    e.printStackTrace();
-                                } catch (LoginManager.InvalidAccountException e) {
-                                    e.printStackTrace();
-                                } catch (NetworkErrorException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        });
-                    }
-                });
-                dialog.show();
-
-            }
-        });
 
 
         //use the instance tFeed field so we can access it in the builder. *do not* reassign this field.
