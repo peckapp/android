@@ -8,6 +8,7 @@ package com.peck.android.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.peck.android.annotations.DBType;
 import com.peck.android.annotations.Header;
 import com.peck.android.annotations.UriPath;
 
@@ -18,20 +19,33 @@ import com.peck.android.annotations.UriPath;
 @UriPath("pecks")
 public class Peck extends DBOperable {
 
-    public static final transient String NOTIFICATION_TYPE = "NOTIFICATION_TYPE";
+    public static final transient String NOTIFICATION_TYPE = "notification_type";
     public static final transient String TEXT = "message";
-    public static final transient String INVITED_TO = "invitation";
+    public static final transient String INVITATION = "invitation";
     public static final transient String INVITED_BY = "invited_by";
+    public static final transient String REFERS_TO = "refers_to";
+    public static final transient String USER_ID = "user_id";
 
     @Expose
-    @SerializedName(INVITED_TO)
-    private long invitedTo;
+    @DBType("integer")
+    @SerializedName(USER_ID)
+    private long userId;
+
 
     @Expose
+    @DBType("integer")
+    @SerializedName(REFERS_TO)
+    private long refersTo;
+
+    @Expose
+    @SerializedName(INVITATION)
+    private String invitation;
+
+    @Expose
+    @DBType("integer")
     @SerializedName(INVITED_BY)
     private long invitedBy;
 
-    //todo: assign serializations
     @Expose
     @SerializedName(NOTIFICATION_TYPE)
     private String type;
