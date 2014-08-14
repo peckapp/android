@@ -19,8 +19,6 @@ import android.database.MatrixCursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -32,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
@@ -53,6 +50,7 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
+import com.peck.android.fragments.feeds.HomeFeed;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
@@ -72,9 +70,10 @@ import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Pattern;
 
 import it.sephiroth.android.library.widget.HListView;
@@ -96,6 +95,8 @@ public class FeedActivity extends FragmentActivity {
     public final static String TAB_POST = "tb_post";
     public final static String TAB_CIRCLES = "tb_circles";
     public final static String TAB_PROFILE = "tb_profile";
+
+    private Deque<HomeFeed> fragQueue = new LinkedBlockingDeque<HomeFeed>(5);
 
     //traveling search view
     private AutoCompleteTextView tView;
@@ -810,138 +811,56 @@ public class FeedActivity extends FragmentActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
-        //build the event feed
-        Feed feed = new Feed.Builder(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Event.class)).build(), R.layout.lvitem_event)
-                .withBindings(new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE}, new int[]{R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time})
-                .withProjection(new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
-                        Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
-                        Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME})
-                .orderedBy(Event.UPDATED_AT + " desc")
-                .withoutDividers()
-                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, final long l) {
-                        new AsyncTask<Void, Void, Void>() {
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                Cursor temp = getContentResolver().query(DBUtils.buildLocalUri(Event.class), new String[] { Event.LOCAL_ID, Event.TYPE }, Event.LOCAL_ID + " = ?", new String[] { Long.toString(l) }, null);
-                                temp.moveToFirst();
-                                String type = temp.getString(temp.getColumnIndex(Event.TYPE));
-                                Log.d(FeedActivity.class.getSimpleName(), type.equals("0") ? "simple" : type.equals("3") ? "announcement" : type.equals("1") ? "athletic" : "dining op");
-                                temp.close();
-                                return null;
-                            }
-                        }.execute();
-                    }
-                })
-                .withViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                    @Override
-                    public boolean setViewValue(final View view, final Cursor cursor, int i) {
-                        switch (cursor.getInt(cursor.getColumnIndex(Event.TYPE))) {
-                            case Event.ATHLETIC_EVENT:
-                                switch (view.getId()) {
-                                    case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
-                                        return true;
-                                    case R.id.tv_text:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
-                                        return true;
-                                    case R.id.iv_event:
-                                        Picasso.with(FeedActivity.this)
-                                                .load(R.drawable.ic_peck)
-                                                .fit()
-                                                .centerCrop()
-                                                .into((ImageView) view);
-                                        return true;
-                                    case R.id.tv_time:
-                                        long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME))*1000l;
-                                        if (date > 0)
-                                            ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz)).toString("K:mm"));
-                                        return true;
-                                    default:
-                                        return false;
-                                }
+        fragQueue.add(new HomeFeed());
+        fragQueue.add(new HomeFeed());
+        fragQueue.add(new HomeFeed());
+        fragQueue.add(new HomeFeed());
+        fragQueue.add(new HomeFeed());
 
-                            case Event.DINING_OPPORTUNITY:
-                                switch (view.getId()) {
-                                    case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
-                                        return true;
-                                    case R.id.tv_text:
-                                        return true;
-                                    case R.id.iv_event:
-                                        Picasso.with(FeedActivity.this)
-                                                .load(R.drawable.ic_peck)
-                                                .fit()
-                                                .centerCrop()
-                                                .into((ImageView) view);
-                                        return true;
-                                    case R.id.tv_time:
-                                        DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
-                                        ((TextView) view).setText(start.toString("K:mm"));
-                                        return true;
-                                    default:
-                                        return false;
-                                }
+        getSupportFragmentManager().beginTransaction().add(R.id.ll_temp, new HomeFeed()).commit();
 
-                            case Event.SIMPLE_EVENT:
-                                switch (view.getId()) {
-                                    case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
-                                        return true;
-                                    case R.id.tv_text:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TEXT)));
-                                        return true;
-                                    case R.id.iv_event:
-                                        String urlPath = cursor.getString(cursor.getColumnIndex(Event.BLURRED_URL));
-                                        if (urlPath != null && urlPath.length() != 0) {
-                                            Picasso.with(FeedActivity.this)
-                                                    .load(PeckApp.Constants.Network.BASE_URL + urlPath)
-                                                    .fit()
-                                                    .centerCrop()
-                                                    .into((ImageView) view);
-                                        } else {
-                                            Picasso.with(FeedActivity.this)
-                                                    .load(R.drawable.ic_peck)
-                                                    .fit()
-                                                    .centerCrop()
-                                                    .into((ImageView) view);
-                                        }
-                                        return true;
-                                    case R.id.tv_time:
-                                        DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
-                                        ((TextView) view).setText(stTemp.toString("K:mm"));
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                            case Event.ANNOUNCEMENT:
-                                switch (view.getId()) {
-                                    case R.id.tv_title:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.TITLE)));
-                                        return true;
-                                    case R.id.tv_text:
-                                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ANNOUNCEMENT_TEXT)));
-                                        return true;
-                                    case R.id.tv_time:
-                                        ((TextView) view).setText("");
-                                        return true;
-                                    case R.id.iv_event:
-                                        Picasso.with(FeedActivity.this)
-                                                .load(R.drawable.ic_peck)
-                                                .fit()
-                                                .centerCrop()
-                                                .into(((ImageView) view));
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                        }
-                        return false;
-                    }
-                })
-                .build();
-        getSupportFragmentManager().beginTransaction().add(R.id.ll_home_feed, feed).commit();
+
+        /*final ViewPager pager = ((ViewPager) findViewById(R.id.vp_home_feed));
+        pager.setOffscreenPageLimit(2);
+        final FragmentStatePagerAdapter pagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int i) {
+                HomeFeed ret = fragQueue.removeFirst();
+                ret.withRelativeDate(i);
+                return ret;
+            }
+
+            @Override
+            public int getCount() {
+                return 5;
+            }
+        };
+        pager.setAdapter(pagerAdapter);
+
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            int currentPage;
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {
+                currentPage = i;
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                switch (((int) Math.signum(i - currentPage))) {
+                    case 1:
+                        break;
+                    case -1:
+                        break;
+                    case 0:
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {}
+        });*/
+
+
 
     }
 
@@ -979,76 +898,5 @@ public class FeedActivity extends FragmentActivity {
         View view = findViewById(R.id.ll_feed_content);
         view.setVisibility((view.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
     }
-
-    /**
-     * an attempt to make a thread-safe adapter for a spinner.
-     * built for search view.
-     */
-    private class SearchSpinnerAdapter extends BaseAdapter {
-        private Handler handler = new Handler(Looper.getMainLooper());
-        private LinkedHashMap<String, Long> data = new LinkedHashMap<String, Long>();
-
-        private SearchSpinnerAdapter() {
-
-        }
-
-
-        private SearchSpinnerAdapter(LinkedHashMap<String, Long> data) {
-            this.data = data;
-        }
-
-        public synchronized void setData(LinkedHashMap<String, Long> data) {
-            this.data = data;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public synchronized int getCount() {
-            return data.size();
-        }
-
-        /**
-         * @param i position position to check
-         * @return the string at position i
-         */
-        @Override
-        public synchronized String getItem(int i) {
-            return ((String) data.keySet().toArray()[i]);
-        }
-
-        /**
-         * @param i position to check
-         * @return the id of the item at position i
-         */
-        @Override
-        public synchronized long getItemId(int i) {
-            return data.get(getItem(i));
-        }
-
-        @Override
-        public synchronized View getView(int i, View convertView, ViewGroup viewGroup) {
-            if (convertView == null) {
-                convertView = ((LayoutInflater) PeckApp.getContext().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.sp_search_item, viewGroup);
-            }
-
-            ((TextView) convertView.findViewById(R.id.tv_title)).setText(getItem(i));
-            return convertView;
-        }
-
-
-        /**
-         * execute on main thread. we'll get errors if we call from an async thread.
-         */
-        @Override
-        public synchronized void notifyDataSetChanged() {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    SearchSpinnerAdapter.super.notifyDataSetChanged();
-                }
-            });
-        }
-    }
-
 
 }

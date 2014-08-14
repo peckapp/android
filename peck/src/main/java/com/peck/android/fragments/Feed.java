@@ -374,7 +374,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     public void setSelection(String selection, String[] args) {
         loaderBundle.putString(LOADER_SELECTION, selection);
         loaderBundle.putStringArray(LOADER_SELECT_ARGS, args);
-        getLoaderManager().initLoader(LOADER_ID, loaderBundle, this);
+        if (isAdded()) getLoaderManager().initLoader(LOADER_ID, loaderBundle, this);
     }
 
 
@@ -393,4 +393,6 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) { this.listener = listener; }
 
+    public String getSelection() { return loaderBundle.getString(LOADER_SELECTION); }
+    public String[] getSelectionArgs() { return loaderBundle.getStringArray(LOADER_SELECT_ARGS);}
 }

@@ -30,17 +30,27 @@ import org.joda.time.DateTimeZone;
  * Created by mammothbane on 8/14/2014.
  */
 public class HomeFeed extends Feed {
+    public static final String DATE_ORDER = "date_order";
+    public static final String SEL_BY_DATE = DATE_ORDER + " > ? and " + DATE_ORDER + " < ?";
+    private String baseSelection;
+
+
+    public int curOffset = -1;
     {
         listItemRes = R.layout.lvitem_event;
         binds_from = new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE};
         binds_to = new int[] {R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time};
         loaderBundle = new Bundle();
-        loaderBundle.putString(LOADER_SORT_ORDER, Event.START_DATE + " asc");
+        loaderBundle.putString(LOADER_SORT_ORDER, Event.START_DATE + " desc");
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
                 Event.DINING_START_TIME, Event.DINING_END_TIME, Event.IMAGE_URL, Event.ANNOUNCEMENT_TEXT, Event.UPDATED_AT, Event.BLURRED_URL,
-                Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME});
+                Event.ATHLETIC_DATE_AND_TIME, Event.START_DATE, Event.DINING_START_TIME,
+                "case " + Event.TYPE + " when " + Event.SIMPLE_EVENT + " then " + Event.START_DATE +
+                        " when " + Event.DINING_OPPORTUNITY + " then " + Event.DINING_START_TIME +
+                        " when " + Event.ATHLETIC_EVENT + " then " + Event.ATHLETIC_DATE_AND_TIME +
+                        " when " + Event.ANNOUNCEMENT + " then " + Event.UPDATED_AT + " end as " + DATE_ORDER});
+        loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Event.class));
         dividers = false;
-
     }
 
     @Override
@@ -75,11 +85,6 @@ public class HomeFeed extends Feed {
                                 ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
                                 return true;
                             case R.id.iv_event:
-                                Picasso.with(getActivity())
-                                        .load(R.drawable.ic_peck)
-                                        .fit()
-                                        .centerCrop()
-                                        .into((ImageView) view);
                                 return true;
                             case R.id.tv_time:
                                 long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME))*1000l;
@@ -98,11 +103,6 @@ public class HomeFeed extends Feed {
                             case R.id.tv_text:
                                 return true;
                             case R.id.iv_event:
-                                Picasso.with(getActivity())
-                                        .load(R.drawable.ic_peck)
-                                        .fit()
-                                        .centerCrop()
-                                        .into((ImageView) view);
                                 return true;
                             case R.id.tv_time:
                                 DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
@@ -122,15 +122,9 @@ public class HomeFeed extends Feed {
                                 return true;
                             case R.id.iv_event:
                                 String urlPath = cursor.getString(cursor.getColumnIndex(Event.BLURRED_URL));
-                                if (urlPath != null && urlPath.length() != 0) {
+                                if (urlPath != null && urlPath.length() != 0 && !urlPath.equals("/images/missing.png")) {
                                     Picasso.with(getActivity())
                                             .load(PeckApp.Constants.Network.BASE_URL + urlPath)
-                                            .fit()
-                                            .centerCrop()
-                                            .into((ImageView) view);
-                                } else {
-                                    Picasso.with(getActivity())
-                                            .load(R.drawable.ic_peck)
                                             .fit()
                                             .centerCrop()
                                             .into((ImageView) view);
@@ -155,11 +149,6 @@ public class HomeFeed extends Feed {
                                 ((TextView) view).setText("");
                                 return true;
                             case R.id.iv_event:
-                                Picasso.with(getActivity())
-                                        .load(R.drawable.ic_peck)
-                                        .fit()
-                                        .centerCrop()
-                                        .into(((ImageView) view));
                                 return true;
                             default:
                                 return false;
@@ -168,6 +157,25 @@ public class HomeFeed extends Feed {
                 return false;
             }
         };
+        withRelativeDate(0);
+    }
 
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        baseSelection = loaderBundle.getString(LOADER_SELECTION);
+    }
+
+    public void withRelativeDate(int offset) {
+        if (curOffset != offset) {
+            String sel = SEL_BY_DATE;
+            long after = DateTime.now().plusDays(offset).withTimeAtStartOfDay().toInstant().getMillis() / 1000l;
+            long before = DateTime.now().plusDays(offset + 1).withTimeAtStartOfDay().toInstant().getMillis() / 1000l;
+            sel = sel.replaceFirst("\\?", Long.toString(after));
+            sel = sel.replace("?", Long.toString(before));
+            setSelection(sel, null);
+
+            curOffset = offset;
+        } else Log.v(HomeFeed.class.getSimpleName(), "not updating this fragment with offset " + offset + "; it's already there");
     }
 }

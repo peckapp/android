@@ -85,11 +85,17 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:id="@+id/ll_home_feed"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_home_feed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/ll_mainbar"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/ll_temp"
         android:layout_below="@+id/ll_mainbar"/>
 
     <ImageView

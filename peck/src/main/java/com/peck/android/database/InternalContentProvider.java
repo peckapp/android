@@ -60,7 +60,7 @@ public class InternalContentProvider extends ContentProvider {
         return (uri.getPath());
     }
 
-    private static String extendSelection(String selection, String append) {
+    public static String extendSelection(String selection, String append) {
         return ((selection != null && selection.length() != 0) ? selection + " and " : "") + append;
     }
 

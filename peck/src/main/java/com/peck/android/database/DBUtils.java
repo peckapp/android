@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,6 +24,7 @@ import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.network.JsonUtils;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
@@ -162,6 +164,27 @@ public class DBUtils {
                 return null;
             }
         }.execute();
+    }
+
+    public static Pair<String, String[]> replaceSingleSqlSelection(
+            @Nullable String currentSelection, @Nullable String[] currentArgs,
+            @NonNull String replace, @Nullable String argReplace) {
+        String[] retArray = (currentArgs == null ? new String[] {} : currentArgs);
+        if (currentSelection != null && currentSelection.contains(replace)) {
+            String[] div = currentSelection.split("\\?");
+            for (int i = 0; i < div.length; i++) {
+                String s = div[i];
+                if (s.contains(replace)) {
+                    retArray[i] = argReplace;
+                    break;
+                }
+            }
+        } else {
+            InternalContentProvider.extendSelection(currentSelection, replace);
+            ArrayUtils.add(retArray, argReplace);
+        }
+
+        return new Pair<String, String[]>(currentSelection, currentArgs);
     }
 
 }
