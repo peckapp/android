@@ -44,6 +44,10 @@ import retrofit.RetrofitError;
 
 /**
  * Created by mammothbane on 7/14/2014.
+ *
+ * main sync adapter for the app.
+ * @since 1.0
+ * @author mammothbane
  */
 public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -54,13 +58,23 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
     public static int batchCount = 0;
     final ContentResolver contentResolver;
     final Object syncResultLock = new Object();
-    final Object batchLock = new Object();
+    public static final Object batchLock = new Object();
 
     public PeckSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         contentResolver = context.getContentResolver();
     }
 
+
+    /**
+     *
+     *
+     * @param account the authenticating account
+     * @param bundle - can specify {@link #SYNC_TYPE} and {@link #URL} params to sync a particular class with a specific url.
+     * @param authority the authority to sync with.
+     * @param client a contentproviderclient
+     * @param syncResult the stats or the sync
+     */
     @Override
     public void onPerformSync(final Account account, final Bundle bundle, final String authority, final ContentProviderClient client, final SyncResult syncResult) {
         Log.v(PeckSyncAdapter.class.getSimpleName(), "syncing");

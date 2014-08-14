@@ -5,15 +5,22 @@
 
 package com.peck.android.fragments.feeds;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
@@ -21,9 +28,11 @@ import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.FailureCallback;
 import com.peck.android.managers.LoginManager;
+import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
 import com.peck.android.models.User;
 import com.peck.android.network.JsonUtils;
+import com.peck.android.network.PeckSyncAdapter;
 import com.peck.android.network.ServerCommunicator;
 import com.squareup.picasso.Picasso;
 
@@ -31,6 +40,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import retrofit.Callback;
@@ -50,6 +61,8 @@ import retrofit.client.Response;
 public class ExploreFeed extends Feed {
 
     public static final String DATE_ORDER = "explr_order";
+    private boolean isRefreshing = false;
+    private final Object refreshLock = new Object();
     {
         listItemRes = R.layout.lvitem_explore;
         binds_from = new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID};
@@ -63,7 +76,7 @@ public class ExploreFeed extends Feed {
                 " when " + Event.ATHLETIC_EVENT + " then " + Event.ATHLETIC_DATE_AND_TIME +
                 " when " + Event.ANNOUNCEMENT + " then " + Event.UPDATED_AT + " end as " + DATE_ORDER});
 
-        loaderBundle.putString(LOADER_SELECTION, Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ?");
+        loaderBundle.putString(LOADER_SELECTION, Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ? AND " + Event.END_DATE + " > " + DateTime.now().toInstant().getMillis()/1000L);
         loaderBundle.putStringArray(LOADER_SELECT_ARGS, new String[]{Integer.toString(Event.SIMPLE_EVENT), Integer.toString(Event.ATHLETIC_EVENT), Integer.toString(Event.ANNOUNCEMENT)});
         loaderBundle.putString(LOADER_SORT_ORDER, Event.SCORE_UPDATED + " desc, " +  Event.SCORE + " desc, " + DATE_ORDER + " asc limit 200");
     }
@@ -341,19 +354,39 @@ public class ExploreFeed extends Feed {
         };
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        refresh();
+    }
+
     public void refresh() {
+        synchronized (refreshLock) { //fixme: this is a really rudimentary way of making this work
+            if (isRefreshing) return;
+            isRefreshing = true;
+        }
         JsonUtils.auth(LoginManager.getActive(), new FailureCallback<Map<String, String>>() {
             @Override
             protected void success(Map<String, String> item) {
                 ServerCommunicator.jsonService.updateExplore(item, new Callback<JsonObject>() {
                     @Override
-                    public void success(JsonObject jsonObject, Response response) {
+                    public void success(final JsonObject jsonObject, Response response) {
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                handleExploreArray(jsonObject.getAsJsonArray("explore_events"), false);
+                                handleExploreArray(jsonObject.getAsJsonArray("explore_announcements"), true);
+                                synchronized (refreshLock) { isRefreshing = false; }
+                                return null;
+                            }
+                        }.execute();
 
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
                         Log.e(ExploreFeed.class.getSimpleName(), "[ ERROR " + StringUtils.substring(error.getResponse() != null ? Integer.toString(error.getResponse().getStatus()) : "???", 0, 2) + "] Failed to download new explore items.", error);
+                        synchronized (refreshLock) { isRefreshing = false; }
                     }
                 });
 
@@ -362,8 +395,54 @@ public class ExploreFeed extends Feed {
             @Override
             protected void failure(Throwable cause) {
                 Log.e(ExploreFeed.class.getSimpleName(), "Failed to authenticate your account on explore refresh.", cause);
+                synchronized (refreshLock) { isRefreshing = false; }
             }
         });
     }
+
+
+
+
+    private void handleExploreArray(@Nullable JsonArray unwrappedArray, boolean isAnnouncement) {
+        if (unwrappedArray == null || unwrappedArray.isJsonNull() || unwrappedArray.size() == 0) return;
+        double updatedTime = DateTime.now().toInstant().getMillis()/1000D;
+        Cursor cursor = PeckApp.getContext().getContentResolver().query(DBUtils.buildLocalUri(Event.class),
+                new String[] { Event.SV_ID, Event.UPDATED_AT, Event.TYPE, Event.LOCAL_ID }, null, null, DBOperable.UPDATED_AT);
+        HashMap<Long, JsonObject> map = new HashMap<Long, JsonObject>();
+        ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+        for (JsonElement element : unwrappedArray) {
+            map.put(element.getAsJsonObject().get(Event.SV_ID).getAsLong(), element.getAsJsonObject());
+        }
+
+        while (cursor.moveToNext()) {
+            long id = cursor.getLong(cursor.getColumnIndex(Event.SV_ID));
+            if (map.containsKey(id) && cursor.getDouble(cursor.getColumnIndex(Event.UPDATED_AT)) <= map.get(id).get(Event.UPDATED_AT).getAsDouble()) {
+                JsonObject object = map.remove(id); //remove so it doesn't get inserted later
+                ContentValues values = JsonUtils.jsonToContentValues(object, Event.class);
+                values.put(Event.TYPE, isAnnouncement ? Event.ANNOUNCEMENT : object.get("event_type").getAsString().equals("simple") ? Event.SIMPLE_EVENT : Event.ATHLETIC_EVENT);
+                values.put(Event.SCORE_UPDATED, updatedTime);
+                batch.add(ContentProviderOperation.newUpdate(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
+            }
+        }
+
+        for (JsonObject object : map.values()) { //insert the remaining values
+            ContentValues values = JsonUtils.jsonToContentValues(object, Event.class);
+            values.put(Event.TYPE, isAnnouncement ? Event.ANNOUNCEMENT : object.get("event_type").getAsString().equals("simple") ? Event.SIMPLE_EVENT : Event.ATHLETIC_EVENT);
+            values.put(Event.SCORE_UPDATED, updatedTime);
+            batch.add(ContentProviderOperation.newInsert(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
+        }
+
+        try {
+            synchronized (PeckSyncAdapter.batchLock) {
+                PeckApp.getContext().getContentResolver().applyBatch(PeckApp.AUTHORITY, batch);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
+        }
+        PeckApp.getContext().getContentResolver().notifyChange(DBUtils.buildLocalUri(Event.class), null, false);
+    }
+
 
 }

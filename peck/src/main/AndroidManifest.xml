@@ -36,10 +36,6 @@
         android:theme="@style/PeckTheme" >
 
         <meta-data
-            android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAIB-g2LHMGuQsbW5ILD_V1Wvwqrj0bLBGvgzGXnA" />
-
-        <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/app_id"/>
 

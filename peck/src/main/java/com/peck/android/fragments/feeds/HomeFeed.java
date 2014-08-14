@@ -28,6 +28,9 @@ import org.joda.time.DateTimeZone;
 
 /**
  * Created by mammothbane on 8/14/2014.
+ *
+ * the home feed
+ *
  */
 public class HomeFeed extends Feed {
     public static final String DATE_ORDER = "date_order";
@@ -37,8 +40,8 @@ public class HomeFeed extends Feed {
     public int curOffset = -1;
     {
         listItemRes = R.layout.lvitem_event;
-        binds_from = new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE};
-        binds_to = new int[] {R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time};
+        binds_from = new String[]{Event.TYPE, Event.TYPE, Event.IMAGE_URL, Event.START_DATE, Event.LOCAL_ID, Event.LOCAL_ID, Event.LOCAL_ID};
+        binds_to = new int[] {R.id.tv_title, R.id.tv_text, R.id.iv_event, R.id.tv_time, R.id.rl_dining, R.id.rl_event, R.id.tv_diningtype};
         loaderBundle = new Bundle();
         loaderBundle.putString(LOADER_SORT_ORDER, DATE_ORDER + " asc");
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Event.TITLE, Event.TEXT, Event.ATHLETIC_OPPONENT, Event.DINING_OP_TYPE, DBOperable.LOCAL_ID, Event.TYPE,
@@ -84,11 +87,20 @@ public class HomeFeed extends Feed {
                                 ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_NOTE)));
                                 return true;
                             case R.id.iv_event:
+                                ((ImageView) view).setImageBitmap(null);
                                 return true;
                             case R.id.tv_time:
                                 long date = cursor.getLong(cursor.getColumnIndex(Event.ATHLETIC_DATE_AND_TIME))*1000l;
                                 if (date > 0)
                                     ((TextView) view).setText(new DateTime(date).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz)).toString("K:mm"));
+                                return true;
+                            case R.id.rl_event:
+                                view.setVisibility(View.VISIBLE);
+                                return true;
+                            case R.id.rl_dining:
+                                view.setVisibility(View.GONE);
+                                return true;
+                            case R.id.tv_diningtype:
                                 return true;
                             default:
                                 return false;
@@ -97,15 +109,22 @@ public class HomeFeed extends Feed {
                     case Event.DINING_OPPORTUNITY:
                         switch (view.getId()) {
                             case R.id.tv_title:
-                                ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                 return true;
                             case R.id.tv_text:
                                 return true;
                             case R.id.iv_event:
+                                ((ImageView) view).setImageBitmap(null);
                                 return true;
                             case R.id.tv_time:
-                                DateTime start = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.DINING_START_TIME))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
-                                ((TextView) view).setText(start.toString("K:mm"));
+                                return true;
+                            case R.id.rl_event:
+                                view.setVisibility(View.GONE);
+                                return true;
+                            case R.id.rl_dining:
+                                view.setVisibility(View.VISIBLE);
+                                return true;
+                            case R.id.tv_diningtype:
+                                ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Event.DINING_OP_TYPE)));
                                 return true;
                             default:
                                 return false;
@@ -133,6 +152,14 @@ public class HomeFeed extends Feed {
                                 DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
                                 ((TextView) view).setText(stTemp.toString("K:mm"));
                                 return true;
+                            case R.id.rl_event:
+                                view.setVisibility(View.VISIBLE);
+                                return true;
+                            case R.id.rl_dining:
+                                view.setVisibility(View.GONE);
+                                return true;
+                            case R.id.tv_diningtype:
+                                return true;
                             default:
                                 return false;
                         }
@@ -148,6 +175,19 @@ public class HomeFeed extends Feed {
                                 ((TextView) view).setText("");
                                 return true;
                             case R.id.iv_event:
+                                Picasso.with(getActivity())
+                                        .load(cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
+                                        .fit()
+                                        .centerCrop()
+                                        .into(((ImageView) view));
+                                return true;
+                            case R.id.rl_event:
+                                view.setVisibility(View.VISIBLE);
+                                return true;
+                            case R.id.rl_dining:
+                                view.setVisibility(View.GONE);
+                                return true;
+                            case R.id.tv_diningtype:
                                 return true;
                             default:
                                 return false;

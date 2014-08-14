@@ -14,7 +14,7 @@
     <dimen name="login_sp_margin">16dp</dimen>
     <dimen name="feed_vert_margin">16dp</dimen>
     <dimen name="feed_horz_margin">16dp</dimen>
-    <dimen name="bar_height">84dp</dimen>
+    <dimen name="bar_height">100dp</dimen>
     <dimen name="new_bar_height">70dp</dimen>
     <dimen name="bt_post_height">60dp</dimen>
     <dimen name="prof_picture_bound">180dp</dimen>
@@ -22,5 +22,4 @@
     <dimen name="share_height">40dp</dimen>
     <dimen name="circle_item_height">100dp</dimen>
     <dimen name="explore_message_bar_height">22dp</dimen>
-
 </resources>

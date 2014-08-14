@@ -9,81 +9,125 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:background="@color/event_bg_purple"
-                android:layout_height="130dp"
+                android:layout_height="wrap_content"
                 android:baselineAligned="false">
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_alignParentTop="true"
+        android:layout_height="1dp"
+        android:layout_alignParentTop="false"
         android:background="@color/div_purple"
-        android:id="@+id/view"/>
+        android:id="@+id/view_top"
+        android:layout_alignTop="@+id/rl_cell_content"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="false"
+        android:background="@color/div_purple"
+        android:id="@+id/view_bottom"
+        android:layout_alignBottom="@+id/rl_cell_content"/>
 
     <ImageView
         android:layout_width="match_parent"
         android:id="@+id/iv_event"
         android:scaleType="centerCrop"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp" />
+        android:layout_alignParentTop="false"
+        android:layout_alignTop="@+id/rl_cell_content"
+        android:layout_alignLeft="@+id/rl_cell_content"
+        android:layout_alignBottom="@+id/rl_cell_content"
+        android:layout_alignRight="@+id/rl_cell_content"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
-        android:layout_centerVertical="true">
+        android:layout_height="wrap_content"
+        android:id="@+id/rl_cell_content"
+        >
 
-        <FrameLayout
-            android:layout_width="108dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="24dp">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rl_dining"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:visibility="gone"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="156dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Breakfast"
+                android:textColor="@android:color/primary_text_dark_nodisable"
+                android:id="@+id/tv_diningtype"
+                android:textAllCaps="true"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_centerInParent="true"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="125dp"
+            android:id="@+id/rl_event"
+            android:visibility="visible">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_time"
-                android:layout_gravity="center"
                 android:textColor="@android:color/primary_text_dark_nodisable"
                 android:textSize="40sp"
-                android:singleLine="true" />
-        </FrameLayout>
+                android:singleLine="false"
+                android:text="28:40"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="30dp"/>
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="24dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginRight="16dp"
-            android:layout_gravity="center_vertical">
-
-            <TextView
+            <RelativeLayout
+                android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tv_title"
-                android:layout_gravity="center_vertical|start"
-                android:text="test text"
-                android:textAllCaps="true"
-                android:textSize="20sp"
-                android:textColor="@android:color/primary_text_dark_nodisable"
-                android:singleLine="true"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
+                android:layout_gravity="center_vertical"
+                android:id="@+id/rl_internal_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="false"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="false"
+                android:layout_marginLeft="156dp"
+                android:layout_alignParentStart="true">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tv_text"
-                android:singleLine="true"
-                android:layout_gravity="center_vertical|start"
-                android:text="Test Text"
-                android:textColor="@android:color/secondary_text_dark_nodisable"
-                android:textSize="20sp" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_title"
+                    android:text="test text"
+                    android:textAllCaps="true"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/primary_text_dark_nodisable"
+                    android:singleLine="true"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"
+                    />
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_text"
+                    android:singleLine="true"
+                    android:text="Test Text"
+                    android:textColor="@android:color/secondary_text_dark_nodisable"
+                    android:textSize="20sp"
+                    android:layout_below="@+id/tv_title"/>
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 
 </RelativeLayout>
