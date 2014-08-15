@@ -22,10 +22,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:id="@+id/ll_buttonbar"
-            android:layout_weight="7"
             >
 
 
@@ -35,14 +34,14 @@
                 android:gravity="center"
                 android:id="@+id/ll_pecks"
                 android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/ll_explore"
                 android:layout_weight="1">
                 <Button
                     android:id="@+id/bt_peck"
                     android:background="@drawable/ic_pecks"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_toLeftOf="@+id/bt_explore"
+                    android:layout_height="44dp"
+                    android:layout_width="44dp"
                     android:layout_gravity="center"/>
 
             </LinearLayout>
@@ -53,15 +52,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:id="@+id/ll_explore"
+                android:layout_toLeftOf="@+id/ll_add"
                 android:gravity="center">
 
                 <Button
                     android:id="@+id/bt_explore"
                     android:background="@drawable/ic_explore"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_toLeftOf="@+id/bt_add"
+                    android:layout_height="44dp"
+                    android:layout_width="44dp"
                     android:layout_gravity="center"/>
             </LinearLayout>
 
@@ -71,15 +70,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:id="@+id/ll_post"
+                android:layout_toLeftOf="@+id/ll_circles"
                 android:gravity="center">
 
                 <Button
                     android:id="@+id/bt_add"
                     android:background="@drawable/ic_post"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_toLeftOf="@+id/bt_circles"
+                    android:layout_height="44dp"
+                    android:layout_width="44dp"
                     android:layout_gravity="center"/>
             </LinearLayout>
 
@@ -89,15 +88,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_toLeftOf="@+id/ll_prof"
                 android:gravity="center">
 
                 <Button
                     android:id="@+id/bt_circles"
                     android:background="@drawable/ic_circles"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/bt_profile"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_gravity="center"/>
             </LinearLayout>
 
@@ -114,8 +113,8 @@
                     android:id="@+id/bt_profile"
                     android:background="@drawable/ic_profile"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_width="44dp"
                     android:layout_gravity="center"/>
             </LinearLayout>
 
