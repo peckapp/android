@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.peck.android.PeckApp;
@@ -146,7 +147,7 @@ public class HomeFeed extends Feed {
                                             .fit()
                                             .centerCrop()
                                             .into((ImageView) view);
-                                }
+                                } else ((ImageView)view).setImageDrawable(null);
                                 return true;
                             case R.id.tv_time:
                                 DateTime stTemp = new DateTime(cursor.getLong(cursor.getColumnIndex(Event.START_DATE))*1000l).toDateTime(DateTimeZone.forTimeZone(PeckApp.tz));
@@ -175,11 +176,14 @@ public class HomeFeed extends Feed {
                                 ((TextView) view).setText("");
                                 return true;
                             case R.id.iv_event:
-                                Picasso.with(getActivity())
-                                        .load(cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
-                                        .fit()
-                                        .centerCrop()
-                                        .into(((ImageView) view));
+                                String urlPath = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
+                                if (urlPath != null && ! urlPath.isEmpty() && !urlPath.equals("/images/missing.png")) {
+                                    Picasso.with(getActivity())
+                                            .load(urlPath)
+                                            .fit()
+                                            .centerCrop()
+                                            .into(((ImageView) view));
+                                } else ((ImageView)view).setImageBitmap(null);
                                 return true;
                             case R.id.rl_event:
                                 view.setVisibility(View.VISIBLE);
@@ -216,4 +220,21 @@ public class HomeFeed extends Feed {
             curOffset = offset;
         } else Log.v(HomeFeed.class.getSimpleName(), "not updating this fragment with offset " + offset + "; it's already there");
     }
+
+    public void incrementDate() {
+        withRelativeDate(curOffset + 1);
+    }
+
+    public void decrementDate() {
+        withRelativeDate(curOffset - 1);
+    }
+
+    public void resetScroll() {
+        ((ListView) getListView()).smoothScrollToPositionFromTop(0, 0, 0);
+    }
+
+    public int getOffset() {
+        return curOffset;
+    }
+
 }

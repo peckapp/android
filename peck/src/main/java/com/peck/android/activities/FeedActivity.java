@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Button;
 
@@ -29,9 +31,7 @@ import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
 import com.squareup.picasso.Picasso;
 
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 
 
 /**
@@ -48,7 +48,9 @@ public class FeedActivity extends FragmentActivity {
     public final static String TAB_CIRCLES = "tb_circles";
     public final static String TAB_PROFILE = "tb_profile";
 
-    private Deque<HomeFeed> fragQueue = new LinkedBlockingDeque<HomeFeed>(5);
+    HomeFeed[] feeds = new HomeFeed[] {new HomeFeed(), new HomeFeed(), new HomeFeed()};
+
+    private int selectedPage;
 
     //hashmap of button resource ids to feeds
     private final static HashMap<Integer, Fragment> buttons = new HashMap<Integer, Fragment>(); //don't use a sparsearray, we need the keyset
@@ -58,6 +60,8 @@ public class FeedActivity extends FragmentActivity {
     private Button lastPressed;
 
     {
+        feeds[0].decrementDate();
+        feeds[2].incrementDate();
         buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
         buttons.put(R.id.bt_explore, new ExploreFeed());
@@ -93,57 +97,66 @@ public class FeedActivity extends FragmentActivity {
             findViewById(i).setOnClickListener(fragmentSwitcherListener);
         }
 
-        fragQueue.add(new HomeFeed());
-        fragQueue.add(new HomeFeed());
-        fragQueue.add(new HomeFeed());
-        fragQueue.add(new HomeFeed());
-        fragQueue.add(new HomeFeed());
+        //getSupportFragmentManager().beginTransaction().add(R.id.ll_temp, new HomeFeed()).commit();
 
-        getSupportFragmentManager().beginTransaction().add(R.id.ll_temp, new HomeFeed()).commit();
+        final ViewPager pager = ((ViewPager) findViewById(R.id.vp_home_feed));
 
-
-        /*final ViewPager pager = ((ViewPager) findViewById(R.id.vp_home_feed));
-        pager.setOffscreenPageLimit(2);
         final FragmentStatePagerAdapter pagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int i) {
-                HomeFeed ret = fragQueue.removeFirst();
-                ret.withRelativeDate(i);
-                return ret;
+                return feeds[i];
             }
 
             @Override
             public int getCount() {
-                return 5;
+                return 3;
+            }
+
+            @Override
+            public int getItemPosition(Object object) {
+                return POSITION_NONE;
             }
         };
         pager.setAdapter(pagerAdapter);
 
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            int currentPage;
             @Override
             public void onPageScrolled(int i, float v, int i2) {
-                currentPage = i;
             }
 
             @Override
             public void onPageSelected(int i) {
-                switch (((int) Math.signum(i - currentPage))) {
-                    case 1:
-                        break;
-                    case -1:
-                        break;
-                    case 0:
-                        break;
-                }
+                selectedPage = i;
             }
 
             @Override
-            public void onPageScrollStateChanged(int i) {}
-        });*/
+            public void onPageScrollStateChanged(int i) {
+                if (i == ViewPager.SCROLL_STATE_IDLE) {
+                    final HomeFeed left = feeds[0];
+                    final HomeFeed center = feeds[1];
+                    final HomeFeed right = feeds[2];
 
-
-
+                    if (selectedPage == 0) {
+                        left.decrementDate();
+                        center.decrementDate();
+                        right.decrementDate();
+                        center.resetScroll();
+                        right.resetScroll();
+                        pager.setCurrentItem(1, false);
+                        left.resetScroll();
+                    } else if (selectedPage == 2) {
+                        left.incrementDate();
+                        center.incrementDate();
+                        right.incrementDate();
+                        center.resetScroll();
+                        left.resetScroll();
+                        pager.setCurrentItem(1, false);
+                        right.resetScroll();
+                    }
+                }
+            }
+        });
+        pager.setCurrentItem(1, false);
     }
 
     @Override

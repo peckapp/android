@@ -4,9 +4,9 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:layout_height="0dp"
             android:layout_weight="3"/>
 
-                     <LinearLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="horizontal"
@@ -29,65 +29,119 @@
             >
 
 
-            <Button
-                android:id="@+id/bt_peck"
-                android:text="pecks"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_height="match_parent"
+            <LinearLayout
                 android:layout_width="0dp"
-                android:textColor="@android:color/primary_text_light_nodisable"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:id="@+id/ll_pecks"
                 android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/bt_explore"
-                android:layout_weight="1" />
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/bt_peck"
+                    android:background="@drawable/ic_pecks"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_toLeftOf="@+id/bt_explore"
+                    android:layout_gravity="center"/>
 
-            <Button
-                android:id="@+id/bt_explore"
-                android:text="explore"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_height="match_parent"
-                android:layout_width="0dp"
-                android:textColor="@android:color/primary_text_light_nodisable"
-                android:layout_toLeftOf="@+id/bt_add"
-                android:layout_weight="1" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/bt_add"
-                android:text="+"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_height="match_parent"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="0dp"
-                android:textColor="@android:color/primary_text_light_nodisable"
-                android:layout_toLeftOf="@+id/bt_circles"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/ll_explore"
+                android:gravity="center">
 
-            <Button
-                android:id="@+id/bt_circles"
-                android:text="circles"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:textColor="@android:color/primary_text_light_nodisable"
-                android:layout_toLeftOf="@+id/bt_profile"
-                android:layout_weight="1" />
+                <Button
+                    android:id="@+id/bt_explore"
+                    android:background="@drawable/ic_explore"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_toLeftOf="@+id/bt_add"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/bt_profile"
-                android:text="profile"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_height="match_parent"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="0dp"
-                android:textColor="@android:color/primary_text_light_nodisable"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/ll_post"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/bt_add"
+                    android:background="@drawable/ic_post"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_toLeftOf="@+id/bt_circles"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_circles"
+                android:orientation="horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/bt_circles"
+                    android:background="@drawable/ic_circles"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/bt_profile"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_prof"
+                android:orientation="horizontal"
                 android:layout_alignParentRight="true"
-                android:layout_weight="1" />
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/bt_profile"
+                    android:background="@drawable/ic_profile"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
 
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:id="@+id/rl_below"
-            />
+            >
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_feed_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Title"
+                android:textStyle="bold"
+                android:id="@+id/tv_content_title"
+                android:layout_centerInParent="true"
+                android:textSize="17dp"/>
+        </RelativeLayout>
 
     </LinearLayout>
 
