@@ -100,7 +100,7 @@ public class FeedActivity extends FragmentActivity {
         //getSupportFragmentManager().beginTransaction().add(R.id.ll_temp, new HomeFeed()).commit();
 
         final ViewPager pager = ((ViewPager) findViewById(R.id.vp_home_feed));
-
+        pager.setOffscreenPageLimit(2);
         final FragmentStatePagerAdapter pagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int i) {
