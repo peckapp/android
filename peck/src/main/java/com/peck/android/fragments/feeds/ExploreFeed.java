@@ -63,6 +63,7 @@ public class ExploreFeed extends Feed {
     public static final String DATE_ORDER = "explr_order";
     private boolean isRefreshing = false;
     private final Object refreshLock = new Object();
+    private long currentTime = DateTime.now().toInstant().getMillis()/1000L;
     {
         listItemRes = R.layout.lvitem_explore;
         binds_from = new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID, Event.TYPE};
@@ -72,13 +73,16 @@ public class ExploreFeed extends Feed {
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Event.SCORE, Event.SCORE_UPDATED, Event.IMAGE_URL, Event.USER_ID, Event.TITLE, Event.TYPE, Event.TEXT, Event.START_DATE, Event.USER_ID,
                 Event.LOCAL_ID, Event.SR_ID, Event.UPDATED_AT,
                 Event.ANNOUNCEMENT_TEXT, Event.ANNOUNCEMENT_COMMENT_COUNT,
-                Event.ATHLETIC_OPPONENT, Event.ATHLETIC_DATE_AND_TIME, Event.ATHLETIC_NOTE, Event.ATHLETIC_HOME_SCORE, Event.ATHLETIC_HOME_AWAY, Event.ATHLETIC_AWAY_SCORE, Event.ATHLETIC_LOCATION, "case " + Event.TYPE + " when " + Event.SIMPLE_EVENT + " then " + Event.START_DATE +
+                Event.ATHLETIC_OPPONENT, Event.ATHLETIC_DATE_AND_TIME, Event.ATHLETIC_NOTE, Event.ATHLETIC_HOME_SCORE, Event.ATHLETIC_HOME_AWAY, Event.ATHLETIC_AWAY_SCORE, Event.ATHLETIC_LOCATION,
+                "abs(" + currentTime + " - case " + Event.TYPE + " when " + Event.SIMPLE_EVENT + " then " + Event.START_DATE +
                 " when " + Event.ATHLETIC_EVENT + " then " + Event.ATHLETIC_DATE_AND_TIME +
-                " when " + Event.ANNOUNCEMENT + " then " + Event.UPDATED_AT + " end as " + DATE_ORDER});
+                " when " + Event.ANNOUNCEMENT + " then " + Event.UPDATED_AT + " end) as " + DATE_ORDER});
 
-        loaderBundle.putString(LOADER_SELECTION, "(" + Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ?) AND " + Event.END_DATE + " > " + DateTime.now().toInstant().getMillis()/1000L);
+        loaderBundle.putString(LOADER_SELECTION, "(" + Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ?) AND " +
+                "case when " + Event.TYPE + " = " + Event.SIMPLE_EVENT + " then " + Event.END_DATE + " > " + currentTime + " when " + Event.ATHLETIC_EVENT + " then " + Event.ATHLETIC_DATE_AND_TIME + " else 1 end");
         loaderBundle.putStringArray(LOADER_SELECT_ARGS, new String[]{Integer.toString(Event.SIMPLE_EVENT), Integer.toString(Event.ATHLETIC_EVENT), Integer.toString(Event.ANNOUNCEMENT)});
-        loaderBundle.putString(LOADER_SORT_ORDER, Event.SCORE_UPDATED + " desc, " +  Event.SCORE + " desc, " + DATE_ORDER + " asc limit 200");
+        loaderBundle.putString(LOADER_SORT_ORDER, Event.SCORE_UPDATED + " desc, " + Event.SCORE  + " desc, " +
+                DATE_ORDER + " asc limit 200");
     }
 
     @Override
