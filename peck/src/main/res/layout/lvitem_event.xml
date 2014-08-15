@@ -15,7 +15,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_alignParentTop="false"
         android:background="@color/div_purple"
         android:id="@+id/view_top"
         android:layout_alignTop="@+id/rl_cell_content"/>
@@ -23,7 +22,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_alignParentBottom="false"
         android:background="@color/div_purple"
         android:id="@+id/view_bottom"
         android:layout_alignBottom="@+id/rl_cell_content"/>
@@ -45,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/rl_cell_content"
-        android:layout_marginBottom="2dp">
+        >
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -125,10 +123,6 @@
                     android:textSize="17sp"
                     android:layout_below="@+id/tv_title"/>
             </RelativeLayout>
-
         </RelativeLayout>
-
     </RelativeLayout>
-
-
 </RelativeLayout>

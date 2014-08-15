@@ -65,8 +65,8 @@ public class ExploreFeed extends Feed {
     private final Object refreshLock = new Object();
     {
         listItemRes = R.layout.lvitem_explore;
-        binds_from = new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID};
-        binds_to = new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo};
+        binds_from = new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID, Event.TYPE};
+        binds_to = new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo, R.id.rl_attendance};
         loaderBundle = new Bundle();
         loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Event.class));
         loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Event.SCORE, Event.SCORE_UPDATED, Event.IMAGE_URL, Event.USER_ID, Event.TITLE, Event.TYPE, Event.TEXT, Event.START_DATE, Event.USER_ID,
@@ -76,7 +76,7 @@ public class ExploreFeed extends Feed {
                 " when " + Event.ATHLETIC_EVENT + " then " + Event.ATHLETIC_DATE_AND_TIME +
                 " when " + Event.ANNOUNCEMENT + " then " + Event.UPDATED_AT + " end as " + DATE_ORDER});
 
-        loaderBundle.putString(LOADER_SELECTION, Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ? AND " + Event.END_DATE + " > " + DateTime.now().toInstant().getMillis()/1000L);
+        loaderBundle.putString(LOADER_SELECTION, "(" + Event.TYPE + " = ? OR " + Event.TYPE + " = ? OR " + Event.TYPE + " = ?) AND " + Event.END_DATE + " > " + DateTime.now().toInstant().getMillis()/1000L);
         loaderBundle.putStringArray(LOADER_SELECT_ARGS, new String[]{Integer.toString(Event.SIMPLE_EVENT), Integer.toString(Event.ATHLETIC_EVENT), Integer.toString(Event.ANNOUNCEMENT)});
         loaderBundle.putString(LOADER_SORT_ORDER, Event.SCORE_UPDATED + " desc, " +  Event.SCORE + " desc, " + DATE_ORDER + " asc limit 200");
     }
@@ -177,11 +177,36 @@ public class ExploreFeed extends Feed {
                                 else ((TextView) view).setText("");
                                 return true;
                             case R.id.rl_photo:
-                                if (user_id > 0) {
-                                    view.setVisibility(View.VISIBLE);
-                                } else {
-                                    view.setVisibility(View.GONE);
-                                }
+                                new AsyncTask<Void, Void, Void>() {
+                                    private boolean show;
+                                    @Override
+                                    protected Void doInBackground(Void... voids) {
+                                        if (user_id < 1) {
+                                            show = false;
+                                            return null;
+                                        }
+                                        Cursor c = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.IMAGE_NAME},
+                                                User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
+                                        if (c.getCount() == 0) {
+                                            show = false;
+                                            return null;
+                                        }
+                                        c.moveToFirst();
+                                        String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                        c.close();
+                                        show = ret != null && !ret.isEmpty();
+                                        return null;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Void aVoid) {
+                                        if (show) view.setVisibility(View.VISIBLE);
+                                        else view.setVisibility(View.GONE);
+                                    }
+                                }.execute();
+                                return true;
+                            case R.id.rl_attendance:
+                                view.setVisibility(View.VISIBLE);
                                 return true;
                             default:
                                 return false;
@@ -270,6 +295,9 @@ public class ExploreFeed extends Feed {
                                             .into(((ImageView) view));
                                 }
                                 return true;
+                            case R.id.rl_attendance:
+                                view.setVisibility(View.GONE);
+                                return true;
                             default:
                                 return false;
 
@@ -342,6 +370,9 @@ public class ExploreFeed extends Feed {
                                 return true;
 
                             case R.id.iv_event:
+                                return true;
+                            case R.id.rl_attendance:
+                                view.setVisibility(View.VISIBLE);
                                 return true;
                             default:
                                 return false;
@@ -441,7 +472,6 @@ public class ExploreFeed extends Feed {
         } catch (OperationApplicationException e) {
             e.printStackTrace();
         }
-        PeckApp.getContext().getContentResolver().notifyChange(DBUtils.buildLocalUri(Event.class), null, false);
     }
 
 

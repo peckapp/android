@@ -34,13 +34,13 @@ public class GcmRegistrar {
 
     /**
      * check to see if google play services are installed. notify the given activity if not.
-     * @param context display an alertdialog here if GPS aren't installed. can be null.
+     * @param context display an alertdialog here if GPS aren't installed. can be null. if context is null, will display a notification.
      * @return true if google play services are available. false if not.
      * @since 1.0
      */
     public static boolean checkPlayServices(@Nullable Activity context) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(PeckApp.getContext());
-        if (resultCode != ConnectionResult.SUCCESS) {
+        if (resultCode != ConnectionResult.SUCCESS && resultCode != ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
             if (context != null) {
                 if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                     GooglePlayServicesUtil.getErrorDialog(resultCode, context,
@@ -49,6 +49,8 @@ public class GcmRegistrar {
                     Log.i(GcmRegistrar.class.getSimpleName(), "This device is not supported.");
                     context.finish();
                 }
+            } else {
+                if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) GooglePlayServicesUtil.showErrorNotification(resultCode, PeckApp.getContext());
             }
             return false;
         }
@@ -74,10 +76,8 @@ public class GcmRegistrar {
                     return null;
                 }
             } else return getRegistrationId();
-        } else {
-            //todo: prompt for valid play services download
-            return null;
         }
+        return null;
     }
 
     /**
