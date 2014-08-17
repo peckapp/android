@@ -52,7 +52,7 @@
     </style>
 
     <style name="riv_default">
-        <item name="android:src">@drawable/ic_peck</item>
+        <item name="android:src">@drawable/ic_launcher</item>
         <item name="android:scaleType">centerCrop</item>
     </style>
 

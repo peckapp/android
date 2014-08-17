@@ -72,8 +72,8 @@ public class GcmIntentService extends IntentService {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_peck)
-                        .setContentTitle("GCM Notification")
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("Peck")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
