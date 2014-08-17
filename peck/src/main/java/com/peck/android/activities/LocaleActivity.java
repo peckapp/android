@@ -212,7 +212,6 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                                                 try {
                                                     LoginManager.logout(LoginManager.getActive());
                                                 } catch (LoginManager.InvalidAccountException ignore) {}
-                                                while (LoginManager.getActive() == null) LoginManager.createTemp(); //fixme
                                                 intent.putExtra(LoginActivity.REDIRECT_TO_FEEDACTIVITY, true);
                                                 startActivity(intent);
                                             }

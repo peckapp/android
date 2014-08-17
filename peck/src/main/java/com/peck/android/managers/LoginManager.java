@@ -540,7 +540,7 @@ public class LoginManager {
             }
         }
 
-        final JsonObject ret = ((JsonObject) ServerCommunicator.jsonService.createUser().get("user"));
+        final JsonObject ret = ((JsonObject) ServerCommunicator.jsonService.createUser(Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID)).get("user"));
         accountManager.setUserData(tmp, PeckAccountAuthenticator.API_KEY, ret.get("api_key").getAsString());
         accountManager.setUserData(tmp, PeckAccountAuthenticator.USER_ID, ret.get("id").getAsString());
         if (getLocale() != null) accountManager.setUserData(tmp, PeckAccountAuthenticator.INSTITUTION, getLocale());

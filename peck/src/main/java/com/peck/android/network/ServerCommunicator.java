@@ -225,8 +225,9 @@ public class ServerCommunicator {
         @POST("/api/{type}")
         void post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image, Callback<JsonObject> callBack);
 
+        @FormUrlEncoded
         @POST("/api/users")
-        JsonObject createUser();
+        JsonObject createUser(@Field("udid") String udid);
 
         @FormUrlEncoded
         @POST("/api/access")
