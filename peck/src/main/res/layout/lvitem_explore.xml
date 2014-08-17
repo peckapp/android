@@ -35,7 +35,6 @@
             android:id="@+id/rl_image">
 
             <ImageView
-                android:src="@drawable/ic_peck"
                 android:id="@+id/iv_event"
                 android:scaleType="centerCrop"
                 android:layout_width="match_parent"

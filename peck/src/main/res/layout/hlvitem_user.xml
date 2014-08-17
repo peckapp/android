@@ -17,7 +17,6 @@
             style="@style/riv_default"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/ic_peck"
             android:id="@+id/iv_event"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
