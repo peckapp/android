@@ -49,6 +49,13 @@ public class ProfileTab extends Fragment {
     private static final int resId = R.layout.tab_profile;
     private UiLifecycleHelper lifecycleHelper;
     private PeckAuthButton peckAuthButton;
+    private String name;
+    private String imgUrl;
+    private String email;
+    private String id;
+    private TextView tvEmail;
+    private RoundedImageView profile;
+    private TextView realName;
 
 
     @Override
@@ -66,6 +73,7 @@ public class ProfileTab extends Fragment {
         if (peckAuthButton != null) peckAuthButton.update();
         super.onResume();
         lifecycleHelper.onResume();
+        refresh(getView());
     }
 
     @Override
@@ -131,22 +139,43 @@ public class ProfileTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(resId, container, false);
-        final String id = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
-        final TextView realName = ((TextView) view.findViewById(R.id.tv_realname));
-        final RoundedImageView profile = ((RoundedImageView) view.findViewById(R.id.iv_event));
+
+        id = AccountManager.get(getActivity()).getUserData(LoginManager.getActive(), PeckAccountAuthenticator.USER_ID);
+        realName = ((TextView) view.findViewById(R.id.tv_realname));
+        profile = ((RoundedImageView) view.findViewById(R.id.iv_event));
+        tvEmail = ((TextView)view.findViewById(R.id.tv_email));
+
+        refresh(view);
+
+        profile.setOnClickListener(new ImagePickerListener(this));
+
+        LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
+        authButton.setFragment(this);
+
+        peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
+        peckAuthButton.setFragment(this);
+
+        return view;
+
+    }
+
+
+    private void refresh(final View mView) {
+
 
         new AsyncTask<Void, Void, Void>() {
-            String name;
-            String imgUrl;
-
             @Override
             protected Void doInBackground(Void... voids) {
                 Cursor cursor = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME, User.IMAGE_NAME, User.THUMBNAIL, User.SV_ID},
                         User.SV_ID + " = ?", new String[]{ id }, null);
-                cursor.moveToFirst();
-                name = cursor.getString(cursor.getColumnIndex(User.FIRST_NAME)) + " " + cursor.getString(cursor.getColumnIndex(User.LAST_NAME));
-                imgUrl = cursor.getString(cursor.getColumnIndex(User.IMAGE_NAME));
-                cursor.close();
+
+                if (cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    email = cursor.getString(cursor.getColumnIndex(User.EMAIL));
+                    name = cursor.getString(cursor.getColumnIndex(User.FIRST_NAME)) + " " + cursor.getString(cursor.getColumnIndex(User.LAST_NAME));
+                    imgUrl = cursor.getString(cursor.getColumnIndex(User.IMAGE_NAME));
+                    cursor.close();
+                }
                 return null;
             }
 
@@ -156,7 +185,10 @@ public class ProfileTab extends Fragment {
                     realName.setText(name);
                     realName.setAlpha(1f);
                 }
-                if (imgUrl != null) Picasso.with(view.getContext())
+                if (email != null) {
+                    tvEmail.setText(email);
+                }
+                if (imgUrl != null) Picasso.with(mView.getContext())
                         .load(PeckApp.Constants.Network.BASE_URL + imgUrl).
                                 into(profile, new Callback() {
                                     @Override
@@ -174,16 +206,7 @@ public class ProfileTab extends Fragment {
         }.execute();
 
 
-        profile.setOnClickListener(new ImagePickerListener(this));
 
-        LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
-        authButton.setFragment(this);
-
-        peckAuthButton = ((PeckAuthButton)view.findViewById(R.id.bt_peck_login));
-        peckAuthButton.setFragment(this);
-
-        return view;
     }
-
 
 }

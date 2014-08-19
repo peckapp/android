@@ -5,6 +5,7 @@
 
 package com.peck.android.activities;
 
+import android.accounts.Account;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -49,6 +50,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
     private boolean syncing = false;
+    private boolean createNew = false;
 
     public static final long LOCATION_TIMEOUT = 6000;
 
@@ -179,8 +181,13 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                 protected Boolean doInBackground(Void... voids) {
                     int counter = 1;
                     while (LoginManager.getActive() == null && counter < 30) {
+                        LoginManager.cleanInvalid();
                         try {
-                            LoginManager.createUserWithUdid();
+                            if (createNew) {
+                                LoginManager.createTemp();
+                            } else {
+                                LoginManager.createUserWithUdid();
+                            }
                         } catch (RetrofitError retrofitError) {
                             Log.e(LoginManager.class.getSimpleName(), "temp account creation failed. error " + (retrofitError.isNetworkError() ? "is a network error" : retrofitError.getMessage()));
                         }
@@ -219,6 +226,12 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
+                                                createNew = true;
+                                                try {
+                                                    LoginManager.setActiveAccount((Account)null);
+                                                } catch (LoginManager.InvalidAccountException e) {
+                                                    e.printStackTrace();
+                                                }
                                                 dialogInterface.cancel();
                                             }
                                         })

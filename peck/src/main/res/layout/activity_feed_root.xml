@@ -135,7 +135,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Title"
                 android:textStyle="bold"
                 android:id="@+id/tv_content_title"
                 android:textSize="17dp"

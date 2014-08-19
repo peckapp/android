@@ -143,7 +143,8 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
         } catch (RetrofitError e) {
-            Log.e(PeckSyncAdapter.class.getSimpleName(), "[ " + "ERROR " + e.getMessage().substring(0, 3) + " ] " + e.getUrl());
+            if (e.getMessage() != null && e.getUrl() != null) Log.e(PeckSyncAdapter.class.getSimpleName(), "[ " + "ERROR " + e.getMessage().substring(0, 3) + " ] " + e.getUrl());
+            else Log.e(PeckSyncAdapter.class.getSimpleName(), "an error occurred on sync", e);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (RemoteException e) {

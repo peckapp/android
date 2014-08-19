@@ -27,15 +27,13 @@ import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
-import retrofit.http.Field;
-import retrofit.http.FieldMap;
-import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.Multipart;
 import retrofit.http.PATCH;
 import retrofit.http.POST;
 import retrofit.http.Part;
 import retrofit.http.Path;
+import retrofit.http.Query;
 import retrofit.http.QueryMap;
 import retrofit.mime.TypedByteArray;
 import retrofit.mime.TypedInput;
@@ -72,7 +70,7 @@ public class ServerCommunicator {
         public TypedOutput toBody(Object object) {
             return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
         }
-    }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
+    }).setLogLevel(RestAdapter.LogLevel.HEADERS).build();
 
 
 
@@ -225,13 +223,11 @@ public class ServerCommunicator {
         @POST("/api/{type}")
         void post(@Path("type") String type, @QueryMap Map<String, String> authentication, @Part("image") Jpeg image, Callback<JsonObject> callBack);
 
-        @FormUrlEncoded
         @POST("/api/users")
-        JsonObject createUser(@Field("udid") String udid);
+        JsonObject createUser(@Query("udid") String udid);
 
-        @FormUrlEncoded
         @POST("/api/access")
-        JsonObject login(@FieldMap Map<String, String> fields);
+        JsonObject login(@QueryMap Map<String, String> fields);
 
         @PATCH("/api/{type}/{id}")
         JsonObject patch(@Path("type") String type, @Path("id") String id, @Body TypedJsonBody body, @QueryMap Map<String, String> authentication);
@@ -245,9 +241,8 @@ public class ServerCommunicator {
         @DELETE("/api/{type}/{id}")
         JsonObject delete(@Path("type") String type, @Path("id") String id, @QueryMap Map<String, String> authentication);
 
-        @FormUrlEncoded
         @POST("/api/users/user_for_udid")
-        JsonObject userForUdid(@Field("udid") String udid, @Field("device_type") String deviceType);
+        JsonObject userForUdid(@Query("udid") String udid, @Query("device_type") String deviceType);
 
         @GET("/api/explore")
         void updateExplore(@QueryMap Map<String, String> authentication, Callback<JsonObject> callback);

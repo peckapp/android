@@ -269,6 +269,7 @@ public class LoginManager {
             Map<String, String> map = new HashMap<String, String>();
             map.put("user[password]", accountManager.getPassword(account));
             map.put("user[email]", account.name);
+            map.put("user[udid]", Settings.Secure.getString(PeckApp.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
             map.put("user[device_token]", GcmRegistrar.register());
             try {
                 map.putAll(JsonUtils.auth(authAccount, false));
@@ -433,7 +434,7 @@ public class LoginManager {
         return account;
     }
 
-    private static synchronized void setActiveAccount(@Nullable String name) throws InvalidAccountException {
+    public static synchronized void setActiveAccount(@Nullable String name) throws InvalidAccountException {
         setActiveAccount(getAccounts().get(name));
     }
 
@@ -442,7 +443,7 @@ public class LoginManager {
      * @param account the account to activate
      * @throws InvalidAccountException when the account can't be validated (returns false from {@link #isValid(android.accounts.Account)})
      */
-    private static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
+    public static synchronized void setActiveAccount(@Nullable Account account) throws InvalidAccountException {
         Account active = getActive();
         if (account == null) {
             for (PeriodicSync sync : ContentResolver.getPeriodicSyncs(active, PeckApp.AUTHORITY)) ContentResolver.removePeriodicSync(active, sync.authority, sync.extras);
