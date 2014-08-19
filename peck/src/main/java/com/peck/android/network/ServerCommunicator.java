@@ -235,6 +235,7 @@ public class ServerCommunicator {
         @PATCH("/api/users/{id}/super_create")
         JsonObject superCreate(@Path("id") String userId, @Body TypedJsonBody user, @QueryMap Map<String, String> authentication);
 
+        @Multipart
         @PATCH("/api/{type}/{id}")
         JsonObject patchImage(@Path("type") String type, @Path("id") String id, @Part("image") Jpeg image, @QueryMap Map<String, String> authentication);
 

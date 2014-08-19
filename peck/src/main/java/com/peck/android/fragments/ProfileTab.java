@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
@@ -102,10 +103,32 @@ public class ProfileTab extends Fragment {
 
 
                     try {
-                        Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
-                        //ServerCommunicator.jsonService.patchImage("users", PeckAccountAuthenticator, new ServerCommunicator.Jpeg("user_"bmp))
+                        final Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
+                        Toast.makeText(getActivity(), "Changing profile pictures isn't supported yet.", Toast.LENGTH_LONG);
+/*
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                try {
+                                    ServerCommunicator.jsonService.patchImage("users", id, new ServerCommunicator.Jpeg("user_" + id + "_" + DateTime.now().toDateTime(DateTimeZone.forTimeZone(PeckApp.tz)).getMillis()/1000L, bmp, 2*1024*1024), JsonUtils.auth(LoginManager.getActive()));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (OperationCanceledException e) {
+                                    e.printStackTrace();
+                                } catch (AuthenticatorException e) {
+                                    e.printStackTrace();
+                                } catch (LoginManager.InvalidAccountException e) {
+                                    e.printStackTrace();
+                                } catch (NetworkErrorException e) {
+                                    e.printStackTrace();
+                                } catch (RetrofitError e) {
+                                    Log.e(ProfileTab.class.getSimpleName(), "retrofit encountered an error", e);
+                                }
 
-
+                                return null;
+                            }
+                        }.execute();
+*/
 
                         Log.d(ProfileTab.class.getSimpleName(), "i have a bitmap");
                     } catch (FileNotFoundException e) { e.printStackTrace(); }
@@ -166,7 +189,7 @@ public class ProfileTab extends Fragment {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                Cursor cursor = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME, User.IMAGE_NAME, User.THUMBNAIL, User.SV_ID},
+                Cursor cursor = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME, User.IMAGE_NAME, User.THUMBNAIL, User.SV_ID, User.EMAIL},
                         User.SV_ID + " = ?", new String[]{ id }, null);
 
                 if (cursor.getCount() > 0) {

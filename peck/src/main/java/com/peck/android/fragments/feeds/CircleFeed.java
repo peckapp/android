@@ -30,7 +30,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
@@ -169,6 +168,7 @@ public class CircleFeed extends Feed {
         binds_to = new int[] { R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm};
         loaderBundle.putString(LOADER_SORT_ORDER, Circle.UPDATED_AT + " desc");
         loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Circle.class));
+        loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Circle.NAME, Circle.UPDATED_AT, Circle.LOCAL_ID, Circle.SV_ID, Circle.LOCALE, Circle.USER_ID});
         runnable = new RecycleRunnable() {
             @Override
             public void run() {
@@ -259,7 +259,7 @@ public class CircleFeed extends Feed {
                         view.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View view) {
-                                                        LinearLayout parent = ((LinearLayout) tView.getParent());
+                                                        /*LinearLayout parent = ((LinearLayout) tView.getParent());
                                                         if (parent != null) {
                                                             parent.removeView(tView);
                                                             if (parent.equals(view.getParent().getParent()))
@@ -298,11 +298,10 @@ public class CircleFeed extends Feed {
                                                             }.execute();
                                                         } else {
                                                             throw new IllegalStateException("onclick was called when fragment was unavailable.");
-                                                        }
+                                                        }*/
 
 
-
-                                                        Log.d(CircleFeed.class.getSimpleName(), "clicked");
+                                                        Toast.makeText(getActivity(), "Adding circle members is not implemented yet.", Toast.LENGTH_LONG).show();
                                                     }
                                                 }
 
