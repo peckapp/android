@@ -19,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:id="@+id/iv_select"
-            android:scaleType="center"
-            android:src="@drawable/img_since1988"/>
+            android:scaleType="center"/>
 
         <LinearLayout
             android:orientation="horizontal"

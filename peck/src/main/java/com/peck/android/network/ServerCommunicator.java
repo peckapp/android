@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.peck.android.PeckApp;
+import com.squareup.okhttp.OkHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -20,9 +21,12 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import de.jodamob.android.tracing.NewRelicTracer;
+import de.jodamob.android.tracing.TracedRetrofitProfiler;
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import retrofit.client.OkClient;
 import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
 import retrofit.http.Body;
@@ -50,27 +54,27 @@ public class ServerCommunicator {
                 public void intercept(RequestFacade request) {
                     request.addHeader("User-Agent", "Peck Android, v. " + PeckApp.version);
                 }
-            }).setConverter(new Converter() {
-        @Override
-        public Object fromBody(TypedInput body, Type type) throws ConversionException {
-            try {
-                String json = IOUtils.toString(body.in());
-                //Log.v(ServerCommunicator.class.getSimpleName(), new JSONObject(json).toString(2));
-                if (!body.mimeType().contains("application/json"))
-                    throw new ConversionException("Data received from the server was not json.");
-                return (new JsonParser().parse(json));
-            } catch (IOException e) {
-                throw new ConversionException(e);
-            /*} catch (JSONException ignore) {
-                throw new ConversionException(ignore);*/
-            }
-        }
+            })
+            .setClient(new OkClient(new OkHttpClient()))
+            .setProfiler(new TracedRetrofitProfiler(new NewRelicTracer()))
+            .setConverter(new Converter() {
+                @Override
+                public Object fromBody(TypedInput body, Type type) throws ConversionException {
+                    try {
+                        String json = IOUtils.toString(body.in());
+                        if (!body.mimeType().contains("application/json"))
+                            throw new ConversionException("Data received from the server was not json.");
+                        return (new JsonParser().parse(json));
+                    } catch (IOException e) {
+                        throw new ConversionException(e);
+                    }
+                }
 
-        @Override
-        public TypedOutput toBody(Object object) {
-            return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
-        }
-    }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
+                @Override
+                public TypedOutput toBody(Object object) {
+                    return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
+                }
+            }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
 
 
 

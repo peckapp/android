@@ -82,8 +82,10 @@ public class NewPostTab extends Fragment {
                 Toast.makeText(getActivity(), "success", Toast.LENGTH_LONG).show();
                 DBUtils.syncJson(DBUtils.buildLocalUri(Event.class), object, Event.class);
                 imageView.setImageBitmap(null);
-                imageBitmap.recycle();
-                imageBitmap = null;
+                if (imageBitmap != null) {
+                    imageBitmap.recycle();
+                    imageBitmap = null;
+                }
                 getActivity().findViewById(R.id.bt_add).performClick();
             }
         }
