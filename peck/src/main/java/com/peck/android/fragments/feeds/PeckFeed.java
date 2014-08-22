@@ -69,7 +69,7 @@ public class PeckFeed extends Feed {
                                 protected void onPostExecute(String url) {
                                     if (url != null) {
                                         Picasso.with(getActivity())
-                                                .load(PeckApp.Constants.Network.BASE_URL + url)
+                                                .load(url)
                                                 .centerCrop()
                                                 .fit()
                                                 .into(((RoundedImageView) view));

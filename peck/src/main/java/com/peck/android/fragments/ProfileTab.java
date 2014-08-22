@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.makeramen.RoundedImageView;
-import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.listeners.ImagePickerListener;
@@ -212,7 +211,7 @@ public class ProfileTab extends Fragment {
                     tvEmail.setText(email);
                 }
                 if (imgUrl != null) Picasso.with(mView.getContext())
-                        .load(PeckApp.Constants.Network.BASE_URL + imgUrl).
+                        .load(imgUrl).
                                 into(profile, new Callback() {
                                     @Override
                                     public void onSuccess() {

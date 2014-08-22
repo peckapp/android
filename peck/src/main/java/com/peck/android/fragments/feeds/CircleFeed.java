@@ -217,7 +217,7 @@ public class CircleFeed extends Feed {
                                             case R.id.iv_event:
                                                 if (o != null && o.toString().length() > 0) {
                                                     Picasso.with(getActivity())
-                                                            .load(PeckApp.Constants.Network.BASE_URL + o)
+                                                            .load(((String) o))
                                                             .fit()
                                                             .centerCrop()
                                                             .into((RoundedImageView) view);

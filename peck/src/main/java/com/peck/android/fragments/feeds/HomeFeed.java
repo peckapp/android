@@ -143,7 +143,7 @@ public class HomeFeed extends Feed {
                                 String urlPath = cursor.getString(cursor.getColumnIndex(Event.BLURRED_URL));
                                 if (urlPath != null && urlPath.length() != 0 && !urlPath.equals("/images/missing.png")) {
                                     Picasso.with(getActivity())
-                                            .load(PeckApp.Constants.Network.BASE_URL + urlPath)
+                                            .load(urlPath)
                                             .fit()
                                             .centerCrop()
                                             .into((ImageView) view);

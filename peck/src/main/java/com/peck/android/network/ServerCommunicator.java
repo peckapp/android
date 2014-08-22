@@ -203,7 +203,7 @@ public class ServerCommunicator {
     }
 
     /**
-     * the retrofit interface that handles server communication.
+     * the retrofit interface that handles communication to peck servers.
      * methods are defined here, and retrofit builds an adapter (above) that will handle them.
      */
     public interface SimpleJsonHandler {
@@ -252,5 +252,6 @@ public class ServerCommunicator {
         @GET("/api/explore")
         void updateExplore(@QueryMap Map<String, String> authentication, Callback<JsonObject> callback);
     }
+
 
 }

@@ -100,7 +100,6 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
             new AsyncTask<Void, Void, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Void... voids) {
-
                     long started = System.currentTimeMillis();
                     while (location == null && System.currentTimeMillis() - started < LOCATION_TIMEOUT) {
                         try {

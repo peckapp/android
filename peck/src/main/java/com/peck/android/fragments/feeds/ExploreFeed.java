@@ -101,7 +101,7 @@ public class ExploreFeed extends Feed {
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                 if (url != null && !url.isEmpty()) {
                                     Picasso.with(getActivity())
-                                            .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
+                                            .load(cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
                                             .fit()
                                             .centerCrop()
                                             .into(((ImageView) view));
@@ -133,7 +133,7 @@ public class ExploreFeed extends Feed {
                                         protected void onPostExecute(String s) {
                                             if (s != null && !s.isEmpty()) {
                                                 Picasso.with(getActivity())
-                                                        .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                        .load(s)
                                                         .fit()
                                                         .centerCrop()
                                                         .into(((ImageView) view));
@@ -271,7 +271,7 @@ public class ExploreFeed extends Feed {
                                         protected void onPostExecute(String s) {
                                             if (s != null && !s.isEmpty()) {
                                                 Picasso.with(getActivity())
-                                                        .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                        .load(s)
                                                         .fit()
                                                         .centerCrop()
                                                         .into(((ImageView) view));
@@ -293,7 +293,7 @@ public class ExploreFeed extends Feed {
                                 String url = cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL));
                                 if (url != null && !url.isEmpty()) {
                                     Picasso.with(getActivity())
-                                            .load(PeckApp.Constants.Network.BASE_URL + cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
+                                            .load(cursor.getString(cursor.getColumnIndex(Event.IMAGE_URL)))
                                             .fit()
                                             .centerCrop()
                                             .into(((ImageView) view));
@@ -360,7 +360,7 @@ public class ExploreFeed extends Feed {
                                         protected void onPostExecute(String s) {
                                             if (s != null && !s.isEmpty()) {
                                                 Picasso.with(getActivity())
-                                                        .load(PeckApp.Constants.Network.BASE_URL + s)
+                                                        .load(s)
                                                         .fit()
                                                         .centerCrop()
                                                         .into(((ImageView) view));

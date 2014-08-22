@@ -144,6 +144,8 @@ public class LoginManager {
                 setActiveAccount(temp);
 
             }
+        } catch (RetrofitError e) {
+            e.printStackTrace();
         } catch (NetworkErrorException e) {
             e.printStackTrace();
         } catch (AuthenticatorException e) {
