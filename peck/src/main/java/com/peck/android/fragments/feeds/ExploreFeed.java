@@ -66,6 +66,7 @@ public class ExploreFeed extends Feed {
     private long currentTime = DateTime.now().toInstant().getMillis()/1000L;
     {
         listItemRes = R.layout.lvitem_explore;
+        layoutRes = R.layout.feed_explore;
         binds_from = new String[]{Event.TITLE, Event.IMAGE_URL, Event.IMAGE_URL, Event.IMAGE_URL, Event.USER_ID, Event.TEXT, Event.START_DATE, Event.USER_ID, Event.USER_ID, Event.USER_ID, Event.TYPE};
         binds_to = new int[]{R.id.tv_title, R.id.iv_event, R.id.rl_image, R.id.riv_user, R.id.tv_text, R.id.tv_time, R.id.tv_name, R.id.tv_action, R.id.rl_photo, R.id.rl_attendance};
         loaderBundle = new Bundle();
