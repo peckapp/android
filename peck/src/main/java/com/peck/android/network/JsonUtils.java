@@ -124,7 +124,8 @@ public class JsonUtils {
      * blocking method to build authentication parameters
      *
      * @param account the authenticating account
-     * @return an authentication map, consisting of api key, institution, userid, and authtoken (if it exists)
+     * @return an authentication map, consisting of api key, institution, userid, and authtoken (if it exists). <i>institution_id</i> is distinct from <i>authentication[institution_id]</i>;
+     * <i>institution_id</i> is the id of the current location. <i>authentication[institution_id]</i> is the institution id associated with the user's account
      * @since 1.0
      */
     public static Map<String, String> auth(Account account) throws IOException, OperationCanceledException, AuthenticatorException, LoginManager.InvalidAccountException, NetworkErrorException {
@@ -144,10 +145,14 @@ public class JsonUtils {
             authToken = LoginManager.getAuthToken(account);
         }
 
+        String localeId = LoginManager.getLocale();
+        if (localeId == null || localeId.isEmpty()) localeId = accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION);
+
         if (authToken != null) auth.put("authentication[authentication_token]", authToken);
         auth.put("authentication[user_id]", accountManager.getUserData(account, PeckAccountAuthenticator.USER_ID));
         auth.put("authentication[institution_id]", accountManager.getUserData(account, PeckAccountAuthenticator.INSTITUTION));
         auth.put("authentication[api_key]", apiKey);
+        auth.put("institution_id", localeId);
 
         return auth;
     }

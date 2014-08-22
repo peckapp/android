@@ -9,7 +9,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 
-import com.peck.android.annotations.Header;
+import com.newrelic.agent.android.NewRelic;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Club;
@@ -62,29 +62,17 @@ public class PeckApp extends Application {
         return MODELS;
     }
 
-    public static String buildEndpointURL(Class tClass) {
-        Header header = (Header)tClass.getAnnotation(Header.class);
-        if (BuildConfig.DEBUG && (header == null || header.singular() == null || header.plural() == null)) throw new IllegalArgumentException(tClass.getSimpleName() + " does not have a header");
-        return Constants.Network.API_ENDPOINT + header.plural() + "/";
-    }
-
     public void onCreate() {
-
-        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
         mContext = this;
-        //Crashlytics.start(this);
-        //fixme: newrelic. can't use it at the moment. removal of other libraries while newrelic was installed completely
-        //fixme: broke the app with problems in dalvik, and i could only fix it without a workspace reset (re-cloning the app into a new directory)
-        /* NewRelic.withApplicationToken(
+        NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
-        ).start(this);*/
+        ).start(this);
 
         System.setProperty("org.joda.time.DateTimeZone.Provider",
                 "com.peck.android.FastDateTimeZoneProvider");
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
-            //Picasso.with(getContext()).setLoggingEnabled(true);
         }
 
         FacebookSessionHandler.init();

@@ -6,22 +6,18 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'http://download.crashlytics.com/maven' }
     }
 
-    /*dependencies {
+    dependencies {
         classpath 'com.newrelic.agent.android:agent-gradle-plugin:3.+'
-    }*/
+    }
 }
 
 apply plugin: 'com.android.application'
-
-
-/*apply plugin: 'newrelic'*/
+apply plugin: 'newrelic'
 
 repositories {
     mavenCentral()
-    maven { url 'http://download.crashlytics.com/maven' }
 }
 
 
@@ -54,6 +50,7 @@ android {
         exclude 'META-INF/LICENSE'
     }
 }
+
 sourceSets {
     main {
         java {
@@ -71,8 +68,6 @@ sourceSets {
     }
 }
 
-
-
 dependencies {
     compile 'com.android.support:appcompat-v7:20.+'
     compile 'com.android.support:support-v4:20.+'
@@ -86,7 +81,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:+'
     compile 'commons-validator:commons-validator:+'
     compile 'joda-time:joda-time:+'
-    //compile 'com.newrelic.agent.android:android-agent:3.+'
+    compile 'com.newrelic.agent.android:android-agent:3.+'
     compile 'com.squareup.retrofit:retrofit:+'
     compile 'com.squareup.okhttp:okhttp-urlconnection:+'
     compile 'com.squareup.okhttp:okhttp:+'

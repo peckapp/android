@@ -14,6 +14,9 @@ import com.peck.android.annotations.UriPath;
 
 /**
  * Created by mammothbane on 6/16/2014.
+ *
+ * model for peck items.
+ *
  */
 @Header(plural = "pecks", singular = "peck")
 @UriPath("pecks")

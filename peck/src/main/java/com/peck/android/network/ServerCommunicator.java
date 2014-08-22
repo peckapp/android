@@ -70,7 +70,7 @@ public class ServerCommunicator {
         public TypedOutput toBody(Object object) {
             return new TypedByteArray("application/json", ((JsonObject) object).getAsString().getBytes());
         }
-    }).setLogLevel(RestAdapter.LogLevel.HEADERS).build();
+    }).setLogLevel(RestAdapter.LogLevel.BASIC).build();
 
 
 
