@@ -168,7 +168,10 @@ public class CircleFeed extends Feed {
         binds_to = new int[] { R.id.tv_title, R.id.hlv_users, R.id.bt_add_cm};
         loaderBundle.putString(LOADER_SORT_ORDER, Circle.UPDATED_AT + " desc");
         loaderBundle.putParcelable(LOADER_URI, DBUtils.buildLocalUri(Circle.class));
-        loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Circle.NAME, Circle.UPDATED_AT, Circle.LOCAL_ID, Circle.SV_ID, Circle.LOCALE, Circle.USER_ID});
+        loaderBundle.putStringArray(LOADER_PROJECTION, new String[]{Circle.NAME, Circle.UPDATED_AT, Circle.LOCAL_ID, Circle.SV_ID, Circle.LOCALE, Circle.USER_ID,
+        });
+
+
         runnable = new RecycleRunnable() {
             @Override
             public void run() {
@@ -310,6 +313,13 @@ public class CircleFeed extends Feed {
                     default:
                         return false;
                 }
+            }
+        };
+
+        refreshAction = new Runnable() {
+            @Override
+            public void run() {
+                swipeLayout.setRefreshing(false);
             }
         };
 

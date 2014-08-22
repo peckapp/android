@@ -8,6 +8,7 @@ package com.peck.android;
 import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
+import android.os.StrictMode;
 
 import com.newrelic.agent.android.NewRelic;
 import com.peck.android.managers.FacebookSessionHandler;
@@ -64,6 +65,8 @@ public class PeckApp extends Application {
 
     public void onCreate() {
         mContext = this;
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().penaltyLog().detectLeakedClosableObjects().build());
         NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
         ).start(this);
@@ -96,7 +99,6 @@ public class PeckApp extends Application {
              * API strings
              */
             public final static String BASE_URL = "http://loki.peckapp.com:3500";
-            public final static String API_ENDPOINT = BASE_URL + "/api/";
 
         }
 

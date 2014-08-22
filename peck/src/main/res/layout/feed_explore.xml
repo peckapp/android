@@ -15,12 +15,18 @@
         android:background="@color/backgr_gray">
 
 
-        <ListView
-            android:animateLayoutChanges="true"
+        <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/lv_content"
-            />
+            android:id="@+id/srl_feed">
+
+            <ListView
+                android:animateLayoutChanges="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/lv_content"/>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
     </LinearLayout>
 

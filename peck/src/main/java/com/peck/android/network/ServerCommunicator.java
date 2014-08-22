@@ -251,6 +251,9 @@ public class ServerCommunicator {
 
         @GET("/api/explore")
         void updateExplore(@QueryMap Map<String, String> authentication, Callback<JsonObject> callback);
+
+        @GET("/api/explore")
+        JsonObject updateExplore(@QueryMap Map<String, String> authentication);
     }
 
 

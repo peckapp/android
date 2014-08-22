@@ -15,7 +15,9 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -61,9 +63,59 @@ import retrofit.client.Response;
 public class ExploreFeed extends Feed {
 
     public static final String DATE_ORDER = "explr_order";
-    private boolean isRefreshing = false;
-    private final Object refreshLock = new Object();
     private long currentTime = DateTime.now().toInstant().getMillis()/1000L;
+
+    private RefreshTask refreshTask;
+
+    private class RefreshTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            JsonUtils.auth(LoginManager.getActive(), new FailureCallback<Map<String, String>>() {
+                @Override
+                protected void success(Map<String, String> item) {
+                    ServerCommunicator.jsonService.updateExplore(item, new Callback<JsonObject>() {
+                        @Override
+                        public void success(final JsonObject jsonObject, Response response) {
+                            new AsyncTask<Void, Void, Void>() {
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    handleExploreArray(jsonObject.getAsJsonArray("explore_events"), false);
+                                    handleExploreArray(jsonObject.getAsJsonArray("explore_announcements"), true);
+                                    return null;
+                                }
+                            }.execute();
+
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            Log.e(ExploreFeed.class.getSimpleName(), "[ ERROR " + StringUtils.substring(error.getResponse() != null ? Integer.toString(error.getResponse().getStatus()) : "???", 0, 2) + "] Failed to download new explore items.", error);
+                        }
+                    });
+
+                }
+
+                @Override
+                protected void failure(Throwable cause) {
+                    Log.e(ExploreFeed.class.getSimpleName(), "Failed to authenticate your account on explore refresh.", cause);
+                }
+            });
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            swipeLayout.setRefreshing(false);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+    }
+
+
     {
         listItemRes = R.layout.lvitem_explore;
         layoutRes = R.layout.feed_explore;
@@ -84,6 +136,12 @@ public class ExploreFeed extends Feed {
         loaderBundle.putStringArray(LOADER_SELECT_ARGS, new String[]{Integer.toString(Event.SIMPLE_EVENT), Integer.toString(Event.ATHLETIC_EVENT), Integer.toString(Event.ANNOUNCEMENT)});
         loaderBundle.putString(LOADER_SORT_ORDER, Event.SCORE_UPDATED + " desc, " + Event.SCORE  + " desc, " +
                 DATE_ORDER + " asc limit 200");
+        refreshAction = new Runnable() {
+            @Override
+            public void run() {
+                refresh();
+            }
+        };
     }
 
     @Override
@@ -123,11 +181,13 @@ public class ExploreFeed extends Feed {
                                         protected String doInBackground(Void... voids) {
                                             Cursor c = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.THUMBNAIL, User.IMAGE_NAME},
                                                     User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
-                                            if (c.getCount() == 0) return null;
-                                            c.moveToFirst();
-                                            String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
-                                            c.close();
-                                            return ret;
+                                            try {
+                                                if (c.getCount() == 0) return null;
+                                                c.moveToFirst();
+                                                return c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                            } finally {
+                                                c.close();
+                                            }
                                         }
 
                                         @Override
@@ -163,11 +223,13 @@ public class ExploreFeed extends Feed {
                                         if (user_id < 1) return "Someone";
                                         Cursor c = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.FIRST_NAME, User.LAST_NAME},
                                                 User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
-                                        if (c.getCount() == 0) return "Someone";
-                                        c.moveToFirst();
-                                        String ret = c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
-                                        c.close();
-                                        return ret;
+                                        try {
+                                            if (c.getCount() == 0) return "Someone";
+                                            c.moveToFirst();
+                                            return c.getString(c.getColumnIndex(User.FIRST_NAME)) + " " + c.getString(c.getColumnIndex(User.LAST_NAME));
+                                        } finally { //try/finally necessary because otherwise we get resource leaks
+                                            c.close();
+                                        }
                                     }
 
                                     @Override
@@ -192,15 +254,19 @@ public class ExploreFeed extends Feed {
                                         }
                                         Cursor c = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.SV_ID, User.IMAGE_NAME},
                                                 User.SV_ID + " = ?", new String[]{Long.toString(user_id)}, null);
-                                        if (c.getCount() == 0) {
-                                            show = false;
+                                        try {
+                                            if (c.getCount() == 0) {
+                                                show = false;
+                                                return null;
+                                            }
+                                            c.moveToFirst();
+                                            String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
+                                            show = ret != null && !ret.isEmpty();
                                             return null;
+
+                                        } finally {
+                                            c.close();
                                         }
-                                        c.moveToFirst();
-                                        String ret = c.getString(c.getColumnIndex(User.IMAGE_NAME));
-                                        c.close();
-                                        show = ret != null && !ret.isEmpty();
-                                        return null;
                                     }
 
                                     @Override
@@ -340,7 +406,7 @@ public class ExploreFeed extends Feed {
 
                                 return true;
                             case R.id.tv_action:
-                                //todo: this is going to want to be a query. it'll only return an id at the moment.
+                                //todo: this is going to want to be a query. it'll only display an id at the moment.
                                 ((TextView) view).setText("is going to the game against " + cursor.getString(cursor.getColumnIndex(Event.ATHLETIC_OPPONENT)));
                                 return true;
                             case R.id.riv_user:
@@ -391,91 +457,68 @@ public class ExploreFeed extends Feed {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        swipeLayout.setOnRefreshListener(this);
+        return view;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        //refresh();
+        refresh();
     }
 
     public void refresh() {
-        synchronized (refreshLock) { //fixme: this is a really rudimentary way of making this work
-            if (isRefreshing) return;
-            isRefreshing = true;
+        if (refreshTask != null && !refreshTask.getStatus().equals(AsyncTask.Status.FINISHED)) {
+            refreshTask.cancel(true);
         }
-        JsonUtils.auth(LoginManager.getActive(), new FailureCallback<Map<String, String>>() {
-            @Override
-            protected void success(Map<String, String> item) {
-                ServerCommunicator.jsonService.updateExplore(item, new Callback<JsonObject>() {
-                    @Override
-                    public void success(final JsonObject jsonObject, Response response) {
-                        new AsyncTask<Void, Void, Void>() {
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                handleExploreArray(jsonObject.getAsJsonArray("explore_events"), false);
-                                handleExploreArray(jsonObject.getAsJsonArray("explore_announcements"), true);
-                                synchronized (refreshLock) { isRefreshing = false; }
-                                return null;
-                            }
-                        }.execute();
-
-                    }
-
-                    @Override
-                    public void failure(RetrofitError error) {
-                        Log.e(ExploreFeed.class.getSimpleName(), "[ ERROR " + StringUtils.substring(error.getResponse() != null ? Integer.toString(error.getResponse().getStatus()) : "???", 0, 2) + "] Failed to download new explore items.", error);
-                        synchronized (refreshLock) { isRefreshing = false; }
-                    }
-                });
-
-            }
-
-            @Override
-            protected void failure(Throwable cause) {
-                Log.e(ExploreFeed.class.getSimpleName(), "Failed to authenticate your account on explore refresh.", cause);
-                synchronized (refreshLock) { isRefreshing = false; }
-            }
-        });
+        refreshTask = new RefreshTask();
+        refreshTask.execute();
     }
-
-
-
 
     private void handleExploreArray(@Nullable JsonArray unwrappedArray, boolean isAnnouncement) {
         if (unwrappedArray == null || unwrappedArray.isJsonNull() || unwrappedArray.size() == 0) return;
         double updatedTime = DateTime.now().toInstant().getMillis()/1000D;
         Cursor cursor = PeckApp.getContext().getContentResolver().query(DBUtils.buildLocalUri(Event.class),
                 new String[] { Event.SV_ID, Event.UPDATED_AT, Event.TYPE, Event.LOCAL_ID }, null, null, DBOperable.UPDATED_AT);
-        HashMap<Long, JsonObject> map = new HashMap<Long, JsonObject>();
-        ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
-        for (JsonElement element : unwrappedArray) {
-            map.put(element.getAsJsonObject().get(Event.SV_ID).getAsLong(), element.getAsJsonObject());
-        }
+        try {
+            HashMap<Long, JsonObject> map = new HashMap<Long, JsonObject>();
+            ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+            for (JsonElement element : unwrappedArray) {
+                map.put(element.getAsJsonObject().get(Event.SV_ID).getAsLong(), element.getAsJsonObject());
+            }
 
-        while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex(Event.SV_ID));
-            if (map.containsKey(id) && cursor.getDouble(cursor.getColumnIndex(Event.UPDATED_AT)) <= map.get(id).get(Event.UPDATED_AT).getAsDouble()) {
-                JsonObject object = map.remove(id); //remove so it doesn't get inserted later
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(cursor.getColumnIndex(Event.SV_ID));
+                if (map.containsKey(id) && cursor.getDouble(cursor.getColumnIndex(Event.UPDATED_AT)) <= map.get(id).get(Event.UPDATED_AT).getAsDouble()) {
+                    JsonObject object = map.remove(id); //remove so it doesn't get inserted later
+                    ContentValues values = JsonUtils.jsonToContentValues(object, Event.class);
+                    values.put(Event.TYPE, isAnnouncement ? Event.ANNOUNCEMENT : object.get("event_type").getAsString().equals("simple") ? Event.SIMPLE_EVENT : Event.ATHLETIC_EVENT);
+                    values.put(Event.SCORE_UPDATED, updatedTime);
+                    batch.add(ContentProviderOperation.newUpdate(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
+                }
+            }
+
+            for (JsonObject object : map.values()) { //insert the remaining values
                 ContentValues values = JsonUtils.jsonToContentValues(object, Event.class);
                 values.put(Event.TYPE, isAnnouncement ? Event.ANNOUNCEMENT : object.get("event_type").getAsString().equals("simple") ? Event.SIMPLE_EVENT : Event.ATHLETIC_EVENT);
                 values.put(Event.SCORE_UPDATED, updatedTime);
-                batch.add(ContentProviderOperation.newUpdate(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
+                batch.add(ContentProviderOperation.newInsert(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
             }
-        }
 
-        for (JsonObject object : map.values()) { //insert the remaining values
-            ContentValues values = JsonUtils.jsonToContentValues(object, Event.class);
-            values.put(Event.TYPE, isAnnouncement ? Event.ANNOUNCEMENT : object.get("event_type").getAsString().equals("simple") ? Event.SIMPLE_EVENT : Event.ATHLETIC_EVENT);
-            values.put(Event.SCORE_UPDATED, updatedTime);
-            batch.add(ContentProviderOperation.newInsert(DBUtils.buildLocalUri(Event.class)).withValues(values).build());
-        }
-
-        try {
-            synchronized (PeckSyncAdapter.batchLock) {
-                PeckApp.getContext().getContentResolver().applyBatch(PeckApp.AUTHORITY, batch);
+            try {
+                synchronized (PeckSyncAdapter.batchLock) {
+                    PeckApp.getContext().getContentResolver().applyBatch(PeckApp.AUTHORITY, batch);
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (OperationApplicationException e) {
+                e.printStackTrace();
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (OperationApplicationException e) {
-            e.printStackTrace();
+        } finally {
+            cursor.close();
         }
     }
 

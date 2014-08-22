@@ -147,7 +147,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_text"
-                    android:password="false"
                     android:layout_marginTop="12dp"
                     android:layout_marginRight="4dp"
                     android:layout_marginBottom="6dp" />

@@ -103,7 +103,6 @@ public class ProfileTab extends Fragment {
 
                     try {
                         final Bitmap bmp = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
-                        Toast.makeText(getActivity(), "Changing profile pictures isn't supported yet.", Toast.LENGTH_LONG);
 /*
                         new AsyncTask<Void, Void, Void>() {
                             @Override
@@ -169,7 +168,13 @@ public class ProfileTab extends Fragment {
 
         refresh(view);
 
-        profile.setOnClickListener(new ImagePickerListener(this));
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity(), "Changing profile pictures isn't supported yet.", Toast.LENGTH_LONG).show();
+            }
+        });
+        //profile.setOnClickListener(new ImagePickerListener(this));
 
         LoginButton authButton = (LoginButton) view.findViewById(R.id.bt_fb_link);
         authButton.setFragment(this);
@@ -183,8 +188,6 @@ public class ProfileTab extends Fragment {
 
 
     private void refresh(final View mView) {
-
-
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -210,7 +213,7 @@ public class ProfileTab extends Fragment {
                 if (email != null) {
                     tvEmail.setText(email);
                 }
-                if (imgUrl != null) Picasso.with(mView.getContext())
+                if (imgUrl != null && !imgUrl.isEmpty() && !imgUrl.equals("/images/missing.png")) Picasso.with(mView.getContext())
                         .load(imgUrl).
                                 into(profile, new Callback() {
                                     @Override
@@ -226,8 +229,6 @@ public class ProfileTab extends Fragment {
 
             }
         }.execute();
-
-
 
     }
 

@@ -12,4 +12,8 @@
     <color name="div_purple">#5c4b94</color>
     <color name="event_bg_purple">#221b29</color>
 
+    <color name="refresh_primary">#460F7D</color>
+    <color name="refresh_secondary">#7519D1</color>
+    <color name="refresh_tertiary">#9E5EDF</color>
+    <color name="refresh_quaternary">#DACFE5</color>
 </resources>

@@ -17,6 +17,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
  * feed fragment class, constructed using a builder. if you don't use a builder, make sure you supply the necessary data in setArguments.
  */
 
-public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SwipeRefreshLayout.OnRefreshListener {
 
     protected static final String LV_RES = "list view resource identifier";
     protected static final String LAYOUT_RES = "layout identifier";
@@ -58,6 +59,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     protected int[] binds_to;
     protected SimpleCursorAdapter mAdapter;
     protected boolean dividers;
+    protected SwipeRefreshLayout swipeLayout;
 
     protected AdapterView.OnItemClickListener listener;
     protected AdapterView mAdapterView;
@@ -70,6 +72,8 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     protected ArrayList<View> headers = new ArrayList<View>();
 
     protected RecycleRunnable runnable;
+
+    protected Runnable refreshAction;
 
     public abstract static class RecycleRunnable implements Runnable {
         protected View recycledView;
@@ -357,6 +361,9 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
+        swipeLayout = ((SwipeRefreshLayout) view.findViewById(R.id.srl_feed));
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorSchemeColors(R.color.refresh_primary, R.color.refresh_secondary, R.color.refresh_tertiary, R.color.refresh_quaternary);
         mAdapterView = ((AdapterView) view.findViewById(listViewRes));
         if (mAdapterView instanceof ListView) {
             for (View header : headers) ((ListView) mAdapterView).addHeaderView(header);
@@ -395,4 +402,9 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
 
     public String getSelection() { return loaderBundle.getString(LOADER_SELECTION); }
     public String[] getSelectionArgs() { return loaderBundle.getStringArray(LOADER_SELECT_ARGS);}
+
+    @Override
+    public void onRefresh() {
+        if (refreshAction != null) refreshAction.run();
+    }
 }
