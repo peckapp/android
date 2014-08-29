@@ -9,13 +9,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.newrelic.agent.android:agent-gradle-plugin:3.429.0'
+        //classpath 'com.newrelic.agent.android:agent-gradle-plugin:3.429.0'
         classpath 'com.android.tools.build:gradle:0.12.2'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'newrelic'
+//apply plugin: 'newrelic'
 
 repositories {
     mavenCentral()
@@ -120,7 +120,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-apache:2.0.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     compile 'com.squareup.okio:okio:0.6.1'
-    compile 'com.newrelic.agent.android:android-agent:3.429.0'
+    //compile 'com.newrelic.agent.android:android-agent:3.429.0'
     compile('de.jodamob.android:android-gluten:0.3-3-g89a07a5') {
         exclude group: 'com.crashlytics.android'
         exclude group: 'org.robolectric'
