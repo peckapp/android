@@ -37,3 +37,6 @@ proguard/
 #crashlytics files
 crashlytics-build.properties
 com_crashlytics_export_strings.xml
+
+#proguard class mapping
+out.map

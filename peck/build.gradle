@@ -21,37 +21,44 @@ repositories {
     mavenCentral()
 }
 
+if(project.hasProperty("Peck.signing") && new File((String)(project.property("Peck.signing") + ".gradle")).exists()) { apply from: project.property("Peck.signing") + ".gradle" }
+
 
 android {
-    signingConfigs {
-        config {
-        }
-    }
     dexOptions {
         jumboMode = true
     }
     compileSdkVersion 20
     buildToolsVersion '20'
+
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 20
         versionCode 1
         versionName '1.0'
+        applicationId 'com.peckapp.android'
     }
+
     buildTypes {
         release {
             runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            debuggable false
+            jniDebugBuild false
+            renderscriptDebugBuild false
+            proguardFile 'E:/peck/android/peck/proguard-rules.txt'
+            zipAlign true
         }
         debug {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             debuggable true
+            jniDebugBuild false
+            renderscriptDebugBuild false
         }
     }
     productFlavors {
-
-     }
+    }
 
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
