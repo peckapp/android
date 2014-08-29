@@ -16,12 +16,29 @@
 #   public *;
 #}
 
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+
 -keep public class com.peck.android.FastDateTimeZoneProvider
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.BroadcastReceiver
 -keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class com.android.vending.licensing.ILicensingService
+-keep public class * implements java.io.Serializable
+-keep public class * extends android.support.v4.app.Fragment
+-keep public class * extends android.support.v4.app.ListFragment
+-keep public class com.peck.android.activities.LocaleActivity
+
+-keepclassmembers class * extends android.os.AsyncTask {
+    protected void onPreExecute();
+    protected *** doInBackground(...);
+    protected void onPostExecute(...);
+}
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
@@ -48,6 +65,8 @@
 -keep class com.squareup.okhttp.internal.huc.**
 
 -keepattributes *Annotation*
+-keepattributes EnclosingMethod, InnerClasses
+-keepattributes Signature
 
 #keep enums
 -keepclassmembers enum * {
@@ -80,7 +99,7 @@
 
 #keep a mapping for deciphering stacktraces
 -printmapping out.map
--renamesourcefileattribute SourceFile
+-renamesourcefileattribute src
 -keepattributes SourceFile,LineNumberTable
 
 #kill verbose and debug logging
@@ -97,3 +116,5 @@
 -dontpreverify
 
 -verbose
+
+-repackageclasses ''

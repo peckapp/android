@@ -5,7 +5,6 @@
 
 package com.peck.android.managers;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.facebook.Request;
@@ -27,15 +26,9 @@ public class FacebookSessionHandler {
 
 
     public static void init() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                Log.i(TAG, "initializing");
-                session = Session.openActiveSessionFromCache(PeckApp.getContext());
-                Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
-                return null;
-            }
-        }.execute();
+        Log.i(TAG, "initializing");
+        session = Session.openActiveSessionFromCache(PeckApp.getContext());
+        Log.i(TAG, ("initialized " + ((session == null) ? "without facebook" : "with facebook")));
     }
 
     public static void getGraphUser(final Callback<GraphUser> callback) {

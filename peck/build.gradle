@@ -21,7 +21,7 @@ repositories {
     mavenCentral()
 }
 
-if(project.hasProperty("Peck.signing") && new File((String)(project.property("Peck.signing") + ".gradle")).exists()) { apply from: project.property("Peck.signing") + ".gradle" }
+if(project.hasProperty("Peck.signing") && new File((String)project.property("Peck.signing")).exists()) { apply from: project.property("Peck.signing") }
 
 
 android {
@@ -30,6 +30,10 @@ android {
     }
     compileSdkVersion 20
     buildToolsVersion '20'
+
+    lintOptions {
+        abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 14
