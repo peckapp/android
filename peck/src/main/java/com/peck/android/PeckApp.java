@@ -10,7 +10,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.StrictMode;
 
-import com.newrelic.agent.android.NewRelic;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.models.Circle;
 import com.peck.android.models.Club;
@@ -67,9 +66,9 @@ public class PeckApp extends Application {
         mContext = this;
 
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().penaltyLog().detectLeakedClosableObjects().build());
-        NewRelic.withApplicationToken(
+        /*NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
-        ).start(this);
+        ).start(this);*/
 
         System.setProperty("org.joda.time.DateTimeZone.Provider",
                 "com.peck.android.FastDateTimeZoneProvider");

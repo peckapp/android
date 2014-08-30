@@ -15,13 +15,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.newrelic.agent.android.NewRelic;
 import com.peck.android.R;
 import com.peck.android.managers.LoginManager;
 
 import java.io.IOException;
-
-import de.jodamob.android.logging.NewRelicLogger;
 
 /**
  * activity used to login to peck. hands back account authenticated in return intent/bundle.
@@ -45,7 +42,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         /* FIXME - ONLY FOR FIRST RELEASE */
 
         if (true) {
-            if (NewRelic.isStarted()) new NewRelicLogger().e("LOGINACTIVITY STARTED IN PRODUCTION V1.0");
+            //if (NewRelic.isStarted()) new NewRelicLogger().e("LOGINACTIVITY STARTED IN PRODUCTION V1.0");
             finish();
             return;
         }
