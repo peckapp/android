@@ -9,6 +9,7 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 -dontusemixedcaseclassnames
 -dontskipnonpubliclibraryclasses
+-dontobfuscate
 
 -keep public class com.peck.android.FastDateTimeZoneProvider
 -keep public class * extends android.app.Activity
@@ -42,6 +43,8 @@
     public <init>(android.content.Context, android.util.AttributeSet, int);
 }
 
+-keep interface *
+
 -keepclassmembers class * extends android.content.Context {
    public void *(android.view.View);
    public void *(android.view.MenuItem);
@@ -68,7 +71,7 @@
 
 -keep public class com.peck.android.network.ServerCommunicator
 
--keep @retrofit.http.** public class *
+-keep public interface retrofit.http.**
 
 -keepattributes *Annotation*
 -keepattributes EnclosingMethod, InnerClasses

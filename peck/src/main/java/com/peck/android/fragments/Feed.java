@@ -18,6 +18,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -362,6 +363,7 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(layoutRes, container, false);
         swipeLayout = ((SwipeRefreshLayout) view.findViewById(R.id.srl_feed));
+        Log.i(getClass().getSimpleName(), "swipelayout is " + (swipeLayout == null ? "null" : "not null"));
         swipeLayout.setOnRefreshListener(this);
         swipeLayout.setColorSchemeColors(R.color.refresh_primary, R.color.refresh_secondary, R.color.refresh_tertiary, R.color.refresh_quaternary);
         mAdapterView = ((AdapterView) view.findViewById(listViewRes));
