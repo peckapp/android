@@ -49,7 +49,6 @@ public class DBUtils {
      * @return the database creation string
      */
     public static <T extends DBOperable> String getDatabaseCreate(Class<T> tClass) {
-        //todo: remove "on conflict replace". we don't want any conflicts going into the db
         return "create table " + getTableName(tClass) + " (" + StringUtils.join(fieldsToCreatorString(tClass), DELIM) +
                 DELIM + "unique (" + DBOperable.SV_ID +
                 ((tClass.equals(Event.class)) ? ", " + Event.TYPE : "")

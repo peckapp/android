@@ -24,7 +24,9 @@
 -keep public class * extends android.support.v4.app.ListFragment
 -keep public class com.peck.android.activities.LocaleActivity
 
--keepclassmembernames public class * extends com.peck.models.DBOperable
+-keepclassmembers public class com.peck.android.models.* {
+    <fields>;
+}
 
 -keepclassmembers class * extends android.os.AsyncTask {
     protected void onPreExecute();
@@ -63,6 +65,8 @@
     @retrofit.http.DELETE <methods>;
     @retrofit.http.PATCH <methods>;
 }
+
+-keep public class com.peck.android.network.ServerCommunicator
 
 -keep @retrofit.http.** public class *
 
