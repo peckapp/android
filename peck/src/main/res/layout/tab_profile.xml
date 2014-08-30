@@ -113,11 +113,12 @@
             </LinearLayout>
 
 
-        <com.peck.android.views.PeckAuthButton
+
+       <com.peck.android.views.PeckAuthButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bt_peck_login"
-            android:layout_marginTop="300dp"
+            android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:layout_below="@+id/ll_subscriptions"
             android:layout_centerHorizontal="true"/>

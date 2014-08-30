@@ -20,12 +20,10 @@ import android.widget.Button;
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
 import com.peck.android.R;
-import com.peck.android.fragments.NewPostTab;
 import com.peck.android.fragments.ProfileTab;
-import com.peck.android.fragments.feeds.CircleFeed;
+import com.peck.android.fragments.UnavailableFragment;
 import com.peck.android.fragments.feeds.ExploreFeed;
 import com.peck.android.fragments.feeds.HomeFeed;
-import com.peck.android.fragments.feeds.PeckFeed;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
@@ -62,11 +60,16 @@ public class FeedActivity extends FragmentActivity {
     {
         feeds[0].decrementDate();
         feeds[2].incrementDate();
-        buttons.put(R.id.bt_add, new NewPostTab());
         buttons.put(R.id.bt_profile, new ProfileTab());
         buttons.put(R.id.bt_explore, new ExploreFeed());
-        buttons.put(R.id.bt_circles, new CircleFeed());
-        buttons.put(R.id.bt_peck, new PeckFeed());
+        buttons.put(R.id.bt_peck, new UnavailableFragment());
+        buttons.put(R.id.bt_circles, new UnavailableFragment());
+        buttons.put(R.id.bt_add, new UnavailableFragment());
+        /*  FIXME  -  COMMENTED FOR RELEASE  */
+
+        //buttons.put(R.id.bt_add, new NewPostTab());
+        //buttons.put(R.id.bt_circles, new CircleFeed());
+        //buttons.put(R.id.bt_peck, new PeckFeed());
 
     }
 

@@ -8,6 +8,7 @@
 
     <string name="app_name">Peck</string>
     <string name="app_id">291944037642057</string> <!-- facebook app id -->
+    <string name="app_process_name">peck</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -47,6 +48,7 @@
     <string name="bt_peck_logout">Logout</string>
     <string name="bt_retry">Retry</string>
     <string name="tv_retry">Couldn\'t download localization data.</string>
+    <string name="tv_content_not_available">content unavailable at this time</string>
 
 
 

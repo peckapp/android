@@ -5,10 +5,7 @@
 
 package com.peck.android.activities;
 
-import android.accounts.Account;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
@@ -18,8 +15,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -50,7 +45,8 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
     private static final int RESOLUTION_REQUEST_FAILURE = 9000;
     private LocationClient client = new LocationClient(PeckApp.getContext(), this, this);
     private boolean syncing = false;
-    private boolean createNew = false;
+
+    private boolean createNew = true; //fixme: FOR PRODUCTION
 
     public static final long LOCATION_TIMEOUT = 6000;
 
@@ -126,6 +122,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                                                                             new String[]{DBOperable.SV_ID, DBOperable.LOCAL_ID}, DBOperable.LOCAL_ID + " = ?", new String[]{Long.toString(l)}, null);
                                                                     cursor.moveToFirst();
                                                                     long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
+                                                                    cursor.close();
 
                                                                     LoginManager.setLocale(LoginManager.getActive().name, id);
 
@@ -196,6 +193,10 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
                         } catch (InterruptedException e) { e.printStackTrace(); }
                     }
 
+
+
+                    /* FIXME  -  COMMENTED FOR RELEASE
+
                     if (LoginManager.getActive() != null && !LoginManager.isValidTemp(LoginManager.getActive())) {
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
@@ -238,7 +239,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
 
                             }
                         });
-                    }
+                    }*/
 
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -248,17 +249,28 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
 
 
                     long startTime = System.currentTimeMillis();
-                    while (getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
-                            new String[]{DBOperable.LOCAL_ID}, null, null, null).getCount() == 0 && System.currentTimeMillis() - startTime < PeckApp.Constants.Network.CONNECT_TIMEOUT) {
+
+                    while (System.currentTimeMillis() - startTime < PeckApp.Constants.Network.CONNECT_TIMEOUT) {
+                        Cursor cursor = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
+                                new String[]{DBOperable.LOCAL_ID}, null, null, null);
                         try {
+                            if (cursor.getCount() > 0) break;
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
                             syncing = false;
                             e.printStackTrace();
+                        } finally {
+                            cursor.close();
                         }
                     }
-                    return getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
-                            new String[]{DBOperable.LOCAL_ID}, null, null, null).getCount() != 0;
+                    Cursor temp = getContentResolver().query(PeckApp.Constants.Database.BASE_AUTHORITY_URI.buildUpon().appendPath(DBUtils.getTableName(Locale.class)).build(),
+                            new String[]{DBOperable.LOCAL_ID}, null, null, null);
+
+                    try {
+                        return temp.getCount() != 0;
+                    } finally {
+                        temp.close();
+                    }
                 }
 
                 @Override
@@ -328,8 +340,7 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
     }
 
     /**
-     * Called by Location Services if the attempt to
-     * Location Services fails.
+     * Called by Location Services if the attempt to connect fails
      */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {

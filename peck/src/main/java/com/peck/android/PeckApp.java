@@ -11,18 +11,13 @@ import android.net.Uri;
 import android.os.StrictMode;
 
 import com.peck.android.managers.FacebookSessionHandler;
-import com.peck.android.models.Circle;
 import com.peck.android.models.Club;
-import com.peck.android.models.Comment;
 import com.peck.android.models.Department;
 import com.peck.android.models.DiningPlace;
 import com.peck.android.models.Event;
 import com.peck.android.models.Locale;
 import com.peck.android.models.MenuItem;
-import com.peck.android.models.Peck;
 import com.peck.android.models.Subscription;
-import com.peck.android.models.User;
-import com.peck.android.models.joins.CircleMember;
 import com.peck.android.models.joins.EventAttendee;
 import com.squareup.picasso.Picasso;
 
@@ -54,8 +49,13 @@ public class PeckApp extends Application {
 
     public static final String AUTHORITY = "com.peck.android.provider.all";
 
+    /* FIXME  -  COMMENTED FOR RELEASE
+
     private static final Class[] MODELS = { Circle.class, Event.class, Locale.class, Peck.class, Comment.class, User.class, DiningPlace.class, Subscription.class,
-            CircleMember.class, EventAttendee.class, Department.class, MenuItem.class, Club.class};
+            CircleMember.class, EventAttendee.class, Department.class, MenuItem.class, Club.class}; */
+
+    private static final Class[] MODELS = { Event.class, Locale.class, DiningPlace.class, Subscription.class,
+            EventAttendee.class, Department.class, MenuItem.class, Club.class};
 
 
     public static Class[] getModelArray() {
@@ -65,7 +65,6 @@ public class PeckApp extends Application {
     public void onCreate() {
         mContext = this;
 
-        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().penaltyLog().detectLeakedClosableObjects().build());
         /*NewRelic.withApplicationToken(
                 "AAb263b9d104b0c100c64a79f2c229cef86daf51a1"
         ).start(this);*/
@@ -75,6 +74,7 @@ public class PeckApp extends Application {
 
         if (BuildConfig.DEBUG) {
             Picasso.with(getContext()).setIndicatorsEnabled(true);
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().penaltyLog().detectLeakedClosableObjects().build());
         }
 
         FacebookSessionHandler.init();
@@ -97,7 +97,7 @@ public class PeckApp extends Application {
             /**
              * API strings
              */
-            public final static String BASE_URL = "http://loki.peckapp.com:3500";
+            public final static String BASE_URL = BuildConfig.DEBUG ? "http://loki.peckapp.com:3500" : "http://yggdrasil.peckapp.com:3500";
 
         }
 

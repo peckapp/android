@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import retrofit.RetrofitError;
@@ -110,6 +111,9 @@ public class PeckSyncAdapter extends AbstractThreadedSyncAdapter {
                     runSync(clzz, account, authority, client, syncResult, urlToSync, eventType, authToken);
                 }
             }, clzz.getSimpleName());
+            try {
+                Thread.sleep(new Random().nextLong() % 1000 + 500);
+            } catch (Throwable ignore) {}
             mine.start();
             syncThreads.add(mine);
         }
