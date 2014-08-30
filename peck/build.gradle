@@ -46,19 +46,20 @@ android {
     buildTypes {
         release {
             runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-release.txt'
             debuggable false
             jniDebugBuild false
             renderscriptDebugBuild false
-            proguardFile 'E:/peck/android/peck/proguard-rules.txt'
+            proguardFile 'E:/peck/android/peck/proguard-release.txt'
             zipAlign true
         }
         debug {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-debug.txt'
             debuggable true
             jniDebugBuild false
             renderscriptDebugBuild false
+            proguardFile 'E:/peck/android/peck/proguard-debug.txt'
         }
     }
     productFlavors {

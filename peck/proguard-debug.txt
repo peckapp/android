@@ -1,0 +1,11 @@
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+-dontskipnonpubliclibraryclasses
+-dontobfuscate
+
+#reduce the size of the apk as much as possible
+-optimizationpasses 5
+
+#unnecessary for dalvik
+-dontpreverify
+
+-verbose
