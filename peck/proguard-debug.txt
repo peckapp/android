@@ -8,4 +8,23 @@
 #unnecessary for dalvik
 -dontpreverify
 
+#these classes complain during compilation if you don't silence them
+-dontwarn rx.**
+-dontwarn com.google.appengine.api.urlfetch.**
+-dontwarn android.support.**
+-dontwarn org.apache.**
+-dontwarn org.joda.convert.ToString
+-dontwarn org.joda.convert.FromString
+-dontwarn org.easymock.**
+-dontwarn java.nio.file.*
+-dontwarn com.google.android.apps.common.testing.**
+-dontwarn bolts.*
+-dontwarn org.jmock.core.Constraint
+-dontwarn com.crashlytics.**
+-dontwarn java.beans.**
+-dontwarn org.hamcrest.**
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn com.squareup.okhttp.internal.huc.**
+-dontwarn com.facebook.android.BuildConfig
+
 -verbose
