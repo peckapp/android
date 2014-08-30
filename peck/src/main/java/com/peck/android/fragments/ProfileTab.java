@@ -8,11 +8,9 @@ package com.peck.android.fragments;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -27,15 +25,11 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.makeramen.RoundedImageView;
 import com.peck.android.R;
-import com.peck.android.database.DBUtils;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.managers.LoginManager;
-import com.peck.android.models.User;
 import com.peck.android.network.PeckAccountAuthenticator;
 import com.peck.android.views.PeckAuthButton;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
 
@@ -188,7 +182,11 @@ public class ProfileTab extends Fragment {
 
 
     private void refresh(final View mView) {
-        new AsyncTask<Void, Void, Void>() {
+        /* FIXME  -  COMMENTED FOR RELEASE
+          *  not broken. needs user table to be created.
+           * */
+
+       /* new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 Cursor cursor = getActivity().getContentResolver().query(DBUtils.buildLocalUri(User.class), new String[]{User.LOCAL_ID, User.FIRST_NAME, User.LAST_NAME, User.IMAGE_NAME, User.THUMBNAIL, User.SV_ID, User.EMAIL},
@@ -228,7 +226,7 @@ public class ProfileTab extends Fragment {
                                 });
 
             }
-        }.execute();
+        }.execute();*/
 
     }
 

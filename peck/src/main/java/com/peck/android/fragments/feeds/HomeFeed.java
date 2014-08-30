@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -201,6 +202,12 @@ public class HomeFeed extends Feed {
             }
         };
         withRelativeDate(0);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((ViewGroup) getListView().getParent()).setBackgroundColor(getResources().getColor(R.color.event_bg_purple));
     }
 
     /**

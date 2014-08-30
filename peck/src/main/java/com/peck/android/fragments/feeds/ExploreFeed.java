@@ -277,7 +277,8 @@ public class ExploreFeed extends Feed {
                                 }.execute();
                                 return true;
                             case R.id.rl_attendance:
-                                view.setVisibility(View.VISIBLE);
+                                /* FIXME  -  SET FOR RELEASE */
+                                //view.setVisibility(View.VISIBLE);
                                 return true;
                             default:
                                 return false;
@@ -443,7 +444,8 @@ public class ExploreFeed extends Feed {
                             case R.id.iv_event:
                                 return true;
                             case R.id.rl_attendance:
-                                view.setVisibility(View.VISIBLE);
+                                /* FIXME  -  SET FOR RELEASE */
+                                //view.setVisibility(View.VISIBLE);
                                 return true;
                             default:
                                 return false;
