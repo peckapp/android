@@ -50,7 +50,6 @@ android {
             debuggable false
             jniDebugBuild false
             renderscriptDebugBuild false
-            proguardFile 'E:/peck/android/peck/proguard-release.txt'
             zipAlign true
         }
         debug {
@@ -59,7 +58,6 @@ android {
             debuggable true
             jniDebugBuild false
             renderscriptDebugBuild false
-            proguardFile 'E:/peck/android/peck/proguard-debug.txt'
         }
     }
     productFlavors {
