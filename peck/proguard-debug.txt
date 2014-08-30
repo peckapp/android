@@ -28,3 +28,80 @@
 -dontwarn com.facebook.android.BuildConfig
 
 -verbose
+
+-keep public class com.peck.android.FastDateTimeZoneProvider
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class com.android.vending.licensing.ILicensingService
+-keep public class * implements java.io.Serializable
+-keep public class * extends android.support.v4.app.Fragment
+-keep public class * extends android.support.v4.app.ListFragment
+-keep public class com.peck.android.activities.LocaleActivity
+
+-keepclassmembers public class com.peck.android.models.* {
+    <fields>;
+}
+
+-keepclassmembers class * extends android.os.AsyncTask {
+    protected void onPreExecute();
+    protected *** doInBackground(...);
+    protected void onPostExecute(...);
+}
+
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+-keep interface *
+
+-keepclassmembers class * extends android.content.Context {
+   public void *(android.view.View);
+   public void *(android.view.MenuItem);
+}
+
+-keepclassmembers class * implements android.os.Parcelable {
+    static ** CREATOR;
+}
+
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
+
+-keep class com.facebook.android.BuildConfig
+-keep class com.squareup.okhttp.internal.huc.**
+
+-keep class retrofit.**
+-keepclassmembers class * {
+    @retrofit.http.GET <methods>;
+    @retrofit.http.POST <methods>;
+    @retrofit.http.DELETE <methods>;
+    @retrofit.http.PATCH <methods>;
+}
+
+-keep public class com.peck.android.network.ServerCommunicator
+
+-keep public interface retrofit.http.**
+
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod, InnerClasses
+-keepattributes Signature
+
+#keep enums
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keep class * implements android.os.Parcleable {
+    public static final android.os.Parcelable$Creator *;
+}
+

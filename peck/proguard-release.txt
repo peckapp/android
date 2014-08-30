@@ -9,7 +9,6 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 -dontusemixedcaseclassnames
 -dontskipnonpubliclibraryclasses
--dontobfuscate
 
 -keep public class com.peck.android.FastDateTimeZoneProvider
 -keep public class * extends android.app.Activity

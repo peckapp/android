@@ -53,7 +53,7 @@ android {
             zipAlign true
         }
         debug {
-            runProguard true
+            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-debug.txt'
             debuggable true
             jniDebugBuild false
