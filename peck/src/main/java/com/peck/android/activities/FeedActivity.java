@@ -14,8 +14,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.peck.android.BuildConfig;
 import com.peck.android.PeckApp;
@@ -24,6 +26,7 @@ import com.peck.android.fragments.ProfileTab;
 import com.peck.android.fragments.UnavailableFragment;
 import com.peck.android.fragments.feeds.ExploreFeed;
 import com.peck.android.fragments.feeds.HomeFeed;
+import com.peck.android.interfaces.Named;
 import com.peck.android.listeners.FragmentSwitcherListener;
 import com.peck.android.managers.GcmRegistrar;
 import com.peck.android.managers.LoginManager;
@@ -46,6 +49,8 @@ public class FeedActivity extends FragmentActivity {
     public final static String TAB_CIRCLES = "tb_circles";
     public final static String TAB_PROFILE = "tb_profile";
 
+    private TextView title;
+
     HomeFeed[] feeds = new HomeFeed[] {new HomeFeed(), new HomeFeed(), new HomeFeed()};
 
     private int selectedPage;
@@ -58,13 +63,32 @@ public class FeedActivity extends FragmentActivity {
     private Button lastPressed;
 
     {
+
+
         feeds[0].decrementDate();
         feeds[2].incrementDate();
         buttons.put(R.id.bt_profile, new ProfileTab());
         buttons.put(R.id.bt_explore, new ExploreFeed());
-        buttons.put(R.id.bt_peck, new UnavailableFragment());
-        buttons.put(R.id.bt_circles, new UnavailableFragment());
-        buttons.put(R.id.bt_add, new UnavailableFragment());
+        buttons.put(R.id.bt_peck, new UnavailableFragment() {
+            @Override
+            public String getName() {
+                return "Pecks";
+            }
+        });
+        buttons.put(R.id.bt_circles, new UnavailableFragment() {
+            @Override
+            public String getName() {
+                return "Circles";
+            }
+        });
+        buttons.put(R.id.bt_add, new UnavailableFragment() {
+            @Override
+            public String getName() {
+                return "Post";
+            }
+        });
+
+
         /*  FIXME  -  COMMENTED FOR RELEASE  */
 
         //buttons.put(R.id.bt_add, new NewPostTab());
@@ -79,6 +103,13 @@ public class FeedActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_root);
 
+        LayoutInflater inflater = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE));
+        feeds[0].addFooter(inflater.inflate(R.layout.div_home, null, false));
+        feeds[1].addFooter(inflater.inflate(R.layout.div_home, null, false));
+        feeds[2].addFooter(inflater.inflate(R.layout.div_home, null, false));
+
+        title = ((TextView) findViewById(R.id.tv_content_title));
+
         //add red/yellow/green indicators to picasso for debugging (red is loaded over network, yellow is loaded from disk, green is loaded from memory)
         if (BuildConfig.DEBUG) Picasso.with(this).setIndicatorsEnabled(true);
 
@@ -89,10 +120,16 @@ public class FeedActivity extends FragmentActivity {
                 @Override
                 public void onClick(View view) {
                     super.onClick(view);
-
+                    title.setText(((Named) buttons.get(view.getId())).getName());
                     getSupportFragmentManager().executePendingTransactions();
-                    if (lastPressed != null && lastPressed.equals(view)) toggleVisibility();
-                    else findViewById(R.id.ll_feed_content).setVisibility(View.VISIBLE);
+                    if (lastPressed != null && lastPressed.equals(view)) {
+                        toggleVisibility();
+                        title.setVisibility(findViewById(R.id.ll_feed_content).getVisibility());
+                    }
+                    else {
+                        findViewById(R.id.ll_feed_content).setVisibility(View.VISIBLE);
+                        title.setVisibility(View.VISIBLE);
+                    }
                     lastPressed = (Button)view;
                 }
             };
