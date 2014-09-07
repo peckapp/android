@@ -17,6 +17,7 @@ import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
+import com.peck.android.interfaces.Named;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Peck;
 import com.peck.android.models.User;
@@ -26,7 +27,7 @@ import com.squareup.picasso.Picasso;
 /**
   * Created by mammothbane on 8/14/2014.
   */
-public class PeckFeed extends Feed {
+public class PeckFeed extends Feed implements Named {
 
     {
         binds_from = new String[] {};
@@ -40,6 +41,11 @@ public class PeckFeed extends Feed {
         loaderBundle.putString(LOADER_SORT_ORDER, Peck.UPDATED_AT);
     }
 
+
+    @Override
+    public String getName() {
+        return "Pecks";
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

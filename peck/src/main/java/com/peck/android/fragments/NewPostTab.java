@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.interfaces.FailureCallback;
+import com.peck.android.interfaces.Named;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Event;
@@ -49,7 +50,7 @@ import retrofit.client.Response;
 /**
  * Created by mammothbane on 6/16/2014.
  */
-public class NewPostTab extends Fragment {
+public class NewPostTab extends Fragment implements Named {
     private final static int ANNOUNCEMENT = 0;
     private final static int EVENT = 1;
     private int bt_selected = EVENT;
@@ -60,6 +61,11 @@ public class NewPostTab extends Fragment {
 
     static {
         doubleFormat.setMaximumFractionDigits(1);
+    }
+
+    @Override
+    public String getName() {
+        return "Post";
     }
 
     private class PostCallback implements Callback<JsonObject> {

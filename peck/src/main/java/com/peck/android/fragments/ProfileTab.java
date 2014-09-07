@@ -25,6 +25,7 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 import com.makeramen.RoundedImageView;
 import com.peck.android.R;
+import com.peck.android.interfaces.Named;
 import com.peck.android.listeners.ImagePickerListener;
 import com.peck.android.managers.FacebookSessionHandler;
 import com.peck.android.managers.LoginManager;
@@ -37,7 +38,7 @@ import java.io.FileNotFoundException;
  * Created by mammothbane on 6/10/2014.
  * a fragment for the profile page. has a member {@link com.peck.android.views.PeckAuthButton} that updates based on login state.
  */
-public class ProfileTab extends Fragment {
+public class ProfileTab extends Fragment implements Named {
 
     private static final int tabId = R.string.tb_profile;
     private static final int resId = R.layout.tab_profile;
@@ -51,6 +52,11 @@ public class ProfileTab extends Fragment {
     private RoundedImageView profile;
     private TextView realName;
 
+
+    @Override
+    public String getName() {
+        return "Profile";
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

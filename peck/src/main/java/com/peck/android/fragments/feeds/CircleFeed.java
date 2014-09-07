@@ -40,6 +40,7 @@ import com.peck.android.PeckApp;
 import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
+import com.peck.android.interfaces.Named;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.Circle;
 import com.peck.android.models.DBOperable;
@@ -64,7 +65,7 @@ import retrofit.client.Response;
 /**
  * Created by mammothbane on 8/14/2014.
  */
-public class CircleFeed extends Feed {
+public class CircleFeed extends Feed implements Named {
     private AutoCompleteTextView tView;
 
     //the circlefeed's current add position
@@ -72,6 +73,11 @@ public class CircleFeed extends Feed {
 
     //the current circle
     private long currentCircleId = -1;
+
+    @Override
+    public String getName() {
+        return "Circles";
+    }
 
     {
         //set up the circle member search view
@@ -107,6 +113,8 @@ public class CircleFeed extends Feed {
                 return src;
             }
         };
+
+
 
         adapter.setFilterQueryProvider(queryProvider);
 

@@ -29,6 +29,7 @@ import com.peck.android.R;
 import com.peck.android.database.DBUtils;
 import com.peck.android.fragments.Feed;
 import com.peck.android.interfaces.FailureCallback;
+import com.peck.android.interfaces.Named;
 import com.peck.android.managers.LoginManager;
 import com.peck.android.models.DBOperable;
 import com.peck.android.models.Event;
@@ -60,12 +61,18 @@ import retrofit.client.Response;
  * @since 1.0
  *
  */
-public class ExploreFeed extends Feed {
+public class ExploreFeed extends Feed implements Named {
 
     public static final String DATE_ORDER = "explr_order";
     private long currentTime = DateTime.now().toInstant().getMillis()/1000L;
 
     private RefreshTask refreshTask;
+
+    //todo: localization
+    @Override
+    public String getName() {
+        return "Explore";
+    }
 
     private class RefreshTask extends AsyncTask<Void, Void, Void> {
 
