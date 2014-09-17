@@ -25,16 +25,18 @@ if(project.hasProperty("Peck.signing") && new File((String)project.property("Pec
 
 
 android {
+    signingConfigs {
+        pecksignature {
+        }
+    }
     dexOptions {
         jumboMode = true
     }
     compileSdkVersion 20
     buildToolsVersion '20'
-
     lintOptions {
         abortOnError false
     }
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 20
@@ -42,7 +44,6 @@ android {
         versionName '1.0'
         applicationId 'com.peckapp.android'
     }
-
     buildTypes {
         release {
             runProguard true
@@ -58,11 +59,11 @@ android {
             debuggable true
             jniDebugBuild false
             renderscriptDebugBuild false
+            signingConfig signingConfigs.pecksignature
         }
     }
     productFlavors {
     }
-
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
