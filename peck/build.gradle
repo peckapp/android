@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 
+ext.SIGNING = "Peck.signing"
+
 buildscript {
     repositories {
         mavenCentral()
@@ -21,14 +23,12 @@ repositories {
     mavenCentral()
 }
 
-if(project.hasProperty("Peck.signing") && new File((String)project.property("Peck.signing")).exists()) { apply from: project.property("Peck.signing") }
+if(project.hasProperty(SIGNING) && project.file(project.property(SIGNING)).exists()) {
+    apply from: project.property(SIGNING)
+}
 
 
 android {
-    signingConfigs {
-        pecksignature {
-        }
-    }
     dexOptions {
         jumboMode = true
     }
@@ -52,6 +52,7 @@ android {
             jniDebugBuild false
             renderscriptDebugBuild false
             zipAlign true
+            signingConfig signingConfigs.pecksignature
         }
         debug {
             runProguard false
@@ -59,7 +60,6 @@ android {
             debuggable true
             jniDebugBuild false
             renderscriptDebugBuild false
-            signingConfig signingConfigs.pecksignature
         }
     }
     productFlavors {

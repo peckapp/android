@@ -43,4 +43,6 @@ out.map
 
 # gradle.properties
 
+#never version signing config
 peck.gradle
+*.jks
