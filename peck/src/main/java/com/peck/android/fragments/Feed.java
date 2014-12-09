@@ -299,8 +299,16 @@ public class Feed extends Fragment implements LoaderManager.LoaderCallbacks<Curs
      */
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        if (i == URL_LOADER) return new CursorLoader(getActivity(), (Uri)bundle.getParcelable(LOADER_URI), bundle.getStringArray(LOADER_PROJECTION),
-                bundle.getString(LOADER_SELECTION), bundle.getStringArray(LOADER_SELECT_ARGS), bundle.getString(LOADER_SORT_ORDER));
+        CursorLoader cl = new CursorLoader(getActivity(), (Uri) bundle.getParcelable(LOADER_URI),
+                bundle.getStringArray(LOADER_PROJECTION),
+                bundle.getString(LOADER_SELECTION),
+                bundle.getStringArray(LOADER_SELECT_ARGS),
+                bundle.getString(LOADER_SORT_ORDER));
+
+        if (i == URL_LOADER) {
+            return cl;
+        }
+
         else return null;
     }
 

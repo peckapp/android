@@ -110,27 +110,29 @@ public class LocaleActivity extends FragmentActivity implements GooglePlayServic
 
                     if (!LocaleActivity.this.isDestroyed() && !LocaleActivity.this.isFinishing()) {
                         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+                        AdapterView.OnItemClickListener listener =  new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                if (LoginManager.getActive() != null) {
+                                    Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
+                                            new String[]{DBOperable.SV_ID, DBOperable.LOCAL_ID}, DBOperable.LOCAL_ID + " = ?", new String[]{Long.toString(l)}, null);
+                                    cursor.moveToFirst();
+                                    long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
+
+                                    LoginManager.setLocale(LoginManager.getActive().name, id);
+
+                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else
+                                    Log.e(LocaleActivity.class.getSimpleName(), "LoginManager didn't have an active account to assign a locale to");
+                            }
+                        };
+
                         ft.add(R.id.rl_loc_select, new Feed.Builder(DBUtils.buildLocalUri(Locale.class), R.layout.lvitem_locale)
                                 .withBindings(new String[]{Locale.NAME}, new int[]{R.id.tv_title})
-                                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                            @Override
-                                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                                if (LoginManager.getActive() != null) {
-                                                                    Cursor cursor = getContentResolver().query(DBUtils.buildLocalUri(Locale.class),
-                                                                            new String[]{DBOperable.SV_ID, DBOperable.LOCAL_ID}, DBOperable.LOCAL_ID + " = ?", new String[]{Long.toString(l)}, null);
-                                                                    cursor.moveToFirst();
-                                                                    long id = cursor.getLong(cursor.getColumnIndex(DBOperable.SV_ID));
-
-                                                                    LoginManager.setLocale(LoginManager.getActive().name, id);
-
-                                                                    Intent intent = new Intent(LocaleActivity.this, FeedActivity.class);
-                                                                    startActivity(intent);
-                                                                    finish();
-                                                                } else
-                                                                    Log.e(LocaleActivity.class.getSimpleName(), "LoginManager didn't have an active account to assign a locale to");
-                                                            }
-                                                        }
-                                )
+                                .setOnItemClickListener(listener)
                                 .withProjection(new String[]{DBOperable.LOCAL_ID, Locale.NAME, (bool
                                         ? "(" + location.getLatitude() + " - " + Locale.LATITUDE + ")*(" + location.getLatitude() + " - " + Locale.LATITUDE + ")" + " + " +
                                         "(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")*(" + location.getLongitude() + " - " + Locale.LONGITUDE + ")" : "null") + " as dist"})

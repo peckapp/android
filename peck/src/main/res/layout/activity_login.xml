@@ -30,7 +30,6 @@
 
         <com.makeramen.RoundedImageView
             xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:oval="true"
             style="@style/riv_default"
             android:id="@+id/riv_user"
             android:layout_height="160dp"

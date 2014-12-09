@@ -98,7 +98,7 @@ public class PeckApp extends Application {
             /**
              * API strings
              */
-            public final static String BASE_URL = "http://loki.peckapp.com:3500";
+            public final static String BASE_URL = "https://peckdevelopment.herokuapp.com";
             public final static String API_ENDPOINT = BASE_URL + "/api/";
 
         }

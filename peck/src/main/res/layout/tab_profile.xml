@@ -32,7 +32,6 @@
 
             <com.makeramen.RoundedImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                app:oval="true"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:id="@+id/iv_event"
